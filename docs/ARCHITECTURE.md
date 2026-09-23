@@ -22,11 +22,17 @@ Patterns provide portable editorial compositions. Block styles alter presentatio
 
 Content inserted through patterns remains ordinary WordPress block content and survives a theme change.
 
-### 4. Progressive enhancement
+### 4. Contextual content modes
+
+Photography, portfolio, and knowledge block-style CSS lives in `assets/css/content-modes.css`. The frontend requests it only for singular content containing relevant core blocks; the block editor always receives the same styles for parity.
+
+This keeps archive and navigation pages on the smaller base stylesheet without hiding pattern functionality behind JavaScript.
+
+### 5. Progressive enhancement
 
 Frontend JavaScript is intentionally small. Navigation behavior enhances usable server-rendered markup; the theme must remain navigable without JavaScript.
 
-### 5. Integrations
+### 6. Integrations
 
 Optional integrations enter through public hooks/filters. Slateframe core does not depend on Polylang, WPML, TranslatePress, Yoast, Rank Math, TablePress, or other plugins.
 

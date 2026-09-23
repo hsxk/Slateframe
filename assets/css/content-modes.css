@@ -1,0 +1,183 @@
+/**
+ * Contextual presentation for photography, portfolio, and knowledge content.
+ * Loaded on relevant singular documents and in the block editor.
+ */
+
+.wp-block-gallery.is-style-slateframe-contact-sheet {
+	gap: clamp(0.5rem, 1.2vw, 0.9rem);
+	align-items: flex-start;
+}
+
+.wp-block-gallery.has-nested-images.is-style-slateframe-contact-sheet figure.wp-block-image {
+	align-self: flex-start;
+	flex-direction: column;
+	justify-content: flex-start;
+	background: var(--slateframe-surface-soft);
+}
+
+.wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
+	width: 100%;
+	height: auto;
+	aspect-ratio: auto;
+	object-fit: contain;
+}
+
+.wp-block-gallery.has-nested-images.is-style-slateframe-contact-sheet figure.wp-block-image figcaption {
+	position: static;
+	inset: auto;
+	width: auto;
+	max-height: none;
+	margin: 0;
+	padding: 0.55rem 0.1rem 0;
+	overflow: visible;
+	background: none;
+	color: var(--slateframe-muted);
+	font-size: 0.78rem;
+	line-height: 1.45;
+	text-align: start;
+}
+
+.wp-block-image.is-style-slateframe-photo-feature {
+	margin-block: clamp(1.5rem, 4vw, 3rem);
+	background: #101513;
+}
+
+.wp-block-image.is-style-slateframe-photo-feature img {
+	width: 100%;
+	max-height: 88vh;
+	object-fit: contain;
+}
+
+.wp-block-image.is-style-slateframe-photo-feature figcaption {
+	margin: 0;
+	padding: 0.7rem 0.85rem;
+	color: #e7ece9;
+	background: #101513;
+	text-align: start;
+}
+
+.wp-block-list.is-style-slateframe-steps,
+.is-style-slateframe-steps {
+	counter-reset: slateframe-step;
+	padding-inline-start: 0;
+	list-style: none;
+}
+
+.wp-block-list.is-style-slateframe-steps > li,
+.is-style-slateframe-steps > li {
+	counter-increment: slateframe-step;
+	display: grid;
+	grid-template-columns: 2.15rem minmax(0, 1fr);
+	gap: 0.8rem;
+	align-items: start;
+	margin-block: 1rem;
+}
+
+.wp-block-list.is-style-slateframe-steps > li::before,
+.is-style-slateframe-steps > li::before {
+	content: counter(slateframe-step, decimal-leading-zero);
+	display: grid;
+	place-items: center;
+	min-width: 2.15rem;
+	min-height: 2.15rem;
+	border: 1px solid var(--slateframe-border);
+	border-radius: 50%;
+	color: var(--slateframe-muted);
+	font-size: 0.72rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.wp-block-list.is-style-slateframe-checklist,
+.is-style-slateframe-checklist {
+	padding-inline-start: 0;
+	list-style: none;
+}
+
+.wp-block-list.is-style-slateframe-checklist > li,
+.is-style-slateframe-checklist > li {
+	position: relative;
+	padding-inline-start: 1.65rem;
+	margin-block: 0.65rem;
+}
+
+.wp-block-list.is-style-slateframe-checklist > li::before,
+.is-style-slateframe-checklist > li::before {
+	position: absolute;
+	inset-inline-start: 0;
+	content: "✓";
+	color: var(--slateframe-accent);
+	font-weight: 800;
+}
+
+.wp-block-group.is-style-slateframe-key-facts {
+	padding-block: 1rem;
+	border-block: 1px solid var(--slateframe-border);
+}
+
+.wp-block-group.is-style-slateframe-key-facts > :first-child,
+.wp-block-group.is-style-slateframe-learning-callout > :first-child,
+.wp-block-group.is-style-slateframe-project-brief > :first-child {
+	margin-block-start: 0;
+}
+
+.wp-block-group.is-style-slateframe-key-facts > :last-child,
+.wp-block-group.is-style-slateframe-learning-callout > :last-child,
+.wp-block-group.is-style-slateframe-project-brief > :last-child {
+	margin-block-end: 0;
+}
+
+.wp-block-group.is-style-slateframe-learning-callout {
+	padding: clamp(1rem, 2.5vw, 1.5rem);
+	border-inline-start: 3px solid var(--slateframe-accent);
+	background: var(--slateframe-surface-soft);
+}
+
+.wp-block-columns.is-style-slateframe-ledger {
+	gap: clamp(1rem, 2.5vw, 2rem);
+	margin-block: 0;
+	padding-block: 1rem;
+	border-block-start: 1px solid var(--slateframe-border);
+}
+
+.wp-block-columns.is-style-slateframe-ledger:last-child {
+	border-block-end: 1px solid var(--slateframe-border);
+}
+
+.wp-block-group.is-style-slateframe-project-brief {
+	padding-block: clamp(1.25rem, 3vw, 2rem);
+	border-block: 1px solid var(--slateframe-border);
+}
+
+.wp-block-group.is-style-slateframe-project-brief a {
+	overflow-wrap: anywhere;
+}
+
+.slateframe-photo-contact-sheet .wp-block-gallery,
+.slateframe-portfolio-index .wp-block-columns,
+.slateframe-knowledge-outline .wp-block-columns,
+.slateframe-photography-feature .wp-block-image,
+.slateframe-project-brief-pattern .wp-block-group,
+.slateframe-lesson-chapter .wp-block-group {
+	margin-block-start: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+.slateframe-portfolio-index h3,
+.slateframe-knowledge-outline h3,
+.slateframe-project-brief-pattern h3,
+.slateframe-lesson-chapter h3 {
+	margin-block-start: 0;
+}
+
+@media (max-width: 781px) {
+	.wp-block-columns.is-style-slateframe-ledger {
+		padding-block: 0.9rem;
+	}
+
+	.wp-block-gallery.is-style-slateframe-contact-sheet {
+		gap: 0.5rem;
+	}
+
+	.wp-block-image.is-style-slateframe-photo-feature img {
+		max-height: 78vh;
+	}
+}
