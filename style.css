@@ -283,6 +283,10 @@ textarea {
 	max-width: none;
 }
 
+.slateframe-prose > .wp-block-group.alignfull {
+	padding-inline: var(--slateframe-gutter);
+}
+
 .slateframe-prose > :first-child {
 	margin-block-start: 0;
 }

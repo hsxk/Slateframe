@@ -37,8 +37,8 @@
 	</div>
 	<!-- /wp:columns -->
 
-	<!-- wp:gallery {"linkTo":"none","sizeSlug":"large","className":"is-style-slateframe-photo-sequence"} -->
-	<figure class="wp-block-gallery has-nested-images columns-default is-cropped is-style-slateframe-photo-sequence"></figure>
+	<!-- wp:gallery {"align":"wide","linkTo":"none","sizeSlug":"large","className":"is-style-slateframe-photo-sequence"} -->
+	<figure class="wp-block-gallery alignwide has-nested-images columns-default is-cropped is-style-slateframe-photo-sequence"></figure>
 	<!-- /wp:gallery -->
 
 	<!-- wp:paragraph {"className":"slateframe-pattern-caption"} -->

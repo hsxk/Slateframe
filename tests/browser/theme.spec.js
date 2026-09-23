@@ -166,6 +166,17 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 
 	expect(titleBounds.left).toBeGreaterThanOrEqual(-1);
 	expect(titleBounds.right).toBeLessThanOrEqual(titleBounds.viewport + 1);
+	const fullChildBounds = await page.locator('.browser-full-block > p').evaluate((element) => {
+		const rect = element.getBoundingClientRect();
+		return {
+			left: rect.left,
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+		};
+	});
+	expect(fullChildBounds.left).toBeGreaterThanOrEqual(12);
+	expect(fullChildBounds.right).toBeLessThanOrEqual(fullChildBounds.viewport - 12);
+
 	await expectNoHorizontalOverflow(page, pagePath);
 });
 
