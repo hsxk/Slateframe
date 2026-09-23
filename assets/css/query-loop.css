@@ -1,0 +1,26 @@
+/**
+ * Native Query Loop normalization for Slateframe portfolio grids.
+ *
+ * Core's flex display-layout classes can remain on Post Template markup even
+ * when a theme deliberately promotes that template to CSS Grid. Reset the
+ * flex sizing here so the grid owns track sizing at every viewport.
+ */
+
+.slateframe-project-grid .wp-block-query.alignwide {
+	width: 100%;
+	max-width: var(--wp--style--global--wide-size);
+}
+
+.slateframe-project-grid .wp-block-post-template {
+	width: 100%;
+	max-width: none;
+	margin-inline: 0;
+	padding-inline: 0;
+}
+
+.slateframe-project-grid .wp-block-post-template > .wp-block-post {
+	width: auto !important;
+	max-width: none !important;
+	min-width: 0;
+	flex-basis: auto !important;
+}
