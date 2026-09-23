@@ -31,6 +31,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Set the public theme author metadata to Hao Kexin and enforce it in release validation.
+
 - Normalized the public development version to 0.1.0 across release metadata and tooling.
 
 ### Fixed

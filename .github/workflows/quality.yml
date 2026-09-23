@@ -24,7 +24,7 @@ jobs:
       - name: Validate theme metadata and JSON
         run: |
           php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
-          php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Author: Kexin Hao","Tested up to: 7.1","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
+          php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Author: Hao Kexin","Tested up to: 7.1","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
       - name: Validate release metadata consistency
         run: php bin/check-release-metadata.php
       - name: Validate JavaScript syntax
