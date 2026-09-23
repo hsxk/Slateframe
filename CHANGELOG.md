@@ -55,6 +55,8 @@ All notable changes to Slateframe will be documented here.
 - Keep photography pattern copy constrained while feature, contact-sheet, photo-essay, and diptych media can use the wide canvas.
 
 - Place contact-sheet captions below photographs instead of inheriting WordPress Core's gradient image overlay.
+- Keep photography-sequence captions below images with Core-compatible selector specificity instead of the nested Gallery overlay.
+- Let native Query Loop project grids use the wide canvas so three-column desktop cards remain readable rather than collapsing into narrow text columns.
 
 - Restrict content-mode asset loading to documents that actually use Slateframe photography, portfolio, or knowledge styles.
 
