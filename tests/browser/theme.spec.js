@@ -461,11 +461,14 @@ test('portable showcase modes respond as a coherent editorial system', async ({ 
 		const gallery = document.querySelector('.browser-sequence-gallery');
 		const galleryItems = [...gallery.querySelectorAll(':scope > .wp-block-image')];
 		const projectTemplate = document.querySelector('.browser-project-grid .wp-block-post-template');
+		const firstProjectCard = projectTemplate.querySelector('.browser-project-card');
 		const captions = [...gallery.querySelectorAll('figcaption')];
 
 		return {
 			galleryTracks: getComputedStyle(gallery).gridTemplateColumns.split(' ').filter(Boolean).length,
 			projectTracks: getComputedStyle(projectTemplate).gridTemplateColumns.split(' ').filter(Boolean).length,
+			projectWidth: projectTemplate.getBoundingClientRect().width,
+			firstProjectCardWidth: firstProjectCard.getBoundingClientRect().width,
 			firstWidth: galleryItems[0].getBoundingClientRect().width,
 			secondWidth: galleryItems[1].getBoundingClientRect().width,
 			captionPositions: captions.map((caption) => getComputedStyle(caption).position),
@@ -482,6 +485,11 @@ test('portable showcase modes respond as a coherent editorial system', async ({ 
 		expect(layout.projectTracks).toBe(projectWidth(testInfo) <= 900 ? 2 : 3);
 	}
 
+	if (projectWidth(testInfo) >= 1440) {
+		expect(layout.projectWidth).toBeGreaterThan(900);
+	}
+
+	expect(layout.firstProjectCardWidth).toBeGreaterThan(220);
 	expect(layout.captionPositions).toEqual(['static', 'static', 'static']);
 	await expect(page.locator('.browser-project-grid .wp-block-query-pagination')).toBeVisible();
 	await expectNoHorizontalOverflow(page, showcasePath);
