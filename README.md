@@ -3,97 +3,134 @@
 **A clean frame for whatever you publish.**
 
 [![Theme quality](https://github.com/hsxk/Slateframe/actions/workflows/quality.yml/badge.svg)](https://github.com/hsxk/Slateframe/actions/workflows/quality.yml)
+![WordPress 6.7+](https://img.shields.io/badge/WordPress-6.7%2B-21759b)
+![PHP 7.4+](https://img.shields.io/badge/PHP-7.4%2B-777bb4)
+![License GPL-3.0-or-later](https://img.shields.io/badge/license-GPL--3.0--or--later-blue)
 
-Slateframe is a fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites. It is built as a small hybrid theme around WordPress core rather than a page-builder runtime.
+Slateframe is a fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites. It is intentionally built around WordPress core: a hybrid `theme.json` + PHP template architecture, native blocks and patterns, system fonts, and a small progressive-enhancement JavaScript layer.
 
-## Development status
+> **Pre-release:** Slateframe is under active development. Validated milestones are merged into `main`; ongoing work continues on `automation/continuous-development`.
 
-Slateframe is under active pre-release development. `main` is kept installable; ongoing work lives on `automation/continuous-development` and is reviewed through a draft pull request before a release milestone.
+## Why Slateframe
 
-The current development line installs and activates in a clean WordPress + MariaDB environment through public CI and produces a validated installable ZIP. It is not yet a release candidate.
+Slateframe is designed for people who want editorial polish without inheriting a page-builder runtime.
 
-## What is already implemented
+- **Content first:** typography, spacing, rules, alignment, and imagery establish hierarchy before decorative UI.
+- **WordPress first:** core templates, blocks, patterns, menus, comments, and theme APIs remain the foundation.
+- **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
+- **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
+- **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
+- **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
-- Native WordPress hybrid architecture with `theme.json`, the PHP template hierarchy, block styles, and theme patterns.
-- Editorial post, page, archive, search, author, comment, pagination, and 404 presentation.
-- Responsive navigation with keyboard support, focus handling, reduced-motion behavior, and a no-JavaScript fallback.
-- Wide and full-width block content without forcing long-form prose beyond its readable measure.
-- Starter patterns for photo essays, project case studies, and structured learning paths.
-- Language-agnostic i18n foundations, logical CSS properties, RTL support, and a plugin-neutral language-switcher hook.
-- System-font typography, lightweight native JavaScript, and explicit frontend asset budgets.
-- Reproducible theme packaging plus real WordPress install/activation smoke tests in CI.
-- Chromium regression coverage at 320, 375, 390, 412, 768, 1440, and 1920 pixels for navigation and focus containment, keyboard skip links, core routes, nested fallback pages, long mixed-script titles, comments on posts and pages, publishing primitives, overflow, wide/full blocks, reduced motion, and reference screenshots.
+## Current feature set
 
-## Design principles
+### Publishing and reading
 
-- **Content first.** Typography, spacing, alignment, rules, and imagery establish hierarchy before decorative UI.
-- **WordPress first.** Core templates, blocks, patterns, and APIs are preferred over framework-shaped abstractions.
-- **Language agnostic.** No fixed locale list, locale URL scheme, or required multilingual plugin is built into the theme.
-- **Accessible by design.** Keyboard behavior, visible focus, semantic structure, reduced motion, and resilient fallbacks are product requirements.
-- **Performance by architecture.** System fonts, small assets, contextual loading, and native browser behavior come before optimization plugins.
-- **Portable content.** Theme presentation stays in the theme; business logic and content ownership stay outside it.
+- Editorial single-post and Page layouts with readable prose measure.
+- Wide and full-width Gutenberg alignment without forcing normal paragraphs wider.
+- Long-title handling for CJK, Latin, and long translated strings.
+- Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, and TablePress-friendly overflow.
+- Post metadata, categories/tags, previous/next navigation, comments, pagination, archives, author pages, search, and 404.
+- Editor-canvas parity for title rhythm, prose width, captions, and wide/full alignment.
 
-## Starter patterns
+### Photography, portfolio, and knowledge
 
-Slateframe currently ships three reusable patterns under the **Slateframe** pattern category:
+Slateframe currently ships five site-neutral starter patterns:
 
-- **Photo essay** — a wide editorial introduction followed by a native Gallery block for image-led stories.
-- **Project case study** — role/scope context plus concise Context, Approach, and Outcome sections.
-- **Learning path** — a three-stage Foundation → Practice → Extend structure for guides and educational content.
-- **Editorial note** — a restrained contextual note or caveat that remains part of normal document flow.
-- **Curated reading list** — a typography-led related-reading section without forcing content into cards.
+1. **Photo essay** — image-led storytelling with the native Gallery block.
+2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
+3. **Learning path** — a Foundation → Practice → Extend structure for educational content.
+4. **Editorial note** — a restrained note/caveat that remains part of normal document flow.
+5. **Curated reading list** — a typography-led related-reading section without a card wall.
 
-Patterns contain no site-specific projects, courses, locale paths, or personal content. Replace the example copy with your own content after insertion.
+Block styles add editorial notes, framed images, photo sequences, project features, learning paths, data tables, and native disclosures.
 
-## Multilingual, RTL, and CJK
+### Navigation and multilingual readiness
 
-Slateframe does not assume English-only content or a fixed set of supported languages. User-facing theme strings use the `slateframe` text domain, CSS favors logical properties, and layouts are designed to tolerate CJK, RTL, and longer translated strings.
-
-Multilingual plugins are optional integrations rather than dependencies. A public `slateframe_language_switcher_html` filter is available for integrations that want to render a language switcher inside the theme navigation.
+- Primary and footer menu locations with a usable fresh-install fallback.
+- Responsive navigation with Escape, outside-click, link-close behavior, focus return, and mobile focus containment.
+- No-JavaScript fallback remains navigable.
+- Optional language-selector integration through the public `slateframe_language_switcher_html` filter.
+- Logical CSS properties, RTL corrections, CJK-safe wrapping, and long-string resilience.
 
 ## Installation
 
-For development builds:
+Slateframe has not reached a tagged stable release yet. For development builds:
 
-1. Download or build `slateframe.zip`.
+1. Download a validated `slateframe.zip` artifact from the public CI, or build it locally.
 2. In WordPress, open **Appearance → Themes → Add New → Upload Theme**.
-3. Upload the ZIP and activate Slateframe.
-4. Assign Primary and Footer menus as needed.
-5. Optionally configure a Custom Logo and build page content with core blocks and Slateframe patterns.
+3. Upload `slateframe.zip` and activate Slateframe.
+4. Assign Primary and Footer menus if desired.
+5. Configure the Site Title, Tagline, and optional Custom Logo.
+6. Build content with WordPress core blocks and Slateframe patterns.
 
-Slateframe does not currently require a page builder or companion plugin.
+No page builder or companion plugin is required.
+
+## Compatibility target
+
+| Area | Current target |
+| --- | --- |
+| WordPress | 6.7+ |
+| PHP | 7.4+ |
+| `theme.json` | Version 3 |
+| Editor | Gutenberg/core block editor |
+| Directionality | LTR + RTL architecture |
+| Languages | Locale-agnostic; CJK/RTL/long-string aware |
+| Multilingual plugins | Optional adapters/hooks; none required |
+
+Compatibility is validated incrementally rather than claimed from syntax alone.
+
+## Quality gates
+
+Public GitHub Actions currently enforce:
+
+- PHP syntax.
+- WordPress Coding Standards through PHPCS/WPCS.
+- `theme.json`, theme metadata, required files, and pattern metadata.
+- Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
+- Guards against hard-coded locale paths and a required Polylang dependency.
+- JavaScript syntax and explicit CSS/JS asset budgets.
+- Real WordPress + MariaDB installation and theme activation.
+- Runtime pattern registration.
+- Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**.
+- Keyboard navigation, core routes, comments, overflow, wide/full blocks, long mixed-script titles, reduced motion, and reference screenshots.
+- Reproducible release ZIP creation with development-only files excluded.
+
+A failed gate is treated as a defect; tests are not removed merely to make CI green.
 
 ## Development
 
-The long-lived development branch is `automation/continuous-development`.
+The long-lived integration branch is `automation/continuous-development`. Validated batches are periodically merged into `main`.
 
-Build the distributable package from the repository root:
+Build the distributable archive:
 
 ```bash
 ./bin/build-theme-zip.sh
 ```
 
-The result is written to `dist/slateframe.zip`. Public CI validates PHP/JavaScript/theme metadata, namespace and locale assumptions, frontend asset budgets, pattern metadata, a clean WordPress installation and activation, registered starter patterns, responsive Chromium browser smoke tests, and package contents.
-
-Browser tests use Playwright and can be pointed at any local Slateframe WordPress instance:
+Run browser tests against a local WordPress installation using Slateframe:
 
 ```bash
 npm install
 PLAYWRIGHT_TEST_BASE_URL=http://127.0.0.1:8080 npm run test:browser
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and [SECURITY.md](SECURITY.md) for vulnerability reporting.
+Repository documentation:
 
-## Compatibility
+- [Contributing](CONTRIBUTING.md)
+- [Security policy](SECURITY.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Public extension points](docs/EXTENSIONS.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Migration audit](docs/MIGRATION.md)
+- [Changelog](CHANGELOG.md)
 
-Current development metadata targets:
+## Theme boundaries
 
-- WordPress 6.7+
-- PHP 7.4+
-- `theme.json` version 3
+Slateframe deliberately does **not** implement analytics, SEO metadata ownership, caching/CDN logic, business data, custom course/project storage, or a required multilingual implementation. Those responsibilities belong to WordPress core, plugins, or services.
 
-Compatibility claims will be tightened and expanded through the pre-release test matrix rather than inferred from syntax alone.
+The theme provides semantic markup and coexists with SEO, table, TOC, multilingual, and content plugins without duplicating their responsibilities.
 
 ## License
 
-GPL-3.0-or-later. See [LICENSE](LICENSE).
+Slateframe is free software released under **GPL-3.0-or-later**. See [LICENSE](LICENSE).

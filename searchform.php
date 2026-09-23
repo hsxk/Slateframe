@@ -1,6 +1,6 @@
 <?php
 /**
- * Search form template.
+ * Search form.
  *
  * @package Slateframe
  */
