@@ -49,6 +49,23 @@ jobs:
             exit 1
           fi
 
+      - name: Validate theme patterns
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          patterns=(patterns/*.php)
+          test "${#patterns[@]}" -ge 3
+          for file in "${patterns[@]}"; do
+            grep -q '^ \* Title:' "$file"
+            grep -q '^ \* Slug: slateframe/' "$file"
+            grep -q '^ \* Categories:.*slateframe' "$file"
+            if grep -qE '(/zh/|/ja/|/en/|time2log|pll_)' "$file"; then
+              echo "Site-specific or locale-specific content found in $file" >&2
+              exit 1
+            fi
+          done
+
       - name: Check required theme files
         run: |
           test -f style.css
@@ -133,6 +150,7 @@ jobs:
           wp post create --path=/tmp/slateframe-wordpress --post_type=post --post_status=publish --post_title='Slateframe smoke post' --post_content='<h2>Heading</h2><p>Paragraph.</p><pre><code>echo "test";</code></pre><table><tr><th>Key</th><th>Value</th></tr><tr><td>A</td><td>B</td></tr></table>'
           wp post create --path=/tmp/slateframe-wordpress --post_type=page --post_status=publish --post_title='Slateframe smoke page' --post_content='<p>Page content.</p>'
           wp eval 'foreach ( array( "index.php", "single.php", "page.php", "archive.php", "search.php", "404.php", "comments.php" ) as $file ) { if ( ! file_exists( get_template_directory() . "/" . $file ) ) { throw new RuntimeException( "Missing template: " . $file ); } } echo "Template smoke checks passed.\n";' --path=/tmp/slateframe-wordpress
+          wp eval '$registry = WP_Block_Patterns_Registry::get_instance(); foreach ( array( "slateframe/photo-essay", "slateframe/project-case-study", "slateframe/learning-path" ) as $pattern ) { if ( ! $registry->is_registered( $pattern ) ) { throw new RuntimeException( "Pattern not registered: " . $pattern ); } } echo "Theme pattern registration passed.\n";' --path=/tmp/slateframe-wordpress
 
   package:
     name: Build distributable

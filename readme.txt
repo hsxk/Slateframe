@@ -16,6 +16,8 @@ Slateframe is a content-first hybrid WordPress theme. It uses native WordPress t
 
 Slateframe is language-agnostic by default. It does not require a multilingual plugin and does not assume a fixed locale list or locale URL structure.
 
+The theme includes reusable block styles and starter patterns for photo essays, project case studies, and structured learning paths. Wide and full-width blocks can expand beyond the normal reading measure while regular prose remains comfortably constrained.
+
 == Installation ==
 
 1. Upload the Slateframe theme directory to /wp-content/themes/.

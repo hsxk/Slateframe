@@ -14,6 +14,8 @@ All notable changes to Slateframe will be documented here.
 - Public CI for static validation, legacy namespace guards, locale-assumption guards, and asset budgets.
 - Real WordPress + MariaDB installation and activation smoke tests.
 - Reproducible distributable ZIP packaging.
+- Wide and full-width block content while preserving a readable default prose measure.
+- Photo essay, project case study, and learning path starter patterns.
 
 ### Fixed
 

@@ -2,35 +2,87 @@
 
 **A clean frame for whatever you publish.**
 
-Slateframe is a fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites.
+[![Theme quality](https://github.com/hsxk/Slateframe/actions/workflows/quality.yml/badge.svg)](https://github.com/hsxk/Slateframe/actions/workflows/quality.yml)
+
+Slateframe is a fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites. It is built as a small hybrid theme around WordPress core rather than a page-builder runtime.
 
 ## Development status
 
-Slateframe is under active development. The stable `main` branch remains intentionally minimal while work proceeds on `automation/continuous-development`.
+Slateframe is under active pre-release development. `main` is kept installable; ongoing work lives on `automation/continuous-development` and is reviewed through a draft pull request before a release milestone.
 
-The current development line already installs and activates in a clean WordPress environment through public CI, but it is not yet a release candidate.
+The current development line installs and activates in a clean WordPress + MariaDB environment through public CI and produces a validated installable ZIP. It is not yet a release candidate.
 
-## Principles
+## What is already implemented
 
-- Content-first editorial design without page-builder runtime dependencies.
-- Native WordPress hybrid architecture: `theme.json`, PHP template hierarchy, Gutenberg patterns and block styles.
-- Language-agnostic by default: WordPress i18n APIs, logical CSS properties, RTL-ready architecture, and optional multilingual integrations through public hooks.
-- Accessibility and keyboard behavior are product requirements.
-- Performance by architecture: system fonts, contextual assets, lightweight native JavaScript.
-- Theme presentation stays portable; site business logic belongs in plugins.
-- Public releases are built from a reproducible package and tested in a clean WordPress installation.
+- Native WordPress hybrid architecture with `theme.json`, the PHP template hierarchy, block styles, and theme patterns.
+- Editorial post, page, archive, search, author, comment, pagination, and 404 presentation.
+- Responsive navigation with keyboard support, focus handling, reduced-motion behavior, and a no-JavaScript fallback.
+- Wide and full-width block content without forcing long-form prose beyond its readable measure.
+- Starter patterns for photo essays, project case studies, and structured learning paths.
+- Language-agnostic i18n foundations, logical CSS properties, RTL support, and a plugin-neutral language-switcher hook.
+- System-font typography, lightweight native JavaScript, and explicit frontend asset budgets.
+- Reproducible theme packaging plus real WordPress install/activation smoke tests in CI.
+
+## Design principles
+
+- **Content first.** Typography, spacing, alignment, rules, and imagery establish hierarchy before decorative UI.
+- **WordPress first.** Core templates, blocks, patterns, and APIs are preferred over framework-shaped abstractions.
+- **Language agnostic.** No fixed locale list, locale URL scheme, or required multilingual plugin is built into the theme.
+- **Accessible by design.** Keyboard behavior, visible focus, semantic structure, reduced motion, and resilient fallbacks are product requirements.
+- **Performance by architecture.** System fonts, small assets, contextual loading, and native browser behavior come before optimization plugins.
+- **Portable content.** Theme presentation stays in the theme; business logic and content ownership stay outside it.
+
+## Starter patterns
+
+Slateframe currently ships three reusable patterns under the **Slateframe** pattern category:
+
+- **Photo essay** — a wide editorial introduction followed by a native Gallery block for image-led stories.
+- **Project case study** — role/scope context plus concise Context, Approach, and Outcome sections.
+- **Learning path** — a three-stage Foundation → Practice → Extend structure for guides and educational content.
+
+Patterns contain no site-specific projects, courses, locale paths, or personal content. Replace the example copy with your own content after insertion.
+
+## Multilingual, RTL, and CJK
+
+Slateframe does not assume English-only content or a fixed set of supported languages. User-facing theme strings use the `slateframe` text domain, CSS favors logical properties, and layouts are designed to tolerate CJK, RTL, and longer translated strings.
+
+Multilingual plugins are optional integrations rather than dependencies. A public `slateframe_language_switcher_html` filter is available for integrations that want to render a language switcher inside the theme navigation.
+
+## Installation
+
+For development builds:
+
+1. Download or build `slateframe.zip`.
+2. In WordPress, open **Appearance → Themes → Add New → Upload Theme**.
+3. Upload the ZIP and activate Slateframe.
+4. Assign Primary and Footer menus as needed.
+5. Optionally configure a Custom Logo and build page content with core blocks and Slateframe patterns.
+
+Slateframe does not currently require a page builder or companion plugin.
 
 ## Development
 
-The long-lived development branch is `automation/continuous-development`. Pull request #1 tracks the public baseline until a reviewed release milestone is ready.
+The long-lived development branch is `automation/continuous-development`.
 
-Run the packaging script from the repository root:
+Build the distributable package from the repository root:
 
 ```bash
 ./bin/build-theme-zip.sh
 ```
 
-The resulting distributable is written to `dist/slateframe.zip`.
+The result is written to `dist/slateframe.zip`. Public CI validates PHP/JavaScript/theme metadata, namespace and locale assumptions, frontend asset budgets, pattern metadata, a clean WordPress installation and activation, registered starter patterns, and package contents.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and [SECURITY.md](SECURITY.md) for vulnerability reporting.
+
+## Compatibility
+
+Current development metadata targets:
+
+- WordPress 6.7+
+- PHP 7.4+
+- `theme.json` version 3
+
+Compatibility claims will be tightened and expanded through the pre-release test matrix rather than inferred from syntax alone.
 
 ## License
 
