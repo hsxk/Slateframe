@@ -123,7 +123,8 @@ function slateframe_brand_mark() {
 			'loading'     => 'eager',
 			'decoding'    => 'async',
 		)
-	);
+	)
+);
 }
 
 /**
