@@ -76,11 +76,14 @@ function slateframe_content_modes_needed() {
 
 	$markers = array(
 		'is-style-slateframe-contact-sheet',
+		'is-style-slateframe-diptych',
 		'is-style-slateframe-photo-feature',
 		'is-style-slateframe-steps',
 		'is-style-slateframe-checklist',
 		'is-style-slateframe-key-facts',
 		'is-style-slateframe-learning-callout',
+		'is-style-slateframe-definition',
+		'is-style-slateframe-metrics',
 		'is-style-slateframe-ledger',
 		'is-style-slateframe-project-brief',
 	);
@@ -199,6 +202,7 @@ function slateframe_language_switcher() {
 function slateframe_register_block_styles() {
 	$styles = array(
 		array( 'core/quote', 'slateframe-note', __( 'Editorial note', 'slateframe' ) ),
+		array( 'core/paragraph', 'slateframe-lead', __( 'Editorial lead', 'slateframe' ) ),
 		array( 'core/group', 'slateframe-project-feature', __( 'Project feature', 'slateframe' ) ),
 		array( 'core/group', 'slateframe-learning-path', __( 'Learning path', 'slateframe' ) ),
 		array( 'core/image', 'slateframe-frame', __( 'Editorial frame', 'slateframe' ) ),
@@ -206,12 +210,15 @@ function slateframe_register_block_styles() {
 		array( 'core/table', 'slateframe-data', __( 'Data table', 'slateframe' ) ),
 		array( 'core/details', 'slateframe-disclosure', __( 'Editorial disclosure', 'slateframe' ) ),
 		array( 'core/gallery', 'slateframe-contact-sheet', __( 'Contact sheet', 'slateframe' ) ),
+		array( 'core/gallery', 'slateframe-diptych', __( 'Photography diptych', 'slateframe' ) ),
 		array( 'core/image', 'slateframe-photo-feature', __( 'Photography feature', 'slateframe' ) ),
 		array( 'core/list', 'slateframe-steps', __( 'Numbered steps', 'slateframe' ) ),
 		array( 'core/list', 'slateframe-checklist', __( 'Editorial checklist', 'slateframe' ) ),
 		array( 'core/group', 'slateframe-key-facts', __( 'Key facts', 'slateframe' ) ),
 		array( 'core/group', 'slateframe-project-brief', __( 'Project brief', 'slateframe' ) ),
 		array( 'core/group', 'slateframe-learning-callout', __( 'Learning callout', 'slateframe' ) ),
+		array( 'core/group', 'slateframe-definition', __( 'Definition', 'slateframe' ) ),
+		array( 'core/columns', 'slateframe-metrics', __( 'Project metrics', 'slateframe' ) ),
 		array( 'core/columns', 'slateframe-ledger', __( 'Editorial ledger', 'slateframe' ) ),
 	);
 

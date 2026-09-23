@@ -33,6 +33,9 @@ All notable changes to Slateframe will be documented here.
 - Photography feature, project brief, and lesson chapter patterns with matching block styles.
 - Real browser fixtures for mixed-orientation photography, long portfolio references, and RTL/CJK knowledge content.
 - Representative 390px and 1440px showcase screenshots for photography, portfolio, and knowledge pages.
+- Editorial lead and table-of-contents reading treatments plus print-friendly long-form output.
+- Photography diptych, project outcomes, knowledge definition, and editorial opening patterns with matching block styles.
+- Browser fixtures and regressions for diptych imagery, project metrics, definitions, reading leads, table-of-contents structure, and print presentation.
 
 ### Changed
 
@@ -41,6 +44,9 @@ All notable changes to Slateframe will be documented here.
 - Normalized the public development version to 0.1.0 across release metadata and tooling.
 
 ### Fixed
+
+- Preserve readable gutters for text inside full-width Group blocks while leaving the full-width surface intact.
+- Keep photography pattern copy constrained while feature, contact-sheet, photo-essay, and diptych media can use the wide canvas.
 
 - Place contact-sheet captions below photographs instead of inheriting WordPress Core's gradient image overlay.
 

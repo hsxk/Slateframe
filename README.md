@@ -30,13 +30,13 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - Editorial single-post and Page layouts with readable prose measure.
 - Wide and full-width Gutenberg alignment without forcing normal paragraphs wider.
 - Long-title handling for CJK, Latin, and long translated strings.
-- Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, and TablePress-friendly overflow.
+- Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, table-of-contents treatment, editorial leads, and print-friendly long-form output.
 - Post metadata, categories/tags, previous/next navigation, comments, pagination, archives, author pages, search, and 404.
 - Editor-canvas parity for title rhythm, prose width, captions, and wide/full alignment.
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships eleven site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
+Slateframe currently ships fifteen site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
@@ -49,8 +49,12 @@ Slateframe currently ships eleven site-neutral starter patterns across publishin
 9. **Photography feature** — a single natural-ratio image with restrained editorial context.
 10. **Project brief** — context, role, constraints, and outcome without a custom content type.
 11. **Lesson chapter** — objective, practice sequence, and explicit continuation for educational content.
+12. **Editorial opening** — a lead paragraph and compact orientation for long-form reading.
+13. **Photography diptych** — two natural-ratio frames that collapse cleanly on narrow screens.
+14. **Project outcomes** — a portable three-column metrics summary without a custom project model.
+15. **Knowledge definition** — a semantic term-and-explanation callout for reference material.
 
-Block styles add editorial notes, framed images, photo sequences, contact sheets, photography features, project features/briefs, learning paths/callouts, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
+Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 
 ### Navigation and multilingual readiness
 
