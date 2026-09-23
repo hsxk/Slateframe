@@ -728,3 +728,188 @@ textarea {
 		letter-spacing: 0.06em;
 	}
 }
+
+
+/* Publishing primitives: resilient long-form content without a heavy runtime. */
+.slateframe-prose a {
+	overflow-wrap: anywhere;
+}
+
+.slateframe-prose :is(h2, h3, h4, h5, h6) {
+	scroll-margin-block-start: 6rem;
+}
+
+.slateframe-prose :is(figure, .wp-block-image, .wp-block-gallery) {
+	max-width: 100%;
+}
+
+.slateframe-prose figcaption,
+.slateframe-prose .wp-element-caption {
+	margin-block-start: 0.65rem;
+	color: var(--slateframe-muted);
+	font-size: 0.84rem;
+	line-height: 1.5;
+	text-align: start;
+}
+
+.slateframe-prose .wp-block-pullquote {
+	padding-block: clamp(1.4rem, 3vw, 2.4rem);
+	border-block: 1px solid var(--slateframe-border);
+	text-align: start;
+}
+
+.slateframe-prose .wp-block-pullquote blockquote {
+	padding-inline-start: 0;
+	border-inline-start: 0;
+	color: var(--slateframe-text);
+	font-size: clamp(1.25rem, 2.4vw, 1.75rem);
+	line-height: 1.45;
+}
+
+.slateframe-prose .wp-block-details {
+	padding-block: 0.9rem;
+	border-block: 1px solid var(--slateframe-border);
+}
+
+.slateframe-prose .wp-block-details summary {
+	min-height: 2.75rem;
+	display: flex;
+	align-items: center;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.slateframe-prose .wp-block-details[open] summary {
+	margin-block-end: 0.75rem;
+}
+
+.slateframe-prose .wp-block-footnotes {
+	padding-inline-start: 1.35rem;
+	color: var(--slateframe-muted);
+	font-size: 0.9rem;
+}
+
+.slateframe-prose .wp-block-footnotes li {
+	padding-inline-start: 0.25rem;
+	margin-block: 0.6rem;
+}
+
+.slateframe-prose .wp-block-footnotes a[href^="#"] {
+	overflow-wrap: normal;
+}
+
+.slateframe-prose table {
+	overscroll-behavior-inline: contain;
+	-webkit-overflow-scrolling: touch;
+}
+
+.slateframe-prose .tablepress {
+	display: table;
+	width: 100%;
+	max-width: none;
+}
+
+.slateframe-prose .tablepress-scroll-wrapper,
+.slateframe-prose .wp-block-table {
+	max-width: 100%;
+	overflow-x: auto;
+	overscroll-behavior-inline: contain;
+	-webkit-overflow-scrolling: touch;
+}
+
+.wp-block-table.is-style-slateframe-data table,
+.wp-block-table.is-style-slateframe-data {
+	font-variant-numeric: tabular-nums;
+}
+
+.wp-block-table.is-style-slateframe-data th {
+	border-block-end: 2px solid var(--slateframe-text);
+	font-size: 0.82rem;
+	letter-spacing: 0.02em;
+}
+
+.wp-block-details.is-style-slateframe-disclosure {
+	padding-inline: clamp(0.9rem, 2vw, 1.25rem);
+	border: 1px solid var(--slateframe-border);
+	background: var(--slateframe-surface-soft);
+}
+
+.slateframe-prose .post-page-numbers {
+	display: inline-grid;
+	place-items: center;
+	min-width: 2.5rem;
+	min-height: 2.5rem;
+	margin-inline: 0.15rem;
+	padding-inline: 0.6rem;
+	border: 1px solid var(--slateframe-border);
+	text-decoration: none;
+}
+
+.slateframe-prose .post-page-numbers.current {
+	border-color: var(--slateframe-text);
+	background: var(--slateframe-text);
+	color: var(--slateframe-bg);
+}
+
+.slateframe-language-slot {
+	display: flex;
+	align-items: center;
+	margin-inline-start: 0.35rem;
+}
+
+.slateframe-language-slot :is(ul, ol) {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.2rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.slateframe-primary-nav .sub-menu {
+	margin: 0;
+	padding: 0.5rem;
+	list-style: none;
+}
+
+@media (min-width: 901px) {
+	.slateframe-primary-nav .menu-item-has-children {
+		position: relative;
+	}
+
+	.slateframe-primary-nav .sub-menu {
+		position: absolute;
+		inset-block-start: 100%;
+		inset-inline-start: 0;
+		min-width: 14rem;
+		border: 1px solid var(--slateframe-border);
+		border-radius: 0.5rem;
+		background: var(--slateframe-surface);
+		box-shadow: 0 0.75rem 2rem rgb(23 25 24 / 10%);
+		visibility: hidden;
+		opacity: 0;
+		transform: translateY(0.25rem);
+		transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
+	}
+
+	.slateframe-primary-nav .menu-item-has-children:hover > .sub-menu,
+	.slateframe-primary-nav .menu-item-has-children:focus-within > .sub-menu {
+		visibility: visible;
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@media (max-width: 900px) {
+	.slateframe-language-slot {
+		margin-inline-start: 0;
+		padding-block-start: 0.65rem;
+		border-block-start: 1px solid var(--slateframe-border);
+	}
+
+	.slateframe-primary-nav .sub-menu {
+		padding-inline: 0 0;
+		margin-inline-start: 0.7rem;
+		border-inline-start: 1px solid var(--slateframe-border);
+	}
+}
