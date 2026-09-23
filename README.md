@@ -22,7 +22,7 @@ The current development line installs and activates in a clean WordPress + Maria
 - Language-agnostic i18n foundations, logical CSS properties, RTL support, and a plugin-neutral language-switcher hook.
 - System-font typography, lightweight native JavaScript, and explicit frontend asset budgets.
 - Reproducible theme packaging plus real WordPress install/activation smoke tests in CI.
-- Responsive Chromium smoke tests at desktop and mobile viewports, including navigation, overflow, core routes, and wide/full block behavior.
+- Chromium regression coverage at 320, 375, 390, 412, 768, 1440, and 1920 pixels for navigation, keyboard skip links, core routes, overflow, comment controls, wide/full blocks, and reference screenshots.
 
 ## Design principles
 
