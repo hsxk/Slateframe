@@ -45,6 +45,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Preserve readable gutters for text inside full-width Group blocks while leaving the full-width surface intact.
+- Keep photography pattern copy constrained while feature, contact-sheet, photo-essay, and diptych media can use the wide canvas.
+
 - Place contact-sheet captions below photographs instead of inheriting WordPress Core's gradient image overlay.
 
 - Restrict content-mode asset loading to documents that actually use Slateframe photography, portfolio, or knowledge styles.
