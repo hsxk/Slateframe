@@ -3,6 +3,9 @@ const { test, expect } = require('@playwright/test');
 
 const postPath = process.env.SLATEFRAME_POST_PATH || '/';
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
+const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
+const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
+const knowledgePath = process.env.SLATEFRAME_KNOWLEDGE_PATH || pagePath;
 
 function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
@@ -24,7 +27,7 @@ function formatViolations(violations) {
 test('representative routes have no automated WCAG A/AA violations', async ({ page }, testInfo) => {
 	test.skip(!isRepresentativeWidth(testInfo), 'Axe runs at representative mobile and desktop widths.');
 
-	for (const route of ['/', pagePath, postPath, '/?s=Slateframe']) {
+	for (const route of ['/', pagePath, postPath, photoPath, projectPath, knowledgePath, '/?s=Slateframe']) {
 		await page.goto(route, { waitUntil: 'networkidle' });
 
 		const results = await new AxeBuilder({ page })
