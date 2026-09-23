@@ -5,3 +5,7 @@ vendor/
 .env
 .env.*
 !/.env.example
+dist/
+playwright-report/
+test-results/
+test-artifacts/

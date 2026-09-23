@@ -10,6 +10,17 @@
 	}
 
 	const mediaQuery = window.matchMedia('(max-width: 900px)');
+	const focusableSelector = [
+		'a[href]',
+		'button:not([disabled])',
+		'input:not([disabled])',
+		'select:not([disabled])',
+		'textarea:not([disabled])',
+		'[tabindex]:not([tabindex="-1"])',
+	].join(',');
+
+	const menuFocusables = () => [toggle, ...nav.querySelectorAll(focusableSelector)]
+		.filter((element) => element.offsetParent !== null);
 
 	const closeMenu = (returnFocus = false) => {
 		header.classList.remove('is-open');
@@ -45,6 +56,34 @@
 		if (event.key === 'Escape' && header.classList.contains('is-open')) {
 			event.preventDefault();
 			closeMenu(true);
+			return;
+		}
+
+		if (event.key !== 'Tab' || !mediaQuery.matches || !header.classList.contains('is-open')) {
+			return;
+		}
+
+		const focusables = menuFocusables();
+
+		if (focusables.length < 2) {
+			return;
+		}
+
+		const first = focusables[0];
+		const last = focusables[focusables.length - 1];
+
+		if (event.shiftKey && document.activeElement === first) {
+			event.preventDefault();
+			last.focus();
+		} else if (!event.shiftKey && document.activeElement === last) {
+			event.preventDefault();
+			first.focus();
+		}
+	});
+
+	nav.addEventListener('click', (event) => {
+		if (mediaQuery.matches && event.target.closest('a[href]')) {
+			closeMenu();
 		}
 	});
 

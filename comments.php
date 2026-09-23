@@ -9,7 +9,7 @@ if ( post_password_required() ) {
 	return;
 }
 
-$comment_count = get_comments_number();
+$slateframe_comment_count = get_comments_number();
 ?>
 <section id="comments" class="slateframe-prose slateframe-comments">
 	<?php if ( have_comments() ) : ?>
@@ -17,14 +17,15 @@ $comment_count = get_comments_number();
 			<?php
 			printf(
 				esc_html(
+					/* translators: %s: number of comments. */
 					_n(
 						'%s response',
 						'%s responses',
-						$comment_count,
+						$slateframe_comment_count,
 						'slateframe'
 					)
 				),
-				esc_html( number_format_i18n( $comment_count ) )
+				esc_html( number_format_i18n( $slateframe_comment_count ) )
 			);
 			?>
 		</h2>
@@ -44,7 +45,7 @@ $comment_count = get_comments_number();
 		<?php the_comments_navigation(); ?>
 	<?php endif; ?>
 
-	<?php if ( ! comments_open() && $comment_count ) : ?>
+	<?php if ( ! comments_open() && $slateframe_comment_count ) : ?>
 		<p><?php esc_html_e( 'Comments are closed.', 'slateframe' ); ?></p>
 	<?php endif; ?>
 

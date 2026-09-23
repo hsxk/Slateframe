@@ -1,0 +1,84 @@
+name: Bug report
+description: Report reproducible behavior that appears incorrect in Slateframe.
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a Slateframe bug. Please provide a minimal, reproducible description and avoid including private site data.
+  - type: input
+    id: version
+    attributes:
+      label: Slateframe version or commit
+      description: Use a release version or commit SHA when possible.
+      placeholder: 0.1.0 or abc1234
+    validations:
+      required: true
+  - type: input
+    id: wordpress
+    attributes:
+      label: WordPress and PHP versions
+      placeholder: WordPress 7.1 / PHP 8.3
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Navigation / header / footer
+        - Posts / pages / archives
+        - Blocks / patterns / editor
+        - Photography / images / galleries
+        - Multilingual / RTL / CJK
+        - Accessibility
+        - Performance
+        - Packaging / installation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: What happened?
+      description: Describe the behavior you observed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Activate Slateframe
+        2. Open ...
+        3. Set ...
+        4. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Browser, device, plugins, and language
+      description: Include only details that may affect the issue.
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recordings
+      description: Useful for visual or responsive problems. Remove personal information before uploading.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I reproduced this with the current Slateframe code or release.
+          required: true
+        - label: I removed credentials, personal data, and private site information from this report.
+          required: true

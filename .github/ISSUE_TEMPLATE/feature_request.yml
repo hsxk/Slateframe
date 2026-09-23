@@ -1,0 +1,53 @@
+name: Feature request
+description: Propose a portable improvement that belongs in the Slateframe theme.
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Slateframe keeps theme presentation portable and leaves site business logic to plugins. Explain the publishing problem first, then the proposed solution.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Publishing problem
+      description: What is difficult or missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed theme behavior
+      description: Describe the smallest reusable solution that would help unrelated Slateframe sites too.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Editorial layout
+        - Photography / gallery
+        - Portfolio / projects
+        - Learning / knowledge content
+        - Navigation
+        - Multilingual / RTL / CJK
+        - Accessibility
+        - Performance
+        - Developer API
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Mention WordPress core blocks, existing patterns, or plugin solutions when relevant.
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: Theme boundary
+      options:
+        - label: This request is primarily presentation or theme behavior, not persistent site business logic.
+          required: true

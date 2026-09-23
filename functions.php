@@ -24,7 +24,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( 'style.css' );
+	add_editor_style( array( 'style.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -66,6 +66,15 @@ function slateframe_assets() {
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 
+	if ( is_singular() && ( comments_open() || get_comments_number() ) ) {
+		wp_enqueue_style(
+			'slateframe-comments',
+			get_template_directory_uri() . '/assets/css/comments.css',
+			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
 	if ( is_rtl() ) {
 		wp_enqueue_style(
 			'slateframe-rtl',
@@ -101,14 +110,18 @@ function slateframe_brand_mark() {
 		return;
 	}
 
-	echo wp_get_attachment_image(
-		$logo_id,
-		'full',
-		false,
-		array(
-			'class'    => 'slateframe-brand-logo',
-			'loading'  => 'eager',
-			'decoding' => 'async',
+	echo wp_kses_post(
+		wp_get_attachment_image(
+			$logo_id,
+			'full',
+			false,
+			array(
+				'class'       => 'slateframe-brand-logo',
+				'alt'         => '',
+				'aria-hidden' => 'true',
+				'loading'     => 'eager',
+				'decoding'    => 'async',
+			)
 		)
 	);
 }
@@ -122,9 +135,13 @@ function slateframe_brand_mark() {
 function slateframe_language_switcher() {
 	$html = apply_filters( 'slateframe_language_switcher_html', '' );
 
-	if ( $html ) {
-		echo wp_kses_post( $html );
+	if ( ! $html ) {
+		return;
 	}
+
+	echo '<div class="slateframe-language-slot">';
+	echo wp_kses_post( $html );
+	echo '</div>';
 }
 
 /**
@@ -137,6 +154,8 @@ function slateframe_register_block_styles() {
 		array( 'core/group', 'slateframe-learning-path', __( 'Learning path', 'slateframe' ) ),
 		array( 'core/image', 'slateframe-frame', __( 'Editorial frame', 'slateframe' ) ),
 		array( 'core/gallery', 'slateframe-photo-sequence', __( 'Photo sequence', 'slateframe' ) ),
+		array( 'core/table', 'slateframe-data', __( 'Data table', 'slateframe' ) ),
+		array( 'core/details', 'slateframe-disclosure', __( 'Editorial disclosure', 'slateframe' ) ),
 	);
 
 	foreach ( $styles as $style ) {

@@ -1,0 +1,49 @@
+/**
+ * Block editor parity for Slateframe's publishing canvas.
+ *
+ * Frontend primitives live in style.css; this file only bridges editor
+ * wrappers so content width and title rhythm match the published result.
+ */
+
+.editor-styles-wrapper {
+	background: var(--slateframe-bg);
+	color: var(--slateframe-text);
+	font-family: var(--slateframe-sans);
+	line-height: 1.72;
+}
+
+.editor-styles-wrapper .wp-block-post-title {
+	max-width: 20ch;
+	margin-inline: auto;
+	font-size: clamp(2.1rem, 5vw, 4.6rem);
+	font-weight: 790;
+	line-height: 1.06;
+	letter-spacing: -0.05em;
+	overflow-wrap: anywhere;
+	text-wrap: balance;
+}
+
+.editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .wp-block {
+	max-width: var(--slateframe-content);
+}
+
+.editor-styles-wrapper .block-editor-block-list__layout.is-root-container > [data-align="wide"],
+.editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .alignwide {
+	max-width: var(--slateframe-wide);
+}
+
+.editor-styles-wrapper .block-editor-block-list__layout.is-root-container > [data-align="full"],
+.editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .alignfull {
+	max-width: none;
+}
+
+.editor-styles-wrapper :is(h2, h3, h4, h5, h6) {
+	text-wrap: balance;
+}
+
+.editor-styles-wrapper figcaption,
+.editor-styles-wrapper .wp-element-caption {
+	color: var(--slateframe-muted);
+	font-size: 0.84rem;
+	line-height: 1.5;
+}
