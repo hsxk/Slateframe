@@ -1,0 +1,39 @@
+name: Theme quality
+
+on:
+  push:
+    branches: [main, automation/continuous-development]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PHP syntax
+        run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: Validate theme.json
+        run: php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
+      - name: Validate JavaScript syntax
+        run: node --check assets/js/theme.js
+      - name: Enforce public namespace and text domain
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RniE 'time2log|t2l-|--t2l-|time2log_' --exclude-dir=.git .; then
+            echo 'Private Time2Log identifiers must not ship in Slateframe.' >&2
+            exit 1
+          fi
+          php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
+      - name: Check required theme files
+        run: test -f style.css && test -f index.php && test -f functions.php && test -f theme.json && test -f screenshot.png || echo 'screenshot.png pending before release'
+      - name: Report asset budget
+        run: |
+          printf 'style.css: '; wc -c < style.css
+          printf 'theme.js: '; wc -c < assets/js/theme.js
+          test $(wc -c < style.css) -le 20000
+          test $(wc -c < assets/js/theme.js) -le 6000
