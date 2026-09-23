@@ -16,8 +16,11 @@
 }
 
 .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
-	width: 100%;
+	width: auto;
+	max-width: 100%;
 	height: auto;
+	max-height: min(62vh, 42rem);
+	margin-inline: auto;
 	aspect-ratio: auto;
 	object-fit: contain;
 }
@@ -187,7 +190,7 @@
 	display: grid !important;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: clamp(0.65rem, 1.5vw, 1.1rem);
-	align-items: start;
+	align-items: center;
 }
 
 .wp-block-gallery.is-style-slateframe-diptych .wp-block-image {
@@ -196,8 +199,11 @@
 }
 
 .wp-block-gallery.is-style-slateframe-diptych img {
-	width: 100%;
+	width: auto;
+	max-width: 100%;
 	height: auto;
+	max-height: min(62vh, 42rem);
+	margin-inline: auto;
 	object-fit: contain;
 }
 
