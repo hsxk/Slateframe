@@ -1,0 +1,3 @@
+/* Core styles use logical properties. Keep this file for targeted RTL corrections only. */
+[dir="rtl"] .slateframe-primary-nav,[dir="rtl"] .slateframe-footer-inner{text-align:start}
+[dir="rtl"] .slateframe-prose pre,[dir="rtl"] .wp-block-code{direction:ltr;text-align:left}
