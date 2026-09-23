@@ -1,8 +1,12 @@
 /*
 Theme Name: Slateframe
+Theme URI: https://github.com/hsxk/Slateframe
+Author: Kexin Hao
+Author URI: https://github.com/hsxk
 Description: A fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites.
 Version: 0.1.0-dev
 Requires at least: 6.7
+Tested up to: 7.1
 Requires PHP: 7.4
 Text Domain: slateframe
 License: GNU General Public License v3 or later
@@ -1061,5 +1065,52 @@ textarea {
 
 	.wp-block-gallery.is-style-slateframe-contact-sheet {
 		gap: 0.5rem;
+	}
+}
+
+
+/* WordPress classic-content compatibility. */
+.alignleft {
+	float: left;
+	margin-block-end: 1rem;
+	margin-inline-end: 1.5rem;
+}
+
+.alignright {
+	float: right;
+	margin-block-end: 1rem;
+	margin-inline-start: 1.5rem;
+}
+
+.aligncenter {
+	display: block;
+	margin-inline: auto;
+}
+
+.wp-caption {
+	max-width: 100%;
+}
+
+.wp-caption-text,
+.gallery-caption {
+	color: var(--slateframe-muted);
+	font-size: 0.84rem;
+	line-height: 1.5;
+}
+
+.sticky.slateframe-card {
+	border-block-start-width: 2px;
+}
+
+.bypostauthor > .comment-body {
+	padding-inline-start: 0.9rem;
+	border-inline-start: 2px solid var(--slateframe-accent);
+}
+
+@media (max-width: 640px) {
+	.alignleft,
+	.alignright {
+		float: none;
+		margin-inline: auto;
 	}
 }

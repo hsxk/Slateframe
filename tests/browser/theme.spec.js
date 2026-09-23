@@ -112,6 +112,14 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
+test('threaded comment replies load only on singular discussions', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	await expect(page.locator('#comment-reply-js')).toHaveCount(1);
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	await expect(page.locator('#comment-reply-js')).toHaveCount(0);
+});
+
 test('comment controls stay inside singular reading canvases', async ({ page }) => {
 	for (const route of [postPath, pagePath]) {
 		await page.goto(route, { waitUntil: 'networkidle' });

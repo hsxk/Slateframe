@@ -89,7 +89,7 @@ Public GitHub Actions currently enforce:
 
 - PHP syntax.
 - WordPress Coding Standards through PHPCS/WPCS.
-- WordPress.org Theme Check against a real WordPress installation with `WP_DEBUG` enabled.
+- WordPress.org Theme Check against the built production ZIP in a real WordPress installation with `WP_DEBUG` enabled; REQUIRED findings block the build while advisory recommendations remain visible in the report.
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
@@ -97,8 +97,8 @@ Public GitHub Actions currently enforce:
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**.
-- Keyboard navigation, core routes, comments, overflow, wide/full blocks, long mixed-script titles, reduced motion, and reference screenshots.
-- Reproducible release ZIP creation with development-only files excluded.
+- Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, and reference screenshots.
+- Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
 
 A failed gate is treated as a defect; tests are not removed merely to make CI green.
 

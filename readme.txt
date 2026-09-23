@@ -26,7 +26,8 @@ Highlights include:
 * System-font typography with no required third-party font request.
 * WordPress i18n APIs, logical CSS properties, RTL support, CJK-safe wrapping, and long-string resilience.
 * Optional multilingual integration through a public filter; no multilingual plugin is required.
-* Keyboard navigation, visible focus, reduced-motion support, semantic landmarks, and resilient no-JavaScript behavior.
+* Keyboard navigation, visible focus, threaded comment replies, reduced-motion support, semantic landmarks, and resilient no-JavaScript behavior.
+* Classic WordPress alignment, caption, gallery-caption, sticky-post, and post-author compatibility classes.
 
 Slateframe keeps presentation in the theme and leaves SEO ownership, analytics, caching, business data, and site-specific content models to WordPress core, plugins, or services.
 
