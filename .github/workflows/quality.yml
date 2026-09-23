@@ -24,7 +24,7 @@ jobs:
       - name: Validate theme metadata and JSON
         run: |
           php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
-          php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
+          php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Author: Kexin Hao","Tested up to: 7.1","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
       - name: Validate JavaScript syntax
         run: |
           node --check assets/js/theme.js
@@ -73,6 +73,71 @@ jobs:
           composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
           composer global require --no-interaction --no-progress 'wp-coding-standards/wpcs:^3.4'
           "$(composer global config bin-dir --absolute)/phpcs" --standard=phpcs.xml.dist --report=full .
+
+
+  theme-check:
+    name: WordPress.org Theme Check
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli
+          coverage: none
+      - name: Build production theme
+        run: ./bin/build-theme-zip.sh /tmp/slateframe-theme-check-dist
+      - name: Install WordPress, Theme Check, and run submission checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
+          chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
+          mkdir -p /tmp/wp-theme-check
+          wp core download --path=/tmp/wp-theme-check --version=latest
+          wp config create --path=/tmp/wp-theme-check --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
+          wp config set WP_DEBUG true --raw --path=/tmp/wp-theme-check
+          wp core install --path=/tmp/wp-theme-check --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
+          unzip -q /tmp/slateframe-theme-check-dist/slateframe.zip -d /tmp/wp-theme-check/wp-content/themes
+          wp theme activate slateframe --path=/tmp/wp-theme-check
+          wp plugin install theme-check --activate --path=/tmp/wp-theme-check
+
+          set +e
+          wp theme-check run slateframe --format=json --path=/tmp/wp-theme-check > /tmp/slateframe-theme-check.json
+          theme_check_exit=$?
+          set -e
+          cat /tmp/slateframe-theme-check.json
+
+          php -r '
+            $report = json_decode(file_get_contents("/tmp/slateframe-theme-check.json"), true, 512, JSON_THROW_ON_ERROR);
+            $required = array_values(array_filter($report, static fn($item) => ($item["type"] ?? "") === "REQUIRED"));
+            if ($required) {
+                fwrite(STDERR, "Theme Check REQUIRED findings:\n" . json_encode($required, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . "\n");
+                exit(1);
+            }
+          '
+
+          if [ "$theme_check_exit" -ne 0 ]; then
+            echo "Theme Check reported advisory findings; no REQUIRED findings remain."
+          fi
+      - name: Upload Theme Check report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: slateframe-theme-check
+          path: /tmp/slateframe-theme-check.json
+          if-no-files-found: ignore
+          retention-days: 7
 
   wordpress-smoke:
     name: WordPress install and activation
@@ -145,6 +210,7 @@ jobs:
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe Browser' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
+          wp option update thread_comments 1 --path=/tmp/wp-browser
           cat > /tmp/slateframe-browser-page.html <<'HTML'
           <!-- wp:paragraph {"className":"browser-default-prose"} -->
           <p class="browser-default-prose">Readable measure for Latin, 中文，以及長い日本語の文章。</p>
@@ -255,7 +321,7 @@ jobs:
 
   package:
     name: Build distributable
-    needs: [static, coding-standards, wordpress-smoke, browser-smoke]
+    needs: [static, coding-standards, theme-check, wordpress-smoke, browser-smoke]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -268,6 +334,8 @@ jobs:
           grep -qx 'slateframe/style.css' /tmp/package.txt
           grep -qx 'slateframe/functions.php' /tmp/package.txt
           grep -qx 'slateframe/theme.json' /tmp/package.txt
+          grep -qx 'slateframe/screenshot.png' /tmp/package.txt
+          php -r '$size=getimagesize("dist/slateframe/screenshot.png"); if (!$size || $size[0] !== 1200 || $size[1] !== 900) { throw new RuntimeException("screenshot.png must be 1200x900"); }'
           if grep -Eq '^slateframe/(package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)$' /tmp/package.txt; then exit 1; fi
           if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/package.txt; then exit 1; fi
       - uses: actions/upload-artifact@v4

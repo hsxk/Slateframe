@@ -11,9 +11,9 @@ All notable changes to Slateframe will be documented here.
 - Accessible responsive navigation with a no-JavaScript fallback and mobile focus containment.
 - Reusable post-list presentation and expanded single-post/Page reading system.
 - Language-agnostic multilingual extension boundary, logical-property architecture, and RTL baseline.
-- Public CI for syntax, metadata, namespace/i18n guards, asset budgets, WPCS/PHPCS, real WordPress runtime, Playwright browser regression, and package validation.
+- Public CI for syntax, metadata, namespace/i18n guards, asset budgets, WPCS/PHPCS, production-package WordPress.org Theme Check, real WordPress runtime, Playwright browser regression, and package validation.
 - Real WordPress + MariaDB installation and activation smoke tests.
-- Reproducible distributable ZIP packaging with development-file exclusions.
+- Reproducible distributable ZIP packaging with development-file exclusions and validated 1200×900 screenshot metadata.
 - Responsive Chromium coverage at 320, 375, 390, 412, 768, 1440, and 1920 px.
 - Wide/full block layout while preserving readable normal prose width.
 - Photo essay, photography contact sheet, project case study, portfolio index, learning path, knowledge outline, editorial note, and curated reading-list patterns.
@@ -21,6 +21,9 @@ All notable changes to Slateframe will be documented here.
 - Block styles for editorial notes, framed images, photo sequences, contact sheets, project/learning sections, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 - Long-form primitives for footnotes, pullquotes, captions, multi-page content, native tables, and TablePress-friendly overflow.
 - Public architecture, extension-point, roadmap, contribution, and security documentation.
+
+- Classic WordPress alignment, caption, sticky-post, and post-author compatibility styling.
+- Threaded comment-reply script loading on singular discussions only.
 
 ### Fixed
 
