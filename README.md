@@ -89,6 +89,7 @@ Public GitHub Actions currently enforce:
 
 - PHP syntax.
 - WordPress Coding Standards through PHPCS/WPCS.
+- WordPress.org Theme Check against a real WordPress installation with `WP_DEBUG` enabled.
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.

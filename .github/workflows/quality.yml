@@ -74,6 +74,51 @@ jobs:
           composer global require --no-interaction --no-progress 'wp-coding-standards/wpcs:^3.4'
           "$(composer global config bin-dir --absolute)/phpcs" --standard=phpcs.xml.dist --report=full .
 
+
+  theme-check:
+    name: WordPress.org Theme Check
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli
+          coverage: none
+      - name: Install WordPress, Theme Check, and run submission checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
+          chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
+          mkdir -p /tmp/wp-theme-check
+          wp core download --path=/tmp/wp-theme-check --version=latest
+          wp config create --path=/tmp/wp-theme-check --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
+          wp config set WP_DEBUG true --raw --path=/tmp/wp-theme-check
+          wp core install --path=/tmp/wp-theme-check --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
+          ln -s "$GITHUB_WORKSPACE" /tmp/wp-theme-check/wp-content/themes/slateframe
+          wp theme activate slateframe --path=/tmp/wp-theme-check
+          wp plugin install theme-check --activate --path=/tmp/wp-theme-check
+          wp theme-check run slateframe --format=json --path=/tmp/wp-theme-check | tee /tmp/slateframe-theme-check.json
+      - name: Upload Theme Check report
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: slateframe-theme-check
+          path: /tmp/slateframe-theme-check.json
+          if-no-files-found: ignore
+          retention-days: 7
+
   wordpress-smoke:
     name: WordPress install and activation
     runs-on: ubuntu-latest
@@ -255,7 +300,7 @@ jobs:
 
   package:
     name: Build distributable
-    needs: [static, coding-standards, wordpress-smoke, browser-smoke]
+    needs: [static, coding-standards, theme-check, wordpress-smoke, browser-smoke]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

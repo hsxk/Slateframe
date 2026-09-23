@@ -11,7 +11,7 @@ All notable changes to Slateframe will be documented here.
 - Accessible responsive navigation with a no-JavaScript fallback and mobile focus containment.
 - Reusable post-list presentation and expanded single-post/Page reading system.
 - Language-agnostic multilingual extension boundary, logical-property architecture, and RTL baseline.
-- Public CI for syntax, metadata, namespace/i18n guards, asset budgets, WPCS/PHPCS, real WordPress runtime, Playwright browser regression, and package validation.
+- Public CI for syntax, metadata, namespace/i18n guards, asset budgets, WPCS/PHPCS, WordPress.org Theme Check, real WordPress runtime, Playwright browser regression, and package validation.
 - Real WordPress + MariaDB installation and activation smoke tests.
 - Reproducible distributable ZIP packaging with development-file exclusions.
 - Responsive Chromium coverage at 320, 375, 390, 412, 768, 1440, and 1920 px.
