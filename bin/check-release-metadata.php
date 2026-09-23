@@ -49,7 +49,7 @@ function slateframe_validate_release_metadata() {
 
 	$style_fields = array(
 		'Theme Name'        => slateframe_release_field( $style, 'Theme Name' ),
-	'Author'            => slateframe_release_field( $style, 'Author' ),
+		'Author'            => slateframe_release_field( $style, 'Author' ),
 		'Version'           => slateframe_release_field( $style, 'Version' ),
 		'Requires at least' => slateframe_release_field( $style, 'Requires at least' ),
 		'Tested up to'      => slateframe_release_field( $style, 'Tested up to' ),
@@ -68,6 +68,7 @@ function slateframe_validate_release_metadata() {
 
 	$expected = array(
 		'Theme Name'  => 'Slateframe',
+		'Author'      => 'Hao Kexin',
 		'Text Domain' => 'slateframe',
 	);
 
