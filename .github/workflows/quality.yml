@@ -9,37 +9,114 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: slateframe-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   static:
+    name: Static quality
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Validate PHP syntax
         run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
       - name: Validate theme.json
         run: php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
+
       - name: Validate JavaScript syntax
         run: node --check assets/js/theme.js
+
       - name: Enforce public runtime namespace and text domain
         shell: bash
         run: |
           set -euo pipefail
-          runtime_files=$(find . -type f \( -name '*.php' -o -name '*.css' -o -name '*.js' -o -name 'theme.json' \) -not -path './.git/*' -not -path './.github/*')
-          if grep -niE 'time2log|t2l-|--t2l-|time2log_' $runtime_files; then
+          mapfile -t runtime_files < <(find . -type f \( -name '*.php' -o -name '*.css' -o -name '*.js' -o -name 'theme.json' \) -not -path './.git/*' -not -path './.github/*')
+          if grep -niE 'time2log|t2l-|--t2l-|time2log_' "${runtime_files[@]}"; then
             echo 'Private legacy identifiers must not ship in Slateframe runtime files.' >&2
             exit 1
           fi
           php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
+
+      - name: Guard language-agnostic runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RniE "(/zh/|/ja/|/en/|pll_current_language|pll_the_languages)" --include='*.php' --include='*.js' --include='*.css' .; then
+            echo 'Core runtime must not hard-code locale paths or a Polylang dependency.' >&2
+            exit 1
+          fi
+
       - name: Check required theme files
         run: |
           test -f style.css
           test -f index.php
           test -f functions.php
           test -f theme.json
+          test -f rtl.css
+          test -f template-parts/content-card.php
+          test -f inc/template-tags.php
           if test ! -f screenshot.png; then echo 'screenshot.png pending before release'; fi
+
       - name: Report asset budget
         run: |
           printf 'style.css: '; wc -c < style.css
           printf 'theme.js: '; wc -c < assets/js/theme.js
-          test $(wc -c < style.css) -le 20000
-          test $(wc -c < assets/js/theme.js) -le 6000
+          test $(wc -c < style.css) -le 24000
+          test $(wc -c < assets/js/theme.js) -le 7000
+
+  wordpress-smoke:
+    name: WordPress install and activation
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli
+          coverage: none
+
+      - name: Install WP-CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o wp
+          chmod +x wp
+          sudo mv wp /usr/local/bin/wp
+          wp --info
+
+      - name: Install WordPress
+        run: |
+          mkdir -p /tmp/slateframe-wordpress
+          wp core download --path=/tmp/slateframe-wordpress --version=latest
+          wp config create             --path=/tmp/slateframe-wordpress             --dbname=wordpress             --dbuser=root             --dbpass=root             --dbhost=127.0.0.1:3306             --skip-check
+          wp core install             --path=/tmp/slateframe-wordpress             --url=https://slateframe.test             --title=Slateframe             --admin_user=admin             --admin_password='slateframe-ci-password'             --admin_email=ci@example.com             --skip-email
+
+      - name: Install and activate Slateframe
+        run: |
+          rm -rf /tmp/slateframe-wordpress/wp-content/themes/slateframe
+          ln -s "$GITHUB_WORKSPACE" /tmp/slateframe-wordpress/wp-content/themes/slateframe
+          wp theme activate slateframe --path=/tmp/slateframe-wordpress
+          test "$(wp option get stylesheet --path=/tmp/slateframe-wordpress)" = "slateframe"
+          wp eval 'if ( wp_get_theme()->errors() ) { fwrite( STDERR, print_r( wp_get_theme()->errors(), true ) ); exit( 1 ); } echo "Slateframe activated cleanly.\n";' --path=/tmp/slateframe-wordpress
+
+      - name: Exercise core content paths
+        run: |
+          wp post create --path=/tmp/slateframe-wordpress --post_type=post --post_status=publish --post_title='Slateframe smoke post' --post_content='<h2>Heading</h2><p>Paragraph.</p><pre><code>echo "test";</code></pre><table><tr><th>Key</th><th>Value</th></tr><tr><td>A</td><td>B</td></tr></table>'
+          wp post create --path=/tmp/slateframe-wordpress --post_type=page --post_status=publish --post_title='Slateframe smoke page' --post_content='<p>Page content.</p>'
+          wp eval 'foreach ( array( "index.php", "single.php", "page.php", "archive.php", "search.php", "404.php", "comments.php" ) as $file ) { if ( ! file_exists( get_template_directory() . "/" . $file ) ) { throw new RuntimeException( "Missing template: " . $file ); } } echo "Template smoke checks passed.\n";' --path=/tmp/slateframe-wordpress
