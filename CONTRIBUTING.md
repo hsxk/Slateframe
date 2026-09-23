@@ -20,7 +20,16 @@ For substantial behavior changes, opening an issue first is useful when the inte
 6. Review the final diff for generated files, debug output, secrets, private data, and unrelated formatting.
 7. Open a pull request that explains the reason for the change and the validation performed.
 
-The public CI validates PHP and JavaScript syntax, theme metadata, namespace and locale guards, frontend asset budgets, theme-pattern metadata, a real WordPress installation/activation flow, runtime pattern registration, navigation fallback markup, and the distributable package. Browser and accessibility coverage will continue to expand during pre-release development.
+The public CI validates PHP and JavaScript syntax, theme metadata, namespace and locale guards, frontend asset budgets, theme-pattern metadata, a real WordPress installation/activation flow, runtime pattern registration, navigation fallback markup, responsive Chromium browser smoke coverage, and the distributable package.
+
+For browser tests, install the development dependency and point Playwright at a local WordPress site running Slateframe:
+
+```bash
+npm install
+PLAYWRIGHT_TEST_BASE_URL=http://127.0.0.1:8080 npm run test:browser
+```
+
+The browser fixture in CI covers a 1440×900 desktop viewport and a 390×844 touch viewport. It checks core routes, mobile menu behavior, horizontal overflow, theme-asset failures, and wide/full block layout behavior.
 
 ## Commit quality
 

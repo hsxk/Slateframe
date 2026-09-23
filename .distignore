@@ -7,3 +7,11 @@ dist/
 CONTRIBUTING.md
 SECURITY.md
 CHANGELOG.md
+node_modules/
+tests/
+test-artifacts/
+playwright-report/
+test-results/
+package.json
+package-lock.json
+playwright.config.js

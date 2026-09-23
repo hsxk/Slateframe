@@ -153,9 +153,156 @@ jobs:
           wp eval '$registry = WP_Block_Patterns_Registry::get_instance(); foreach ( array( "slateframe/photo-essay", "slateframe/project-case-study", "slateframe/learning-path" ) as $pattern ) { if ( ! $registry->is_registered( $pattern ) ) { throw new RuntimeException( "Pattern not registered: " . $pattern ); } } echo "Theme pattern registration passed.\n";' --path=/tmp/slateframe-wordpress
           wp eval 'ob_start(); slateframe_menu_fallback(); $fallback = ob_get_clean(); if ( ! str_contains( $fallback, "<ul" ) || str_contains( $fallback, "<div" ) ) { throw new RuntimeException( "Navigation fallback must render a direct list." ); } echo "Navigation fallback markup passed.\n";' --path=/tmp/slateframe-wordpress
 
+  browser-smoke:
+    name: Browser smoke
+    needs: [static]
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install WP-CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o wp
+          chmod +x wp
+          sudo mv wp /usr/local/bin/wp
+
+      - name: Install browser test site
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/slateframe-browser
+          wp core download --path=/tmp/slateframe-browser --version=latest
+          wp config create \
+            --path=/tmp/slateframe-browser \
+            --dbname=wordpress \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=127.0.0.1:3306 \
+            --skip-check
+          wp core install \
+            --path=/tmp/slateframe-browser \
+            --url=http://127.0.0.1:8080 \
+            --title='Slateframe Browser Fixture' \
+            --admin_user=admin \
+            --admin_password='slateframe-browser-ci-password' \
+            --admin_email=ci@example.com \
+            --skip-email
+          rm -rf /tmp/slateframe-browser/wp-content/themes/slateframe
+          ln -s "$GITHUB_WORKSPACE" /tmp/slateframe-browser/wp-content/themes/slateframe
+          wp theme activate slateframe --path=/tmp/slateframe-browser
+
+          cat > /tmp/slateframe-browser-page.html <<'HTML'
+          <!-- wp:paragraph {"className":"browser-default-prose"} -->
+          <p class="browser-default-prose">Readable measure fixture for Slateframe browser testing.</p>
+          <!-- /wp:paragraph -->
+          <!-- wp:group {"align":"wide","className":"browser-wide-block"} -->
+          <div class="wp-block-group alignwide browser-wide-block"><!-- wp:paragraph --><p>Wide content fixture.</p><!-- /wp:paragraph --></div>
+          <!-- /wp:group -->
+          <!-- wp:group {"align":"full","className":"browser-full-block"} -->
+          <div class="wp-block-group alignfull browser-full-block"><!-- wp:paragraph --><p>Full-width content fixture.</p><!-- /wp:paragraph --></div>
+          <!-- /wp:group -->
+          <!-- wp:heading -->
+          <h2 class="wp-block-heading">Long-form content</h2>
+          <!-- /wp:heading -->
+          <!-- wp:paragraph -->
+          <p>This fixture checks normal reading width, responsive layout, and the same block canvas used by editorial patterns.</p>
+          <!-- /wp:paragraph -->
+          HTML
+
+          PAGE_ID="$(wp post create \
+            --path=/tmp/slateframe-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_title='Slateframe Browser Page' \
+            --post_content="$(cat /tmp/slateframe-browser-page.html)" \
+            --porcelain)"
+
+          POST_ID="$(wp post create \
+            --path=/tmp/slateframe-browser \
+            --post_type=post \
+            --post_status=publish \
+            --post_title='Slateframe Browser Post' \
+            --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p></blockquote><pre><code>echo "slateframe";</code></pre>' \
+            --porcelain)"
+
+          echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
+
+      - name: Install Playwright
+        run: |
+          npm install --package-lock=false --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Start WordPress
+        shell: bash
+        run: |
+          set -euo pipefail
+          wp server \
+            --path=/tmp/slateframe-browser \
+            --host=127.0.0.1 \
+            --port=8080 \
+            > /tmp/slateframe-wordpress-server.log 2>&1 &
+          echo $! > /tmp/slateframe-wordpress-server.pid
+
+          ready=0
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:8080/ > /dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/slateframe-wordpress-server.log
+            exit 1
+          fi
+
+      - name: Run browser smoke
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
+        run: npm run test:browser
+
+      - name: Upload browser artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: slateframe-browser
+          path: |
+            test-artifacts/screenshots/
+            playwright-report/
+            test-results/
+            /tmp/slateframe-wordpress-server.log
+          if-no-files-found: ignore
+          retention-days: 7
+
   package:
     name: Build distributable
-    needs: [static, wordpress-smoke]
+    needs: [static, wordpress-smoke, browser-smoke]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -171,7 +318,22 @@ jobs:
           grep -qx 'slateframe/style.css' /tmp/slateframe-package.txt
           grep -qx 'slateframe/functions.php' /tmp/slateframe-package.txt
           grep -qx 'slateframe/theme.json' /tmp/slateframe-package.txt
-          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist)/' /tmp/slateframe-package.txt; then
+          if grep -Eq '^slateframe/(package(-lock)?\.json|playwright\.config\.js)
+          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/slateframe-package.txt; then
+            echo 'Development-only files leaked into the distributable.' >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: slateframe-theme
+          path: dist/slateframe.zip
+          retention-days: 7
+ /tmp/slateframe-package.txt; then
+            echo 'Browser development tooling leaked into the distributable.' >&2
+            exit 1
+          fi
+          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/slateframe-package.txt; then
             echo 'Development-only files leaked into the distributable.' >&2
             exit 1
           fi

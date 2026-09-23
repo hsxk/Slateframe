@@ -22,6 +22,7 @@ The current development line installs and activates in a clean WordPress + Maria
 - Language-agnostic i18n foundations, logical CSS properties, RTL support, and a plugin-neutral language-switcher hook.
 - System-font typography, lightweight native JavaScript, and explicit frontend asset budgets.
 - Reproducible theme packaging plus real WordPress install/activation smoke tests in CI.
+- Responsive Chromium smoke tests at desktop and mobile viewports, including navigation, overflow, core routes, and wide/full block behavior.
 
 ## Design principles
 
@@ -70,7 +71,14 @@ Build the distributable package from the repository root:
 ./bin/build-theme-zip.sh
 ```
 
-The result is written to `dist/slateframe.zip`. Public CI validates PHP/JavaScript/theme metadata, namespace and locale assumptions, frontend asset budgets, pattern metadata, a clean WordPress installation and activation, registered starter patterns, and package contents.
+The result is written to `dist/slateframe.zip`. Public CI validates PHP/JavaScript/theme metadata, namespace and locale assumptions, frontend asset budgets, pattern metadata, a clean WordPress installation and activation, registered starter patterns, responsive Chromium browser smoke tests, and package contents.
+
+Browser tests use Playwright and can be pointed at any local Slateframe WordPress instance:
+
+```bash
+npm install
+PLAYWRIGHT_TEST_BASE_URL=http://127.0.0.1:8080 npm run test:browser
+```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request and [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
