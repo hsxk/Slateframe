@@ -35,15 +35,18 @@ Slateframe is designed for people who want editorial polish without inheriting a
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships five site-neutral starter patterns:
+Slateframe currently ships eight site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
 3. **Learning path** — a Foundation → Practice → Extend structure for educational content.
 4. **Editorial note** — a restrained note/caveat that remains part of normal document flow.
 5. **Curated reading list** — a typography-led related-reading section without a card wall.
+6. **Photography contact sheet** — mixed portrait/landscape imagery without forced cropping.
+7. **Portfolio index** — project summaries organized as an editorial ledger rather than a card grid.
+8. **Knowledge outline** — prerequisites, outcomes, and a numbered learning sequence.
 
-Block styles add editorial notes, framed images, photo sequences, project features, learning paths, data tables, and native disclosures.
+Block styles add editorial notes, framed images, photo sequences, contact sheets, project features, learning paths, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 
 ### Navigation and multilingual readiness
 

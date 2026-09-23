@@ -16,9 +16,9 @@ All notable changes to Slateframe will be documented here.
 - Reproducible distributable ZIP packaging with development-file exclusions.
 - Responsive Chromium coverage at 320, 375, 390, 412, 768, 1440, and 1920 px.
 - Wide/full block layout while preserving readable normal prose width.
-- Photo essay, project case study, learning path, editorial note, and curated reading-list patterns.
+- Photo essay, photography contact sheet, project case study, portfolio index, learning path, knowledge outline, editorial note, and curated reading-list patterns.
 - Editor-canvas parity for content width, title rhythm, captions, and wide/full alignment.
-- Block styles for editorial notes, framed images, photo sequences, project/learning sections, data tables, and native disclosures.
+- Block styles for editorial notes, framed images, photo sequences, contact sheets, project/learning sections, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 - Long-form primitives for footnotes, pullquotes, captions, multi-page content, native tables, and TablePress-friendly overflow.
 - Public architecture, extension-point, roadmap, contribution, and security documentation.
 
