@@ -78,6 +78,12 @@ function slateframe_content_modes_needed() {
 		'is-style-slateframe-contact-sheet',
 		'is-style-slateframe-diptych',
 		'is-style-slateframe-photo-feature',
+		'is-style-slateframe-photo-sequence',
+		'is-style-slateframe-project-feature',
+		'is-style-slateframe-learning-path',
+		'slateframe-photography-sequence',
+		'slateframe-project-grid',
+		'slateframe-knowledge-checklist',
 		'is-style-slateframe-steps',
 		'is-style-slateframe-checklist',
 		'is-style-slateframe-key-facts',
@@ -87,6 +93,20 @@ function slateframe_content_modes_needed() {
 		'is-style-slateframe-ledger',
 		'is-style-slateframe-project-brief',
 	);
+
+	/**
+	 * Filters the content markers that trigger Slateframe's contextual styles.
+	 *
+	 * Integrations may append site-neutral markers for content that reuses the
+	 * theme's photography, portfolio, or knowledge presentation layer.
+	 *
+	 * @param string[] $markers Content markers to scan for.
+	 */
+	$markers = apply_filters( 'slateframe_content_mode_markers', $markers );
+
+	if ( ! is_array( $markers ) ) {
+		return false;
+	}
 
 	foreach ( $markers as $marker ) {
 		if ( false !== strpos( $post->post_content, $marker ) ) {
