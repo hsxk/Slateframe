@@ -33,3 +33,48 @@
 <!-- wp:image {"align":"wide","className":"slateframe-showcase-feature is-style-slateframe-photo-feature"} -->
 <figure class="wp-block-image alignwide slateframe-showcase-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Abstract landscape demonstrating Slateframe photography presentation"><figcaption>Native blocks. Natural proportions. No page-builder dependency.</figcaption></figure>
 <!-- /wp:image -->
+
+<!-- wp:group {"align":"wide","className":"slateframe-photography-sequence browser-photography-sequence","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide slateframe-photography-sequence browser-photography-sequence">
+	<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">Photography sequence</h2><!-- /wp:heading -->
+	<!-- wp:paragraph --><p>One establishing frame followed by a paired detail rhythm, with natural image proportions and captions below the image.</p><!-- /wp:paragraph -->
+	<!-- wp:gallery {"linkTo":"none","columns":2,"imageCrop":false,"className":"slateframe-gallery-sequence is-style-slateframe-photo-sequence browser-sequence-gallery"} -->
+	<figure class="wp-block-gallery has-nested-images columns-2 slateframe-gallery-sequence is-style-slateframe-photo-sequence browser-sequence-gallery">
+		<!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide establishing fixture"><figcaption>Opening frame</figcaption></figure><!-- /wp:image -->
+		<!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Portrait detail fixture"><figcaption>Portrait detail</figcaption></figure><!-- /wp:image -->
+		<!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide closing fixture"><figcaption>Closing frame</figcaption></figure><!-- /wp:image -->
+	</figure><!-- /wp:gallery -->
+</div><!-- /wp:group -->
+
+<!-- wp:group {"align":"wide","className":"slateframe-project-grid browser-project-grid","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide slateframe-project-grid browser-project-grid">
+	<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">Portable project grid</h2><!-- /wp:heading -->
+	<!-- wp:query {"queryId":91,"query":{"perPage":6,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"exclude","inherit":false},"displayLayout":{"type":"flex","columns":3}} -->
+	<div class="wp-block-query">
+		<!-- wp:post-template -->
+			<!-- wp:group {"className":"slateframe-project-card browser-project-card","layout":{"type":"constrained"}} -->
+			<div class="wp-block-group slateframe-project-card browser-project-card">
+				<!-- wp:post-title {"isLink":true,"fontSize":"large"} /-->
+				<!-- wp:post-excerpt {"moreText":""} /-->
+				<!-- wp:post-date /-->
+			</div><!-- /wp:group -->
+		<!-- /wp:post-template -->
+		<!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"space-between"}} -->
+			<!-- wp:query-pagination-previous /-->
+			<!-- wp:query-pagination-numbers /-->
+			<!-- wp:query-pagination-next /-->
+		<!-- /wp:query-pagination -->
+	</div><!-- /wp:query -->
+</div><!-- /wp:group -->
+
+<!-- wp:group {"align":"wide","className":"slateframe-knowledge-checklist browser-knowledge-checklist","layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignwide slateframe-knowledge-checklist browser-knowledge-checklist">
+	<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">Knowledge checkpoint</h2><!-- /wp:heading -->
+	<!-- wp:columns {"className":"slateframe-learning-checkpoint browser-learning-checkpoint"} -->
+	<div class="wp-block-columns slateframe-learning-checkpoint browser-learning-checkpoint">
+		<!-- wp:column --><div class="wp-block-column"><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Understand</h3><!-- /wp:heading --><!-- wp:list {"className":"is-style-slateframe-checklist"} --><ul class="wp-block-list is-style-slateframe-checklist"><li>Explain the central idea.</li><li>State an important limit.</li></ul><!-- /wp:list --></div><!-- /wp:column -->
+		<!-- wp:column --><div class="wp-block-column"><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Practise</h3><!-- /wp:heading --><!-- wp:list {"className":"is-style-slateframe-checklist"} --><ul class="wp-block-list is-style-slateframe-checklist"><li>Apply it to one example.</li><li>Record a follow-up question.</li></ul><!-- /wp:list --></div><!-- /wp:column -->
+	</div><!-- /wp:columns -->
+	<!-- wp:quote --><blockquote class="wp-block-quote"><p>A checkpoint should reveal what the reader can do now.</p></blockquote><!-- /wp:quote -->
+</div><!-- /wp:group -->
+
