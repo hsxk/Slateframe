@@ -95,13 +95,23 @@ function slateframe_pagination() {
 
 /**
  * Provide a usable navigation fallback on fresh installs.
+ *
+ * wp_page_menu() always restores its default div when the container argument
+ * is empty. Building the list directly keeps fallback markup identical in
+ * shape to wp_nav_menu() output, which simplifies responsive navigation.
  */
 function slateframe_menu_fallback() {
-	wp_page_menu(
+	$pages = wp_list_pages(
 		array(
-			'container'  => false,
-			'menu_class' => 'slateframe-menu-fallback',
-			'show_home'  => true,
+			'echo'     => false,
+			'title_li' => '',
 		)
+	);
+
+	printf(
+		'<ul class="slateframe-menu-fallback"><li class="page_item slateframe-home-link"><a href="%1$s">%2$s</a></li>%3$s</ul>',
+		esc_url( home_url( '/' ) ),
+		esc_html__( 'Home', 'slateframe' ),
+		wp_kses_post( $pages )
 	);
 }
