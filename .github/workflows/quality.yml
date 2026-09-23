@@ -144,8 +144,77 @@ jobs:
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe Browser' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
-          PAGE_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --comment_status=open --post_title='Slateframe 发布框架 — Ein außergewöhnlich langes Veröffentlichungsbeispiel' --post_content='<p class="browser-default-prose">Readable measure.</p><!-- wp:table --><figure class="wp-block-table"><table><tr><th>Metric</th><th>Value</th></tr><tr><td>Reach</td><td>1,234</td></tr></table></figure><!-- /wp:table --><pre><code>echo "slateframe";</code></pre>' --porcelain)
-          POST_ID=$(wp post create --path=/tmp/wp-browser --post_type=post --post_status=publish --post_title='Slateframe Browser Post' --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p></blockquote>' --porcelain)
+          cat > /tmp/slateframe-browser-page.html <<'HTML'
+          <!-- wp:paragraph {"className":"browser-default-prose"} -->
+          <p class="browser-default-prose">Readable measure for Latin, 中文，以及長い日本語の文章。</p>
+          <!-- /wp:paragraph -->
+
+          <!-- wp:group {"align":"wide","className":"browser-wide-block"} -->
+          <div class="wp-block-group alignwide browser-wide-block"><!-- wp:paragraph -->
+          <p>A wide editorial block used to verify that layout can expand beyond the prose measure.</p>
+          <!-- /wp:paragraph --></div>
+          <!-- /wp:group -->
+
+          <!-- wp:group {"align":"full","className":"browser-full-block"} -->
+          <div class="wp-block-group alignfull browser-full-block"><!-- wp:paragraph -->
+          <p>A full-width block used to verify the edge-to-edge publishing canvas.</p>
+          <!-- /wp:paragraph --></div>
+          <!-- /wp:group -->
+
+          <!-- wp:table {"className":"browser-data-table is-style-slateframe-data"} -->
+          <figure class="wp-block-table browser-data-table is-style-slateframe-data"><table><thead><tr><th>Metric</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><td>Publishing reach</td><td>1,234</td><td>12,345</td></tr></tbody></table></figure>
+          <!-- /wp:table -->
+
+          <!-- wp:details {"className":"browser-details is-style-slateframe-disclosure"} -->
+          <details class="wp-block-details browser-details is-style-slateframe-disclosure"><summary>Implementation note</summary><!-- wp:paragraph -->
+          <p>Native disclosure content remains readable without JavaScript.</p>
+          <!-- /wp:paragraph --></details>
+          <!-- /wp:details -->
+
+          <!-- wp:html -->
+          <ol class="wp-block-footnotes browser-footnotes"><li id="browser-footnote">Footnote content with a <a href="#main-content">return link</a>.</li></ol>
+          <!-- /wp:html -->
+
+          <!-- wp:code -->
+          <pre class="wp-block-code"><code>echo "slateframe";</code></pre>
+          <!-- /wp:code -->
+          HTML
+
+          PAGE_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --comment_status=open \
+            --post_title='Slateframe 发布框架 — Ein außergewöhnlich langes Veröffentlichungsbeispiel' \
+            --post_content="$(cat /tmp/slateframe-browser-page.html)" \
+            --porcelain)
+
+          CHILD_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_parent="$PAGE_ID" \
+            --post_title='Nested navigation page' \
+            --post_content='<p>Nested fallback navigation fixture.</p>' \
+            --porcelain)
+
+          POST_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=post \
+            --post_status=publish \
+            --comment_status=open \
+            --post_title='Slateframe Browser Post' \
+            --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p></blockquote>' \
+            --porcelain)
+
+          wp comment create \
+            --path=/tmp/wp-browser \
+            --comment_post_ID="$PAGE_ID" \
+            --comment_author='CI Reader' \
+            --comment_author_email='ci-reader@example.com' \
+            --comment_content='Page comment fixture.' \
+            --comment_approved=1
+
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress
