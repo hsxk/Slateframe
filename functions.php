@@ -24,7 +24,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/content-modes.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -118,6 +118,21 @@ function slateframe_content_modes_needed() {
 }
 
 /**
+ * Determine whether the current document contains Slateframe's native Query Loop grid.
+ *
+ * @return bool
+ */
+function slateframe_query_loop_styles_needed() {
+	if ( ! is_singular() ) {
+		return false;
+	}
+
+	$post = get_post();
+
+	return $post instanceof WP_Post && false !== strpos( $post->post_content, 'slateframe-project-grid' );
+}
+
+/**
  * Enqueue the intentionally small frontend asset layer.
  */
 function slateframe_assets() {
@@ -130,6 +145,15 @@ function slateframe_assets() {
 			'slateframe-content-modes',
 			get_template_directory_uri() . '/assets/css/content-modes.css',
 			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
+	if ( slateframe_query_loop_styles_needed() ) {
+		wp_enqueue_style(
+			'slateframe-query-loop',
+			get_template_directory_uri() . '/assets/css/query-loop.css',
+			array( 'slateframe-content-modes' ),
 			$version
 		);
 	}
