@@ -12,7 +12,9 @@ The public quality workflow currently requires:
 - compatibility smoke coverage for WordPress 6.7 and current WordPress across PHP 7.4 and PHP 8.3;
 - Theme Check against the built `slateframe.zip`;
 - zero Theme Check findings with severity `REQUIRED`;
+- all 18 production patterns present and registered in real WordPress, with no remote media URLs embedded in pattern source;
 - responsive browser regression, including content-mode, print, CJK/RTL, and long-string fixtures;
+- separate base-runtime and contextual-asset ceilings so specialized presentation does not silently inflate ordinary routes;
 - package-content and 1200×900 screenshot validation.
 
 Theme Check advisory findings remain visible in CI rather than being hidden.
