@@ -6,6 +6,7 @@ const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
 const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
 const knowledgePath = process.env.SLATEFRAME_KNOWLEDGE_PATH || pagePath;
+const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH || pagePath;
 
 function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
@@ -27,7 +28,7 @@ function formatViolations(violations) {
 test('representative routes have no automated WCAG A/AA violations', async ({ page }, testInfo) => {
 	test.skip(!isRepresentativeWidth(testInfo), 'Axe runs at representative mobile and desktop widths.');
 
-	for (const route of ['/', pagePath, postPath, photoPath, projectPath, knowledgePath, '/?s=Slateframe']) {
+	for (const route of ['/', pagePath, postPath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe']) {
 		await page.goto(route, { waitUntil: 'networkidle' });
 
 		const results = await new AxeBuilder({ page })
@@ -80,6 +81,14 @@ test('primary mobile controls meet the 44px touch-target baseline', async ({ pag
 	const submitBox = await submit.boundingBox();
 	expect(submitBox).not.toBeNull();
 	expect(submitBox.height).toBeGreaterThanOrEqual(44);
+
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	const paginationLink = page.locator('.browser-project-grid .wp-block-query-pagination a').first();
+	await expect(paginationLink).toBeVisible();
+	const paginationBox = await paginationLink.boundingBox();
+	expect(paginationBox).not.toBeNull();
+	expect(paginationBox.width).toBeGreaterThanOrEqual(44);
+	expect(paginationBox.height).toBeGreaterThanOrEqual(44);
 });
 
 test('interactive form controls retain accessible names', async ({ page }, testInfo) => {

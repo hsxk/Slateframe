@@ -24,7 +24,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/content-modes.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -78,6 +78,12 @@ function slateframe_content_modes_needed() {
 		'is-style-slateframe-contact-sheet',
 		'is-style-slateframe-diptych',
 		'is-style-slateframe-photo-feature',
+		'is-style-slateframe-photo-sequence',
+		'is-style-slateframe-project-feature',
+		'is-style-slateframe-learning-path',
+		'slateframe-photography-sequence',
+		'slateframe-project-grid',
+		'slateframe-knowledge-checklist',
 		'is-style-slateframe-steps',
 		'is-style-slateframe-checklist',
 		'is-style-slateframe-key-facts',
@@ -88,6 +94,20 @@ function slateframe_content_modes_needed() {
 		'is-style-slateframe-project-brief',
 	);
 
+	/**
+	 * Filters the content markers that trigger Slateframe's contextual styles.
+	 *
+	 * Integrations may append site-neutral markers for content that reuses the
+	 * theme's photography, portfolio, or knowledge presentation layer.
+	 *
+	 * @param string[] $markers Content markers to scan for.
+	 */
+	$markers = apply_filters( 'slateframe_content_mode_markers', $markers );
+
+	if ( ! is_array( $markers ) ) {
+		return false;
+	}
+
 	foreach ( $markers as $marker ) {
 		if ( false !== strpos( $post->post_content, $marker ) ) {
 			return true;
@@ -95,6 +115,21 @@ function slateframe_content_modes_needed() {
 	}
 
 	return false;
+}
+
+/**
+ * Determine whether the current document contains Slateframe's native Query Loop grid.
+ *
+ * @return bool
+ */
+function slateframe_query_loop_styles_needed() {
+	if ( ! is_singular() ) {
+		return false;
+	}
+
+	$post = get_post();
+
+	return $post instanceof WP_Post && false !== strpos( $post->post_content, 'slateframe-project-grid' );
 }
 
 /**
@@ -110,6 +145,15 @@ function slateframe_assets() {
 			'slateframe-content-modes',
 			get_template_directory_uri() . '/assets/css/content-modes.css',
 			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
+	if ( slateframe_query_loop_styles_needed() ) {
+		wp_enqueue_style(
+			'slateframe-query-loop',
+			get_template_directory_uri() . '/assets/css/query-loop.css',
+			array( 'slateframe-content-modes' ),
 			$version
 		);
 	}

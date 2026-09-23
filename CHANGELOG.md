@@ -36,6 +36,9 @@ All notable changes to Slateframe will be documented here.
 - Editorial lead and table-of-contents reading treatments plus print-friendly long-form output.
 - Photography diptych, project outcomes, knowledge definition, and editorial opening patterns with matching block styles.
 - Browser fixtures and regressions for diptych imagery, project metrics, definitions, reading leads, table-of-contents structure, and print presentation.
+- Photography sequence, native Query Loop project grid, and knowledge checklist patterns with responsive presentation.
+- Public `slateframe_content_mode_markers` filter for integrations that reuse contextual presentation without creating a hard dependency.
+- Real showcase regression for responsive sequence galleries, 1/2/3-column project grids, pagination, checkpoint layouts, and intrinsic image dimensions.
 
 ### Changed
 
@@ -43,12 +46,18 @@ All notable changes to Slateframe will be documented here.
 
 - Normalized the public development version to 0.1.0 across release metadata and tooling.
 
+- Moved specialized Photography/Portfolio/Knowledge rules out of the base stylesheet and added separate base-runtime/contextual asset budgets.
+- Project-grid dates now use the site's locale-aware WordPress date format instead of a theme-imposed month/year format.
+
 ### Fixed
 
 - Preserve readable gutters for text inside full-width Group blocks while leaving the full-width surface intact.
 - Keep photography pattern copy constrained while feature, contact-sheet, photo-essay, and diptych media can use the wide canvas.
 
 - Place contact-sheet captions below photographs instead of inheriting WordPress Core's gradient image overlay.
+- Keep photography-sequence captions below images with Core-compatible selector specificity instead of the nested Gallery overlay.
+- Let native Query Loop project grids use the wide canvas so three-column desktop cards remain readable rather than collapsing into narrow text columns.
+- Balance mixed portrait/landscape contact sheets and diptychs with natural-ratio viewport-height caps instead of letting tall images create oversized desktop voids.
 
 - Restrict content-mode asset loading to documents that actually use Slateframe photography, portfolio, or knowledge styles.
 
@@ -69,3 +78,4 @@ All notable changes to Slateframe will be documented here.
 - Exercise skip-link keyboard navigation in the browser regression suite.
 - Trap focus within the open mobile navigation and return focus to the toggle when closed.
 - Exercise reduced-motion behavior and long mixed-script titles in browser regression.
+- Exercise project pagination touch targets and run Axe against the combined content-mode showcase.

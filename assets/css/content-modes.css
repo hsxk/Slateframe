@@ -16,8 +16,11 @@
 }
 
 .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
-	width: 100%;
+	width: auto;
+	max-width: 100%;
 	height: auto;
+	max-height: min(62vh, 42rem);
+	margin-inline: auto;
 	aspect-ratio: auto;
 	object-fit: contain;
 }
@@ -187,7 +190,7 @@
 	display: grid !important;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: clamp(0.65rem, 1.5vw, 1.1rem);
-	align-items: start;
+	align-items: center;
 }
 
 .wp-block-gallery.is-style-slateframe-diptych .wp-block-image {
@@ -196,8 +199,11 @@
 }
 
 .wp-block-gallery.is-style-slateframe-diptych img {
-	width: 100%;
+	width: auto;
+	max-width: 100%;
 	height: auto;
+	max-height: min(62vh, 42rem);
+	margin-inline: auto;
 	object-fit: contain;
 }
 
@@ -232,4 +238,234 @@
 	}
 
 	.wp-block-columns.is-style-slateframe-metrics > .wp-block-column:first-child { border-block-start: 0; }
+}
+
+/* Core editorial content modes kept out of the base stylesheet. */
+.wp-block-gallery.is-style-slateframe-photo-sequence {
+	gap: clamp(0.55rem, 1.3vw, 1rem);
+	align-items: start;
+}
+
+.wp-block-gallery.is-style-slateframe-photo-sequence .wp-block-image {
+	margin: 0;
+}
+
+.wp-block-group.is-style-slateframe-project-feature,
+.wp-block-group.is-style-slateframe-learning-path {
+	padding-block: clamp(1.75rem, 4vw, 3.25rem);
+	border-block: 1px solid var(--slateframe-border);
+}
+
+.slateframe-project-meta {
+	display: grid;
+	gap: 0.7rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.slateframe-project-meta li {
+	padding-block-end: 0.65rem;
+	border-block-end: 1px solid var(--slateframe-border);
+}
+
+.slateframe-project-meta strong {
+	display: block;
+	margin-block-end: 0.12rem;
+	font-size: 0.76rem;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.slateframe-project-sections {
+	margin-block-start: clamp(1.75rem, 4vw, 3rem);
+}
+
+.slateframe-project-sections h3,
+.slateframe-learning-step h3 {
+	margin-block-start: 0;
+}
+
+.slateframe-learning-step {
+	min-height: 100%;
+	padding-block-start: 0.9rem;
+	border-block-start: 2px solid var(--slateframe-text);
+}
+
+.slateframe-learning-step > :last-child {
+	margin-block-end: 0;
+}
+
+/* Photography sequence: one establishing frame, followed by a paired rhythm. */
+.slateframe-photography-sequence .slateframe-gallery-sequence {
+	display: grid !important;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: clamp(0.75rem, 1.8vw, 1.35rem);
+	align-items: start;
+}
+
+.slateframe-photography-sequence .wp-block-gallery.has-nested-images.slateframe-gallery-sequence > figure.wp-block-image {
+	width: 100% !important;
+	min-width: 0;
+	margin: 0 !important;
+	align-self: start;
+	flex-direction: column;
+	justify-content: flex-start;
+	background: var(--slateframe-surface-soft);
+}
+
+.slateframe-photography-sequence .slateframe-gallery-sequence > .wp-block-image:first-child {
+	grid-column: 1 / -1;
+}
+
+.slateframe-photography-sequence .slateframe-gallery-sequence img {
+	width: 100%;
+	height: auto;
+	object-fit: contain;
+}
+
+.slateframe-photography-sequence .wp-block-gallery.has-nested-images.slateframe-gallery-sequence figure.wp-block-image figcaption {
+	position: static;
+	inset: auto;
+	width: auto;
+	max-height: none;
+	margin: 0;
+	padding: 0.55rem 0.1rem 0;
+	overflow: visible;
+	background: none;
+	color: var(--slateframe-muted);
+	font-size: 0.78rem;
+	line-height: 1.45;
+	text-align: start;
+}
+
+/* Portfolio Query Loop: portable cards without a custom post type dependency. */
+.slateframe-project-grid .wp-block-post-template {
+	display: grid !important;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: clamp(1.25rem, 2.8vw, 2rem);
+}
+
+.slateframe-project-grid .slateframe-project-card {
+	min-width: 0;
+	height: 100%;
+	padding-block-start: 1rem;
+	border-block-start: 1px solid var(--slateframe-border);
+}
+
+.slateframe-project-grid .wp-block-post-featured-image {
+	margin: 0 0 0.9rem;
+	overflow: hidden;
+	background: var(--slateframe-surface-soft);
+}
+
+.slateframe-project-grid .wp-block-post-featured-image img {
+	width: 100%;
+	transition: transform 180ms ease;
+}
+
+.slateframe-project-grid .wp-block-post-title {
+	margin-block: 0;
+	line-height: 1.18;
+	overflow-wrap: anywhere;
+	text-wrap: balance;
+}
+
+.slateframe-project-grid .wp-block-post-title a {
+	color: var(--slateframe-text);
+	text-decoration: none;
+}
+
+.slateframe-project-grid .wp-block-post-excerpt {
+	color: var(--slateframe-muted);
+}
+
+.slateframe-project-grid .wp-block-post-date {
+	color: var(--slateframe-muted);
+	font-size: 0.78rem;
+	font-variant-numeric: tabular-nums;
+}
+
+.slateframe-project-grid .wp-block-query-pagination {
+	gap: 0.5rem;
+	margin-block-start: clamp(1.75rem, 4vw, 3rem);
+	padding-block-start: 1rem;
+	border-block-start: 1px solid var(--slateframe-border);
+}
+
+.slateframe-project-grid .wp-block-query-pagination :is(a, .page-numbers) {
+	display: inline-grid;
+	place-items: center;
+	min-width: 2.75rem;
+	min-height: 2.75rem;
+	padding-inline: 0.65rem;
+}
+
+@media (hover: hover) {
+	.slateframe-project-grid .wp-block-post-featured-image a:hover img {
+		transform: scale(1.015);
+	}
+}
+
+/* Knowledge checkpoints: compact verification without proprietary widgets. */
+.slateframe-knowledge-checklist .slateframe-learning-checkpoint {
+	gap: 0;
+	margin-block: clamp(1.5rem, 3vw, 2.25rem);
+	border-block: 1px solid var(--slateframe-border);
+}
+
+.slateframe-knowledge-checklist .slateframe-learning-checkpoint > .wp-block-column {
+	min-width: 0;
+	padding: clamp(1rem, 2.5vw, 1.5rem);
+	border-inline-start: 1px solid var(--slateframe-border);
+}
+
+.slateframe-knowledge-checklist .slateframe-learning-checkpoint > .wp-block-column:first-child {
+	border-inline-start: 0;
+}
+
+.slateframe-knowledge-checklist .slateframe-learning-checkpoint h3 {
+	margin-block-start: 0;
+}
+
+.slateframe-knowledge-checklist .slateframe-learning-checkpoint .is-style-slateframe-checklist {
+	margin-block-end: 0;
+}
+
+.slateframe-knowledge-checklist > .wp-block-quote {
+	margin-block-start: clamp(1.5rem, 3vw, 2.25rem);
+}
+
+@media (max-width: 900px) {
+	.slateframe-project-grid .wp-block-post-template {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 781px) {
+	.wp-block-group.is-style-slateframe-project-feature,
+	.wp-block-group.is-style-slateframe-learning-path {
+		padding-block: 1.5rem;
+	}
+
+	.slateframe-knowledge-checklist .slateframe-learning-checkpoint > .wp-block-column {
+		padding-inline: 0;
+		border-inline-start: 0;
+		border-block-start: 1px solid var(--slateframe-border);
+	}
+
+	.slateframe-knowledge-checklist .slateframe-learning-checkpoint > .wp-block-column:first-child {
+		border-block-start: 0;
+	}
+}
+
+@media (max-width: 640px) {
+	.slateframe-photography-sequence .slateframe-gallery-sequence,
+	.slateframe-project-grid .wp-block-post-template {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.slateframe-photography-sequence .slateframe-gallery-sequence > .wp-block-image:first-child {
+		grid-column: auto;
+	}
 }

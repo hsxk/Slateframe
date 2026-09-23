@@ -62,7 +62,7 @@ async function expectNoHorizontalOverflow(page, route = page.url()) {
 
 test('core routes render without theme runtime failures', async ({ page }) => {
 	const failures = watchRuntime(page);
-	const routes = ['/', postPath, pagePath, photoPath, projectPath, knowledgePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
+	const routes = ['/', postPath, pagePath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
 
 	for (const route of routes) {
 		failures.length = 0;
@@ -319,12 +319,17 @@ test('photography fixtures preserve natural image proportions and captions', asy
 		const read = (selector) => {
 			const image = document.querySelector(selector);
 			const rect = image.getBoundingClientRect();
-			return { ratio: rect.width / rect.height, fit: getComputedStyle(image).objectFit };
+			return {
+				ratio: rect.width / rect.height,
+				height: rect.height,
+				fit: getComputedStyle(image).objectFit,
+			};
 		};
 		return {
 			landscape: read('.browser-photo-gallery img[alt="Wide landscape fixture"]'),
 			portrait: read('.browser-photo-gallery img[alt="Tall portrait fixture"]'),
 			feature: read('.browser-photo-feature img'),
+			viewportHeight: window.innerHeight,
 		};
 	});
 	expect(ratios.landscape.ratio).toBeGreaterThan(1.5);
@@ -332,6 +337,7 @@ test('photography fixtures preserve natural image proportions and captions', asy
 	expect(ratios.landscape.fit).toBe('contain');
 	expect(ratios.portrait.fit).toBe('contain');
 	expect(ratios.feature.fit).toBe('contain');
+	expect(ratios.portrait.height).toBeLessThanOrEqual((ratios.viewportHeight * 0.62) + 2);
 
 	const captionPresentation = await page.locator('.browser-photo-gallery figcaption').first().evaluate((caption) => {
 		const styles = getComputedStyle(caption);
@@ -355,6 +361,8 @@ test('photography diptych switches from one to two columns without cropping', as
 		return {
 			tracks: styles.gridTemplateColumns.split(' ').filter(Boolean).length,
 			fits: images.map((image) => getComputedStyle(image).objectFit),
+			heights: images.map((image) => image.getBoundingClientRect().height),
+			viewportHeight: window.innerHeight,
 		};
 	});
 
@@ -365,6 +373,9 @@ test('photography diptych switches from one to two columns without cropping', as
 	}
 
 	expect(presentation.fits).toEqual(['contain', 'contain']);
+	for (const height of presentation.heights) {
+		expect(height).toBeLessThanOrEqual((presentation.viewportHeight * 0.62) + 2);
+	}
 	await expectNoHorizontalOverflow(page, photoPath);
 });
 
@@ -422,7 +433,7 @@ test('capture content-mode showcase screenshots', async ({ page }, testInfo) => 
 	test.skip(![390, 1440].includes(projectWidth(testInfo)), 'Representative mobile and desktop screenshots only.');
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
-	for (const [name, route] of [['photography', photoPath], ['portfolio', projectPath], ['knowledge', knowledgePath]]) {
+	for (const [name, route] of [['photography', photoPath], ['portfolio', projectPath], ['knowledge', knowledgePath], ['showcase', showcasePath]]) {
 		await page.goto(route, { waitUntil: 'networkidle' });
 		await page.screenshot({ path: path.join(screenshotDir, `${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
@@ -440,13 +451,84 @@ test('content-mode stylesheet is requested only when specialized styles are pres
 	await page.goto(postPath, { waitUntil: 'networkidle' });
 	expect(requests, 'ordinary post should keep the contextual stylesheet unloaded').toHaveLength(0);
 
-	for (const route of [photoPath, projectPath, knowledgePath]) {
+	for (const route of [photoPath, projectPath, knowledgePath, showcasePath]) {
 		requests.length = 0;
 		await page.goto(route, { waitUntil: 'networkidle' });
 		expect(requests, `content-mode stylesheet should load on ${route}`).toHaveLength(1);
 	}
 });
 
+
+
+test('portable showcase modes respond as a coherent editorial system', async ({ page }, testInfo) => {
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+
+	await expect(page.locator('.browser-sequence-gallery img')).toHaveCount(3);
+	await expect(page.locator('.browser-sequence-gallery figcaption')).toHaveCount(3);
+	await expect(page.locator('.browser-project-card')).toHaveCount(6);
+	await expect(page.locator('.browser-learning-checkpoint > .wp-block-column')).toHaveCount(2);
+
+	const layout = await page.evaluate(() => {
+		const gallery = document.querySelector('.browser-sequence-gallery');
+		const galleryItems = [...gallery.querySelectorAll(':scope > .wp-block-image')];
+		const projectTemplate = document.querySelector('.browser-project-grid .wp-block-post-template');
+		const firstProjectCard = projectTemplate.querySelector('.browser-project-card');
+		const captions = [...gallery.querySelectorAll('figcaption')];
+
+		return {
+			galleryTracks: getComputedStyle(gallery).gridTemplateColumns.split(' ').filter(Boolean).length,
+			projectTracks: getComputedStyle(projectTemplate).gridTemplateColumns.split(' ').filter(Boolean).length,
+			projectWidth: projectTemplate.getBoundingClientRect().width,
+			firstProjectCardWidth: firstProjectCard.getBoundingClientRect().width,
+			firstWidth: galleryItems[0].getBoundingClientRect().width,
+			secondWidth: galleryItems[1].getBoundingClientRect().width,
+			captionPositions: captions.map((caption) => getComputedStyle(caption).position),
+		};
+	});
+
+	if (projectWidth(testInfo) <= 640) {
+		expect(layout.galleryTracks).toBe(1);
+		expect(layout.projectTracks).toBe(1);
+		expect(Math.abs(layout.firstWidth - layout.secondWidth)).toBeLessThanOrEqual(2);
+	} else {
+		expect(layout.galleryTracks).toBe(2);
+		expect(layout.firstWidth).toBeGreaterThan(layout.secondWidth * 1.7);
+		expect(layout.projectTracks).toBe(projectWidth(testInfo) <= 900 ? 2 : 3);
+	}
+
+	if (projectWidth(testInfo) >= 1440) {
+		expect(layout.projectWidth).toBeGreaterThan(900);
+	}
+
+	expect(layout.firstProjectCardWidth).toBeGreaterThan(220);
+	expect(layout.captionPositions).toEqual(['static', 'static', 'static']);
+	await expect(page.locator('.browser-project-grid .wp-block-query-pagination')).toBeVisible();
+	await expectNoHorizontalOverflow(page, showcasePath);
+});
+
+test('showcase media reserves intrinsic space to reduce layout-shift risk', async ({ page }) => {
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+
+	const dimensions = await page.locator('.browser-sequence-gallery img').evaluateAll((images) =>
+		images.map((image) => ({
+			width: Number(image.getAttribute('width')),
+			height: Number(image.getAttribute('height')),
+			clientWidth: image.getBoundingClientRect().width,
+			clientHeight: image.getBoundingClientRect().height,
+			fit: getComputedStyle(image).objectFit,
+		}))
+	);
+
+	for (const image of dimensions) {
+		expect(image.width).toBeGreaterThan(0);
+		expect(image.height).toBeGreaterThan(0);
+		expect(image.clientWidth).toBeGreaterThan(0);
+		expect(image.clientHeight).toBeGreaterThan(0);
+		expect(image.fit).toBe('contain');
+	}
+
+	await expectNoHorizontalOverflow(page, showcasePath);
+});
 
 test('post metadata never emits an unnamed author link', async ({ page }) => {
 	for (const route of ['/', postPath]) {
