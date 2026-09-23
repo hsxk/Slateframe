@@ -14,6 +14,7 @@ All notable changes to Slateframe will be documented here.
 - Public CI for syntax, metadata, namespace/i18n guards, asset budgets, WPCS/PHPCS, production-package WordPress.org Theme Check, real WordPress runtime, Playwright browser regression, and package validation.
 - Real WordPress + MariaDB installation and activation smoke tests.
 - Reproducible distributable ZIP packaging with development-file exclusions and validated 1200×900 screenshot metadata.
+- Keep repository-only README documentation out of the WordPress.org distributable, which uses readme.txt.
 - Release metadata consistency validation across style.css, readme.txt, and package.json.
 - WordPress 6.7/current compatibility smoke coverage on PHP 7.4 and PHP 8.3.
 - Automated Axe WCAG A/AA checks on representative mobile and desktop routes.
