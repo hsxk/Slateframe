@@ -1,0 +1,17 @@
+/* Comment form resilience is loaded only when a singular view can render comments. */
+.slateframe-comments textarea {
+	inline-size: 100%;
+	max-inline-size: 100%;
+	min-block-size: 10rem;
+	resize: vertical;
+}
+
+.slateframe-comments input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]),
+.slateframe-comments select {
+	max-inline-size: 100%;
+}
+
+.slateframe-comments label {
+	display: inline-block;
+	max-inline-size: 100%;
+}

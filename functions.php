@@ -66,6 +66,15 @@ function slateframe_assets() {
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 
+	if ( is_singular() && ( comments_open() || get_comments_number() ) ) {
+		wp_enqueue_style(
+			'slateframe-comments',
+			get_template_directory_uri() . '/assets/css/comments.css',
+			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
 	if ( is_rtl() ) {
 		wp_enqueue_style(
 			'slateframe-rtl',
