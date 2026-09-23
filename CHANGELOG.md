@@ -42,6 +42,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Restrict content-mode asset loading to documents that actually use Slateframe photography, portfolio, or knowledge styles.
+
 - Avoid invalid nested anchors when a WordPress Custom Logo is configured.
 - Keep fresh-install navigation structurally consistent with assigned menus.
 - Keep nested fallback page navigation usable.

@@ -74,8 +74,19 @@ function slateframe_content_modes_needed() {
 		return false;
 	}
 
-	foreach ( array( 'core/gallery', 'core/image', 'core/list', 'core/group', 'core/columns', 'core/table', 'core/details' ) as $block_name ) {
-		if ( has_block( $block_name, $post ) ) {
+	$markers = array(
+		'is-style-slateframe-contact-sheet',
+		'is-style-slateframe-photo-feature',
+		'is-style-slateframe-steps',
+		'is-style-slateframe-checklist',
+		'is-style-slateframe-key-facts',
+		'is-style-slateframe-learning-callout',
+		'is-style-slateframe-ledger',
+		'is-style-slateframe-project-brief',
+	);
+
+	foreach ( $markers as $marker ) {
+		if ( str_contains( $post->post_content, $marker ) ) {
 			return true;
 		}
 	}

@@ -333,3 +333,22 @@ test('capture content-mode showcase screenshots', async ({ page }, testInfo) => 
 		await page.screenshot({ path: path.join(screenshotDir, `${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
 });
+
+
+test('content-mode stylesheet is requested only when specialized styles are present', async ({ page }) => {
+	const requests = [];
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/content-modes.css')) {
+			requests.push(request.url());
+		}
+	});
+
+	await page.goto(postPath, { waitUntil: 'networkidle' });
+	expect(requests, 'ordinary post should keep the contextual stylesheet unloaded').toHaveLength(0);
+
+	for (const route of [photoPath, projectPath, knowledgePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `content-mode stylesheet should load on ${route}`).toHaveLength(1);
+	}
+});
