@@ -298,11 +298,13 @@
 	align-items: start;
 }
 
-.slateframe-photography-sequence .slateframe-gallery-sequence > .wp-block-image {
+.slateframe-photography-sequence .wp-block-gallery.has-nested-images.slateframe-gallery-sequence > figure.wp-block-image {
 	width: 100% !important;
 	min-width: 0;
 	margin: 0 !important;
 	align-self: start;
+	flex-direction: column;
+	justify-content: flex-start;
 	background: var(--slateframe-surface-soft);
 }
 
@@ -316,7 +318,7 @@
 	object-fit: contain;
 }
 
-.slateframe-photography-sequence .slateframe-gallery-sequence figcaption {
+.slateframe-photography-sequence .wp-block-gallery.has-nested-images.slateframe-gallery-sequence figure.wp-block-image figcaption {
 	position: static;
 	inset: auto;
 	width: auto;
