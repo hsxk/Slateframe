@@ -28,18 +28,32 @@ function slateframe_entry_meta() {
 		return;
 	}
 
-	$author_url  = get_author_posts_url( (int) get_the_author_meta( 'ID' ) );
-	$author_name = get_the_author();
+	$author_id   = (int) get_the_author_meta( 'ID' );
+	$author_name = trim( (string) get_the_author() );
+	$author_url  = $author_id ? get_author_posts_url( $author_id ) : '';
 
 	echo '<div class="slateframe-entry-meta">';
 	slateframe_posted_on();
-	echo '<span aria-hidden="true"> · </span>';
-	printf(
-		'<span class="slateframe-byline"><span class="screen-reader-text">%1$s </span><a href="%2$s">%3$s</a></span>',
-		esc_html__( 'By', 'slateframe' ),
-		esc_url( $author_url ),
-		esc_html( $author_name )
-	);
+
+	if ( '' !== $author_name ) {
+		echo '<span aria-hidden="true"> · </span>';
+
+		if ( $author_url ) {
+			printf(
+				'<span class="slateframe-byline"><span class="screen-reader-text">%1$s </span><a href="%2$s">%3$s</a></span>',
+				esc_html__( 'By', 'slateframe' ),
+				esc_url( $author_url ),
+				esc_html( $author_name )
+			);
+		} else {
+			printf(
+				'<span class="slateframe-byline"><span class="screen-reader-text">%1$s </span>%2$s</span>',
+				esc_html__( 'By', 'slateframe' ),
+				esc_html( $author_name )
+			);
+		}
+	}
+
 	echo '</div>';
 }
 

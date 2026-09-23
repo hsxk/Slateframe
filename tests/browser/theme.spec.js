@@ -352,3 +352,18 @@ test('content-mode stylesheet is requested only when specialized styles are pres
 		expect(requests, `content-mode stylesheet should load on ${route}`).toHaveLength(1);
 	}
 });
+
+
+test('post metadata never emits an unnamed author link', async ({ page }) => {
+	for (const route of ['/', postPath]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		const unnamed = await page.locator('.slateframe-entry-meta a').evaluateAll((links) =>
+			links.filter((link) => {
+				const text = (link.textContent || '').trim();
+				const label = (link.getAttribute('aria-label') || '').trim();
+				return !text && !label;
+			}).length
+		);
+		expect(unnamed, `unnamed metadata links on ${route}`).toBe(0);
+	}
+});

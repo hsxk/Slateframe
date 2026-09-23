@@ -55,6 +55,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Accessibility
 
+- Avoid empty author links when content has no resolvable WordPress author, preserving discernible-link semantics.
+
 - Render the footer menu in an explicit navigation landmark only when assigned.
 - Exercise skip-link keyboard navigation in the browser regression suite.
 - Trap focus within the open mobile navigation and return focus to the toggle when closed.
