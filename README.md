@@ -36,7 +36,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships fifteen site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
+Slateframe currently ships eighteen site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
@@ -53,6 +53,9 @@ Slateframe currently ships fifteen site-neutral starter patterns across publishi
 13. **Photography diptych** — two natural-ratio frames that collapse cleanly on narrow screens.
 14. **Project outcomes** — a portable three-column metrics summary without a custom project model.
 15. **Knowledge definition** — a semantic term-and-explanation callout for reference material.
+16. **Photography sequence** — an establishing frame plus paired detail rhythm with natural-ratio imagery and captions.
+17. **Project grid** — a native Query Loop portfolio index with responsive cards, site-local date formatting, empty state, and pagination.
+18. **Knowledge checklist** — a compact Understand → Practise checkpoint built from core Columns, Lists, and Quote blocks.
 
 Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 
@@ -62,6 +65,7 @@ Block styles add editorial notes and leads, framed images, photo sequences, cont
 - Responsive navigation with Escape, outside-click, link-close behavior, focus return, and mobile focus containment.
 - No-JavaScript fallback remains navigable.
 - Optional language-selector integration through the public `slateframe_language_switcher_html` filter.
+- Extensible contextual-style detection through `slateframe_content_mode_markers`, without hard-coding multilingual or plugin APIs.
 - Logical CSS properties, RTL corrections, CJK-safe wrapping, and long-string resilience.
 
 ## Installation
@@ -103,11 +107,11 @@ Public GitHub Actions currently enforce:
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
-- JavaScript syntax and explicit CSS/JS asset budgets.
+- JavaScript syntax and explicit base-runtime/contextual CSS asset budgets, so specialized presentation does not silently inflate ordinary pages.
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**.
-- Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, and reference screenshots.
+- Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
 
