@@ -1,0 +1,46 @@
+.slateframe-primary-nav,
+.slateframe-primary-nav > ul {
+	min-width: 0;
+	max-width: 100%;
+}
+
+.slateframe-primary-nav li {
+	position: relative;
+	min-width: 0;
+}
+
+.slateframe-primary-nav .children,
+.slateframe-primary-nav .sub-menu {
+	max-width: min(20rem, calc(100vw - (2 * var(--slateframe-gutter))));
+}
+
+@media (min-width: 901px) {
+	.slateframe-primary-nav > ul > li > .children,
+	.slateframe-primary-nav > ul > li > .sub-menu {
+		position: absolute;
+		inset-block-start: 100%;
+		inset-inline-end: 0;
+		z-index: 110;
+		width: max-content;
+		min-width: 12rem;
+		padding: 0.35rem;
+		border: 1px solid var(--slateframe-border);
+		border-radius: var(--slateframe-radius);
+		background: var(--slateframe-surface);
+		box-shadow: 0 1rem 2.5rem rgb(23 25 24 / 12%);
+	}
+
+	.slateframe-primary-nav .children a,
+	.slateframe-primary-nav .sub-menu a {
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+}
+
+@media (max-width: 900px) {
+	.slateframe-primary-nav .children,
+	.slateframe-primary-nav .sub-menu {
+		width: 100%;
+		padding-inline-start: 1rem;
+	}
+}
