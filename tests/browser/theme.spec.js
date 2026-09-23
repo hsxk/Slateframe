@@ -149,6 +149,8 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 
 	await expect(page.locator('.browser-data-table')).toBeVisible();
+	await expect(page.locator('.browser-lead')).toBeVisible();
+	await expect(page.locator('.browser-toc')).toBeVisible();
 	await expect(page.locator('.browser-details summary')).toBeVisible();
 	await expect(page.locator('.browser-footnotes')).toBeVisible();
 	await expect(page.locator('.slateframe-comments')).toBeVisible();
@@ -165,6 +167,18 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 	expect(titleBounds.left).toBeGreaterThanOrEqual(-1);
 	expect(titleBounds.right).toBeLessThanOrEqual(titleBounds.viewport + 1);
 	await expectNoHorizontalOverflow(page, pagePath);
+});
+
+test('reading helpers preserve print and navigation structure', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const lead = page.locator('.browser-lead');
+	await expect(lead).toBeVisible();
+	expect(await lead.evaluate((element) => Number.parseFloat(getComputedStyle(element).fontSize))).toBeGreaterThan(16);
+	await expect(page.locator('.browser-toc a')).toHaveCount(2);
+
+	await page.emulateMedia({ media: 'print' });
+	expect(await page.locator('.slateframe-site-header').evaluate((element) => getComputedStyle(element).display)).toBe('none');
+	expect(await page.locator('.slateframe-comments').evaluate((element) => getComputedStyle(element).display)).toBe('none');
 });
 
 test('knowledge block styles remain contained and readable', async ({ page }) => {
@@ -288,6 +302,7 @@ test('photography fixtures preserve natural image proportions and captions', asy
 	await page.goto(photoPath, { waitUntil: 'networkidle' });
 	await expect(page.locator('.browser-photo-feature img')).toBeVisible();
 	await expect(page.locator('.browser-photo-gallery figcaption')).toHaveCount(2);
+	await expect(page.locator('.browser-photo-diptych img')).toHaveCount(2);
 	const ratios = await page.evaluate(() => {
 		const read = (selector) => {
 			const image = document.querySelector(selector);
@@ -323,6 +338,7 @@ test('portfolio brief keeps long references contained', async ({ page }) => {
 	await page.goto(projectPath, { waitUntil: 'networkidle' });
 	await expect(page.locator('.browser-project-brief')).toBeVisible();
 	await expect(page.locator('.browser-project-brief a')).toBeVisible();
+	await expect(page.locator('.browser-project-metrics .wp-block-column')).toHaveCount(3);
 	await expectNoHorizontalOverflow(page, projectPath);
 });
 
@@ -332,6 +348,7 @@ test('knowledge callouts respect RTL direction and logical layout', async ({ pag
 	await expect(callout).toHaveAttribute('dir', 'rtl');
 	expect(await callout.evaluate((element) => getComputedStyle(element).direction)).toBe('rtl');
 	await expect(page.locator('.browser-rtl-steps li')).toHaveCount(3);
+	await expect(page.locator('.browser-definition')).toBeVisible();
 	await expectNoHorizontalOverflow(page, knowledgePath);
 });
 

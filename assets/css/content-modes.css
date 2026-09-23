@@ -181,3 +181,55 @@
 		max-height: 78vh;
 	}
 }
+
+
+.wp-block-gallery.is-style-slateframe-diptych {
+	display: grid !important;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: clamp(0.65rem, 1.5vw, 1.1rem);
+	align-items: start;
+}
+
+.wp-block-gallery.is-style-slateframe-diptych .wp-block-image {
+	width: 100% !important;
+	margin: 0 !important;
+}
+
+.wp-block-gallery.is-style-slateframe-diptych img {
+	width: 100%;
+	height: auto;
+	object-fit: contain;
+}
+
+.wp-block-columns.is-style-slateframe-metrics {
+	gap: 0;
+	border-block: 1px solid var(--slateframe-border);
+}
+
+.wp-block-columns.is-style-slateframe-metrics > .wp-block-column {
+	padding: 1rem;
+	border-inline-start: 1px solid var(--slateframe-border);
+}
+
+.wp-block-columns.is-style-slateframe-metrics > .wp-block-column:first-child { border-inline-start: 0; }
+
+.wp-block-group.is-style-slateframe-definition {
+	padding: 1rem 1.1rem;
+	border-inline-start: 3px solid var(--slateframe-text);
+	background: var(--slateframe-surface-soft);
+}
+
+.wp-block-group.is-style-slateframe-definition > :first-child { margin-block-start: 0; }
+.wp-block-group.is-style-slateframe-definition > :last-child { margin-block-end: 0; }
+
+@media (max-width: 540px) {
+	.wp-block-gallery.is-style-slateframe-diptych { grid-template-columns: 1fr; }
+
+	.wp-block-columns.is-style-slateframe-metrics > .wp-block-column {
+		padding-inline: 0;
+		border-inline-start: 0;
+		border-block-start: 1px solid var(--slateframe-border);
+	}
+
+	.wp-block-columns.is-style-slateframe-metrics > .wp-block-column:first-child { border-block-start: 0; }
+}
