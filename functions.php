@@ -36,6 +36,7 @@ function slateframe_setup() {
 			'caption',
 			'style',
 			'script',
+			)
 		)
 	);
 
@@ -110,8 +111,9 @@ function slateframe_brand_mark() {
 		return;
 	}
 
-	echo wp_get_attachment_image(
-		$logo_id,
+	echo wp_kses_post(
+		wp_get_attachment_image(
+			$logo_id,
 		'full',
 		false,
 		array(

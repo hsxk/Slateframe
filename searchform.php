@@ -1,1 +1,14 @@
-<form role="search" method="get" class="slateframe-search-form" action="<?php echo esc_url(home_url('/')); ?>"><label><span class="screen-reader-text"><?php esc_html_e('Search for:','slateframe'); ?></span><input type="search" name="s" value="<?php echo esc_attr(get_search_query()); ?>" placeholder="<?php echo esc_attr__('Search…','slateframe'); ?>"></label><button type="submit"><?php esc_html_e('Search','slateframe'); ?></button></form>
+<?php
+/**
+ * Search form template.
+ *
+ * @package Slateframe
+ */
+?>
+<form role="search" method="get" class="slateframe-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
+	<label>
+		<span class="screen-reader-text"><?php esc_html_e( 'Search for:', 'slateframe' ); ?></span>
+		<input type="search" name="s" value="<?php echo esc_attr( get_search_query() ); ?>" placeholder="<?php echo esc_attr__( 'Search…', 'slateframe' ); ?>">
+	</label>
+	<button type="submit"><?php esc_html_e( 'Search', 'slateframe' ); ?></button>
+</form>

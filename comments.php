@@ -15,6 +15,7 @@ $comment_count = get_comments_number();
 	<?php if ( have_comments() ) : ?>
 		<h2 class="slateframe-comments-title">
 			<?php
+			/* translators: %s: number of comments. */
 			printf(
 				esc_html(
 					_n(

@@ -12,6 +12,7 @@ get_header();
 		<div class="slateframe-shell">
 			<h1 class="slateframe-page-title">
 				<?php
+				/* translators: %s: search query. */
 				printf(
 					esc_html__( 'Search results for: %s', 'slateframe' ),
 					esc_html( get_search_query() )

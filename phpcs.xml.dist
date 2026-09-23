@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<ruleset name="Slateframe">
+	<description>WordPress coding standards for the Slateframe public theme.</description>
+
+	<file>.</file>
+	<arg name="extensions" value="php"/>
+	<arg value="sp"/>
+
+	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>node_modules/*</exclude-pattern>
+	<exclude-pattern>dist/*</exclude-pattern>
+	<exclude-pattern>test-artifacts/*</exclude-pattern>
+	<exclude-pattern>playwright-report/*</exclude-pattern>
+	<exclude-pattern>test-results/*</exclude-pattern>
+
+	<config name="minimum_supported_wp_version" value="6.7"/>
+
+	<rule ref="WordPress-Core"/>
+	<rule ref="WordPress-Extra"/>
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array" value="slateframe"/>
+		</properties>
+	</rule>
+	<rule ref="WordPress.NamingConventions.PrefixAllGlobals">
+		<properties>
+			<property name="prefixes" type="array" value="slateframe"/>
+		</properties>
+	</rule>
+</ruleset>
