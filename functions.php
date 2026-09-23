@@ -156,6 +156,11 @@ function slateframe_register_block_styles() {
 		array( 'core/gallery', 'slateframe-photo-sequence', __( 'Photo sequence', 'slateframe' ) ),
 		array( 'core/table', 'slateframe-data', __( 'Data table', 'slateframe' ) ),
 		array( 'core/details', 'slateframe-disclosure', __( 'Editorial disclosure', 'slateframe' ) ),
+		array( 'core/gallery', 'slateframe-contact-sheet', __( 'Contact sheet', 'slateframe' ) ),
+		array( 'core/list', 'slateframe-steps', __( 'Numbered steps', 'slateframe' ) ),
+		array( 'core/list', 'slateframe-checklist', __( 'Editorial checklist', 'slateframe' ) ),
+		array( 'core/group', 'slateframe-key-facts', __( 'Key facts', 'slateframe' ) ),
+		array( 'core/columns', 'slateframe-ledger', __( 'Editorial ledger', 'slateframe' ) ),
 	);
 
 	foreach ( $styles as $style ) {
@@ -174,11 +179,20 @@ add_action( 'init', 'slateframe_register_block_styles' );
  * Register Slateframe's pattern category.
  */
 function slateframe_pattern_category() {
-	register_block_pattern_category(
-		'slateframe',
-		array(
-			'label' => __( 'Slateframe', 'slateframe' ),
-		)
+	$categories = array(
+		'slateframe'             => __( 'Slateframe', 'slateframe' ),
+		'slateframe-photography' => __( 'Slateframe: Photography', 'slateframe' ),
+		'slateframe-portfolio'   => __( 'Slateframe: Portfolio', 'slateframe' ),
+		'slateframe-knowledge'   => __( 'Slateframe: Knowledge', 'slateframe' ),
 	);
+
+	foreach ( $categories as $slug => $label ) {
+		register_block_pattern_category(
+			$slug,
+			array(
+				'label' => $label,
+			)
+		);
+	}
 }
 add_action( 'init', 'slateframe_pattern_category' );

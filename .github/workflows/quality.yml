@@ -45,7 +45,7 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           patterns=(patterns/*.php)
-          test "${#patterns[@]}" -ge 5
+          test "${#patterns[@]}" -ge 8
           for file in "${patterns[@]}"; do
             grep -q '^ \* Title:' "$file"
             grep -q '^ \* Slug: slateframe/' "$file"
@@ -107,7 +107,8 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-site
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
-          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/project-case-study","slateframe/learning-path","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
+          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/project-case-study","slateframe/portfolio-index","slateframe/learning-path","slateframe/knowledge-outline","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
+          wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/columns","slateframe-ledger"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
 
   browser-smoke:
     name: Browser smoke
@@ -178,6 +179,18 @@ jobs:
           <!-- wp:code -->
           <pre class="wp-block-code"><code>echo "slateframe";</code></pre>
           <!-- /wp:code -->
+
+          <!-- wp:list {"ordered":true,"className":"browser-steps is-style-slateframe-steps"} -->
+          <ol class="browser-steps is-style-slateframe-steps"><li>Understand the idea.</li><li>Apply it.</li><li>Extend it.</li></ol>
+          <!-- /wp:list -->
+
+          <!-- wp:list {"className":"browser-checklist is-style-slateframe-checklist"} -->
+          <ul class="browser-checklist is-style-slateframe-checklist"><li>Keyboard-safe</li><li>Translation-safe</li></ul>
+          <!-- /wp:list -->
+
+          <!-- wp:group {"className":"browser-key-facts is-style-slateframe-key-facts"} -->
+          <div class="wp-block-group browser-key-facts is-style-slateframe-key-facts"><!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Key facts</h3><!-- /wp:heading --><!-- wp:paragraph --><p>Reusable editorial context.</p><!-- /wp:paragraph --></div>
+          <!-- /wp:group -->
           HTML
 
           PAGE_ID=$(wp post create \

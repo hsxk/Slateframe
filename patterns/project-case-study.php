@@ -2,7 +2,7 @@
 /**
  * Title: Project case study
  * Slug: slateframe/project-case-study
- * Categories: slateframe
+ * Categories: slateframe, slateframe-portfolio
  * Keywords: portfolio, project, case study
  * Description: A portable project overview with context, responsibilities, approach, and outcome.
  * Viewport Width: 1280

@@ -2,7 +2,7 @@
 /**
  * Title: Photo essay
  * Slug: slateframe/photo-essay
- * Categories: slateframe, featured
+ * Categories: slateframe, slateframe-photography, featured
  * Keywords: photography, gallery, editorial
  * Description: A restrained wide layout for a photographic story or visual sequence.
  * Viewport Width: 1280

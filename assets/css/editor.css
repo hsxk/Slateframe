@@ -47,3 +47,18 @@
 	font-size: 0.84rem;
 	line-height: 1.5;
 }
+
+
+.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
+	height: auto;
+	aspect-ratio: auto;
+	object-fit: contain;
+}
+
+.editor-styles-wrapper :is(.is-style-slateframe-steps, .is-style-slateframe-checklist) {
+	max-width: var(--slateframe-content);
+}
+
+.editor-styles-wrapper .is-style-slateframe-ledger {
+	max-width: var(--slateframe-wide);
+}

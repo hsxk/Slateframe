@@ -156,6 +156,16 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 	await expectNoHorizontalOverflow(page, pagePath);
 });
 
+test('knowledge block styles remain contained and readable', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	for (const selector of ['.browser-steps', '.browser-checklist', '.browser-key-facts']) {
+		await expect(page.locator(selector)).toBeVisible();
+	}
+
+	await expectNoHorizontalOverflow(page, pagePath);
+});
+
 test('fallback child navigation is available at every responsive width', async ({ page }, testInfo) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 

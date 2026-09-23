@@ -2,7 +2,7 @@
 /**
  * Title: Learning path
  * Slug: slateframe/learning-path
- * Categories: slateframe
+ * Categories: slateframe, slateframe-knowledge
  * Keywords: learning, guide, course, steps
  * Description: A compact three-stage learning path that keeps prerequisites and progression visible.
  * Viewport Width: 1280
