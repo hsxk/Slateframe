@@ -47,12 +47,16 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           patterns=(patterns/*.php)
-          test "${#patterns[@]}" -ge 15
+          test "${#patterns[@]}" -ge 18
           for file in "${patterns[@]}"; do
             grep -q '^ \* Title:' "$file"
             grep -q '^ \* Slug: slateframe/' "$file"
             grep -q '^ \* Categories:.*slateframe' "$file"
           done
+          if grep -niE 'https?://' "${patterns[@]}"; then
+            echo 'Production patterns must not introduce remote media or third-party requests.' >&2
+            exit 1
+          fi
           for file in style.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php package.json playwright.config.js tests/browser/theme.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
@@ -230,7 +234,7 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-site
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
-          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/project-outcomes","slateframe/knowledge-definition","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
+          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/photography-sequence","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/project-outcomes","slateframe/portfolio-project-grid","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/knowledge-definition","slateframe/knowledge-checklist","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
 
   browser-smoke:
