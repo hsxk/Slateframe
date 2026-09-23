@@ -4,9 +4,11 @@
   "version": "0.1.0",
   "description": "Development tooling for the Slateframe WordPress theme.",
   "scripts": {
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:a11y": "playwright test tests/browser/accessibility.spec.js"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0"
+    "@playwright/test": "1.63.0",
+    "@axe-core/playwright": "4.13.0"
   }
 }

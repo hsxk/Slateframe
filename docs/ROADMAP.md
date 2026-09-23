@@ -8,7 +8,7 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 - Expand Portfolio and Knowledge patterns without introducing custom content ownership.
 - Expand WordPress.org readiness from the current required-check baseline to final submission review.
 - Extend browser fixtures for CJK, RTL, long strings, tables, galleries, comments, and empty states.
-- Review accessibility against WCAG 2.2 practices beyond automated scoring.
+- Continue manual WCAG 2.2 review beyond the automated Axe, focus, accessible-name, and touch-target regression baseline.
 - Finish visual regression baselines and a representative `screenshot.png`.
 - Replace the pre-release fixture screenshot with the final polished WordPress.org showcase.
 - Document tested plugin coexistence where evidence exists.

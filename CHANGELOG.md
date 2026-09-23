@@ -16,6 +16,8 @@ All notable changes to Slateframe will be documented here.
 - Reproducible distributable ZIP packaging with development-file exclusions and validated 1200×900 screenshot metadata.
 - Release metadata consistency validation across style.css, readme.txt, and package.json.
 - WordPress 6.7/current compatibility smoke coverage on PHP 7.4 and PHP 8.3.
+- Automated Axe WCAG A/AA checks on representative mobile and desktop routes.
+- Browser regressions for visible keyboard focus, accessible form names, and 44 px mobile touch targets.
 - Responsive Chromium coverage at 320, 375, 390, 412, 768, 1440, and 1920 px.
 - Wide/full block layout while preserving readable normal prose width.
 - Photo essay, photography contact sheet, project case study, portfolio index, learning path, knowledge outline, editorial note, and curated reading-list patterns.

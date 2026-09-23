@@ -31,7 +31,7 @@ jobs:
         run: |
           node --check assets/js/theme.js
           node --check playwright.config.js
-          node --check tests/browser/theme.spec.js
+          find tests/browser -type f -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Guard public namespace and language-agnostic runtime
         shell: bash
         run: |

@@ -100,6 +100,7 @@ Public GitHub Actions currently enforce:
 - Runtime pattern registration.
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**.
 - Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, and reference screenshots.
+- Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
 
 A failed gate is treated as a defect; tests are not removed merely to make CI green.
@@ -120,6 +121,14 @@ Run browser tests against a local WordPress installation using Slateframe:
 npm install
 PLAYWRIGHT_TEST_BASE_URL=http://127.0.0.1:8080 npm run test:browser
 ```
+
+Run only the accessibility regression slice:
+
+```bash
+PLAYWRIGHT_TEST_BASE_URL=http://127.0.0.1:8080 npm run test:a11y
+```
+
+Automated checks are a regression baseline, not a claim of complete WCAG conformance; manual keyboard, zoom, screen-reader, and visual review remain part of release work.
 
 Repository documentation:
 
