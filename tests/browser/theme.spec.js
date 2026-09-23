@@ -334,6 +334,28 @@ test('photography fixtures preserve natural image proportions and captions', asy
 	await expectNoHorizontalOverflow(page, photoPath);
 });
 
+test('photography diptych switches from one to two columns without cropping', async ({ page }, testInfo) => {
+	await page.goto(photoPath, { waitUntil: 'networkidle' });
+
+	const presentation = await page.locator('.browser-photo-diptych').evaluate((gallery) => {
+		const styles = getComputedStyle(gallery);
+		const images = [...gallery.querySelectorAll('img')];
+		return {
+			tracks: styles.gridTemplateColumns.split(' ').filter(Boolean).length,
+			fits: images.map((image) => getComputedStyle(image).objectFit),
+		};
+	});
+
+	if (projectWidth(testInfo) <= 540) {
+		expect(presentation.tracks).toBe(1);
+	} else {
+		expect(presentation.tracks).toBe(2);
+	}
+
+	expect(presentation.fits).toEqual(['contain', 'contain']);
+	await expectNoHorizontalOverflow(page, photoPath);
+});
+
 test('portfolio brief keeps long references contained', async ({ page }) => {
 	await page.goto(projectPath, { waitUntil: 'networkidle' });
 	await expect(page.locator('.browser-project-brief')).toBeVisible();
@@ -348,7 +370,21 @@ test('knowledge callouts respect RTL direction and logical layout', async ({ pag
 	await expect(callout).toHaveAttribute('dir', 'rtl');
 	expect(await callout.evaluate((element) => getComputedStyle(element).direction)).toBe('rtl');
 	await expect(page.locator('.browser-rtl-steps li')).toHaveCount(3);
-	await expect(page.locator('.browser-definition')).toBeVisible();
+
+	const definition = page.locator('.browser-definition');
+	await expect(definition).toHaveAttribute('dir', 'rtl');
+	const definitionBorders = await definition.evaluate((element) => {
+		const styles = getComputedStyle(element);
+		return {
+			direction: styles.direction,
+			inlineStart: Number.parseFloat(styles.borderInlineStartWidth),
+			right: Number.parseFloat(styles.borderRightWidth),
+			left: Number.parseFloat(styles.borderLeftWidth),
+		};
+	});
+	expect(definitionBorders.direction).toBe('rtl');
+	expect(definitionBorders.inlineStart).toBeGreaterThanOrEqual(3);
+	expect(definitionBorders.right).toBeGreaterThan(definitionBorders.left);
 	await expectNoHorizontalOverflow(page, knowledgePath);
 });
 
