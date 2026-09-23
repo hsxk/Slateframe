@@ -22,7 +22,7 @@ Highlights include:
 * Native comments, archives, author pages, search, pagination, and 404 handling.
 * Lightweight code, table, gallery, caption, footnote, pullquote, disclosure, editorial lead, table-of-contents, and print presentation.
 * Starter patterns for photo essays, photography contact sheets/features/diptychs, project case studies/indexes/briefs/outcomes, learning paths/lesson chapters/knowledge outlines/definitions, editorial openings/notes, and curated reading lists.
-* Block styles for editorial notes, framed images, photo sequences, contact sheets, photography features, project features/briefs, learning paths/callouts, data tables, disclosures, numbered steps, checklists, key facts, and editorial ledgers.
+* Block styles for editorial notes/leads, framed images, photo sequences, contact sheets/diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 * System-font typography with no required third-party font request.
 * WordPress i18n APIs, logical CSS properties, RTL support, CJK-safe wrapping, and long-string resilience.
 * Optional multilingual integration through a public filter; no multilingual plugin is required.
