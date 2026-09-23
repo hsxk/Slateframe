@@ -162,7 +162,11 @@ test('fallback child navigation is available at every responsive width', async (
 	const nestedList = page.locator('[data-primary-nav] .children').first();
 	await expect(nestedList).toHaveCount(1);
 
-	if (projectWidth(testInfo) > 900) {
+	if (projectWidth(testInfo) <= 900) {
+		const toggle = page.locator('[data-menu-toggle]');
+		await toggle.click();
+		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+	} else {
 		await page.locator('[data-primary-nav] .page_item_has_children > a').first().focus();
 	}
 
