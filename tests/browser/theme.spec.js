@@ -103,6 +103,26 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
+test('article comment controls stay inside the reading canvas', async ({ page }) => {
+	await page.goto(postPath, { waitUntil: 'networkidle' });
+
+	const textarea = page.locator('.slateframe-comments textarea').first();
+	await expect(textarea).toBeVisible();
+
+	const bounds = await textarea.evaluate((element) => {
+		const rect = element.getBoundingClientRect();
+		return {
+			left: rect.left,
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+		};
+	});
+
+	expect(bounds.left).toBeGreaterThanOrEqual(-1);
+	expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
+	await expectNoHorizontalOverflow(page, postPath);
+});
+
 test('wide and full blocks can leave the prose measure', async ({ page }, testInfo) => {
 	test.skip(testInfo.project.name !== 'desktop-chromium', 'Width comparison is desktop-specific.');
 
@@ -130,14 +150,15 @@ test('wide and full blocks can leave the prose measure', async ({ page }, testIn
 	expect(widths.full).toBeGreaterThan(widths.viewport * 0.95);
 });
 
-test('capture reference page screenshot', async ({ page }, testInfo) => {
-	await page.goto(pagePath, { waitUntil: 'networkidle' });
-
+test('capture responsive reference screenshots', async ({ page }, testInfo) => {
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
 
-	await page.screenshot({
-		path: path.join(screenshotDir, `${testInfo.project.name}-page.png`),
-		fullPage: true,
-	});
+	for (const [name, route] of [['page', pagePath], ['post', postPath]]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.screenshot({
+			path: path.join(screenshotDir, `${testInfo.project.name}-${name}.png`),
+			fullPage: true,
+		});
+	}
 });
