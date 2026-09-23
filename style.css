@@ -173,6 +173,12 @@ textarea {
 	margin: 0;
 }
 
+.slateframe-menu-fallback {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+
 .slateframe-primary-nav > ul {
 	display: flex;
 	gap: 0.2rem;
@@ -513,6 +519,30 @@ textarea {
 	margin: 0.35rem 0 0;
 }
 
+.slateframe-footer-nav {
+	align-self: center;
+}
+
+.slateframe-footer-menu {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem 1rem;
+}
+
+.slateframe-footer-menu a {
+	color: var(--slateframe-text);
+	text-decoration: none;
+}
+
+.slateframe-footer-menu a:hover {
+	text-decoration: underline;
+	text-underline-offset: 0.2em;
+}
+
+.slateframe-copyright {
+	align-self: center;
+}
+
 @media (max-width: 900px) {
 	.has-js .slateframe-menu-toggle {
 		display: grid;
@@ -537,7 +567,8 @@ textarea {
 		opacity: 1;
 	}
 
-	.slateframe-primary-nav > ul {
+	.slateframe-primary-nav > ul,
+	.slateframe-primary-nav .slateframe-menu-fallback {
 		display: grid;
 	}
 

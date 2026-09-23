@@ -20,3 +20,9 @@ All notable changes to Slateframe will be documented here.
 ### Fixed
 
 - Avoid invalid nested anchors when a WordPress Custom Logo is configured.
+- Keep the fresh-install navigation fallback structurally consistent with assigned menus.
+- Treat the custom-logo image as decorative when the visible site name already labels the brand link.
+
+### Accessibility
+
+- Render the footer menu inside an explicit navigation landmark and omit the landmark when no footer menu is assigned.

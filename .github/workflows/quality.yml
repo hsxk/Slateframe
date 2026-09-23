@@ -151,6 +151,7 @@ jobs:
           wp post create --path=/tmp/slateframe-wordpress --post_type=page --post_status=publish --post_title='Slateframe smoke page' --post_content='<p>Page content.</p>'
           wp eval 'foreach ( array( "index.php", "single.php", "page.php", "archive.php", "search.php", "404.php", "comments.php" ) as $file ) { if ( ! file_exists( get_template_directory() . "/" . $file ) ) { throw new RuntimeException( "Missing template: " . $file ); } } echo "Template smoke checks passed.\n";' --path=/tmp/slateframe-wordpress
           wp eval '$registry = WP_Block_Patterns_Registry::get_instance(); foreach ( array( "slateframe/photo-essay", "slateframe/project-case-study", "slateframe/learning-path" ) as $pattern ) { if ( ! $registry->is_registered( $pattern ) ) { throw new RuntimeException( "Pattern not registered: " . $pattern ); } } echo "Theme pattern registration passed.\n";' --path=/tmp/slateframe-wordpress
+          wp eval 'ob_start(); slateframe_menu_fallback(); $fallback = ob_get_clean(); if ( ! str_contains( $fallback, "<ul" ) || str_contains( $fallback, "<div" ) ) { throw new RuntimeException( "Navigation fallback must render a direct list." ); } echo "Navigation fallback markup passed.\n";' --path=/tmp/slateframe-wordpress
 
   package:
     name: Build distributable

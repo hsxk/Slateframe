@@ -106,9 +106,11 @@ function slateframe_brand_mark() {
 		'full',
 		false,
 		array(
-			'class'    => 'slateframe-brand-logo',
-			'loading'  => 'eager',
-			'decoding' => 'async',
+			'class'       => 'slateframe-brand-logo',
+			'alt'         => '',
+			'aria-hidden' => 'true',
+			'loading'     => 'eager',
+			'decoding'    => 'async',
 		)
 	);
 }
