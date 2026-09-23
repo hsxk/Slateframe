@@ -5,6 +5,10 @@ const { test, expect } = require('@playwright/test');
 const postPath = process.env.SLATEFRAME_POST_PATH || '/';
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
 
+function projectWidth(testInfo) {
+	return testInfo.project.use.viewport?.width || 1440;
+}
+
 function watchRuntime(page) {
 	const failures = [];
 
@@ -82,7 +86,7 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 
 	const toggle = page.locator('[data-menu-toggle]');
 
-	if (testInfo.project.name === 'mobile-chromium') {
+	if (projectWidth(testInfo) <= 900) {
 		await expect(toggle).toBeVisible();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
@@ -124,7 +128,7 @@ test('article comment controls stay inside the reading canvas', async ({ page })
 });
 
 test('wide and full blocks can leave the prose measure', async ({ page }, testInfo) => {
-	test.skip(testInfo.project.name !== 'desktop-chromium', 'Width comparison is desktop-specific.');
+	test.skip(projectWidth(testInfo) < 1000, 'Width comparison requires a desktop reading canvas.');
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 
