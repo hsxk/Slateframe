@@ -72,7 +72,7 @@ jobs:
         run: |
           composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
           composer global require --no-interaction --no-progress 'wp-coding-standards/wpcs:^3.4'
-          "$(composer global config bin-dir --absolute)/phpcs" --standard=phpcs.xml.dist --report=summary .
+          "$(composer global config bin-dir --absolute)/phpcs" --standard=phpcs.xml.dist --report=full .
 
   wordpress-smoke:
     name: WordPress install and activation
