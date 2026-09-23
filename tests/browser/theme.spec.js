@@ -182,6 +182,26 @@ test('reduced-motion preference disables smooth scrolling', async ({ page }) => 
 	expect(scrollBehavior).toBe('auto');
 });
 
+test('comment thread remains on the prose reading axis', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	const axes = await page.evaluate(() => {
+		const heading = document.querySelector('.slateframe-comments-title');
+		const list = document.querySelector('.slateframe-comment-list');
+
+		if (!heading || !list) {
+			throw new Error('Comment-axis fixtures are missing.');
+		}
+
+		return {
+			headingLeft: heading.getBoundingClientRect().left,
+			listLeft: list.getBoundingClientRect().left,
+		};
+	});
+
+	expect(Math.abs(axes.headingLeft - axes.listLeft)).toBeLessThanOrEqual(1);
+});
+
 test('blockquote remains on the prose reading axis', async ({ page }) => {
 	await page.goto(postPath, { waitUntil: 'networkidle' });
 

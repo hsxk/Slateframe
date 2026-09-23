@@ -20,7 +20,9 @@
 }
 
 .slateframe-comment-list {
-	margin: 0;
+	width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-content));
+	margin-block: 0;
+	margin-inline: auto;
 	padding: 0;
 	list-style: none;
 }
