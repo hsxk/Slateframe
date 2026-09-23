@@ -65,6 +65,17 @@ test('core routes render without theme runtime failures', async ({ page }) => {
 	}
 });
 
+test('skip link moves keyboard users to the main landmark', async ({ page }) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+	await page.keyboard.press('Tab');
+
+	const skipLink = page.locator('.skip-link');
+	await expect(skipLink).toBeFocused();
+	await expect(skipLink).toBeVisible();
+	await page.keyboard.press('Enter');
+	await expect(page).toHaveURL(/#main-content$/);
+});
+
 test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	const failures = watchRuntime(page);
 	await page.goto('/', { waitUntil: 'networkidle' });
