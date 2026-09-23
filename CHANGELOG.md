@@ -33,6 +33,9 @@ All notable changes to Slateframe will be documented here.
 - Photography feature, project brief, and lesson chapter patterns with matching block styles.
 - Real browser fixtures for mixed-orientation photography, long portfolio references, and RTL/CJK knowledge content.
 - Representative 390px and 1440px showcase screenshots for photography, portfolio, and knowledge pages.
+- Editorial lead and table-of-contents reading treatments plus print-friendly long-form output.
+- Photography diptych, project outcomes, knowledge definition, and editorial opening patterns with matching block styles.
+- Browser fixtures and regressions for diptych imagery, project metrics, definitions, reading leads, table-of-contents structure, and print presentation.
 
 ### Changed
 
