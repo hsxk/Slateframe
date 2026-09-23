@@ -1,0 +1,22 @@
+# Slateframe
+
+**A clean frame for whatever you publish.**
+
+Slateframe is a fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites.
+
+## Development status
+
+Slateframe is under active development. The stable `main` branch remains intentionally minimal while work proceeds on `automation/continuous-development`.
+
+## Principles
+
+- Content-first editorial design without page-builder runtime dependencies.
+- Native WordPress hybrid architecture: `theme.json`, PHP template hierarchy, Gutenberg patterns and block styles.
+- Language-agnostic by default: WordPress i18n APIs, logical CSS properties, RTL-ready architecture, and optional multilingual integrations through public hooks.
+- Accessibility and keyboard behavior are product requirements.
+- Performance by architecture: system fonts, contextual assets, lightweight native JavaScript.
+- Theme presentation stays portable; site business logic belongs in plugins.
+
+## License
+
+GPL-2.0-or-later.
