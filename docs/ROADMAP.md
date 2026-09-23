@@ -6,11 +6,11 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 - Complete Photography/Gallery visual language with portrait/landscape/high-DPI fixtures.
 - Expand Portfolio and Knowledge patterns without introducing custom content ownership.
-- Add stronger WordPress.org Theme Check/readiness coverage.
+- Expand WordPress.org readiness from the current required-check baseline to final submission review.
 - Extend browser fixtures for CJK, RTL, long strings, tables, galleries, comments, and empty states.
 - Review accessibility against WCAG 2.2 practices beyond automated scoring.
 - Finish visual regression baselines and a representative `screenshot.png`.
-- Validate release ZIP contents and metadata against WordPress.org expectations.
+- Replace the pre-release fixture screenshot with the final polished WordPress.org showcase.
 - Document tested plugin coexistence where evidence exists.
 
 ## After the baseline is stable

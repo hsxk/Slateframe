@@ -14,6 +14,8 @@ All notable changes to Slateframe will be documented here.
 - Public CI for syntax, metadata, namespace/i18n guards, asset budgets, WPCS/PHPCS, production-package WordPress.org Theme Check, real WordPress runtime, Playwright browser regression, and package validation.
 - Real WordPress + MariaDB installation and activation smoke tests.
 - Reproducible distributable ZIP packaging with development-file exclusions and validated 1200×900 screenshot metadata.
+- Release metadata consistency validation across style.css, readme.txt, and package.json.
+- WordPress 6.7/current compatibility smoke coverage on PHP 7.4 and PHP 8.3.
 - Responsive Chromium coverage at 320, 375, 390, 412, 768, 1440, and 1920 px.
 - Wide/full block layout while preserving readable normal prose width.
 - Photo essay, photography contact sheet, project case study, portfolio index, learning path, knowledge outline, editorial note, and curated reading-list patterns.
@@ -24,6 +26,10 @@ All notable changes to Slateframe will be documented here.
 
 - Classic WordPress alignment, caption, sticky-post, and post-author compatibility styling.
 - Threaded comment-reply script loading on singular discussions only.
+
+### Changed
+
+- Normalized the public development version to 0.1.0 across release metadata and tooling.
 
 ### Fixed
 

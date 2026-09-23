@@ -25,6 +25,8 @@ jobs:
         run: |
           php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
           php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Author: Kexin Hao","Tested up to: 7.1","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
+      - name: Validate release metadata consistency
+        run: php bin/check-release-metadata.php
       - name: Validate JavaScript syntax
         run: |
           node --check assets/js/theme.js
@@ -74,6 +76,55 @@ jobs:
           composer global require --no-interaction --no-progress 'wp-coding-standards/wpcs:^3.4'
           "$(composer global config bin-dir --absolute)/phpcs" --standard=phpcs.xml.dist --report=full .
 
+
+
+  compatibility:
+    name: Compatibility · WP ${{ matrix.wordpress }} · PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - wordpress: '6.7'
+            php: '7.4'
+          - wordpress: '6.7'
+            php: '8.3'
+          - wordpress: 'latest'
+            php: '7.4'
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli
+          coverage: none
+      - name: Install WP-CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
+          chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
+      - name: Install WordPress and activate Slateframe
+        shell: bash
+        run: |
+          set -euo pipefail
+          site="/tmp/wp-compat-${{ matrix.wordpress }}-${{ matrix.php }}"
+          mkdir -p "$site"
+          wp core download --path="$site" --version="${{ matrix.wordpress }}"
+          wp config create --path="$site" --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
+          wp core install --path="$site" --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
+          ln -s "$GITHUB_WORKSPACE" "$site/wp-content/themes/slateframe"
+          wp theme activate slateframe --path="$site"
+          test "$(wp option get stylesheet --path="$site")" = slateframe
+          wp eval 'if ( ! current_theme_supports("title-tag") || ! current_theme_supports("align-wide") ) { throw new RuntimeException("Required theme support missing."); }' --path="$site"
 
   theme-check:
     name: WordPress.org Theme Check
@@ -321,7 +372,7 @@ jobs:
 
   package:
     name: Build distributable
-    needs: [static, coding-standards, theme-check, wordpress-smoke, browser-smoke]
+    needs: [static, coding-standards, compatibility, theme-check, wordpress-smoke, browser-smoke]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -329,6 +380,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          php bin/check-release-metadata.php
           ./bin/build-theme-zip.sh
           unzip -Z1 dist/slateframe.zip > /tmp/package.txt
           grep -qx 'slateframe/style.css' /tmp/package.txt

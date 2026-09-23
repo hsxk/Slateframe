@@ -81,7 +81,7 @@ No page builder or companion plugin is required.
 | Languages | Locale-agnostic; CJK/RTL/long-string aware |
 | Multilingual plugins | Optional adapters/hooks; none required |
 
-Compatibility is validated incrementally rather than claimed from syntax alone.
+Compatibility is validated incrementally rather than claimed from syntax alone. CI currently exercises the minimum PHP target and the primary modern PHP runtime against WordPress 6.7 and current WordPress.
 
 ## Quality gates
 
@@ -89,7 +89,9 @@ Public GitHub Actions currently enforce:
 
 - PHP syntax.
 - WordPress Coding Standards through PHPCS/WPCS.
+- Release metadata consistency across `style.css`, `readme.txt`, and `package.json`.
 - WordPress.org Theme Check against the built production ZIP in a real WordPress installation with `WP_DEBUG` enabled; REQUIRED findings block the build while advisory recommendations remain visible in the report.
+- WordPress/PHP compatibility smoke coverage for the minimum PHP target and modern PHP runtime.
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
@@ -126,6 +128,7 @@ Repository documentation:
 - [Architecture](docs/ARCHITECTURE.md)
 - [Public extension points](docs/EXTENSIONS.md)
 - [Roadmap](docs/ROADMAP.md)
+- [WordPress.org readiness](docs/WORDPRESS-ORG.md)
 - [Migration audit](docs/MIGRATION.md)
 - [Changelog](CHANGELOG.md)
 
