@@ -22,7 +22,7 @@ The current development line installs and activates in a clean WordPress + Maria
 - Language-agnostic i18n foundations, logical CSS properties, RTL support, and a plugin-neutral language-switcher hook.
 - System-font typography, lightweight native JavaScript, and explicit frontend asset budgets.
 - Reproducible theme packaging plus real WordPress install/activation smoke tests in CI.
-- Chromium regression coverage at 320, 375, 390, 412, 768, 1440, and 1920 pixels for navigation, keyboard skip links, core routes, overflow, comment controls, wide/full blocks, and reference screenshots.
+- Chromium regression coverage at 320, 375, 390, 412, 768, 1440, and 1920 pixels for navigation and focus containment, keyboard skip links, core routes, nested fallback pages, long mixed-script titles, comments on posts and pages, publishing primitives, overflow, wide/full blocks, reduced motion, and reference screenshots.
 
 ## Design principles
 
@@ -40,6 +40,8 @@ Slateframe currently ships three reusable patterns under the **Slateframe** patt
 - **Photo essay** — a wide editorial introduction followed by a native Gallery block for image-led stories.
 - **Project case study** — role/scope context plus concise Context, Approach, and Outcome sections.
 - **Learning path** — a three-stage Foundation → Practice → Extend structure for guides and educational content.
+- **Editorial note** — a restrained contextual note or caveat that remains part of normal document flow.
+- **Curated reading list** — a typography-led related-reading section without forcing content into cards.
 
 Patterns contain no site-specific projects, courses, locale paths, or personal content. Replace the example copy with your own content after insertion.
 

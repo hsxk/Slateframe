@@ -94,6 +94,11 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
 		await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
 
+		const lastNavigationLink = page.locator('[data-primary-nav] a:visible').last();
+		await lastNavigationLink.focus();
+		await page.keyboard.press('Tab');
+		await expect(toggle).toBeFocused();
+
 		await page.keyboard.press('Escape');
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 		await expect(toggle).toBeFocused();
@@ -107,13 +112,37 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
-test('article comment controls stay inside the reading canvas', async ({ page }) => {
-	await page.goto(postPath, { waitUntil: 'networkidle' });
+test('comment controls stay inside singular reading canvases', async ({ page }) => {
+	for (const route of [postPath, pagePath]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
 
-	const textarea = page.locator('.slateframe-comments textarea').first();
-	await expect(textarea).toBeVisible();
+		const textarea = page.locator('.slateframe-comments textarea').first();
+		await expect(textarea).toBeVisible();
 
-	const bounds = await textarea.evaluate((element) => {
+		const bounds = await textarea.evaluate((element) => {
+			const rect = element.getBoundingClientRect();
+			return {
+				left: rect.left,
+				right: rect.right,
+				viewport: document.documentElement.clientWidth,
+			};
+		});
+
+		expect(bounds.left).toBeGreaterThanOrEqual(-1);
+		expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
+		await expectNoHorizontalOverflow(page, route);
+	}
+});
+
+test('publishing primitives remain readable and contained', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	await expect(page.locator('.browser-data-table')).toBeVisible();
+	await expect(page.locator('.browser-details summary')).toBeVisible();
+	await expect(page.locator('.browser-footnotes')).toBeVisible();
+	await expect(page.locator('.slateframe-comments')).toBeVisible();
+
+	const titleBounds = await page.locator('.slateframe-entry-title').evaluate((element) => {
 		const rect = element.getBoundingClientRect();
 		return {
 			left: rect.left,
@@ -122,9 +151,31 @@ test('article comment controls stay inside the reading canvas', async ({ page })
 		};
 	});
 
-	expect(bounds.left).toBeGreaterThanOrEqual(-1);
-	expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
-	await expectNoHorizontalOverflow(page, postPath);
+	expect(titleBounds.left).toBeGreaterThanOrEqual(-1);
+	expect(titleBounds.right).toBeLessThanOrEqual(titleBounds.viewport + 1);
+	await expectNoHorizontalOverflow(page, pagePath);
+});
+
+test('fallback child navigation is available at every responsive width', async ({ page }, testInfo) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	const nestedList = page.locator('[data-primary-nav] .children').first();
+	await expect(nestedList).toHaveCount(1);
+
+	if (projectWidth(testInfo) > 900) {
+		await page.locator('[data-primary-nav] .page_item_has_children > a').first().focus();
+	}
+
+	await expect(nestedList).toBeVisible();
+	await expectNoHorizontalOverflow(page, '/');
+});
+
+test('reduced-motion preference disables smooth scrolling', async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	const scrollBehavior = await page.evaluate(() => getComputedStyle(document.documentElement).scrollBehavior);
+	expect(scrollBehavior).toBe('auto');
 });
 
 test('wide and full blocks can leave the prose measure', async ({ page }, testInfo) => {

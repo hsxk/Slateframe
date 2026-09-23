@@ -86,8 +86,10 @@ jobs:
       - name: Report asset budget
         run: |
           printf 'style.css: '; wc -c < style.css
+          printf 'editor.css: '; wc -c < assets/css/editor.css
           printf 'theme.js: '; wc -c < assets/js/theme.js
           test $(wc -c < style.css) -le 24000
+          test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
 
   wordpress-smoke:
@@ -156,7 +158,8 @@ jobs:
           wp post create --path=/tmp/slateframe-wordpress --post_type=post --post_status=publish --post_title='Slateframe smoke post' --post_content='<h2>Heading</h2><p>Paragraph.</p><pre><code>echo "test";</code></pre><table><tr><th>Key</th><th>Value</th></tr><tr><td>A</td><td>B</td></tr></table>'
           wp post create --path=/tmp/slateframe-wordpress --post_type=page --post_status=publish --post_title='Slateframe smoke page' --post_content='<p>Page content.</p>'
           wp eval 'foreach ( array( "index.php", "single.php", "page.php", "archive.php", "search.php", "404.php", "comments.php" ) as $file ) { if ( ! file_exists( get_template_directory() . "/" . $file ) ) { throw new RuntimeException( "Missing template: " . $file ); } } echo "Template smoke checks passed.\n";' --path=/tmp/slateframe-wordpress
-          wp eval '$registry = WP_Block_Patterns_Registry::get_instance(); foreach ( array( "slateframe/photo-essay", "slateframe/project-case-study", "slateframe/learning-path" ) as $pattern ) { if ( ! $registry->is_registered( $pattern ) ) { throw new RuntimeException( "Pattern not registered: " . $pattern ); } } echo "Theme pattern registration passed.\n";' --path=/tmp/slateframe-wordpress
+          wp eval '$registry = WP_Block_Patterns_Registry::get_instance(); foreach ( array( "slateframe/photo-essay", "slateframe/project-case-study", "slateframe/learning-path", "slateframe/editorial-note", "slateframe/reading-list" ) as $pattern ) { if ( ! $registry->is_registered( $pattern ) ) { throw new RuntimeException( "Pattern not registered: " . $pattern ); } } echo "Theme pattern registration passed.\n";' --path=/tmp/slateframe-wordpress
+          wp eval '$registry = WP_Block_Styles_Registry::get_instance(); foreach ( array( array( "core/table", "slateframe-data" ), array( "core/details", "slateframe-disclosure" ) ) as $style ) { if ( ! $registry->is_registered( $style[0], $style[1] ) ) { throw new RuntimeException( "Block style not registered: " . implode( "/", $style ) ); } } echo "Publishing block styles passed.\n";' --path=/tmp/slateframe-wordpress
           wp eval 'ob_start(); slateframe_menu_fallback(); $fallback = ob_get_clean(); if ( ! str_contains( $fallback, "<ul" ) || str_contains( $fallback, "<div" ) ) { throw new RuntimeException( "Navigation fallback must render a direct list." ); } echo "Navigation fallback markup passed.\n";' --path=/tmp/slateframe-wordpress
 
   browser-smoke:
@@ -237,15 +240,42 @@ jobs:
           <!-- wp:paragraph -->
           <p>This fixture checks normal reading width, responsive layout, and the same block canvas used by editorial patterns.</p>
           <!-- /wp:paragraph -->
+          <!-- wp:table {"className":"browser-data-table is-style-slateframe-data"} -->
+          <figure class="wp-block-table browser-data-table is-style-slateframe-data"><table><thead><tr><th>Metric</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><td>Publishing reach</td><td>1,234</td><td>12,345</td></tr></tbody></table></figure>
+          <!-- /wp:table -->
+          <!-- wp:details {"className":"browser-details is-style-slateframe-disclosure"} -->
+          <details class="wp-block-details browser-details is-style-slateframe-disclosure"><summary>Implementation note</summary><!-- wp:paragraph --><p>Native disclosure content remains readable without JavaScript.</p><!-- /wp:paragraph --></details>
+          <!-- /wp:details -->
+          <!-- wp:html -->
+          <ol class="wp-block-footnotes browser-footnotes"><li id="browser-footnote">Footnote content with a <a href="#main-content">return link</a>.</li></ol>
+          <!-- /wp:html -->
           HTML
 
           PAGE_ID="$(wp post create \
             --path=/tmp/slateframe-browser \
             --post_type=page \
             --post_status=publish \
-            --post_title='Slateframe Browser Page' \
+            --comment_status=open \
+            --post_title='Slateframe 发布框架 — Ein außergewöhnlich langes Veröffentlichungsbeispiel' \
             --post_content="$(cat /tmp/slateframe-browser-page.html)" \
             --porcelain)"
+
+          CHILD_ID="$(wp post create \
+            --path=/tmp/slateframe-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_parent="$PAGE_ID" \
+            --post_title='Nested navigation page' \
+            --post_content='<p>Nested fallback navigation fixture.</p>' \
+            --porcelain)"
+
+          wp comment create \
+            --path=/tmp/slateframe-browser \
+            --comment_post_ID="$PAGE_ID" \
+            --comment_author='CI Reader' \
+            --comment_author_email='ci-reader@example.com' \
+            --comment_content='Page comment fixture.' \
+            --comment_approved=1
 
           POST_ID="$(wp post create \
             --path=/tmp/slateframe-browser \
