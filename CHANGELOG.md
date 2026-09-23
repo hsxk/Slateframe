@@ -42,6 +42,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Place contact-sheet captions below photographs instead of inheriting WordPress Core's gradient image overlay.
+
 - Restrict content-mode asset loading to documents that actually use Slateframe photography, portfolio, or knowledge styles.
 
 - Avoid invalid nested anchors when a WordPress Custom Logo is configured.

@@ -305,6 +305,17 @@ test('photography fixtures preserve natural image proportions and captions', asy
 	expect(ratios.landscape.fit).toBe('contain');
 	expect(ratios.portrait.fit).toBe('contain');
 	expect(ratios.feature.fit).toBe('contain');
+
+	const captionPresentation = await page.locator('.browser-photo-gallery figcaption').first().evaluate((caption) => {
+		const styles = getComputedStyle(caption);
+		return {
+			position: styles.position,
+			backgroundImage: styles.backgroundImage,
+			color: styles.color,
+		};
+	});
+	expect(captionPresentation.position).toBe('static');
+	expect(captionPresentation.backgroundImage).toBe('none');
 	await expectNoHorizontalOverflow(page, photoPath);
 });
 
