@@ -379,7 +379,8 @@ jobs:
           grep -qx 'slateframe/functions.php' /tmp/slateframe-package.txt
           grep -qx 'slateframe/theme.json' /tmp/slateframe-package.txt
 
-          if grep -Eq '^slateframe/(package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)
+          if grep -Eq '^slateframe/(package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)$' /tmp/slateframe-package.txt; then
+            echo 'Development tooling leaked into the distributable.' >&2
             exit 1
           fi
 
