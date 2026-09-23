@@ -319,12 +319,17 @@ test('photography fixtures preserve natural image proportions and captions', asy
 		const read = (selector) => {
 			const image = document.querySelector(selector);
 			const rect = image.getBoundingClientRect();
-			return { ratio: rect.width / rect.height, fit: getComputedStyle(image).objectFit };
+			return {
+				ratio: rect.width / rect.height,
+				height: rect.height,
+				fit: getComputedStyle(image).objectFit,
+			};
 		};
 		return {
 			landscape: read('.browser-photo-gallery img[alt="Wide landscape fixture"]'),
 			portrait: read('.browser-photo-gallery img[alt="Tall portrait fixture"]'),
 			feature: read('.browser-photo-feature img'),
+			viewportHeight: window.innerHeight,
 		};
 	});
 	expect(ratios.landscape.ratio).toBeGreaterThan(1.5);
@@ -332,6 +337,7 @@ test('photography fixtures preserve natural image proportions and captions', asy
 	expect(ratios.landscape.fit).toBe('contain');
 	expect(ratios.portrait.fit).toBe('contain');
 	expect(ratios.feature.fit).toBe('contain');
+	expect(ratios.portrait.height).toBeLessThanOrEqual((ratios.viewportHeight * 0.62) + 2);
 
 	const captionPresentation = await page.locator('.browser-photo-gallery figcaption').first().evaluate((caption) => {
 		const styles = getComputedStyle(caption);
@@ -355,6 +361,8 @@ test('photography diptych switches from one to two columns without cropping', as
 		return {
 			tracks: styles.gridTemplateColumns.split(' ').filter(Boolean).length,
 			fits: images.map((image) => getComputedStyle(image).objectFit),
+			heights: images.map((image) => image.getBoundingClientRect().height),
+			viewportHeight: window.innerHeight,
 		};
 	});
 
@@ -365,6 +373,9 @@ test('photography diptych switches from one to two columns without cropping', as
 	}
 
 	expect(presentation.fits).toEqual(['contain', 'contain']);
+	for (const height of presentation.heights) {
+		expect(height).toBeLessThanOrEqual((presentation.viewportHeight * 0.62) + 2);
+	}
 	await expectNoHorizontalOverflow(page, photoPath);
 });
 
