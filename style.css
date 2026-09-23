@@ -866,18 +866,18 @@ textarea {
 	list-style: none;
 }
 
-.slateframe-primary-nav .sub-menu {
+.slateframe-primary-nav :is(.sub-menu, .children) {
 	margin: 0;
 	padding: 0.5rem;
 	list-style: none;
 }
 
 @media (min-width: 901px) {
-	.slateframe-primary-nav .menu-item-has-children {
+	.slateframe-primary-nav :is(.menu-item-has-children, .page_item_has_children) {
 		position: relative;
 	}
 
-	.slateframe-primary-nav .sub-menu {
+	.slateframe-primary-nav :is(.sub-menu, .children) {
 		position: absolute;
 		inset-block-start: 100%;
 		inset-inline-start: 0;
@@ -892,8 +892,8 @@ textarea {
 		transition: opacity 180ms ease, transform 180ms ease, visibility 180ms ease;
 	}
 
-	.slateframe-primary-nav .menu-item-has-children:hover > .sub-menu,
-	.slateframe-primary-nav .menu-item-has-children:focus-within > .sub-menu {
+	.slateframe-primary-nav :is(.menu-item-has-children, .page_item_has_children):hover > :is(.sub-menu, .children),
+	.slateframe-primary-nav :is(.menu-item-has-children, .page_item_has_children):focus-within > :is(.sub-menu, .children) {
 		visibility: visible;
 		opacity: 1;
 		transform: translateY(0);
@@ -907,7 +907,7 @@ textarea {
 		border-block-start: 1px solid var(--slateframe-border);
 	}
 
-	.slateframe-primary-nav .sub-menu {
+	.slateframe-primary-nav :is(.sub-menu, .children) {
 		padding-inline: 0 0;
 		margin-inline-start: 0.7rem;
 		border-inline-start: 1px solid var(--slateframe-border);
