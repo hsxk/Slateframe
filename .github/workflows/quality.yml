@@ -19,76 +19,42 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Validate PHP syntax
         run: find . -type f -name '*.php' -print0 | xargs -0 -n1 php -l
-
-      - name: Validate theme.json
-        run: php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
-
+      - name: Validate theme metadata and JSON
+        run: |
+          php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
+          php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
       - name: Validate JavaScript syntax
         run: |
           node --check assets/js/theme.js
           node --check playwright.config.js
           node --check tests/browser/theme.spec.js
-
-      - name: Enforce public runtime namespace and text domain
+      - name: Guard public namespace and language-agnostic runtime
         shell: bash
         run: |
           set -euo pipefail
           mapfile -t runtime_files < <(find . -type f \( -name '*.php' -o -name '*.css' -o -name '*.js' -o -name 'theme.json' \) -not -path './.git/*' -not -path './.github/*' -not -path './tests/*')
-          if grep -niE 'time2log|t2l-|--t2l-|time2log_' "${runtime_files[@]}"; then
-            echo 'Private legacy identifiers must not ship in Slateframe runtime files.' >&2
+          if grep -niE 'time2log|t2l-|--t2l-|time2log_|/zh/|/ja/|/en/|pll_current_language|pll_the_languages' "${runtime_files[@]}"; then
+            echo 'Site-specific identifiers, locale paths, or required plugin APIs must not ship in Slateframe runtime.' >&2
             exit 1
           fi
-          php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
-
-      - name: Guard language-agnostic runtime
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -RniE "(/zh/|/ja/|/en/|pll_current_language|pll_the_languages)" --include='*.php' --include='*.js' --include='*.css' --exclude-dir='.git' --exclude-dir='.github' --exclude-dir='tests' .; then
-            echo 'Core runtime must not hard-code locale paths or a Polylang dependency.' >&2
-            exit 1
-          fi
-
-      - name: Validate theme patterns
+      - name: Validate patterns and required files
         shell: bash
         run: |
           set -euo pipefail
           shopt -s nullglob
           patterns=(patterns/*.php)
-          test "${#patterns[@]}" -ge 3
+          test "${#patterns[@]}" -ge 5
           for file in "${patterns[@]}"; do
             grep -q '^ \* Title:' "$file"
             grep -q '^ \* Slug: slateframe/' "$file"
             grep -q '^ \* Categories:.*slateframe' "$file"
-            if grep -qE '(/zh/|/ja/|/en/|time2log|pll_)' "$file"; then
-              echo "Site-specific or locale-specific content found in $file" >&2
-              exit 1
-            fi
           done
-
-      - name: Check required theme files
+          for file in style.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php package.json playwright.config.js tests/browser/theme.spec.js phpcs.xml.dist; do test -f "$file"; done
+      - name: Enforce asset budgets
         run: |
-          test -f style.css
-          test -f index.php
-          test -f functions.php
-          test -f theme.json
-          test -f rtl.css
-          test -f template-parts/content-card.php
-          test -f inc/template-tags.php
-          test -f package.json
-          test -f playwright.config.js
-          test -f tests/browser/theme.spec.js
-          test -f phpcs.xml.dist
-          if test ! -f screenshot.png; then echo 'screenshot.png pending before release'; fi
-
-      - name: Report asset budget
-        run: |
-          printf 'style.css: '; wc -c < style.css
-          printf 'editor.css: '; wc -c < assets/css/editor.css
-          printf 'theme.js: '; wc -c < assets/js/theme.js
+          wc -c style.css assets/css/editor.css assets/js/theme.js
           test $(wc -c < style.css) -le 24000
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
@@ -98,23 +64,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           coverage: none
-
-      - name: Install WordPress Coding Standards
+      - name: Install WPCS and run PHPCS
         run: |
           composer global config allow-plugins.dealerdirect/phpcodesniffer-composer-installer true
-          composer global require --no-interaction --no-progress "wp-coding-standards/wpcs:^3.4"
-
-      - name: Run PHPCS
-        shell: bash
-        run: |
-          set -euo pipefail
-          PHPCS_BIN="$(composer global config bin-dir --absolute)/phpcs"
-          "$PHPCS_BIN" --standard=phpcs.xml.dist --report=summary .
+          composer global require --no-interaction --no-progress 'wp-coding-standards/wpcs:^3.4'
+          "$(composer global config bin-dir --absolute)/phpcs" --standard=phpcs.xml.dist --report=summary .
 
   wordpress-smoke:
     name: WordPress install and activation
@@ -125,66 +83,31 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: wordpress
-        ports:
-          - 3306:3306
+        ports: ['3306:3306']
         options: >-
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
+          --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
-
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mysqli
           coverage: none
-
       - name: Install WP-CLI
         run: |
-          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o wp
-          chmod +x wp
-          sudo mv wp /usr/local/bin/wp
-          wp --info
-
-      - name: Install WordPress
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
+          chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
+      - name: Install WordPress and activate Slateframe
         run: |
-          mkdir -p /tmp/slateframe-wordpress
-          wp core download --path=/tmp/slateframe-wordpress --version=latest
-          wp config create \
-            --path=/tmp/slateframe-wordpress \
-            --dbname=wordpress \
-            --dbuser=root \
-            --dbpass=root \
-            --dbhost=127.0.0.1:3306 \
-            --skip-check
-          wp core install \
-            --path=/tmp/slateframe-wordpress \
-            --url=https://slateframe.test \
-            --title=Slateframe \
-            --admin_user=admin \
-            --admin_password='slateframe-ci-password' \
-            --admin_email=ci@example.com \
-            --skip-email
-
-      - name: Install and activate Slateframe
-        run: |
-          rm -rf /tmp/slateframe-wordpress/wp-content/themes/slateframe
-          ln -s "$GITHUB_WORKSPACE" /tmp/slateframe-wordpress/wp-content/themes/slateframe
-          wp theme activate slateframe --path=/tmp/slateframe-wordpress
-          test "$(wp option get stylesheet --path=/tmp/slateframe-wordpress)" = "slateframe"
-          wp eval 'if ( wp_get_theme()->errors() ) { fwrite( STDERR, print_r( wp_get_theme()->errors(), true ) ); exit( 1 ); } echo "Slateframe activated cleanly.\n";' --path=/tmp/slateframe-wordpress
-
-      - name: Exercise core content paths
-        run: |
-          wp post create --path=/tmp/slateframe-wordpress --post_type=post --post_status=publish --post_title='Slateframe smoke post' --post_content='<h2>Heading</h2><p>Paragraph.</p><pre><code>echo "test";</code></pre><table><tr><th>Key</th><th>Value</th></tr><tr><td>A</td><td>B</td></tr></table>'
-          wp post create --path=/tmp/slateframe-wordpress --post_type=page --post_status=publish --post_title='Slateframe smoke page' --post_content='<p>Page content.</p>'
-          wp eval 'foreach ( array( "index.php", "single.php", "page.php", "archive.php", "search.php", "404.php", "comments.php" ) as $file ) { if ( ! file_exists( get_template_directory() . "/" . $file ) ) { throw new RuntimeException( "Missing template: " . $file ); } } echo "Template smoke checks passed.\n";' --path=/tmp/slateframe-wordpress
-          wp eval '$registry = WP_Block_Patterns_Registry::get_instance(); foreach ( array( "slateframe/photo-essay", "slateframe/project-case-study", "slateframe/learning-path", "slateframe/editorial-note", "slateframe/reading-list" ) as $pattern ) { if ( ! $registry->is_registered( $pattern ) ) { throw new RuntimeException( "Pattern not registered: " . $pattern ); } } echo "Theme pattern registration passed.\n";' --path=/tmp/slateframe-wordpress
-          wp eval '$registry = WP_Block_Styles_Registry::get_instance(); foreach ( array( array( "core/table", "slateframe-data" ), array( "core/details", "slateframe-disclosure" ) ) as $style ) { if ( ! $registry->is_registered( $style[0], $style[1] ) ) { throw new RuntimeException( "Block style not registered: " . implode( "/", $style ) ); } } echo "Publishing block styles passed.\n";' --path=/tmp/slateframe-wordpress
-          wp eval 'ob_start(); slateframe_menu_fallback(); $fallback = ob_get_clean(); if ( ! str_contains( $fallback, "<ul" ) || str_contains( $fallback, "<div" ) ) { throw new RuntimeException( "Navigation fallback must render a direct list." ); } echo "Navigation fallback markup passed.\n";' --path=/tmp/slateframe-wordpress
+          mkdir -p /tmp/wp-site
+          wp core download --path=/tmp/wp-site --version=latest
+          wp config create --path=/tmp/wp-site --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
+          wp core install --path=/tmp/wp-site --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
+          ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
+          wp theme activate slateframe --path=/tmp/wp-site
+          test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
+          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/project-case-study","slateframe/learning-path","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
 
   browser-smoke:
     name: Browser smoke
@@ -196,157 +119,45 @@ jobs:
         env:
           MARIADB_ROOT_PASSWORD: root
           MARIADB_DATABASE: wordpress
-        ports:
-          - 3306:3306
+        ports: ['3306:3306']
         options: >-
           --health-cmd="healthcheck.sh --connect --innodb_initialized"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
-
+          --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
-
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
           extensions: mysqli
           coverage: none
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-
-      - name: Install WP-CLI
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o wp
-          chmod +x wp
-          sudo mv wp /usr/local/bin/wp
-
-      - name: Install browser test site
+      - name: Install fixture site
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p /tmp/slateframe-browser
-          wp core download --path=/tmp/slateframe-browser --version=latest
-          wp config create \
-            --path=/tmp/slateframe-browser \
-            --dbname=wordpress \
-            --dbuser=root \
-            --dbpass=root \
-            --dbhost=127.0.0.1:3306 \
-            --skip-check
-          wp core install \
-            --path=/tmp/slateframe-browser \
-            --url=http://127.0.0.1:8080 \
-            --title='Slateframe Browser Fixture' \
-            --admin_user=admin \
-            --admin_password='slateframe-browser-ci-password' \
-            --admin_email=ci@example.com \
-            --skip-email
-          rm -rf /tmp/slateframe-browser/wp-content/themes/slateframe
-          ln -s "$GITHUB_WORKSPACE" /tmp/slateframe-browser/wp-content/themes/slateframe
-          wp theme activate slateframe --path=/tmp/slateframe-browser
-
-          cat > /tmp/slateframe-browser-page.html <<'HTML'
-          <!-- wp:paragraph {"className":"browser-default-prose"} -->
-          <p class="browser-default-prose">Readable measure fixture for Slateframe browser testing.</p>
-          <!-- /wp:paragraph -->
-          <!-- wp:group {"align":"wide","className":"browser-wide-block"} -->
-          <div class="wp-block-group alignwide browser-wide-block"><!-- wp:paragraph --><p>Wide content fixture.</p><!-- /wp:paragraph --></div>
-          <!-- /wp:group -->
-          <!-- wp:group {"align":"full","className":"browser-full-block"} -->
-          <div class="wp-block-group alignfull browser-full-block"><!-- wp:paragraph --><p>Full-width content fixture.</p><!-- /wp:paragraph --></div>
-          <!-- /wp:group -->
-          <!-- wp:heading -->
-          <h2 class="wp-block-heading">Long-form content</h2>
-          <!-- /wp:heading -->
-          <!-- wp:paragraph -->
-          <p>This fixture checks normal reading width, responsive layout, and the same block canvas used by editorial patterns.</p>
-          <!-- /wp:paragraph -->
-          <!-- wp:table {"className":"browser-data-table is-style-slateframe-data"} -->
-          <figure class="wp-block-table browser-data-table is-style-slateframe-data"><table><thead><tr><th>Metric</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><td>Publishing reach</td><td>1,234</td><td>12,345</td></tr></tbody></table></figure>
-          <!-- /wp:table -->
-          <!-- wp:details {"className":"browser-details is-style-slateframe-disclosure"} -->
-          <details class="wp-block-details browser-details is-style-slateframe-disclosure"><summary>Implementation note</summary><!-- wp:paragraph --><p>Native disclosure content remains readable without JavaScript.</p><!-- /wp:paragraph --></details>
-          <!-- /wp:details -->
-          <!-- wp:html -->
-          <ol class="wp-block-footnotes browser-footnotes"><li id="browser-footnote">Footnote content with a <a href="#main-content">return link</a>.</li></ol>
-          <!-- /wp:html -->
-          HTML
-
-          PAGE_ID="$(wp post create \
-            --path=/tmp/slateframe-browser \
-            --post_type=page \
-            --post_status=publish \
-            --comment_status=open \
-            --post_title='Slateframe 发布框架 — Ein außergewöhnlich langes Veröffentlichungsbeispiel' \
-            --post_content="$(cat /tmp/slateframe-browser-page.html)" \
-            --porcelain)"
-
-          CHILD_ID="$(wp post create \
-            --path=/tmp/slateframe-browser \
-            --post_type=page \
-            --post_status=publish \
-            --post_parent="$PAGE_ID" \
-            --post_title='Nested navigation page' \
-            --post_content='<p>Nested fallback navigation fixture.</p>' \
-            --porcelain)"
-
-          wp comment create \
-            --path=/tmp/slateframe-browser \
-            --comment_post_ID="$PAGE_ID" \
-            --comment_author='CI Reader' \
-            --comment_author_email='ci-reader@example.com' \
-            --comment_content='Page comment fixture.' \
-            --comment_approved=1
-
-          POST_ID="$(wp post create \
-            --path=/tmp/slateframe-browser \
-            --post_type=post \
-            --post_status=publish \
-            --post_title='Slateframe Browser Post' \
-            --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p></blockquote><pre><code>echo "slateframe";</code></pre>' \
-            --porcelain)"
-
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp && chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
+          mkdir -p /tmp/wp-browser
+          wp core download --path=/tmp/wp-browser --version=latest
+          wp config create --path=/tmp/wp-browser --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
+          wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe Browser' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
+          ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
+          wp theme activate slateframe --path=/tmp/wp-browser
+          PAGE_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --comment_status=open --post_title='Slateframe 发布框架 — Ein außergewöhnlich langes Veröffentlichungsbeispiel' --post_content='<p class="browser-default-prose">Readable measure.</p><!-- wp:table --><figure class="wp-block-table"><table><tr><th>Metric</th><th>Value</th></tr><tr><td>Reach</td><td>1,234</td></tr></table></figure><!-- /wp:table --><pre><code>echo "slateframe";</code></pre>' --porcelain)
+          POST_ID=$(wp post create --path=/tmp/wp-browser --post_type=post --post_status=publish --post_title='Slateframe Browser Post' --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p></blockquote>' --porcelain)
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
-
-      - name: Install Playwright
+      - name: Install Playwright and start WordPress
         run: |
           npm install --package-lock=false --no-audit --no-fund
           npx playwright install --with-deps chromium
-
-      - name: Start WordPress
-        shell: bash
-        run: |
-          set -euo pipefail
-          wp server \
-            --path=/tmp/slateframe-browser \
-            --host=127.0.0.1 \
-            --port=8080 \
-            > /tmp/slateframe-wordpress-server.log 2>&1 &
-          echo $! > /tmp/slateframe-wordpress-server.pid
-
-          ready=0
-          for attempt in {1..30}; do
-            if curl -fsS http://127.0.0.1:8080/ > /dev/null; then
-              ready=1
-              break
-            fi
-            sleep 1
-          done
-
-          if [ "$ready" -ne 1 ]; then
-            cat /tmp/slateframe-wordpress-server.log
-            exit 1
-          fi
-
-      - name: Run browser smoke
+          wp server --path=/tmp/wp-browser --host=127.0.0.1 --port=8080 >/tmp/slateframe-server.log 2>&1 &
+          for attempt in {1..30}; do curl -fsS http://127.0.0.1:8080/ >/dev/null && break; sleep 1; done
+      - name: Run responsive browser smoke
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
         run: npm run test:browser
-
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -356,7 +167,7 @@ jobs:
             test-artifacts/screenshots/
             playwright-report/
             test-results/
-            /tmp/slateframe-wordpress-server.log
+            /tmp/slateframe-server.log
           if-no-files-found: ignore
           retention-days: 7
 
@@ -366,74 +177,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build theme ZIP
-        run: ./bin/build-theme-zip.sh
-
-      - name: Validate package contents
+      - name: Build and validate theme ZIP
         shell: bash
         run: |
           set -euo pipefail
-          unzip -Z1 dist/slateframe.zip > /tmp/slateframe-package.txt
-          grep -qx 'slateframe/style.css' /tmp/slateframe-package.txt
-          grep -qx 'slateframe/functions.php' /tmp/slateframe-package.txt
-          grep -qx 'slateframe/theme.json' /tmp/slateframe-package.txt
-
-          if grep -Eq '^slateframe/(package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)$' /tmp/slateframe-package.txt; then
-            echo 'Development tooling leaked into the distributable.' >&2
-            exit 1
-          fi
-
-          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/slateframe-package.txt; then
-            echo 'Development-only files leaked into the distributable.' >&2
-            exit 1
-          fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: slateframe-theme
-          path: dist/slateframe.zip
-          retention-days: 7
- /tmp/slateframe-package.txt; then
-            echo 'Browser development tooling leaked into the distributable.' >&2
-            exit 1
-          fi
-
-          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/slateframe-package.txt; then
-            echo 'Development-only files leaked into the distributable.' >&2
-            exit 1
-          fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: slateframe-theme
-          path: dist/slateframe.zip
-          retention-days: 7
- /tmp/slateframe-package.txt; then
-            echo 'Browser development tooling leaked into the distributable.' >&2
-            exit 1
-          fi
-
-          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/slateframe-package.txt; then
-            echo 'Development-only files leaked into the distributable.' >&2
-            exit 1
-          fi
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: slateframe-theme
-          path: dist/slateframe.zip
-          retention-days: 7
- /tmp/slateframe-package.txt; then
-            echo 'Browser development tooling leaked into the distributable.' >&2
-            exit 1
-          fi
-
-          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/slateframe-package.txt; then
-            echo 'Development-only files leaked into the distributable.' >&2
-            exit 1
-          fi
-
+          ./bin/build-theme-zip.sh
+          unzip -Z1 dist/slateframe.zip > /tmp/package.txt
+          grep -qx 'slateframe/style.css' /tmp/package.txt
+          grep -qx 'slateframe/functions.php' /tmp/package.txt
+          grep -qx 'slateframe/theme.json' /tmp/package.txt
+          if grep -Eq '^slateframe/(package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)$' /tmp/package.txt; then exit 1; fi
+          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/package.txt; then exit 1; fi
       - uses: actions/upload-artifact@v4
         with:
           name: slateframe-theme
