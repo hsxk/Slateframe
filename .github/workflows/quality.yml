@@ -104,8 +104,21 @@ jobs:
         run: |
           mkdir -p /tmp/slateframe-wordpress
           wp core download --path=/tmp/slateframe-wordpress --version=latest
-          wp config create             --path=/tmp/slateframe-wordpress             --dbname=wordpress             --dbuser=root             --dbpass=root             --dbhost=127.0.0.1:3306             --skip-check
-          wp core install             --path=/tmp/slateframe-wordpress             --url=https://slateframe.test             --title=Slateframe             --admin_user=admin             --admin_password='slateframe-ci-password'             --admin_email=ci@example.com             --skip-email
+          wp config create \
+            --path=/tmp/slateframe-wordpress \
+            --dbname=wordpress \
+            --dbuser=root \
+            --dbpass=root \
+            --dbhost=127.0.0.1:3306 \
+            --skip-check
+          wp core install \
+            --path=/tmp/slateframe-wordpress \
+            --url=https://slateframe.test \
+            --title=Slateframe \
+            --admin_user=admin \
+            --admin_password='slateframe-ci-password' \
+            --admin_email=ci@example.com \
+            --skip-email
 
       - name: Install and activate Slateframe
         run: |
@@ -120,3 +133,32 @@ jobs:
           wp post create --path=/tmp/slateframe-wordpress --post_type=post --post_status=publish --post_title='Slateframe smoke post' --post_content='<h2>Heading</h2><p>Paragraph.</p><pre><code>echo "test";</code></pre><table><tr><th>Key</th><th>Value</th></tr><tr><td>A</td><td>B</td></tr></table>'
           wp post create --path=/tmp/slateframe-wordpress --post_type=page --post_status=publish --post_title='Slateframe smoke page' --post_content='<p>Page content.</p>'
           wp eval 'foreach ( array( "index.php", "single.php", "page.php", "archive.php", "search.php", "404.php", "comments.php" ) as $file ) { if ( ! file_exists( get_template_directory() . "/" . $file ) ) { throw new RuntimeException( "Missing template: " . $file ); } } echo "Template smoke checks passed.\n";' --path=/tmp/slateframe-wordpress
+
+  package:
+    name: Build distributable
+    needs: [static, wordpress-smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build theme ZIP
+        run: ./bin/build-theme-zip.sh
+
+      - name: Validate package contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -Z1 dist/slateframe.zip > /tmp/slateframe-package.txt
+          grep -qx 'slateframe/style.css' /tmp/slateframe-package.txt
+          grep -qx 'slateframe/functions.php' /tmp/slateframe-package.txt
+          grep -qx 'slateframe/theme.json' /tmp/slateframe-package.txt
+          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist)/' /tmp/slateframe-package.txt; then
+            echo 'Development-only files leaked into the distributable.' >&2
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: slateframe-theme
+          path: dist/slateframe.zip
+          retention-days: 7
