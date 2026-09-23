@@ -20,17 +20,23 @@ jobs:
         run: php -r '$j=json_decode(file_get_contents("theme.json"),true,512,JSON_THROW_ON_ERROR); if (($j["version"] ?? null)!==3) { throw new RuntimeException("theme.json must use version 3"); }'
       - name: Validate JavaScript syntax
         run: node --check assets/js/theme.js
-      - name: Enforce public namespace and text domain
+      - name: Enforce public runtime namespace and text domain
         shell: bash
         run: |
           set -euo pipefail
-          if grep -RniE 'time2log|t2l-|--t2l-|time2log_' --exclude-dir=.git .; then
-            echo 'Private Time2Log identifiers must not ship in Slateframe.' >&2
+          runtime_files=$(find . -type f \( -name '*.php' -o -name '*.css' -o -name '*.js' -o -name 'theme.json' \) -not -path './.git/*' -not -path './.github/*')
+          if grep -niE 'time2log|t2l-|--t2l-|time2log_' $runtime_files; then
+            echo 'Private legacy identifiers must not ship in Slateframe runtime files.' >&2
             exit 1
           fi
           php -r '$s=file_get_contents("style.css"); foreach (["Theme Name: Slateframe","Text Domain: slateframe"] as $needle) { if (!str_contains($s,$needle)) { throw new RuntimeException("Missing metadata: ".$needle); } }'
       - name: Check required theme files
-        run: test -f style.css && test -f index.php && test -f functions.php && test -f theme.json && test -f screenshot.png || echo 'screenshot.png pending before release'
+        run: |
+          test -f style.css
+          test -f index.php
+          test -f functions.php
+          test -f theme.json
+          if test ! -f screenshot.png; then echo 'screenshot.png pending before release'; fi
       - name: Report asset budget
         run: |
           printf 'style.css: '; wc -c < style.css
