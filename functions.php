@@ -86,7 +86,7 @@ function slateframe_content_modes_needed() {
 	);
 
 	foreach ( $markers as $marker ) {
-		if ( str_contains( $post->post_content, $marker ) ) {
+		if ( false !== strpos( $post->post_content, $marker ) ) {
 			return true;
 		}
 	}
