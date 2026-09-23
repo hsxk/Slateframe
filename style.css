@@ -223,6 +223,7 @@ textarea {
 	line-height: 1.06;
 	letter-spacing: -0.05em;
 	overflow-wrap: anywhere;
+	hyphens: auto;
 	text-wrap: balance;
 }
 
@@ -307,7 +308,7 @@ textarea {
 }
 
 .slateframe-prose blockquote {
-	margin-inline: 0;
+	margin-inline: auto;
 	padding-inline-start: 1.2rem;
 	border-inline-start: 3px solid var(--slateframe-accent);
 	color: var(--slateframe-muted);
@@ -911,5 +912,27 @@ textarea {
 		padding-inline: 0 0;
 		margin-inline-start: 0.7rem;
 		border-inline-start: 1px solid var(--slateframe-border);
+	}
+}
+
+
+@media (min-width: 901px) {
+	.slateframe-primary-nav > ul > li > a,
+	.slateframe-primary-nav > .slateframe-menu-fallback > li > a {
+		max-inline-size: 24ch;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+@media (max-width: 480px) {
+	.slateframe-page-title,
+	.slateframe-entry-title {
+		max-width: none;
+		font-size: clamp(1.8rem, 7.2vw, 2.4rem);
+		line-height: 1.08;
+		letter-spacing: -0.04em;
+		text-wrap: pretty;
 	}
 }

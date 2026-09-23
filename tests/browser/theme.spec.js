@@ -182,6 +182,26 @@ test('reduced-motion preference disables smooth scrolling', async ({ page }) => 
 	expect(scrollBehavior).toBe('auto');
 });
 
+test('blockquote remains on the prose reading axis', async ({ page }) => {
+	await page.goto(postPath, { waitUntil: 'networkidle' });
+
+	const axes = await page.evaluate(() => {
+		const paragraph = document.querySelector('.slateframe-prose > p');
+		const quote = document.querySelector('.slateframe-prose > blockquote');
+
+		if (!paragraph || !quote) {
+			throw new Error('Reading-axis fixtures are missing.');
+		}
+
+		return {
+			paragraphLeft: paragraph.getBoundingClientRect().left,
+			quoteLeft: quote.getBoundingClientRect().left,
+		};
+	});
+
+	expect(Math.abs(axes.paragraphLeft - axes.quoteLeft)).toBeLessThanOrEqual(1);
+});
+
 test('wide and full blocks can leave the prose measure', async ({ page }, testInfo) => {
 	test.skip(projectWidth(testInfo) < 1000, 'Width comparison requires a desktop reading canvas.');
 
