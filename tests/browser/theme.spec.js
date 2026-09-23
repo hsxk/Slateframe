@@ -22,15 +22,33 @@ function watchRuntime(page) {
 	return failures;
 }
 
-async function expectNoHorizontalOverflow(page) {
-	const dimensions = await page.evaluate(() => ({
-		clientWidth: document.documentElement.clientWidth,
-		scrollWidth: document.documentElement.scrollWidth,
-	}));
+async function expectNoHorizontalOverflow(page, route = page.url()) {
+	const dimensions = await page.evaluate(() => {
+		const clientWidth = document.documentElement.clientWidth;
+		const offenders = [...document.querySelectorAll('body *')]
+			.map((element) => {
+				const rect = element.getBoundingClientRect();
+				return {
+					tag: element.tagName.toLowerCase(),
+					className: typeof element.className === 'string' ? element.className : '',
+					left: Math.round(rect.left * 10) / 10,
+					right: Math.round(rect.right * 10) / 10,
+					width: Math.round(rect.width * 10) / 10,
+				};
+			})
+			.filter((item) => item.left < -1 || item.right > clientWidth + 1)
+			.slice(0, 8);
+
+		return {
+			clientWidth,
+			scrollWidth: document.documentElement.scrollWidth,
+			offenders,
+		};
+	});
 
 	expect(
 		dimensions.scrollWidth,
-		`scrollWidth ${dimensions.scrollWidth}px should not exceed clientWidth ${dimensions.clientWidth}px`
+		`${route}: scrollWidth ${dimensions.scrollWidth}px should not exceed clientWidth ${dimensions.clientWidth}px; offenders: ${JSON.stringify(dimensions.offenders)}`
 	).toBeLessThanOrEqual(dimensions.clientWidth + 1);
 }
 
@@ -42,7 +60,7 @@ test('core routes render without theme runtime failures', async ({ page }) => {
 		failures.length = 0;
 		await page.goto(route, { waitUntil: 'networkidle' });
 		await expect(page.locator('#main-content')).toBeVisible();
-		await expectNoHorizontalOverflow(page);
+		await expectNoHorizontalOverflow(page, route);
 		expect(failures, `runtime failures on ${route}`).toEqual([]);
 	}
 });
@@ -70,7 +88,7 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 		await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
 	}
 
-	await expectNoHorizontalOverflow(page);
+	await expectNoHorizontalOverflow(page, '/');
 	expect(failures).toEqual([]);
 });
 

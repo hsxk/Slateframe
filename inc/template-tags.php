@@ -99,7 +99,8 @@ function slateframe_pagination() {
 function slateframe_menu_fallback() {
 	wp_page_menu(
 		array(
-			'menu_class' => 'slateframe-fallback-menu',
+			'container'  => false,
+			'menu_class' => 'slateframe-menu-fallback',
 			'show_home'  => true,
 		)
 	);
