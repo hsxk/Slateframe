@@ -388,14 +388,7 @@ jobs:
           grep -qx 'slateframe/theme.json' /tmp/package.txt
           grep -qx 'slateframe/screenshot.png' /tmp/package.txt
           php -r '$size=getimagesize("dist/slateframe/screenshot.png"); if (!$size || $size[0] !== 1200 || $size[1] !== 900) { throw new RuntimeException("screenshot.png must be 1200x900"); }'
-          if grep -Eq '^slateframe/(README\.md|package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)
-          if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/package.txt; then exit 1; fi
-      - uses: actions/upload-artifact@v4
-        with:
-          name: slateframe-theme
-          path: dist/slateframe.zip
-          retention-days: 7
- /tmp/package.txt; then exit 1; fi
+          if grep -Eq '^slateframe/(README\.md|package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)$' /tmp/package.txt; then exit 1; fi
           if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/package.txt; then exit 1; fi
       - uses: actions/upload-artifact@v4
         with:
