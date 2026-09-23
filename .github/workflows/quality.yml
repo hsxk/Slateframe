@@ -360,6 +360,17 @@ jobs:
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p></blockquote>' \
             --porcelain)
 
+          for project_index in 1 2 3 4 5 6; do
+            wp post create \
+              --path=/tmp/wp-browser \
+              --post_type=post \
+              --post_status=publish \
+              --post_title="Portable project fixture ${project_index}" \
+              --post_excerpt="A site-neutral project summary for responsive Query Loop coverage." \
+              --post_content="<p>Project fixture ${project_index} keeps the theme independent from custom content models.</p>" \
+              >/dev/null
+          done
+
           wp comment create \
             --path=/tmp/wp-browser \
             --comment_post_ID="$PAGE_ID" \
