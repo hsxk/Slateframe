@@ -20,6 +20,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
+- **Contextual content-mode CSS:** photography, portfolio, and knowledge presentation is split from the base stylesheet and loaded only when relevant blocks appear on singular content.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
 ## Current feature set
@@ -35,7 +36,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships eight site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
+Slateframe currently ships eleven site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
@@ -45,8 +46,11 @@ Slateframe currently ships eight site-neutral starter patterns across publishing
 6. **Photography contact sheet** — mixed portrait/landscape imagery without forced cropping.
 7. **Portfolio index** — project summaries organized as an editorial ledger rather than a card grid.
 8. **Knowledge outline** — prerequisites, outcomes, and a numbered learning sequence.
+9. **Photography feature** — a single natural-ratio image with restrained editorial context.
+10. **Project brief** — context, role, constraints, and outcome without a custom content type.
+11. **Lesson chapter** — objective, practice sequence, and explicit continuation for educational content.
 
-Block styles add editorial notes, framed images, photo sequences, contact sheets, project features, learning paths, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
+Block styles add editorial notes, framed images, photo sequences, contact sheets, photography features, project features/briefs, learning paths/callouts, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 
 ### Navigation and multilingual readiness
 

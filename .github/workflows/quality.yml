@@ -47,17 +47,18 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           patterns=(patterns/*.php)
-          test "${#patterns[@]}" -ge 8
+          test "${#patterns[@]}" -ge 11
           for file in "${patterns[@]}"; do
             grep -q '^ \* Title:' "$file"
             grep -q '^ \* Slug: slateframe/' "$file"
             grep -q '^ \* Categories:.*slateframe' "$file"
           done
-          for file in style.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php package.json playwright.config.js tests/browser/theme.spec.js phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php package.json playwright.config.js tests/browser/theme.spec.js phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/editor.css assets/js/theme.js
-          test $(wc -c < style.css) -le 24000
+          wc -c style.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
+          test $(wc -c < style.css) -le 22000
+          test $(wc -c < assets/css/content-modes.css) -le 6500
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
 
@@ -223,8 +224,8 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-site
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
-          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/project-case-study","slateframe/portfolio-index","slateframe/learning-path","slateframe/knowledge-outline","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
-          wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/columns","slateframe-ledger"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
+          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
+          wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/image","slateframe-photo-feature"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/columns","slateframe-ledger"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
 
   browser-smoke:
     name: Browser smoke
@@ -262,6 +263,14 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
           wp option update thread_comments 1 --path=/tmp/wp-browser
+          mkdir -p /tmp/wp-browser/wp-content/uploads/slateframe-fixtures
+          cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#dfe6df"/><path d="M0 650L500 260l330 250 230-180 540 420v150H0z" fill="#63756c"/><circle cx="1250" cy="220" r="88" fill="#f7f7f4"/></svg>
+          SVG
+          cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg <<'SVG'
+          <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1350" viewBox="0 0 900 1350"><rect width="900" height="1350" fill="#e6e2d8"/><path d="M0 1030L260 530l170 240 180-360 290 520v420H0z" fill="#6e675d"/><circle cx="245" cy="260" r="72" fill="#f7f7f4"/></svg>
+          SVG
+
           cat > /tmp/slateframe-browser-page.html <<'HTML'
           <!-- wp:paragraph {"className":"browser-default-prose"} -->
           <p class="browser-default-prose">Readable measure for Latin, 中文，以及長い日本語の文章。</p>
@@ -345,6 +354,13 @@ jobs:
             --comment_content='Page comment fixture.' \
             --comment_approved=1
 
+          PHOTO_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Photography Fixture' --post_content='<!-- wp:group {"align":"wide","className":"slateframe-pattern slateframe-photography-feature"} --><div class="wp-block-group alignwide slateframe-pattern slateframe-photography-feature"><!-- wp:image {"className":"browser-photo-feature is-style-slateframe-photo-feature"} --><figure class="wp-block-image browser-photo-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Landscape fixture"><figcaption>Landscape fixture caption</figcaption></figure><!-- /wp:image --><!-- wp:gallery {"className":"browser-photo-gallery is-style-slateframe-contact-sheet"} --><figure class="wp-block-gallery has-nested-images columns-2 browser-photo-gallery is-style-slateframe-contact-sheet"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide landscape fixture"><figcaption>Wide frame</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Tall portrait fixture"><figcaption>Portrait frame</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery --></div><!-- /wp:group -->' --porcelain)
+          PROJECT_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Portfolio Fixture' --post_content='<!-- wp:group {"className":"browser-project-brief is-style-slateframe-project-brief"} --><div class="wp-block-group browser-project-brief is-style-slateframe-project-brief"><!-- wp:heading {"level":2} --><h2 class="wp-block-heading">Project brief</h2><!-- /wp:heading --><!-- wp:columns --><div class="wp-block-columns"><!-- wp:column --><div class="wp-block-column"><p>Context for a portable project page.</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><p>Role and constraints.</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><p>Outcome and next step.</p></div><!-- /wp:column --></div><!-- /wp:columns --><p><a href="https://example.com/a-very-long-project-reference-without-site-specific-assumptions-and-with-a-long-readable-path">Long project reference</a></p></div><!-- /wp:group -->' --porcelain)
+          KNOWLEDGE_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Knowledge Fixture — 中文とالعربية long-string validation' --post_content='<!-- wp:group {"className":"browser-learning-callout is-style-slateframe-learning-callout"} --><div class="wp-block-group browser-learning-callout is-style-slateframe-learning-callout" dir="rtl"><h2>مسار تعلم مرن</h2><p>هذا مثال طويل لاختبار اتجاه الكتابة والتخطيط المنطقي دون افتراض لغة أو إضافة متعددة اللغات.</p></div><!-- /wp:group --><!-- wp:list {"ordered":true,"className":"browser-rtl-steps is-style-slateframe-steps"} --><ol class="browser-rtl-steps is-style-slateframe-steps" dir="rtl"><li>افهم الفكرة الأساسية.</li><li>طبّقها على مثال عملي.</li><li>اربط النتيجة بالخطوة التالية.</li></ol><!-- /wp:list -->' --porcelain)
+
+          echo "SLATEFRAME_PHOTO_PATH=/?page_id=$PHOTO_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_PROJECT_PATH=/?page_id=$PROJECT_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_KNOWLEDGE_PATH=/?page_id=$KNOWLEDGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress

@@ -24,7 +24,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/content-modes.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -59,12 +59,46 @@ function slateframe_setup() {
 add_action( 'after_setup_theme', 'slateframe_setup' );
 
 /**
+ * Determine whether the current singular document needs content-mode styles.
+ *
+ * @return bool
+ */
+function slateframe_content_modes_needed() {
+	if ( ! is_singular() ) {
+		return false;
+	}
+
+	$post = get_post();
+
+	if ( ! $post instanceof WP_Post ) {
+		return false;
+	}
+
+	foreach ( array( 'core/gallery', 'core/image', 'core/list', 'core/group', 'core/columns', 'core/table', 'core/details' ) as $block_name ) {
+		if ( has_block( $block_name, $post ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
  * Enqueue the intentionally small frontend asset layer.
  */
 function slateframe_assets() {
 	$version = wp_get_theme()->get( 'Version' );
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
+
+	if ( slateframe_content_modes_needed() ) {
+		wp_enqueue_style(
+			'slateframe-content-modes',
+			get_template_directory_uri() . '/assets/css/content-modes.css',
+			array( 'slateframe-style' ),
+			$version
+		);
+	}
 
 	if ( is_singular() && ( comments_open() || get_comments_number() ) ) {
 		wp_enqueue_style(
@@ -161,9 +195,12 @@ function slateframe_register_block_styles() {
 		array( 'core/table', 'slateframe-data', __( 'Data table', 'slateframe' ) ),
 		array( 'core/details', 'slateframe-disclosure', __( 'Editorial disclosure', 'slateframe' ) ),
 		array( 'core/gallery', 'slateframe-contact-sheet', __( 'Contact sheet', 'slateframe' ) ),
+		array( 'core/image', 'slateframe-photo-feature', __( 'Photography feature', 'slateframe' ) ),
 		array( 'core/list', 'slateframe-steps', __( 'Numbered steps', 'slateframe' ) ),
 		array( 'core/list', 'slateframe-checklist', __( 'Editorial checklist', 'slateframe' ) ),
 		array( 'core/group', 'slateframe-key-facts', __( 'Key facts', 'slateframe' ) ),
+		array( 'core/group', 'slateframe-project-brief', __( 'Project brief', 'slateframe' ) ),
+		array( 'core/group', 'slateframe-learning-callout', __( 'Learning callout', 'slateframe' ) ),
 		array( 'core/columns', 'slateframe-ledger', __( 'Editorial ledger', 'slateframe' ) ),
 	);
 

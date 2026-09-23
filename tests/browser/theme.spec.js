@@ -4,6 +4,9 @@ const { test, expect } = require('@playwright/test');
 
 const postPath = process.env.SLATEFRAME_POST_PATH || '/';
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
+const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
+const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
+const knowledgePath = process.env.SLATEFRAME_KNOWLEDGE_PATH || pagePath;
 
 function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
@@ -58,7 +61,7 @@ async function expectNoHorizontalOverflow(page, route = page.url()) {
 
 test('core routes render without theme runtime failures', async ({ page }) => {
 	const failures = watchRuntime(page);
-	const routes = ['/', postPath, pagePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
+	const routes = ['/', postPath, pagePath, photoPath, projectPath, knowledgePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
 
 	for (const route of routes) {
 		failures.length = 0;
@@ -277,5 +280,56 @@ test('capture responsive reference screenshots', async ({ page }, testInfo) => {
 			path: path.join(screenshotDir, `${testInfo.project.name}-${name}.png`),
 			fullPage: true,
 		});
+	}
+});
+
+
+test('photography fixtures preserve natural image proportions and captions', async ({ page }) => {
+	await page.goto(photoPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.browser-photo-feature img')).toBeVisible();
+	await expect(page.locator('.browser-photo-gallery figcaption')).toHaveCount(2);
+	const ratios = await page.evaluate(() => {
+		const read = (selector) => {
+			const image = document.querySelector(selector);
+			const rect = image.getBoundingClientRect();
+			return { ratio: rect.width / rect.height, fit: getComputedStyle(image).objectFit };
+		};
+		return {
+			landscape: read('.browser-photo-gallery img[alt="Wide landscape fixture"]'),
+			portrait: read('.browser-photo-gallery img[alt="Tall portrait fixture"]'),
+			feature: read('.browser-photo-feature img'),
+		};
+	});
+	expect(ratios.landscape.ratio).toBeGreaterThan(1.5);
+	expect(ratios.portrait.ratio).toBeLessThan(0.8);
+	expect(ratios.landscape.fit).toBe('contain');
+	expect(ratios.portrait.fit).toBe('contain');
+	expect(ratios.feature.fit).toBe('contain');
+	await expectNoHorizontalOverflow(page, photoPath);
+});
+
+test('portfolio brief keeps long references contained', async ({ page }) => {
+	await page.goto(projectPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.browser-project-brief')).toBeVisible();
+	await expect(page.locator('.browser-project-brief a')).toBeVisible();
+	await expectNoHorizontalOverflow(page, projectPath);
+});
+
+test('knowledge callouts respect RTL direction and logical layout', async ({ page }) => {
+	await page.goto(knowledgePath, { waitUntil: 'networkidle' });
+	const callout = page.locator('.browser-learning-callout');
+	await expect(callout).toHaveAttribute('dir', 'rtl');
+	expect(await callout.evaluate((element) => getComputedStyle(element).direction)).toBe('rtl');
+	await expect(page.locator('.browser-rtl-steps li')).toHaveCount(3);
+	await expectNoHorizontalOverflow(page, knowledgePath);
+});
+
+test('capture content-mode showcase screenshots', async ({ page }, testInfo) => {
+	test.skip(![390, 1440].includes(projectWidth(testInfo)), 'Representative mobile and desktop screenshots only.');
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	for (const [name, route] of [['photography', photoPath], ['portfolio', projectPath], ['knowledge', knowledgePath]]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.screenshot({ path: path.join(screenshotDir, `${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
 });

@@ -29,6 +29,10 @@ All notable changes to Slateframe will be documented here.
 
 - Classic WordPress alignment, caption, sticky-post, and post-author compatibility styling.
 - Threaded comment-reply script loading on singular discussions only.
+- Contextual content-mode stylesheet so photography, portfolio, and knowledge presentation does not inflate base archive/navigation CSS.
+- Photography feature, project brief, and lesson chapter patterns with matching block styles.
+- Real browser fixtures for mixed-orientation photography, long portfolio references, and RTL/CJK knowledge content.
+- Representative 390px and 1440px showcase screenshots for photography, portfolio, and knowledge pages.
 
 ### Changed
 
