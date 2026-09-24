@@ -27,13 +27,17 @@ test('photography images preserve intrinsic dimensions for layout stability', as
 	}
 });
 
-test('photography images expose responsive candidates without viewport overflow', async ({ page }) => {
+test('photography media stays responsive without viewport overflow', async ({ page }) => {
 	await openPhotography(page);
 	const images = page.locator('#main-content img');
 	const data = await images.evaluateAll((nodes) => nodes.map((image) => {
 		const rect = image.getBoundingClientRect();
+		const source = new URL(image.currentSrc || image.src, document.baseURI);
 		return {
 			srcset: image.getAttribute('srcset') || '',
+			sizes: image.getAttribute('sizes') || '',
+			currentSrc: image.currentSrc || '',
+			isVector: source.pathname.toLowerCase().endsWith('.svg'),
 			left: rect.left,
 			right: rect.right,
 			viewport: document.documentElement.clientWidth,
@@ -41,7 +45,13 @@ test('photography images expose responsive candidates without viewport overflow'
 	}));
 
 	for (const image of data) {
-		expect(image.srcset).not.toBe('');
+		expect(image.currentSrc).not.toBe('');
+		// Raster attachments should expose WordPress responsive candidates. Vector
+		// fixtures are resolution-independent and intentionally need no srcset.
+		if (!image.isVector) {
+			expect(image.srcset).not.toBe('');
+			expect(image.sizes).not.toBe('');
+		}
 		expect(image.left).toBeGreaterThanOrEqual(-1);
 		expect(image.right).toBeLessThanOrEqual(image.viewport + 1);
 	}
