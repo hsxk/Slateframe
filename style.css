@@ -30,12 +30,9 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 	--slateframe-space-scale: 1;
 	--slateframe-gutter-min: 16px;
 	--slateframe-section-scale: 1;
-	--slateframe-space-1: calc(0.25rem * var(--slateframe-space-scale));
 	--slateframe-space-2: calc(0.5rem * var(--slateframe-space-scale));
 	--slateframe-space-3: calc(0.75rem * var(--slateframe-space-scale));
 	--slateframe-space-4: calc(1rem * var(--slateframe-space-scale));
-	--slateframe-space-5: calc(1.5rem * var(--slateframe-space-scale));
-	--slateframe-space-6: calc(2rem * var(--slateframe-space-scale));
 	--slateframe-gutter: clamp(var(--slateframe-gutter-min), 3vw, calc(var(--slateframe-gutter-min) * 2));
 	--slateframe-section: calc(clamp(2.75rem, 5vw, 4.5rem) * var(--slateframe-section-scale));
 	--slateframe-radius: 12px;
@@ -86,18 +83,6 @@ textarea {
 	font: inherit;
 }
 
-:where(button, input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
-	border-radius: var(--slateframe-radius);
-}
-
-:where(button, input[type="button"], input[type="submit"], input[type="reset"], select) {
-	min-block-size: var(--slateframe-control);
-}
-
-:where(input:not([type="checkbox"]):not([type="radio"]), select, textarea) {
-	padding-block: var(--slateframe-space-2);
-	padding-inline: var(--slateframe-space-3);
-}
 
 :focus-visible {
 	outline: 3px solid var(--slateframe-focus);
