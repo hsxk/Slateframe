@@ -13,8 +13,8 @@
 <!-- wp:paragraph --><p><?php echo esc_html_x( 'Add three to five images and captions to tell one deliberate visual story.', 'Pattern introduction', 'slateframe' ); ?></p><!-- /wp:paragraph -->
 <!-- wp:gallery {"linkTo":"none","sizeSlug":"large","columns":2,"imageCrop":false,"className":"slateframe-gallery-sequence is-style-slateframe-photo-sequence"} -->
 <figure class="wp-block-gallery has-nested-images columns-2 is-cropped-false slateframe-gallery-sequence is-style-slateframe-photo-sequence">
-<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} /-->
-<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} /-->
-<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} /-->
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
 </figure><!-- /wp:gallery -->
 </div><!-- /wp:group -->
