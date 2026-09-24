@@ -62,6 +62,16 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
 	}
+
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const commentInput = page.locator('.slateframe-comments .comment-form-author input').first();
+	const commentTextarea = page.locator('.slateframe-comments textarea').first();
+	await expect(commentInput).toBeVisible();
+	await expect(commentTextarea).toBeVisible();
+	expect((await commentInput.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	for (const field of [commentInput, commentTextarea]) {
+		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	}
 });
 
 test('appearance profile stays contained across content modes and captures review evidence', async ({ page }, testInfo) => {

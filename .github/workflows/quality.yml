@@ -241,6 +241,30 @@ jobs:
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
           wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/photography-sequence","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/project-outcomes","slateframe/portfolio-project-grid","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/knowledge-definition","slateframe/knowledge-checklist","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
+      - name: Validate bounded Appearance settings
+        shell: bash
+        run: |
+          wp eval '
+            $values = array(
+              "slateframe_control_size" => array(20, 44.0),
+              "slateframe_spacing_scale" => array(9, 1.2),
+              "slateframe_gutter_size" => array(5, 14.0),
+              "slateframe_section_scale" => array(9, 1.2),
+              "slateframe_radius_size" => array(99, 16.0),
+              "slateframe_content_width" => array(400, 640.0),
+              "slateframe_wide_width" => array(2000, 1280.0),
+            );
+            foreach ($values as $id => $fixture) {
+              set_theme_mod($id, $fixture[0]);
+              if (abs(slateframe_layout_value($id) - $fixture[1]) > 0.0001) {
+                throw new RuntimeException("Appearance bound failed: " . $id);
+              }
+              remove_theme_mod($id);
+            }
+            if (7 !== count(slateframe_layout_control_definitions())) {
+              throw new RuntimeException("Appearance control registry drifted.");
+            }
+          ' --path=/tmp/wp-site
 
   browser-smoke:
     name: Browser smoke
