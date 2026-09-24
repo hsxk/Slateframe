@@ -9,6 +9,21 @@ async function openRasterPhotography(page) {
 	await expect(page.locator('#main-content')).toBeVisible();
 }
 
+async function openLightbox(page, activation = 'click') {
+	const trigger = page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
+	await expect(trigger).toBeVisible();
+	if (activation === 'keyboard') {
+		await trigger.focus();
+		await expect(trigger).toBeFocused();
+		await page.keyboard.press('Enter');
+	} else {
+		await trigger.click();
+	}
+	const dialog = page.locator('[role="dialog"]').last();
+	await expect(dialog).toBeVisible();
+	return { trigger, dialog, enlarged: dialog.locator('img[sizes="100vw"]').last() };
+}
+
 function seconds(value) {
 	return value.split(',').map((duration) => {
 		const item = duration.trim();
@@ -46,14 +61,7 @@ test('raster candidate selection remains appropriate for the rendered viewport',
 
 test('native lightbox opens from keyboard and exposes responsive enlarged media', async ({ page }) => {
 	await openRasterPhotography(page);
-	const trigger = page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
-	await expect(trigger).toBeVisible();
-	await trigger.focus();
-	await expect(trigger).toBeFocused();
-	await page.keyboard.press('Enter');
-	const dialog = page.locator('[role="dialog"]').last();
-	await expect(dialog).toBeVisible();
-	const enlarged = dialog.locator('img[sizes="100vw"]').last();
+	const { enlarged } = await openLightbox(page, 'keyboard');
 	await expect(enlarged).toBeVisible();
 	const media = await enlarged.evaluate((node) => ({ srcset: node.getAttribute('srcset') || '', currentSrc: node.currentSrc || '' }));
 	expect(media.srcset.split(',').length).toBeGreaterThanOrEqual(2);
@@ -62,38 +70,29 @@ test('native lightbox opens from keyboard and exposes responsive enlarged media'
 
 test('native lightbox closes with Escape and restores focus', async ({ page }) => {
 	await openRasterPhotography(page);
-	const trigger = page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
-	await trigger.focus();
-	await page.keyboard.press('Enter');
-	const dialog = page.locator('[role="dialog"]').last();
-	await expect(dialog).toBeVisible();
+	const { trigger, dialog, enlarged } = await openLightbox(page, 'keyboard');
+	await expect(enlarged).toBeVisible();
+	await dialog.focus();
+	await expect(dialog).toBeFocused();
 	await page.keyboard.press('Escape');
 	await expect(dialog).toBeHidden();
 	await expect(trigger).toBeFocused();
 });
 
-test('native lightbox enlarged media remains contained on narrow and wide viewports', async ({ page }) => {
+test('native lightbox enlarged media remains contained after its opening transition', async ({ page }) => {
 	await openRasterPhotography(page);
-	const trigger = page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
-	await trigger.click();
-	const dialog = page.locator('[role="dialog"]').last();
-	await expect(dialog).toBeVisible();
-	const enlarged = dialog.locator('img[sizes="100vw"]').last();
+	const { enlarged } = await openLightbox(page);
 	await expect(enlarged).toBeVisible();
-	const rect = await enlarged.evaluate((node) => { const box = node.getBoundingClientRect(); return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: innerWidth, height: innerHeight }; });
-	expect(rect.left).toBeGreaterThanOrEqual(-1);
-	expect(rect.right).toBeLessThanOrEqual(rect.width + 1);
-	expect(rect.top).toBeGreaterThanOrEqual(-1);
-	expect(rect.bottom).toBeLessThanOrEqual(rect.height + 1);
+	await expect.poll(async () => enlarged.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		return Math.max(0, -box.left, box.right - innerWidth, -box.top, box.bottom - innerHeight);
+	}), { message: 'enlarged media should settle fully inside the viewport' }).toBeLessThanOrEqual(1);
 });
 
 test('native lightbox honors reduced-motion preference', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await openRasterPhotography(page);
-	const trigger = page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
-	await trigger.click();
-	const dialog = page.locator('[role="dialog"]').last();
-	await expect(dialog).toBeVisible();
+	const { dialog } = await openLightbox(page);
 	const durations = await dialog.evaluate((node) => { const style = getComputedStyle(node); return { transition: style.transitionDuration, animation: style.animationDuration }; });
 	for (const duration of [...seconds(durations.transition), ...seconds(durations.animation)]) {
 		expect(duration).toBeLessThanOrEqual(0.01);
