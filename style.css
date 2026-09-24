@@ -885,6 +885,15 @@ textarea {
 	}
 }
 
+
+/* Keep WordPress Core's immersive image inside the dynamic viewport at every aspect ratio. */
+.wp-lightbox-overlay .wp-block-image > img {
+	max-inline-size: 100dvi;
+	max-block-size: 100dvb;
+	object-fit: contain;
+}
+
+
 /* WordPress classic-content compatibility. */
 .alignleft {
 	float: left;
