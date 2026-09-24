@@ -57,20 +57,25 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php package.json playwright.config.js tests/browser/theme.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css assets/css/navigation.css assets/css/comments.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
+          wc -c style.css assets/css/navigation.css assets/css/comments.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
           test $(wc -c < style.css) -le 20500
+          test $(wc -c < assets/css/navigation.css) -le 4000
+          test $(wc -c < assets/css/comments.css) -le 3000
           test $(wc -c < assets/css/content-modes.css) -le 12500
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
-          base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/js/theme.js) ))
-          contextual_css_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/content-modes.css) ))
-          echo "Base CSS+JS: ${base_runtime_bytes} bytes"
-          echo "Base+contextual CSS: ${contextual_css_bytes} bytes"
-          test "$base_runtime_bytes" -le 23000
-          test "$contextual_css_bytes" -le 33000
+          base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/js/theme.js) ))
+          discussion_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          contextual_css_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/css/content-modes.css) ))
+          echo "Base CSS+navigation+JS: ${base_runtime_bytes} bytes"
+          echo "Base+discussion runtime: ${discussion_runtime_bytes} bytes"
+          echo "Base+navigation+contextual CSS: ${contextual_css_bytes} bytes"
+          test "$base_runtime_bytes" -le 25000
+          test "$discussion_runtime_bytes" -le 28000
+          test "$contextual_css_bytes" -le 35000
 
   coding-standards:
     name: WordPress coding standards
@@ -411,6 +416,39 @@ jobs:
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
         run: npm run test:browser
+      - name: Verify compact Appearance bounds
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
+          SLATEFRAME_APPEARANCE_PROFILE: compact
+        run: |
+          wp theme mod set slateframe_control_size 44 --path=/tmp/wp-browser
+          wp theme mod set slateframe_spacing_scale 0.9 --path=/tmp/wp-browser
+          wp theme mod set slateframe_gutter_size 14 --path=/tmp/wp-browser
+          wp theme mod set slateframe_section_scale 0.85 --path=/tmp/wp-browser
+          wp theme mod set slateframe_radius_size 0 --path=/tmp/wp-browser
+          wp theme mod set slateframe_content_width 640 --path=/tmp/wp-browser
+          wp theme mod set slateframe_wide_width 1024 --path=/tmp/wp-browser
+          npx playwright test tests/browser/appearance.spec.js --project=viewport-390 --project=viewport-1440
+      - name: Verify spacious Appearance bounds
+        if: ${{ always() }}
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
+          SLATEFRAME_APPEARANCE_PROFILE: spacious
+        run: |
+          wp theme mod set slateframe_control_size 56 --path=/tmp/wp-browser
+          wp theme mod set slateframe_spacing_scale 1.2 --path=/tmp/wp-browser
+          wp theme mod set slateframe_gutter_size 28 --path=/tmp/wp-browser
+          wp theme mod set slateframe_section_scale 1.2 --path=/tmp/wp-browser
+          wp theme mod set slateframe_radius_size 16 --path=/tmp/wp-browser
+          wp theme mod set slateframe_content_width 800 --path=/tmp/wp-browser
+          wp theme mod set slateframe_wide_width 1280 --path=/tmp/wp-browser
+          npx playwright test tests/browser/appearance.spec.js --project=viewport-390 --project=viewport-1440
+      - name: Reset Appearance fixture
+        if: ${{ always() }}
+        run: |
+          for mod in slateframe_control_size slateframe_spacing_scale slateframe_gutter_size slateframe_section_scale slateframe_radius_size slateframe_content_width slateframe_wide_width; do
+            wp theme mod remove "$mod" --path=/tmp/wp-browser
+          done
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4

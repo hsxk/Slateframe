@@ -5,99 +5,103 @@
  * @package Slateframe
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+/** @return array<string,array<string,mixed>> */
+function slateframe_layout_control_definitions() {
+	return array(
+		'slateframe_control_size' => array( 'label' => __( 'Control size', 'slateframe' ), 'description' => __( 'Minimum height for buttons, inputs, navigation targets, and pagination.', 'slateframe' ), 'default' => 44, 'min' => 44, 'max' => 56, 'step' => 1 ),
+		'slateframe_spacing_scale' => array( 'label' => __( 'Spacing density', 'slateframe' ), 'description' => __( 'Scales component gaps and internal padding without changing text size.', 'slateframe' ), 'default' => 1, 'min' => 0.9, 'max' => 1.2, 'step' => 0.05 ),
+		'slateframe_gutter_size' => array( 'label' => __( 'Page gutter', 'slateframe' ), 'description' => __( 'Controls minimum side whitespace around reading and wide canvases.', 'slateframe' ), 'default' => 16, 'min' => 14, 'max' => 28, 'step' => 1 ),
+		'slateframe_section_scale' => array( 'label' => __( 'Section whitespace', 'slateframe' ), 'description' => __( 'Scales vertical separation between major page sections.', 'slateframe' ), 'default' => 1, 'min' => 0.85, 'max' => 1.2, 'step' => 0.05 ),
+		'slateframe_radius_size' => array( 'label' => __( 'Corner radius', 'slateframe' ), 'description' => __( 'Sets the shared radius for controls, panels, media frames, and menus.', 'slateframe' ), 'default' => 12, 'min' => 0, 'max' => 16, 'step' => 1 ),
+		'slateframe_content_width' => array( 'label' => __( 'Reading width', 'slateframe' ), 'description' => __( 'Sets the maximum width of long-form reading content.', 'slateframe' ), 'default' => 736, 'min' => 640, 'max' => 800, 'step' => 8 ),
+		'slateframe_wide_width' => array( 'label' => __( 'Wide canvas', 'slateframe' ), 'description' => __( 'Sets the maximum width of wide blocks and editorial grids.', 'slateframe' ), 'default' => 1184, 'min' => 1024, 'max' => 1280, 'step' => 16 ),
+	);
 }
 
-/**
- * Sanitize a bounded decimal Customizer value.
- *
- * @param mixed                $value Candidate value.
- * @param WP_Customize_Setting $setting Setting instance.
- * @return float
- */
+/** @param string $id Setting ID. @return float */
+function slateframe_layout_value( $id ) {
+	$controls = slateframe_layout_control_definitions();
+	if ( ! isset( $controls[ $id ] ) ) { return 0; }
+	$args = $controls[ $id ];
+	$value = get_theme_mod( $id, $args['default'] );
+	$value = is_numeric( $value ) ? (float) $value : (float) $args['default'];
+	return min( (float) $args['max'], max( (float) $args['min'], $value ) );
+}
+
+/** @param mixed $value Candidate value. @param WP_Customize_Setting $setting Setting instance. @return float */
 function slateframe_sanitize_bounded_number( $value, $setting ) {
-	$value   = is_numeric( $value ) ? (float) $value : (float) $setting->default;
-	$control = $setting->manager->get_control( $setting->id );
-	$input   = $control && isset( $control->input_attrs ) ? $control->input_attrs : array();
-	$min     = isset( $input['min'] ) ? (float) $input['min'] : $value;
-	$max     = isset( $input['max'] ) ? (float) $input['max'] : $value;
-
-	return min( $max, max( $min, $value ) );
+	$controls = slateframe_layout_control_definitions();
+	$args = isset( $controls[ $setting->id ] ) ? $controls[ $setting->id ] : null;
+	if ( ! $args ) { return (float) $setting->default; }
+	$value = is_numeric( $value ) ? (float) $value : (float) $args['default'];
+	return min( (float) $args['max'], max( (float) $args['min'], $value ) );
 }
 
-/**
- * Register site-wide sizing and spacing controls under Appearance > Customize.
- *
- * @param WP_Customize_Manager $wp_customize Customizer manager.
- */
+/** @param float $value Numeric value. @return string */
+function slateframe_format_css_number( $value ) {
+	$value = rtrim( rtrim( number_format( (float) $value, 2, '.', '' ), '0' ), '.' );
+	return '' === $value ? '0' : $value;
+}
+
+/** @param WP_Customize_Manager $wp_customize Customizer manager. */
 function slateframe_customize_register( $wp_customize ) {
-	$wp_customize->add_section(
-		'slateframe_layout',
-		array(
-			'title'       => __( 'Slateframe layout', 'slateframe' ),
-			'description' => __( 'Tune control size, spacing rhythm, page gutters, section whitespace, and corner radius. Accessible minimums are preserved.', 'slateframe' ),
-			'priority'    => 35,
-		)
-	);
-
-	$controls = array(
-		'slateframe_control_size'  => array( __( 'Control size', 'slateframe' ), __( 'Minimum height for buttons, inputs, navigation targets, and pagination.', 'slateframe' ), 44, 44, 60, 1 ),
-		'slateframe_spacing_scale' => array( __( 'Spacing density', 'slateframe' ), __( 'Scales component gaps and internal padding without changing text size.', 'slateframe' ), 1, 0.85, 1.3, 0.05 ),
-		'slateframe_gutter_size'   => array( __( 'Page gutter', 'slateframe' ), __( 'Controls minimum side whitespace around reading and wide canvases.', 'slateframe' ), 16, 12, 32, 1 ),
-		'slateframe_section_scale' => array( __( 'Section whitespace', 'slateframe' ), __( 'Scales vertical separation between major page sections.', 'slateframe' ), 1, 0.8, 1.35, 0.05 ),
-		'slateframe_radius_size'   => array( __( 'Corner radius', 'slateframe' ), __( 'Sets the shared radius for controls, panels, media frames, and menus.', 'slateframe' ), 12, 0, 24, 1 ),
-	);
-
-	foreach ( $controls as $id => $args ) {
-		$wp_customize->add_setting(
-			$id,
-			array(
-				'default'           => $args[2],
-				'sanitize_callback' => 'slateframe_sanitize_bounded_number',
-				'transport'         => 'refresh',
-			)
-		);
-		$wp_customize->add_control(
-			$id,
-			array(
-				'type'        => 'range',
-				'section'     => 'slateframe_layout',
-				'label'       => $args[0],
-				'description' => $args[1],
-				'input_attrs' => array(
-					'min'  => $args[3],
-					'max'  => $args[4],
-					'step' => $args[5],
-				),
-			)
-		);
+	$wp_customize->add_section( 'slateframe_layout', array(
+		'title' => __( 'Slateframe layout', 'slateframe' ),
+		'description' => __( 'Tune control size, spacing rhythm, reading width, wide canvas, page gutters, section whitespace, and corner radius. Accessible minimums and balanced ranges are preserved.', 'slateframe' ),
+		'priority' => 35,
+	) );
+	foreach ( slateframe_layout_control_definitions() as $id => $args ) {
+		$wp_customize->add_setting( $id, array( 'default' => $args['default'], 'sanitize_callback' => 'slateframe_sanitize_bounded_number', 'transport' => 'refresh' ) );
+		$wp_customize->add_control( $id, array(
+			'type' => 'range', 'section' => 'slateframe_layout', 'label' => $args['label'], 'description' => $args['description'],
+			'input_attrs' => array( 'min' => $args['min'], 'max' => $args['max'], 'step' => $args['step'] ),
+		) );
 	}
 }
 add_action( 'customize_register', 'slateframe_customize_register' );
 
-/**
- * Emit only changed spatial tokens, keeping defaults free of inline overrides.
- */
-function slateframe_customizer_spatial_tokens() {
-	$values = array(
-		'--slateframe-control'       => array( 'slateframe_control_size', 44, 'px' ),
-		'--slateframe-space-scale'   => array( 'slateframe_spacing_scale', 1, '' ),
-		'--slateframe-gutter-min'    => array( 'slateframe_gutter_size', 16, 'px' ),
-		'--slateframe-section-scale' => array( 'slateframe_section_scale', 1, '' ),
-		'--slateframe-radius'        => array( 'slateframe_radius_size', 12, 'px' ),
+/** @return string */
+function slateframe_customizer_spatial_css() {
+	$controls = slateframe_layout_control_definitions();
+	$rules = array();
+	$direct = array(
+		'slateframe_control_size' => array( '--slateframe-control', 'px' ),
+		'slateframe_gutter_size' => array( '--slateframe-gutter-min', 'px' ),
+		'slateframe_radius_size' => array( '--slateframe-radius', 'px' ),
+		'slateframe_content_width' => array( '--slateframe-content', 'px' ),
+		'slateframe_wide_width' => array( '--slateframe-wide', 'px' ),
 	);
-	$rules  = array();
-
-	foreach ( $values as $token => $definition ) {
-		$value = (float) get_theme_mod( $definition[0], $definition[1] );
-		if ( abs( $value - $definition[1] ) > 0.0001 ) {
-			$rules[] = $token . ':' . rtrim( rtrim( number_format( $value, 2, '.', '' ), '0' ), '.' ) . $definition[2];
+	foreach ( $direct as $id => $token ) {
+		$value = slateframe_layout_value( $id );
+		if ( abs( $value - (float) $controls[ $id ]['default'] ) > 0.0001 ) {
+			$rules[] = $token[0] . ':' . slateframe_format_css_number( $value ) . $token[1];
 		}
 	}
-
-	if ( $rules ) {
-		wp_add_inline_style( 'slateframe-style', ':root{' . implode( ';', $rules ) . '}' );
+	$spacing_scale = slateframe_layout_value( 'slateframe_spacing_scale' );
+	if ( abs( $spacing_scale - 1 ) > 0.0001 ) {
+		$spacing_tokens = array(
+			'--slateframe-inline-gap' => 4, '--slateframe-space-2' => 8, '--slateframe-control-padding-block' => 8,
+			'--slateframe-space-3' => 12, '--slateframe-component-gap' => 12, '--slateframe-media-gap' => 12,
+			'--slateframe-control-padding-inline' => 12, '--slateframe-caption-gap' => 10.4,
+			'--slateframe-space-4' => 16, '--slateframe-stack-gap' => 16,
+		);
+		$rules[] = '--slateframe-space-scale:' . slateframe_format_css_number( $spacing_scale );
+		foreach ( $spacing_tokens as $token => $base ) { $rules[] = $token . ':' . slateframe_format_css_number( $base * $spacing_scale ) . 'px'; }
 	}
+	$section_scale = slateframe_layout_value( 'slateframe_section_scale' );
+	if ( abs( $section_scale - 1 ) > 0.0001 ) {
+		$rules[] = '--slateframe-section-scale:' . slateframe_format_css_number( $section_scale );
+		$rules[] = '--slateframe-section-min:' . slateframe_format_css_number( 44 * $section_scale ) . 'px';
+		$rules[] = '--slateframe-section-max:' . slateframe_format_css_number( 72 * $section_scale ) . 'px';
+	}
+	return $rules ? ':root{' . implode( ';', $rules ) . '}' : '';
+}
+
+/** Emit changed spatial tokens only. */
+function slateframe_customizer_spatial_tokens() {
+	$css = slateframe_customizer_spatial_css();
+	if ( $css ) { wp_add_inline_style( 'slateframe-style', $css ); }
 }
 add_action( 'wp_enqueue_scripts', 'slateframe_customizer_spatial_tokens', 20 );
