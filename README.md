@@ -23,6 +23,12 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Contextual content-mode CSS:** photography, portfolio, and knowledge presentation is split from the base stylesheet and loaded only when relevant blocks appear on singular content.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
+## Appearance and spatial system
+
+Slateframe uses one coherent spatial system instead of sizing each component independently. The default system provides a 44px accessible control baseline, a six-step spacing rhythm, responsive page gutters, major-section whitespace, and a shared corner radius. These tokens are reused by navigation, forms, search, pagination, panels, and editorial layouts.
+
+Site owners can tune the system in **Appearance → Customize → Slateframe layout**: control size, spacing density, page gutter, section whitespace, and corner radius. Control size cannot be reduced below 44px. Block authors also get the matching XS–2XL spacing presets through WordPress spacing controls. Defaults add no extra inline CSS; Slateframe emits token overrides only when a site owner changes a value.
+
 ## Current feature set
 
 ### Publishing and reading
