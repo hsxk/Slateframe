@@ -21,7 +21,7 @@ async function openLightbox(page, activation = 'click') {
 	}
 	const dialog = page.locator('[role="dialog"]').last();
 	await expect(dialog).toBeVisible();
-	return { trigger, dialog, enlarged: dialog.locator('img[sizes="100vw"]').last() };
+	return { trigger, dialog, enlarged: dialog.locator('img[sizes="100vw"]').last(), close: dialog.getByRole('button', { name: /close/i }) };
 }
 
 function seconds(value) {
@@ -66,6 +66,9 @@ test('native lightbox opens from keyboard and exposes responsive enlarged media'
 	const media = await enlarged.evaluate((node) => ({ srcset: node.getAttribute('srcset') || '', currentSrc: node.currentSrc || '' }));
 	expect(media.srcset.split(',').length).toBeGreaterThanOrEqual(2);
 	expect(media.currentSrc).toContain('slateframe-raster');
+	const geometry = await enlarged.evaluate((node) => { const box = node.getBoundingClientRect(); return { renderedWidth: box.width, renderedHeight: box.height, naturalWidth: node.naturalWidth, naturalHeight: node.naturalHeight }; });
+	expect(geometry.naturalWidth).toBeGreaterThanOrEqual(Math.floor(geometry.renderedWidth));
+	expect(geometry.naturalHeight).toBeGreaterThanOrEqual(Math.floor(geometry.renderedHeight));
 });
 
 test('native lightbox closes with Escape and restores focus', async ({ page }) => {
@@ -75,6 +78,28 @@ test('native lightbox closes with Escape and restores focus', async ({ page }) =
 	await dialog.focus();
 	await expect(dialog).toBeFocused();
 	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	await expect(trigger).toBeFocused();
+});
+
+
+test('native lightbox exposes an accessible close target and locks page overflow', async ({ page }) => {
+	await openRasterPhotography(page);
+	const { dialog, close } = await openLightbox(page, 'keyboard');
+	await expect(dialog).toHaveAccessibleName(/Raster landscape fixture/i);
+	await expect(close).toBeVisible();
+	const target = await close.evaluate((node) => { const box = node.getBoundingClientRect(); return { width: box.width, height: box.height }; });
+	expect(target.width).toBeGreaterThanOrEqual(44);
+	expect(target.height).toBeGreaterThanOrEqual(44);
+	const overflow = await page.evaluate(() => ({ horizontal: document.documentElement.scrollWidth - document.documentElement.clientWidth, body: getComputedStyle(document.body).overflow }));
+	expect(overflow.horizontal).toBeLessThanOrEqual(1);
+	expect(['hidden', 'clip']).toContain(overflow.body);
+});
+
+test('native lightbox close control restores focus to its trigger', async ({ page }) => {
+	await openRasterPhotography(page);
+	const { trigger, dialog, close } = await openLightbox(page, 'keyboard');
+	await close.click();
 	await expect(dialog).toBeHidden();
 	await expect(trigger).toBeFocused();
 });
