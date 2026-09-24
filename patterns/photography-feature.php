@@ -22,7 +22,7 @@
 	<!-- wp:paragraph {"className":"slateframe-pattern-intro"} -->
 	<p class="slateframe-pattern-intro"><?php echo esc_html_x( 'Use a short introduction when the frame needs context, then keep the photograph at its natural proportion.', 'Pattern content', 'slateframe' ); ?></p>
 	<!-- /wp:paragraph -->
-	<!-- wp:image {"align":"wide","sizeSlug":"large","linkDestination":"none","className":"is-style-slateframe-photo-feature"} -->
+	<!-- wp:image {"align":"wide","sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true},"className":"is-style-slateframe-photo-feature"} -->
 	<figure class="wp-block-image alignwide size-large is-style-slateframe-photo-feature"></figure>
 	<!-- /wp:image -->
 </div>
