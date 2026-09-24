@@ -25,9 +25,11 @@ Slateframe is designed for people who want editorial polish without inheriting a
 
 ## Appearance and spatial system
 
-Slateframe uses one coherent spatial system instead of sizing each component independently. The default system provides a 44px accessible control baseline, a six-step spacing rhythm, responsive page gutters, major-section whitespace, and a shared corner radius. These tokens are reused by navigation, forms, search, pagination, panels, and editorial layouts.
+Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
 
-Site owners can tune the system in **Appearance → Customize → Slateframe layout**: control size, spacing density, page gutter, section whitespace, and corner radius. Control size cannot be reduced below 44px. Block authors also get the matching XS–2XL spacing presets through WordPress spacing controls. Defaults add no extra inline CSS; Slateframe emits token overrides only when a site owner changes a value.
+Site owners can tune seven bounded settings in **Appearance → Customize → Slateframe layout**: control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Control size cannot fall below 44px, and every range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS. Block authors get the matching XS–2XL spacing presets plus Small/Body/Lead/Heading/Display typography presets in the editor. Defaults add no extra inline CSS; changed settings emit a compact root-token override.
+
+CI renders the designed default plus the minimum/compact and maximum/spacious Appearance profiles at representative mobile and desktop widths. The profiles are checked for control targets, real content/wide measures, gutters, radius, spacing tokens, content-mode overflow, and screenshot evidence.
 
 ## Current feature set
 
@@ -113,10 +115,10 @@ Public GitHub Actions currently enforce:
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
-- JavaScript syntax and explicit base-runtime/contextual CSS asset budgets, so specialized presentation does not silently inflate ordinary pages.
+- JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual comments/content-mode CSS, and JavaScript, so every shipped request is counted.
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
-- Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**.
+- Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious Appearance profiles at representative mobile and desktop widths.
 - Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.

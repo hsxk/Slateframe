@@ -42,6 +42,12 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Matured the spatial system into semantic control-padding, inline/component/stack/media/caption gaps, header height, border/focus, reading-width, and wide-canvas tokens.
+- Centralized responsive primary navigation and language-slot presentation in its dedicated stylesheet instead of maintaining conflicting base and navigation rules.
+- Asset budgets now count the always-loaded navigation stylesheet and contextual comment CSS rather than under-reporting the base runtime.
+- Added bounded reading-width and wide-canvas Appearance controls and tightened the original density/radius/gutter ranges to preserve Slateframe's designed proportions.
+- Expanded the editor typography scale to Small, Body, Lead, Heading, and Display presets while retaining system fonts.
+- Added compact/default/spacious Appearance browser profiles with mobile/desktop screenshot evidence and overflow/control/measure checks.
 - Set the public theme author metadata to Hao Kexin and enforce it in release validation.
 
 - Normalized the public development version to 0.1.0 across release metadata and tooling.
@@ -51,6 +57,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Target WordPress Core's actual lightbox close/navigation controls with Slateframe's accessible control baseline.
+- Override Core lightbox minimum image dimensions in contextual photography CSS so enlarged media stays inside short desktop viewports without cropping.
+- Bring multi-page post pagination and comment form/reply targets into the shared control-size system.
 - Preserve readable gutters for text inside full-width Group blocks while leaving the full-width surface intact.
 - Keep photography pattern copy constrained while feature, contact-sheet, photo-essay, and diptych media can use the wide canvas.
 
