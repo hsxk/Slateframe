@@ -1,14 +1,7 @@
-.wp-lightbox-overlay :is(.wp-lightbox-close-button, .wp-lightbox-navigation-button-prev, .wp-lightbox-navigation-button-next) {
-	min-inline-size: var(--slateframe-control);
-	min-block-size: var(--slateframe-control);
-}
-.wp-lightbox-overlay .lightbox-image-container {
-	max-inline-size: calc(100dvi - var(--slateframe-space-4));
-	max-block-size: calc(100dvb - var(--slateframe-space-4));
-}
-.wp-lightbox-overlay .wp-block-image img[sizes="100vw"] {
-	inline-size: 100%; block-size: 100%; min-inline-size: 0; min-block-size: 0; object-fit: contain;
-}
+html:has(.wp-lightbox-overlay.active){overflow:hidden}
+.wp-lightbox-overlay :is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next){min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control)}
+.wp-lightbox-overlay .lightbox-image-container{max-inline-size:calc(100dvi - var(--slateframe-space-4));max-block-size:calc(100dvb - var(--slateframe-space-4))}
+.wp-lightbox-overlay .wp-block-image img[sizes="100vw"]{inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;object-fit:contain}
 
 .wp-block-gallery.is-style-slateframe-contact-sheet {
 	gap: clamp(0.5rem, 1.2vw, 0.9rem);

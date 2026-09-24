@@ -85,28 +85,33 @@ test('native lightbox closes with Escape and restores focus', async ({ page }) =
 
 test('native lightbox exposes an accessible close target and prevents background scrolling', async ({ page }) => {
 	await openRasterPhotography(page);
+	await page.evaluate(() => {
+		const spacer = document.createElement('div');
+		spacer.dataset.scrollLockFixture = 'true';
+		spacer.style.blockSize = '200vh';
+		document.body.append(spacer);
+		window.scrollTo(0, Math.min(240, document.documentElement.scrollHeight - innerHeight));
+	});
+	const backgroundScrollY = await page.evaluate(() => window.scrollY);
+	expect(backgroundScrollY).toBeGreaterThan(0);
+
 	const { dialog, close } = await openLightbox(page, 'keyboard');
 	await expect(dialog).toHaveAccessibleName(/Raster landscape fixture/i);
 	await expect(close).toBeVisible();
 	const target = await close.evaluate((node) => { const box = node.getBoundingClientRect(); return { width: box.width, height: box.height }; });
 	expect(target.width).toBeGreaterThanOrEqual(44);
 	expect(target.height).toBeGreaterThanOrEqual(44);
+	expect(await page.evaluate(() => window.scrollY)).toBe(backgroundScrollY);
 
-	const before = await page.evaluate(() => ({
-		horizontal: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-		scrollY: window.scrollY,
-		scrollHeight: document.documentElement.scrollHeight,
-		clientHeight: document.documentElement.clientHeight,
-	}));
-	expect(before.horizontal).toBeLessThanOrEqual(1);
-	expect(before.scrollHeight).toBeGreaterThan(before.clientHeight + 100);
+	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+	expect(overflow).toBeLessThanOrEqual(1);
 
 	const viewport = page.viewportSize();
 	if (!viewport) throw new Error('Expected a configured viewport.');
 	await page.mouse.move(Math.floor(viewport.width / 2), Math.floor(viewport.height / 2));
-	await page.mouse.wheel(0, before.scrollY > 50 ? -600 : 600);
+	await page.mouse.wheel(0, 600);
 	await page.waitForTimeout(100);
-	expect(await page.evaluate(() => window.scrollY)).toBe(before.scrollY);
+	expect(await page.evaluate(() => window.scrollY)).toBe(backgroundScrollY);
 });
 
 test('native lightbox close control restores focus to its trigger', async ({ page }) => {
