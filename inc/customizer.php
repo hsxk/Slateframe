@@ -42,11 +42,11 @@ function slateframe_customize_register( $wp_customize ) {
 	);
 
 	$controls = array(
-		'slateframe_control_size' => array( __( 'Control size', 'slateframe' ), __( 'Minimum height for buttons, inputs, navigation targets, and pagination.', 'slateframe' ), 44, 44, 60, 1 ),
+		'slateframe_control_size'  => array( __( 'Control size', 'slateframe' ), __( 'Minimum height for buttons, inputs, navigation targets, and pagination.', 'slateframe' ), 44, 44, 60, 1 ),
 		'slateframe_spacing_scale' => array( __( 'Spacing density', 'slateframe' ), __( 'Scales component gaps and internal padding without changing text size.', 'slateframe' ), 1, 0.85, 1.3, 0.05 ),
-		'slateframe_gutter_size' => array( __( 'Page gutter', 'slateframe' ), __( 'Controls minimum side whitespace around reading and wide canvases.', 'slateframe' ), 16, 12, 32, 1 ),
+		'slateframe_gutter_size'   => array( __( 'Page gutter', 'slateframe' ), __( 'Controls minimum side whitespace around reading and wide canvases.', 'slateframe' ), 16, 12, 32, 1 ),
 		'slateframe_section_scale' => array( __( 'Section whitespace', 'slateframe' ), __( 'Scales vertical separation between major page sections.', 'slateframe' ), 1, 0.8, 1.35, 0.05 ),
-		'slateframe_radius_size' => array( __( 'Corner radius', 'slateframe' ), __( 'Sets the shared radius for controls, panels, media frames, and menus.', 'slateframe' ), 12, 0, 24, 1 ),
+		'slateframe_radius_size'   => array( __( 'Corner radius', 'slateframe' ), __( 'Sets the shared radius for controls, panels, media frames, and menus.', 'slateframe' ), 12, 0, 24, 1 ),
 	);
 
 	foreach ( $controls as $id => $args ) {
@@ -65,7 +65,11 @@ function slateframe_customize_register( $wp_customize ) {
 				'section'     => 'slateframe_layout',
 				'label'       => $args[0],
 				'description' => $args[1],
-				'input_attrs' => array( 'min' => $args[3], 'max' => $args[4], 'step' => $args[5] ),
+				'input_attrs' => array(
+					'min'  => $args[3],
+					'max'  => $args[4],
+					'step' => $args[5],
+				),
 			)
 		);
 	}
@@ -83,7 +87,7 @@ function slateframe_customizer_spatial_tokens() {
 		'--slateframe-section-scale' => array( 'slateframe_section_scale', 1, '' ),
 		'--slateframe-radius'        => array( 'slateframe_radius_size', 12, 'px' ),
 	);
-	$rules = array();
+	$rules  = array();
 
 	foreach ( $values as $token => $definition ) {
 		$value = (float) get_theme_mod( $definition[0], $definition[1] );
