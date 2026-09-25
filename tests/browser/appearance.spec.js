@@ -49,7 +49,8 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	near(metrics.stackGap, 16 * profile.spacing); near(metrics.controlPaddingBlock, 8 * profile.spacing);
 	expect(metrics.summaryHeight).toBeGreaterThanOrEqual(profile.control - 1);
 	const gutter = Math.min(profile.gutter * 2, Math.max(profile.gutter, metrics.viewport * 0.03));
-	near(metrics.shellInset, gutter, 1.5);
+	const centeredWideInset = Math.max(0, (metrics.viewport - profile.wide) / 2);
+	near(metrics.shellInset, Math.max(gutter, centeredWideInset), 1.5);
 	expect(metrics.normalWidth).toBeLessThanOrEqual(Math.min(profile.content, metrics.viewport - (2 * gutter)) + 2);
 	expect(metrics.wideWidth).toBeLessThanOrEqual(Math.min(profile.wide, metrics.viewport - (2 * gutter)) + 2);
 	if (width(testInfo) === 1440) expect(metrics.wideWidth).toBeGreaterThan(metrics.normalWidth + 150);
