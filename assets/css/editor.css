@@ -14,7 +14,7 @@
 }
 
 .editor-styles-wrapper .wp-block-post-title {
-	max-width: 20ch;
+	max-width: 14em;
 	margin-inline: auto;
 	font-size: clamp(2.1rem, 5vw, 4.6rem);
 	font-weight: 790;
@@ -25,6 +25,7 @@
 }
 
 .editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .wp-block {
+	min-inline-size: 0;
 	max-width: var(--slateframe-content);
 }
 
