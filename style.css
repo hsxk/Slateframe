@@ -364,6 +364,7 @@ color:var(--slateframe-text);
 }
 .slateframe-search-form button,
 .form-submit .submit,
+.wp-block-search__button,
 .wp-element-button {
 min-block-size:var(--slateframe-control);
 max-inline-size:100%;
