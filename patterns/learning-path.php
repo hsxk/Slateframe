@@ -82,5 +82,12 @@
 		<!-- /wp:column -->
 	</div>
 	<!-- /wp:columns -->
+
+	<!-- wp:group {"className":"is-style-slateframe-learning-callout"} -->
+	<div class="wp-block-group is-style-slateframe-learning-callout">
+		<!-- wp:heading {"level":3} --><h3 class="wp-block-heading"><?php echo esc_html_x( 'Checkpoint', 'Pattern content', 'slateframe' ); ?></h3><!-- /wp:heading -->
+		<!-- wp:paragraph --><p><?php echo esc_html_x( 'Before moving on, ask the reader to explain the foundation, complete one practice task, and name the next question they are ready to explore.', 'Pattern content', 'slateframe' ); ?></p><!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
 </div>
 <!-- /wp:group -->

@@ -21,7 +21,7 @@ Highlights include:
 * Responsive primary navigation and optional footer navigation.
 * Native comments, archives, author pages, search, pagination, and 404 handling.
 * Lightweight code, table, gallery, caption, footnote, pullquote, disclosure, editorial lead, table-of-contents, and print presentation.
-* Starter patterns for photo essays, photography contact sheets/features/diptychs/sequences, project case studies/indexes/briefs/outcomes/query grids, learning paths/lesson chapters/knowledge outlines/definitions/checkpoints, editorial openings/notes, and curated reading lists.
+* Starter patterns for photo essays, photography contact sheets/features/diptychs/sequences, project case studies/indexes/briefs/outcomes/query grids/decision logs, learning paths/lesson chapters/knowledge outlines/definitions/checkpoints/procedures/comparisons, editorial openings/notes, and curated reading lists.
 * Block styles for editorial notes/leads, framed images, photo sequences, contact sheets/diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 * An editorial system-font type scale with Small, Body, Lead, Heading, and Display presets and no required third-party font request.
 * A coherent spatial system for control sizing, component rhythm, page gutters, reading/wide widths, section whitespace, and corner radius, with bounded controls in Appearance > Customize.

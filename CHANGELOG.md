@@ -39,6 +39,9 @@ All notable changes to Slateframe will be documented here.
 - Photography sequence, native Query Loop project grid, and knowledge checklist patterns with responsive presentation.
 - Public `slateframe_content_mode_markers` filter for integrations that reuse contextual presentation without creating a hard dependency.
 - Real showcase regression for responsive sequence galleries, 1/2/3-column project grids, pagination, checkpoint layouts, and intrinsic image dimensions.
+- Project decision-log, knowledge-procedure, and knowledge-comparison patterns built entirely from portable core blocks and Slateframe's shared spatial/block-style system.
+- Real showcase and browser coverage for decision evidence, procedural verification, mixed CJK/RTL comparisons, and long-form containment.
+- Project case studies now prompt for inspectable evidence; project outcomes prompt for baseline/time-frame/source context; lesson chapters include prerequisites and verification; learning paths include an explicit checkpoint.
 
 ### Changed
 

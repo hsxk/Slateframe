@@ -19,5 +19,12 @@
 		<!-- wp:column --><div class="wp-block-column"><!-- wp:heading {"level":3} --><h3 class="wp-block-heading"><?php echo esc_html_x( 'Scope', 'Pattern content', 'slateframe' ); ?></h3><!-- /wp:heading --><!-- wp:paragraph --><p><?php echo esc_html_x( 'Describe reach or scale.', 'Pattern content', 'slateframe' ); ?></p><!-- /wp:paragraph --></div><!-- /wp:column -->
 		<!-- wp:column --><div class="wp-block-column"><!-- wp:heading {"level":3} --><h3 class="wp-block-heading"><?php echo esc_html_x( 'Status', 'Pattern content', 'slateframe' ); ?></h3><!-- /wp:heading --><!-- wp:paragraph --><p><?php echo esc_html_x( 'Record the current state.', 'Pattern content', 'slateframe' ); ?></p><!-- /wp:paragraph --></div><!-- /wp:column -->
 	</div><!-- /wp:columns -->
+
+	<!-- wp:group {"className":"is-style-slateframe-project-brief"} -->
+	<div class="wp-block-group is-style-slateframe-project-brief">
+		<!-- wp:heading {"level":3} --><h3 class="wp-block-heading"><?php echo esc_html_x( 'Interpretation', 'Pattern content', 'slateframe' ); ?></h3><!-- /wp:heading -->
+		<!-- wp:paragraph --><p><?php echo esc_html_x( 'Give each number a baseline, time frame, or source so the result can be understood rather than displayed as an isolated metric.', 'Pattern content', 'slateframe' ); ?></p><!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
 </div>
 <!-- /wp:group -->

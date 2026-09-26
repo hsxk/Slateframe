@@ -81,5 +81,16 @@
 		<!-- /wp:column -->
 	</div>
 	<!-- /wp:columns -->
+
+	<!-- wp:group {"className":"is-style-slateframe-project-brief"} -->
+	<div class="wp-block-group is-style-slateframe-project-brief">
+		<!-- wp:heading {"level":3} -->
+		<h3 class="wp-block-heading"><?php echo esc_html_x( 'Evidence', 'Pattern content', 'slateframe' ); ?></h3>
+		<!-- /wp:heading -->
+		<!-- wp:paragraph -->
+		<p><?php echo esc_html_x( 'Connect the outcome to something a reader can inspect: a before-and-after measure, shipped artifact, user observation, benchmark, or documented lesson.', 'Pattern content', 'slateframe' ); ?></p>
+		<!-- /wp:paragraph -->
+	</div>
+	<!-- /wp:group -->
 </div>
 <!-- /wp:group -->

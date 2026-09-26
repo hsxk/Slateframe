@@ -531,6 +531,34 @@ test('portable showcase modes respond as a coherent editorial system', async ({ 
 	await expectNoHorizontalOverflow(page, showcasePath);
 });
 
+
+test('project decisions and knowledge procedures remain structured and contained', async ({ page }) => {
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+
+	await expect(page.locator('.browser-project-decision-steps li')).toHaveCount(3);
+	await expect(page.locator('.browser-project-evidence')).toBeVisible();
+	await expect(page.locator('.browser-knowledge-procedure-steps li')).toHaveCount(3);
+	await expect(page.locator('.browser-knowledge-verification .is-style-slateframe-checklist li')).toHaveCount(2);
+	await expect(page.locator('.browser-i18n-comparison > .wp-block-column')).toHaveCount(2);
+
+	for (const selector of [
+		'.browser-project-decision',
+		'.browser-project-evidence',
+		'.browser-knowledge-procedure',
+		'.browser-knowledge-verification',
+		'.browser-knowledge-comparison',
+	]) {
+		const bounds = await page.locator(selector).evaluate((element) => {
+			const rect = element.getBoundingClientRect();
+			return { left: rect.left, right: rect.right, viewport: document.documentElement.clientWidth };
+		});
+		expect(bounds.left, selector).toBeGreaterThanOrEqual(-1);
+		expect(bounds.right, selector).toBeLessThanOrEqual(bounds.viewport + 1);
+	}
+
+	await expectNoHorizontalOverflow(page, showcasePath);
+});
+
 test('showcase media reserves intrinsic space to reduce layout-shift risk', async ({ page }) => {
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
 
