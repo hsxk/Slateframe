@@ -4,7 +4,6 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 .wp-lightbox-overlay .wp-lightbox-close-button{margin-block-start:env(safe-area-inset-top,0px);margin-inline-end:env(safe-area-inset-right,0px)}
 .wp-lightbox-overlay .lightbox-image-container{max-inline-size:calc(100dvi - (2 * var(--slateframe-space-4)));max-block-size:calc(100dvb - (2 * var(--slateframe-space-4)))}
 .wp-lightbox-overlay .wp-block-image img[sizes="100vw"]{inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;object-fit:contain}
-.wp-lightbox-overlay .is-style-slateframe-photo-feature{margin:0;background:none}
 
 .wp-block-gallery:is(.is-style-slateframe-contact-sheet,.is-style-slateframe-diptych,.is-style-slateframe-photo-sequence),.wp-block-gallery.slateframe-gallery-sequence{gap:var(--slateframe-media-gap)}
 .wp-block-gallery.is-style-slateframe-contact-sheet{align-items:flex-start}
@@ -14,6 +13,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 .wp-block-image.is-style-slateframe-photo-feature{margin-block:calc(var(--slateframe-stack-gap) + var(--slateframe-component-gap));background:var(--slateframe-media-chrome)}
 .wp-block-image.is-style-slateframe-photo-feature img{inline-size:100%;max-block-size:88dvh;object-fit:contain}
 .wp-block-image.is-style-slateframe-photo-feature figcaption{margin:0;padding:var(--slateframe-caption-gap) var(--slateframe-component-gap);color:var(--slateframe-media-chrome-text);background:var(--slateframe-media-chrome);text-align:start;overflow-wrap:anywhere}
+.wp-lightbox-overlay .wp-block-image.is-style-slateframe-photo-feature{margin:0;background:none}
 .slateframe-photo-contact-sheet .wp-block-gallery,.slateframe-photography-feature .wp-block-image{margin-block-start:calc(var(--slateframe-stack-gap) + var(--slateframe-component-gap))}
 .wp-block-gallery.is-style-slateframe-diptych{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center}
 .wp-block-gallery.is-style-slateframe-diptych .wp-block-image{inline-size:100%!important;margin:0!important}
