@@ -111,7 +111,6 @@
 
 .slateframe-prose > table {
 	display: block;
-	inline-size: 100%;
 	max-inline-size: 100%;
 	overflow-x: auto;
 	border-collapse: collapse;
@@ -209,7 +208,6 @@
 
 .slateframe-prose .tablepress-scroll-wrapper,
 .slateframe-prose .wp-block-table {
-	inline-size: 100%;
 	min-inline-size: 0;
 	max-inline-size: 100%;
 	overflow-x: auto;

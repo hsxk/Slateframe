@@ -204,6 +204,39 @@ function slateframe_assets() {
 add_action( 'wp_enqueue_scripts', 'slateframe_assets' );
 
 /**
+ * Keep potentially scrollable Core table blocks reachable from the keyboard.
+ *
+ * The wrapper owns horizontal overflow at narrow widths and text zoom, so it
+ * needs a focus stop even when the table happens to fit at the current width.
+ * Preserve an author-supplied tabindex when one is present.
+ *
+ * @param string $block_content Rendered Core table block markup.
+ * @return string
+ */
+function slateframe_focusable_table_block( $block_content ) {
+	if ( '' === $block_content ) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	while ( $processor->next_tag() ) {
+		if ( ! $processor->has_class( 'wp-block-table' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+
+		break;
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/table', 'slateframe_focusable_table_block' );
+
+/**
  * Render only the custom-logo image inside Slateframe's own brand link.
  *
  * Core get_custom_logo() includes its own anchor. Rendering the attachment

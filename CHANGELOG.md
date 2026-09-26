@@ -103,6 +103,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Accessibility
 
+- Keep Core table scroll regions keyboard-focusable with Slateframe's shared focus ring, while preserving an author-supplied tabindex.
+- Keep normal data tables on the centered reading measure instead of stretching their scroll wrapper to the viewport.
 - Keep long table headers and cells shrinkable during 200% text resizing so readable mobile pages do not gain document-level horizontal scrolling.
 - Avoid empty author links when content has no resolvable WordPress author, preserving discernible-link semantics.
 

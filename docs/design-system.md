@@ -44,7 +44,7 @@ Prefer logical properties. UI copy is translatable with the slateframe text doma
 
 ## Editor parity
 
-theme.json spacing, typography, content width, wide width, and semantic colors should remain conceptually aligned with frontend tokens. A pattern should not become unexpectedly looser or narrower merely because it is viewed in the editor. Scrollable data tables use a single scroll owner: the Core/TablePress wrapper owns overflow while the inner table may keep its intrinsic width. The editor mirrors the same containment and wrapping model so text resizing does not turn internal table width into page-level overflow.
+theme.json spacing, typography, content width, wide width, and semantic colors should remain conceptually aligned with frontend tokens. A pattern should not become unexpectedly looser or narrower merely because it is viewed in the editor. Scrollable data tables use a single scroll owner: the Core/TablePress wrapper owns overflow while the inner table may keep its intrinsic width. Core table wrappers remain on the normal reading measure and are keyboard-focusable when overflow becomes reachable at narrow widths or text zoom. The editor mirrors the same containment and wrapping model so text resizing does not turn internal table width into page-level overflow.
 
 ## Review checklist
 
