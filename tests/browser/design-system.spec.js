@@ -112,14 +112,40 @@ test('long translated controls do not shrink below touch baseline', async ({ pag
 test('reduced motion removes meaningful transition duration', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
-	const duration = await page.locator('.slateframe-card-media img, .wp-block-post-featured-image img').first()
-		.evaluate((node) => getComputedStyle(node).transitionDuration);
+	const duration = await page.evaluate(() => {
+		const probe = document.createElement('div');
+		probe.style.transition = 'opacity 200ms ease';
+		document.body.append(probe);
+		const value = getComputedStyle(probe).transitionDuration;
+		probe.remove();
+		return value;
+	});
 	expect(duration === '0s' || duration === '0.00001s').toBeTruthy();
 });
 
 test('design system remains viewport-contained after 200 percent zoom equivalent', async ({ page }) => {
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
-	await page.evaluate(() => { document.documentElement.style.fontSize = '32px'; });
-	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-	expect(overflow).toBeLessThanOrEqual(1);
+	const metrics = await page.evaluate(() => {
+		document.documentElement.style.fontSize = '32px';
+		const viewport = document.documentElement.clientWidth;
+		const offenders = [...document.body.querySelectorAll('*')]
+			.map((node) => {
+				const rect = node.getBoundingClientRect();
+				return {
+					tag: node.tagName.toLowerCase(),
+					className: typeof node.className === 'string' ? node.className : '',
+					left: Math.round(rect.left),
+					right: Math.round(rect.right),
+					width: Math.round(rect.width),
+				};
+			})
+			.filter((item) => item.left < -1 || item.right > viewport + 1)
+			.sort((a, b) => Math.max(b.right - viewport, -b.left) - Math.max(a.right - viewport, -a.left))
+			.slice(0, 12);
+		return {
+			overflow: document.documentElement.scrollWidth - viewport,
+			offenders,
+		};
+	});
+	expect(metrics.overflow, JSON.stringify(metrics.offenders)).toBeLessThanOrEqual(1);
 });
