@@ -44,7 +44,7 @@ Prefer logical properties. UI copy is translatable with the slateframe text doma
 
 ## Editor parity
 
-theme.json spacing, typography, content width, wide width, and semantic colors should remain conceptually aligned with frontend tokens. A pattern should not become unexpectedly looser or narrower merely because it is viewed in the editor.
+theme.json spacing, typography, content width, wide width, and semantic colors should remain conceptually aligned with frontend tokens. A pattern should not become unexpectedly looser or narrower merely because it is viewed in the editor. Scrollable data tables are inline-size contained so their internal scroll area does not become page-level overflow during text resizing.
 
 ## Review checklist
 

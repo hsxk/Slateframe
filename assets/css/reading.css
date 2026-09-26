@@ -215,8 +215,11 @@
 
 .slateframe-prose .tablepress-scroll-wrapper,
 .slateframe-prose .wp-block-table {
-	max-width: 100%;
+	inline-size: 100%;
+	min-inline-size: 0;
+	max-inline-size: 100%;
 	overflow-x: auto;
+	contain: inline-size;
 	overscroll-behavior-inline: contain;
 	-webkit-overflow-scrolling: touch;
 }

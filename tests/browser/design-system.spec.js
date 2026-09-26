@@ -48,7 +48,7 @@ test('focus ring is a visible semantic token rather than browser-default suppres
 
 test('reading and wide measures preserve hierarchy on desktop', async ({ page }, testInfo) => {
 	test.skip((testInfo.project.use.viewport?.width || 0) < 1024, 'Desktop measure contract.');
-	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const widths = await page.evaluate(() => {
 		const normal = document.querySelector('.browser-default-prose');
 		const wide = document.querySelector('.browser-wide-block');
