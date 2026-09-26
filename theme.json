@@ -1,1 +1,182 @@
-{"$schema":"https://schemas.wp.org/trunk/theme.json","version":3,"settings":{"appearanceTools":true,"layout":{"contentSize":"46rem","wideSize":"74rem"},"color":{"custom":true,"defaultPalette":false,"palette":[{"slug":"ink","name":"Ink","color":"#171918"},{"slug":"paper","name":"Paper","color":"#f7f7f4"},{"slug":"surface","name":"Surface","color":"#ffffff"},{"slug":"muted","name":"Muted","color":"#656b67"},{"slug":"accent","name":"Accent","color":"#1d5f50"}]},"spacing":{"customSpacingSize":true,"units":["px","rem","em","%","vw","vh"]},"typography":{"fluid":true,"dropCap":false,"lineHeight":true,"letterSpacing":true,"fontFamilies":[{"slug":"sans","name":"Slateframe Sans","fontFamily":"ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Arial,sans-serif"},{"slug":"mono","name":"Slateframe Mono","fontFamily":"ui-monospace,'SFMono-Regular',Consolas,'Liberation Mono',monospace"}],"fontSizes":[{"slug":"body","name":"Body","size":"1rem","fluid":false}]},"blocks":{"core/image":{"lightbox":{"allowEditing":true}}}},"styles":{"color":{"background":"var:preset|color|paper","text":"var:preset|color|ink"},"spacing":{"blockGap":"1.35rem"},"typography":{"fontFamily":"var:preset|font-family|sans","fontSize":"var:preset|font-size|body","lineHeight":"1.72"},"elements":{"link":{"color":{"text":"var:preset|color|accent"}},"heading":{"typography":{"fontWeight":"760","lineHeight":"1.15","letterSpacing":"-0.03em"}}}}}
+{
+	"$schema": "https://schemas.wp.org/trunk/theme.json",
+	"version": 3,
+	"settings": {
+		"appearanceTools": true,
+		"layout": {
+			"contentSize": "46rem",
+			"wideSize": "74rem"
+		},
+		"color": {
+			"custom": true,
+			"defaultPalette": false,
+			"palette": [
+				{
+					"slug": "ink",
+					"name": "Ink",
+					"color": "#171918"
+				},
+				{
+					"slug": "paper",
+					"name": "Paper",
+					"color": "#f7f7f4"
+				},
+				{
+					"slug": "surface",
+					"name": "Surface",
+					"color": "#ffffff"
+				},
+				{
+					"slug": "muted",
+					"name": "Muted",
+					"color": "#656b67"
+				},
+				{
+					"slug": "accent",
+					"name": "Accent",
+					"color": "#1d5f50"
+				}
+			]
+		},
+		"spacing": {
+			"customSpacingSize": true,
+			"units": [
+				"px",
+				"rem",
+				"em",
+				"%",
+				"vw",
+				"vh"
+			],
+			"spacingSizes": [
+				{
+					"slug": "xs",
+					"name": "XS",
+					"size": "0.5rem"
+				},
+				{
+					"slug": "sm",
+					"name": "S",
+					"size": "0.75rem"
+				},
+				{
+					"slug": "md",
+					"name": "M",
+					"size": "1rem"
+				},
+				{
+					"slug": "lg",
+					"name": "L",
+					"size": "1.5rem"
+				},
+				{
+					"slug": "xl",
+					"name": "XL",
+					"size": "2rem"
+				},
+				{
+					"slug": "2xl",
+					"name": "2XL",
+					"size": "3rem"
+				}
+			],
+			"blockGap": true,
+			"defaultSpacingSizes": false
+		},
+		"typography": {
+			"fluid": true,
+			"dropCap": false,
+			"lineHeight": true,
+			"letterSpacing": true,
+			"fontFamilies": [
+				{
+					"slug": "sans",
+					"name": "Slateframe Sans",
+					"fontFamily": "ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans',Arial,sans-serif"
+				},
+				{
+					"slug": "mono",
+					"name": "Slateframe Mono",
+					"fontFamily": "ui-monospace,'SFMono-Regular',Consolas,'Liberation Mono',monospace"
+				}
+			],
+			"fontSizes": [
+				{
+					"slug": "small",
+					"name": "Small",
+					"size": "0.82rem",
+					"fluid": false
+				},
+				{
+					"slug": "body",
+					"name": "Body",
+					"size": "1rem",
+					"fluid": false
+				},
+				{
+					"slug": "lead",
+					"name": "Lead",
+					"size": "1.32rem",
+					"fluid": {
+						"min": "1.12rem",
+						"max": "1.32rem"
+					}
+				},
+				{
+					"slug": "heading",
+					"name": "Heading",
+					"size": "1.9rem",
+					"fluid": {
+						"min": "1.35rem",
+						"max": "1.9rem"
+					}
+				},
+				{
+					"slug": "display",
+					"name": "Display",
+					"size": "4.6rem",
+					"fluid": {
+						"min": "2.1rem",
+						"max": "4.6rem"
+					}
+				}
+			],
+			"defaultFontSizes": false
+		},
+		"blocks": {
+			"core/image": {
+				"lightbox": {
+					"allowEditing": true
+				}
+			}
+		}
+	},
+	"styles": {
+		"color": {
+			"background": "var:preset|color|paper",
+			"text": "var:preset|color|ink"
+		},
+		"spacing": {
+			"blockGap": "1.35rem"
+		},
+		"typography": {
+			"fontFamily": "var:preset|font-family|sans",
+			"fontSize": "var:preset|font-size|body",
+			"lineHeight": "1.72"
+		},
+		"elements": {
+			"link": {
+				"color": {
+					"text": "var:preset|color|accent"
+				}
+			},
+			"heading": {
+				"typography": {
+					"fontWeight": "760",
+					"lineHeight": "1.15",
+					"letterSpacing": "-0.03em"
+				}
+			}
+		}
+	}
+}

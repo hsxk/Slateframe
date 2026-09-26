@@ -1,7 +1,7 @@
-/**
- * Contextual presentation for photography, portfolio, and knowledge content.
- * Loaded on relevant singular documents and in the block editor.
- */
+html:has(.wp-lightbox-overlay.active){overflow:hidden}
+.wp-lightbox-overlay :is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next){min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control)}
+.wp-lightbox-overlay .lightbox-image-container{max-inline-size:calc(100dvi - var(--slateframe-space-4));max-block-size:calc(100dvb - var(--slateframe-space-4))}
+.wp-lightbox-overlay .wp-block-image img[sizes="100vw"]{inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;object-fit:contain}
 
 .wp-block-gallery.is-style-slateframe-contact-sheet {
 	gap: clamp(0.5rem, 1.2vw, 0.9rem);
@@ -240,7 +240,6 @@
 	.wp-block-columns.is-style-slateframe-metrics > .wp-block-column:first-child { border-block-start: 0; }
 }
 
-/* Core editorial content modes kept out of the base stylesheet. */
 .wp-block-gallery.is-style-slateframe-photo-sequence {
 	gap: clamp(0.55rem, 1.3vw, 1rem);
 	align-items: start;
@@ -296,7 +295,6 @@
 	margin-block-end: 0;
 }
 
-/* Photography sequence: one establishing frame, followed by a paired rhythm. */
 .slateframe-photography-sequence .slateframe-gallery-sequence {
 	display: grid !important;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -339,7 +337,6 @@
 	text-align: start;
 }
 
-/* Portfolio Query Loop: portable cards without a custom post type dependency. */
 .slateframe-project-grid .wp-block-post-template {
 	display: grid !important;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -396,8 +393,8 @@
 .slateframe-project-grid .wp-block-query-pagination :is(a, .page-numbers) {
 	display: inline-grid;
 	place-items: center;
-	min-width: 2.75rem;
-	min-height: 2.75rem;
+	min-width: var(--slateframe-control);
+	min-height: var(--slateframe-control);
 	padding-inline: 0.65rem;
 }
 
@@ -407,7 +404,6 @@
 	}
 }
 
-/* Knowledge checkpoints: compact verification without proprietary widgets. */
 .slateframe-knowledge-checklist .slateframe-learning-checkpoint {
 	gap: 0;
 	margin-block: clamp(1.5rem, 3vw, 2.25rem);

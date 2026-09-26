@@ -116,6 +116,31 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
+test('spatial tokens keep interactive controls coherent and accessible', async ({ page }) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const tokens = await page.evaluate(() => {
+		const root = getComputedStyle(document.documentElement);
+		return {
+			control: Number.parseFloat(root.getPropertyValue('--slateframe-control')),
+			gutter: Number.parseFloat(root.getPropertyValue('--slateframe-gutter-min')),
+			radius: Number.parseFloat(root.getPropertyValue('--slateframe-radius')),
+			spacing: Number.parseFloat(root.getPropertyValue('--slateframe-space-scale')),
+			section: Number.parseFloat(root.getPropertyValue('--slateframe-section-scale')),
+		};
+	});
+	expect(tokens.control).toBeGreaterThanOrEqual(44);
+	expect(tokens.gutter).toBeGreaterThanOrEqual(12);
+	expect(tokens.radius).toBeGreaterThanOrEqual(0);
+	expect(tokens.spacing).toBeGreaterThanOrEqual(0.85);
+	expect(tokens.section).toBeGreaterThanOrEqual(0.8);
+
+	const targets = page.locator('.slateframe-primary-nav a:visible, [data-menu-toggle]:visible');
+	for (let index = 0; index < await targets.count(); index += 1) {
+		const box = await targets.nth(index).boundingBox();
+		expect(box?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+});
+
 test('threaded comment replies load only on singular discussions', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	await expect(page.locator('#comment-reply-js')).toHaveCount(1);

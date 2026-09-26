@@ -1,0 +1,92 @@
+name: Photography runtime quality
+
+on:
+  push:
+    branches: [automation/continuous-development]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: slateframe-photography-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  raster-lightbox:
+    name: Raster images and native lightbox
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: wordpress
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mysqli,gd
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install WordPress and raster fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
+          chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
+          mkdir -p /tmp/wp-photo
+          wp core download --path=/tmp/wp-photo --version=latest
+          wp config create --path=/tmp/wp-photo --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
+          wp core install --path=/tmp/wp-photo --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
+          ln -s "$GITHUB_WORKSPACE" /tmp/wp-photo/wp-content/themes/slateframe
+          wp theme activate slateframe --path=/tmp/wp-photo
+
+          php -r '
+            $image = imagecreatetruecolor(2400, 1600);
+            $sky = imagecolorallocate($image, 226, 232, 229);
+            $ground = imagecolorallocate($image, 92, 112, 103);
+            $light = imagecolorallocate($image, 248, 248, 244);
+            imagefill($image, 0, 0, $sky);
+            imagefilledpolygon($image, [0,1600,0,1180,560,620,980,1030,1420,520,2400,1300,2400,1600], 7, $ground);
+            imagefilledellipse($image, 1900, 360, 220, 220, $light);
+            imagejpeg($image, "/tmp/slateframe-raster.jpg", 88);
+            imagedestroy($image);
+          '
+          ATTACHMENT_ID=$(wp media import /tmp/slateframe-raster.jpg --path=/tmp/wp-photo --title='Raster photography fixture' --alt='Raster landscape fixture' --porcelain)
+          wp media regenerate "$ATTACHMENT_ID" --yes --path=/tmp/wp-photo
+          SRC=$(wp eval "echo wp_get_attachment_image_url($ATTACHMENT_ID, 'large');" --path=/tmp/wp-photo)
+          WIDTH=$(wp eval "\$m=wp_get_attachment_metadata($ATTACHMENT_ID); echo \$m['width'];" --path=/tmp/wp-photo)
+          HEIGHT=$(wp eval "\$m=wp_get_attachment_metadata($ATTACHMENT_ID); echo \$m['height'];" --path=/tmp/wp-photo)
+          CONTENT="<!-- wp:image {\"id\":${ATTACHMENT_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true},\"className\":\"is-style-slateframe-photo-feature\"} --><figure class=\"wp-block-image size-large is-style-slateframe-photo-feature\"><img src=\"${SRC}\" alt=\"Raster landscape fixture\" class=\"wp-image-${ATTACHMENT_ID} wp-image-raster\" width=\"${WIDTH}\" height=\"${HEIGHT}\"/><figcaption class=\"wp-element-caption\">Responsive raster photography fixture</figcaption></figure><!-- /wp:image -->"
+          PAGE_ID=$(wp post create --path=/tmp/wp-photo --post_type=page --post_status=publish --post_title='Raster Photography Fixture' --post_content="$CONTENT" --porcelain)
+          echo "SLATEFRAME_RASTER_PHOTO_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
+      - name: Install Playwright and start WordPress
+        run: |
+          npm install --package-lock=false --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          wp server --path=/tmp/wp-photo --host=127.0.0.1 --port=8080 >/tmp/slateframe-photo-server.log 2>&1 &
+          for attempt in {1..30}; do curl -fsS http://127.0.0.1:8080/ >/dev/null && break; sleep 1; done
+      - name: Verify responsive raster and lightbox behavior
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
+        run: npx playwright test tests/browser/photography-raster-lightbox.spec.js
+      - name: Upload photography artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: slateframe-photography-runtime
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/slateframe-photo-server.log
+          if-no-files-found: ignore
+          retention-days: 7

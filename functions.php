@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once get_template_directory() . '/inc/template-tags.php';
+require_once get_template_directory() . '/inc/customizer.php';
 
 /**
  * Register theme supports and navigation locations.
