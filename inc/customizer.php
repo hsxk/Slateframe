@@ -128,6 +128,130 @@ function slateframe_format_css_number( $value ) {
 }
 
 /**
+ * Sanitize the site-level color mode.
+ *
+ * @param mixed $value Candidate color mode.
+ * @return string
+ */
+function slateframe_sanitize_color_mode( $value ) {
+	$value   = is_string( $value ) ? sanitize_key( $value ) : '';
+	$allowed = array( 'system', 'light', 'dark' );
+
+	return in_array( $value, $allowed, true ) ? $value : 'system';
+}
+
+/**
+ * Return the configured site color mode.
+ *
+ * @return string
+ */
+function slateframe_site_color_mode() {
+	return slateframe_sanitize_color_mode( get_theme_mod( 'slateframe_color_mode', 'system' ) );
+}
+
+/**
+ * Resolve a visitor color mode without assuming a locale or plugin.
+ *
+ * A visitor's functional preference cookie takes precedence over the site
+ * default. System mode is represented by an empty string so CSS can follow
+ * prefers-color-scheme without JavaScript.
+ *
+ * @return string
+ */
+function slateframe_resolved_color_mode() {
+	if ( isset( $_COOKIE['slateframe_color_mode'] ) ) {
+		$visitor_mode = slateframe_sanitize_color_mode( wp_unslash( $_COOKIE['slateframe_color_mode'] ) );
+
+		if ( in_array( $visitor_mode, array( 'light', 'dark' ), true ) ) {
+			return $visitor_mode;
+		}
+	}
+
+	$site_mode = slateframe_site_color_mode();
+
+	return 'system' === $site_mode ? '' : $site_mode;
+}
+
+/**
+ * Add an explicit color mode to the document root when one is resolved.
+ *
+ * @param string $output Existing language attributes.
+ * @return string
+ */
+function slateframe_color_mode_language_attributes( $output ) {
+	$mode = slateframe_resolved_color_mode();
+
+	if ( ! $mode ) {
+		return $output;
+	}
+
+	return $output . ' data-slateframe-color-mode="' . esc_attr( $mode ) . '"';
+}
+add_filter( 'language_attributes', 'slateframe_color_mode_language_attributes' );
+
+/**
+ * Return color tokens for explicit editor-mode parity.
+ *
+ * @param string $mode Light or dark.
+ * @return array
+ */
+function slateframe_color_mode_tokens( $mode ) {
+	$palettes = array(
+		'light' => array(
+			'--slateframe-bg'              => '#f7f7f4',
+			'--slateframe-surface'         => '#ffffff',
+			'--slateframe-surface-soft'    => '#f0f1ee',
+			'--slateframe-text'            => '#171918',
+			'--slateframe-muted'           => '#656b67',
+			'--slateframe-border'          => '#dfe2de',
+			'--slateframe-accent'          => '#1d5f50',
+			'--slateframe-accent-strong'   => '#12483d',
+			'--slateframe-focus'           => '#0b6bcb',
+			'--slateframe-shadow'          => 'rgb(23 25 24 / 10%)',
+			'--slateframe-selection'       => '#dbe8e3',
+		),
+		'dark'  => array(
+			'--slateframe-bg'              => '#111412',
+			'--slateframe-surface'         => '#181c1a',
+			'--slateframe-surface-soft'    => '#202622',
+			'--slateframe-text'            => '#eef1ee',
+			'--slateframe-muted'           => '#a7b0aa',
+			'--slateframe-border'          => '#343b37',
+			'--slateframe-accent'          => '#7fc8b4',
+			'--slateframe-accent-strong'   => '#a5decf',
+			'--slateframe-focus'           => '#78b7ff',
+			'--slateframe-shadow'          => 'rgb(0 0 0 / 32%)',
+			'--slateframe-selection'       => '#214c40',
+		),
+	);
+
+	return isset( $palettes[ $mode ] ) ? $palettes[ $mode ] : array();
+}
+
+/**
+ * Build explicit editor color tokens for Light/Dark site defaults.
+ *
+ * @return string
+ */
+function slateframe_editor_color_mode_css() {
+	$mode = slateframe_site_color_mode();
+
+	if ( 'system' === $mode ) {
+		return '';
+	}
+
+	$rules = array();
+
+	foreach ( slateframe_color_mode_tokens( $mode ) as $token => $value ) {
+		$rules[] = $token . ':' . $value;
+	}
+
+	$rules[] = 'color-scheme:' . $mode;
+
+	return ':root{' . implode( ';', $rules ) . '}';
+}
+
+/**
  * Register site-wide sizing and spacing controls under Appearance > Customize.
  *
  * @param WP_Customize_Manager $wp_customize Customizer manager.
@@ -136,9 +260,33 @@ function slateframe_customize_register( $wp_customize ) {
 	$wp_customize->add_section(
 		'slateframe_layout',
 		array(
-			'title'       => __( 'Slateframe layout', 'slateframe' ),
-			'description' => __( 'Tune control size, spacing rhythm, reading width, wide canvas, page gutters, section whitespace, and corner radius. Accessible minimums and balanced ranges are preserved.', 'slateframe' ),
+			'title'       => __( 'Slateframe design', 'slateframe' ),
+			'description' => __( 'Tune color mode, control size, spacing rhythm, reading width, wide canvas, page gutters, section whitespace, and corner radius. Accessible minimums and balanced ranges are preserved.', 'slateframe' ),
 			'priority'    => 35,
+		)
+	);
+
+	$wp_customize->add_setting(
+		'slateframe_color_mode',
+		array(
+			'default'           => 'system',
+			'sanitize_callback' => 'slateframe_sanitize_color_mode',
+			'transport'         => 'refresh',
+		)
+	);
+	$wp_customize->add_control(
+		'slateframe_color_mode',
+		array(
+			'type'        => 'select',
+			'section'     => 'slateframe_layout',
+			'priority'    => 5,
+			'label'       => __( 'Color mode', 'slateframe' ),
+			'description' => __( 'Choose the initial color scheme. Visitors can still use the header control to remember their own light or dark preference.', 'slateframe' ),
+			'choices'     => array(
+				'system' => __( 'Follow system preference', 'slateframe' ),
+				'light'  => __( 'Light', 'slateframe' ),
+				'dark'   => __( 'Dark', 'slateframe' ),
+			),
 		)
 	);
 
@@ -250,7 +398,7 @@ add_action( 'wp_enqueue_scripts', 'slateframe_customizer_spatial_tokens', 20 );
  * @return array
  */
 function slateframe_editor_spatial_tokens( $editor_settings ) {
-	$css = slateframe_customizer_spatial_css();
+	$css = slateframe_customizer_spatial_css() . slateframe_editor_color_mode_css();
 
 	if ( ! $css ) {
 		return $editor_settings;

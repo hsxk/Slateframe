@@ -42,7 +42,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden}
 
 .wp-block-image.is-style-slateframe-photo-feature {
 	margin-block: clamp(1.5rem, 4vw, 3rem);
-	background: #101513;
+	background: var(--slateframe-media-chrome);
 }
 
 .wp-block-image.is-style-slateframe-photo-feature img {
@@ -54,8 +54,8 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden}
 .wp-block-image.is-style-slateframe-photo-feature figcaption {
 	margin: 0;
 	padding: 0.7rem 0.85rem;
-	color: #e7ece9;
-	background: #101513;
+	color: var(--slateframe-media-chrome-text);
+	background: var(--slateframe-media-chrome);
 	text-align: start;
 }
 

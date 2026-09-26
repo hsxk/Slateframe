@@ -24,6 +24,10 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 	--slateframe-accent: #1d5f50;
 	--slateframe-accent-strong: #12483d;
 	--slateframe-focus: #0b6bcb;
+	--slateframe-shadow: rgb(23 25 24 / 10%);
+	--slateframe-selection: #dbe8e3;
+	--slateframe-media-chrome: #101513;
+	--slateframe-media-chrome-text: #e7ece9;
 	--slateframe-content: 46rem;
 	--slateframe-wide: 74rem;
 	--slateframe-control: 44px;
@@ -56,6 +60,43 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 	--slateframe-radius: 12px;
 	--slateframe-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Arial, sans-serif;
 	--slateframe-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+	color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-slateframe-color-mode]) {
+		--slateframe-bg: #111412;
+		--slateframe-surface: #181c1a;
+		--slateframe-surface-soft: #202622;
+		--slateframe-text: #eef1ee;
+		--slateframe-muted: #a7b0aa;
+		--slateframe-border: #343b37;
+		--slateframe-accent: #7fc8b4;
+		--slateframe-accent-strong: #a5decf;
+		--slateframe-focus: #78b7ff;
+		--slateframe-shadow: rgb(0 0 0 / 32%);
+		--slateframe-selection: #214c40;
+		color-scheme: dark;
+	}
+}
+
+:root[data-slateframe-color-mode="dark"] {
+	--slateframe-bg: #111412;
+	--slateframe-surface: #181c1a;
+	--slateframe-surface-soft: #202622;
+	--slateframe-text: #eef1ee;
+	--slateframe-muted: #a7b0aa;
+	--slateframe-border: #343b37;
+	--slateframe-accent: #7fc8b4;
+	--slateframe-accent-strong: #a5decf;
+	--slateframe-focus: #78b7ff;
+	--slateframe-shadow: rgb(0 0 0 / 32%);
+	--slateframe-selection: #214c40;
+	color-scheme: dark;
+}
+
+:root[data-slateframe-color-mode="light"] {
+	color-scheme: light;
 }
 
 * {
@@ -64,6 +105,11 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 
 html {
 	scroll-behavior: smooth;
+}
+
+::selection {
+	background: var(--slateframe-selection);
+	color: var(--slateframe-text);
 }
 
 body {
@@ -99,6 +145,12 @@ input,
 select,
 textarea {
 	font: inherit;
+	color-scheme: inherit;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	accent-color: var(--slateframe-accent);
 }
 
 
@@ -179,8 +231,12 @@ textarea {
 }
 
 .slateframe-brand-title {
+	display: block;
 	font-weight: 760;
 	letter-spacing: -0.025em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .slateframe-brand-tagline {
