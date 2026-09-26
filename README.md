@@ -20,7 +20,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
-- **Contextual assets:** long-form reading presentation is loaded only on singular documents, while photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear.
+- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404/TOC publishing extras are isolated from base routes; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
 ## Appearance and spatial system
@@ -40,8 +40,8 @@ CI renders the designed default plus the minimum/compact and maximum/spacious sp
 - Editorial single-post and Page layouts with readable prose measure.
 - Wide and full-width Gutenberg alignment without forcing normal paragraphs wider.
 - Long-title handling for CJK, Latin, and long translated strings.
-- Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, table-of-contents treatment, editorial leads, and print-friendly long-form output.
-- Post metadata, categories/tags, previous/next navigation, comments, pagination, archives, author pages, search, and 404.
+- Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, Core/common TOC presentation compatibility, editorial leads, and print-friendly long-form output.
+- Post metadata, categories/tags, filterable related reading, optional previous/next navigation, comments, pagination, archives, author pages with WordPress-native avatars, search, and a recovery-oriented 404 surface.
 - Editor-canvas parity for the singular reading layer: title rhythm, H2/H3 hierarchy, nested-list rhythm, quotes, inline code, tables, captions, wide/full alignment, and bounded Appearance token overrides.
 
 ### Photography, portfolio, and knowledge
@@ -121,7 +121,7 @@ Public GitHub Actions currently enforce:
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
-- JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual comments/content-mode CSS, and JavaScript, so every shipped request is counted.
+- JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual publishing/reading/comments/content-mode CSS, and JavaScript, so every shipped request is counted.
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths; Photography is also captured in each spatial profile and Core lightbox behavior is exercised in the focused raster runtime.
@@ -165,6 +165,7 @@ Repository documentation:
 - [Roadmap](docs/ROADMAP.md)
 - [WordPress.org readiness](docs/WORDPRESS-ORG.md)
 - [Migration audit](docs/MIGRATION.md)
+- [WPCode migration boundary](docs/WPCODE-MIGRATION.md)
 - [Changelog](CHANGELOG.md)
 
 ## Theme boundaries

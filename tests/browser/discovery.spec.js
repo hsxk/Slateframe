@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 const postPath = process.env.SLATEFRAME_POST_PATH || '/';
+const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
 
 async function expectNoRootOverflow(page) {
 	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -17,6 +18,9 @@ test('single posts expose portable related reading without replacing post naviga
 	const links = related.locator('.slateframe-related-item a');
 	expect(await links.count()).toBeGreaterThan(0);
 	expect(await links.count()).toBeLessThanOrEqual(3);
+	for (let index = 0; index < await links.count(); index += 1) {
+		expect((await links.nth(index).boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
 
 	await expect(page.locator('.slateframe-post-navigation')).toBeVisible();
 	await expectNoRootOverflow(page);
@@ -45,5 +49,33 @@ test('author metadata keeps the WordPress archive as the safe default', async ({
 	await page.goto(postPath, { waitUntil: 'networkidle' });
 	const byline = page.locator('.slateframe-byline a');
 	await expect(byline).toBeVisible();
-	expect(await byline.getAttribute('href')).toContain('/author/');
+	expect(await byline.getAttribute('href')).toMatch(/(?:\/author\/|[?&]author=\d+)/);
+});
+
+test('author archives expose a native avatar surface without fixed media URLs', async ({ page }) => {
+	await page.goto('/?author=1', { waitUntil: 'networkidle' });
+
+	await expect(page.locator('body')).toHaveClass(/author/);
+	await expect(page.locator('.slateframe-author-header')).toBeVisible();
+	const avatar = page.locator('.slateframe-author-avatar img');
+	await expect(avatar).toBeVisible();
+	expect((await avatar.boundingBox())?.width || 0).toBeGreaterThanOrEqual(64);
+	await expectNoRootOverflow(page);
+});
+
+test('common TOC controls inherit Slateframe touch sizing without plugin ownership', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	const toc = page.locator('.slateframe-prose').first();
+	await toc.evaluate((node) => {
+		const fixture = document.createElement('nav');
+		fixture.className = 'ez-toc-container';
+		fixture.innerHTML = '<div class="ez-toc-title-container"><button class="ez-toc-toggle" type="button">Contents</button></div><ol><li><a href="#main-content">Overview</a></li></ol>';
+		node.prepend(fixture);
+	});
+
+	const toggle = page.locator('.ez-toc-toggle');
+	await expect(toggle).toBeVisible();
+	expect((await toggle.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	await expectNoRootOverflow(page);
 });
