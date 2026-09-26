@@ -69,13 +69,13 @@ test('system/site default, accessible toggle, and visitor preference stay cohere
 	await fs.mkdir(screenshotDir, { recursive: true });
 	await ensureDark(page);
 	await page.screenshot({
-		path: path.join(screenshotDir, `color-dark-${testInfo.project.name}-page.png`),
+		path: path.join(screenshotDir, `color-${expectedSiteMode}-dark-${testInfo.project.name}-page.png`),
 		fullPage: true,
 	});
 	await page.locator('[data-color-toggle]').click();
 	await expect(page.locator('html')).toHaveCSS('color-scheme', 'light');
 	await page.screenshot({
-		path: path.join(screenshotDir, `color-light-${testInfo.project.name}-page.png`),
+		path: path.join(screenshotDir, `color-${expectedSiteMode}-light-${testInfo.project.name}-page.png`),
 		fullPage: true,
 	});
 });
@@ -120,7 +120,7 @@ test('dark palette reaches forms, reading surfaces, mobile navigation, and photo
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
 	await page.screenshot({
-		path: path.join(screenshotDir, `color-dark-${testInfo.project.name}-photography.png`),
+		path: path.join(screenshotDir, `color-${expectedSiteMode}-dark-${testInfo.project.name}-photography.png`),
 		fullPage: true,
 	});
 });
