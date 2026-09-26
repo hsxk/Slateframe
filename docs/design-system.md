@@ -28,9 +28,15 @@ Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Wide
 
 Buttons, text inputs, selects, pagination targets, menu controls, language integrations, comment controls, and lightbox controls should share the same minimum target, focus language, radius family, and text baseline. Visual compactness should come from border and typography choices, not inaccessible hit areas.
 
+## Photography and media
+
+Photography uses the same spatial language instead of maintaining a parallel set of gallery numbers. Contact sheets, diptychs, and sequences consume `--slateframe-media-gap`; captions consume `--slateframe-caption-gap`; feature media enters the document using stack/component rhythm. Images preserve their intrinsic ratio and use dynamic viewport caps rather than fixed crops.
+
+WordPress Core's native lightbox remains the interaction owner. Slateframe only supplies presentation safeguards: the shared control target, dynamic-viewport containment, scroll/overscroll locking, safe-area-aware close placement, focus visibility, and reduced-motion handling. The theme does not fork Core's lightbox JavaScript.
+
 ## Appearance bounds
 
-Customizer ranges are product guardrails, not arbitrary CSS editors. Minimum/default/maximum states must remain visually balanced across header, search, article, galleries, portfolio patterns, knowledge patterns, pagination, comments, and footer.
+Customizer ranges are product guardrails, not arbitrary CSS editors. Minimum/default/maximum states must remain visually balanced across header, search, article, galleries, portfolio patterns, knowledge patterns, pagination, comments, and footer. Photography evidence is captured at representative mobile and desktop widths for all three spatial profiles so media rhythm changes are reviewed rather than inferred from token values alone.
 
 ## Direction and language
 

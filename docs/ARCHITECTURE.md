@@ -28,7 +28,7 @@ Content inserted through patterns remains ordinary WordPress block content and s
 
 Long-form post/Page presentation lives in `assets/css/reading.css` and is requested only for singular frontend documents. The block editor always receives the same reading layer so authored hierarchy matches the published view.
 
-Photography, portfolio, and knowledge block-style CSS lives in `assets/css/content-modes.css` and is layered on only when singular content contains relevant core blocks. This keeps home, archive, search, and navigation routes on the smaller base stylesheet without hiding pattern functionality behind JavaScript. The public `slateframe_content_mode_markers` filter allows integrations to append stable, site-neutral content markers without making a plugin or locale scheme part of core.
+Photography, portfolio, and knowledge block-style CSS lives in `assets/css/content-modes.css` and is layered on only when singular content contains relevant core blocks. This keeps home, archive, search, and navigation routes on the smaller base stylesheet without hiding pattern functionality behind JavaScript. Photography presentation deliberately reuses the shared media/caption/stack tokens and enhances WordPress Core's native lightbox rather than replacing its interaction model. Dynamic viewport containment, safe-area-aware close placement, scroll locking, reduced motion, and the shared control-size baseline are presentation safeguards only. The public `slateframe_content_mode_markers` filter allows integrations to append stable, site-neutral content markers without making a plugin or locale scheme part of core.
 
 ### 5. Progressive enhancement
 

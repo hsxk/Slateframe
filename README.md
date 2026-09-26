@@ -70,7 +70,7 @@ Slateframe currently ships twenty-one site-neutral starter patterns across publi
 20. **Knowledge procedure** — a goal → action → verification workflow with a recovery checkpoint.
 21. **Knowledge comparison** — a two-option editorial comparison organized around fit, limits, and a decision rule.
 
-Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers. Portfolio and knowledge patterns deliberately compose those shared styles instead of introducing one-off component CSS.
+Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers. Photography layouts share one media/caption rhythm, preserve natural image geometry, and use WordPress Core's native lightbox with Slateframe's accessible control, dynamic-viewport, safe-area, scroll-lock, and reduced-motion safeguards. Portfolio and knowledge patterns deliberately compose shared styles instead of introducing one-off component CSS.
 
 ### Navigation and multilingual readiness
 
@@ -124,7 +124,7 @@ Public GitHub Actions currently enforce:
 - JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual comments/content-mode CSS, and JavaScript, so every shipped request is counted.
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
-- Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths.
+- Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths; Photography is also captured in each spatial profile and Core lightbox behavior is exercised in the focused raster runtime.
 - Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
