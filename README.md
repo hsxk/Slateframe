@@ -44,7 +44,7 @@ CI renders the designed default plus the minimum/compact and maximum/spacious Ap
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships eighteen site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
+Slateframe currently ships twenty-one site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
@@ -64,8 +64,11 @@ Slateframe currently ships eighteen site-neutral starter patterns across publish
 16. **Photography sequence** — an establishing frame plus paired detail rhythm with natural-ratio imagery and captions.
 17. **Project grid** — a native Query Loop portfolio index with responsive cards, site-local date formatting, empty state, and pagination.
 18. **Knowledge checklist** — a compact Understand → Practise checkpoint built from core Columns, Lists, and Quote blocks.
+19. **Project decision log** — a constraint → decision → consequence trail with an explicit evidence prompt.
+20. **Knowledge procedure** — a goal → action → verification workflow with a recovery checkpoint.
+21. **Knowledge comparison** — a two-option editorial comparison organized around fit, limits, and a decision rule.
 
-Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers.
+Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers. Portfolio and knowledge patterns deliberately compose those shared styles instead of introducing one-off component CSS.
 
 ### Navigation and multilingual readiness
 

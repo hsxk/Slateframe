@@ -67,3 +67,20 @@ test('international fixture preserves document semantics', async ({ page }) => {
 	await expect(page.locator('.browser-i18n-table th')).toHaveCount(2);
 	await expect(page.locator('.browser-i18n-table td')).toHaveCount(4);
 });
+
+
+test('multilingual comparisons preserve child direction and containment', async ({ page }) => {
+	const cjk = page.locator('.browser-comparison-cjk');
+	const rtl = page.locator('.browser-comparison-rtl');
+	await expect(cjk).toHaveAttribute('lang', 'ja');
+	await expect(rtl).toHaveAttribute('lang', 'ar');
+	await expect(rtl).toHaveAttribute('dir', 'rtl');
+	await expectContained(page, cjk, 'comparison CJK column');
+	await expectContained(page, rtl, 'comparison RTL column');
+	expect(await rtl.evaluate((element) => getComputedStyle(element).direction)).toBe('rtl');
+	const metrics = await page.evaluate(() => ({
+		scrollWidth: document.documentElement.scrollWidth,
+		clientWidth: document.documentElement.clientWidth,
+	}));
+	expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+});
