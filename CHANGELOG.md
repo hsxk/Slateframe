@@ -58,6 +58,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Converted recurring child-theme repair patterns into first-class Slateframe contracts: tokenized page-start rhythm, script-neutral title measure, content-relative reading widths, viewport-contained mobile navigation, and sticky-header-aware anchor spacing.
+
 - Isolated author, related-reading, 404 recovery, and optional TOC compatibility styles into a bounded contextual publishing asset so new discovery features do not increase the base-route CSS budget.
 - Matured the spatial system into semantic control-padding, inline/component/stack/media/caption gaps, header height, border/focus, reading-width, and wide-canvas tokens.
 - Centralized responsive primary navigation and language-slot presentation in its dedicated stylesheet instead of maintaining conflicting base and navigation rules.
@@ -76,6 +78,9 @@ All notable changes to Slateframe will be documented here.
 - Contact sheets, diptychs, photography sequences, and feature captions now consume the shared media/caption/stack rhythm instead of maintaining separate gap and padding values.
 
 ### Fixed
+
+- Keep direct plugin-style TablePress output locally scrollable and keyboard reachable without requiring TablePress, while CI now reproduces long-table and real pretty-404 failure modes.
+- Keep ordinary frontend and editor blocks shrinkable inside the reading measure so intrinsic long content cannot recreate inconsistent box/table widths or root overflow.
 
 - Prevent Photo Feature media chrome from leaking into the native lightbox overlay as a dark edge during desktop opening.
 - Make post metadata and common TOC links honor the shared accessible touch-target baseline.
