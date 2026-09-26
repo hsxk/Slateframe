@@ -251,13 +251,13 @@ input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)
 }
 
 .slateframe-page-header {
-	padding-block: clamp(3.5rem, 8vw, 6.5rem) clamp(2rem, 5vw, 3.5rem);
+	padding-block: var(--slateframe-section) calc(var(--slateframe-stack-gap) + var(--slateframe-component-gap));
 }
 
 .slateframe-page-title,
 .slateframe-entry-title {
 	margin: 0;
-	max-width: 20ch;
+	max-width: 14em;
 	font-size: clamp(2.1rem, 5vw, 4.6rem);
 	font-weight: 790;
 	line-height: 1.06;
