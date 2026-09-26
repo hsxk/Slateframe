@@ -72,13 +72,9 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 :root[data-slateframe-color-mode="dark"] { color-scheme: dark; }
 :root[data-slateframe-color-mode="light"] { color-scheme: light; }
 
-* {
-	box-sizing: border-box;
-}
+*{box-sizing:border-box}
 
-html {
-	scroll-behavior:smooth;
-}
+html{scroll-behavior:smooth}
 
 ::selection {
 	background: var(--slateframe-selection);
@@ -95,42 +91,18 @@ body {
 	text-rendering: optimizeLegibility;
 }
 
-img,
-svg,
-video {
-	display: block;
-	max-width: 100%;
-	height: auto;
-}
+img,svg,video{display:block;max-width:100%;height:auto}
 
-a {
-	color: var(--slateframe-accent);
-	text-decoration-thickness: 0.08em;
-	text-underline-offset: 0.18em;
-}
+a{color:var(--slateframe-accent);text-decoration-thickness:.08em;text-underline-offset:.18em}
 
-a:hover {
-	color: var(--slateframe-accent-strong);
-}
+a:hover{color:var(--slateframe-accent-strong)}
 
-button,
-input,
-select,
-textarea {
-	font: inherit;
-	color-scheme: inherit;
-}
+button,input,select,textarea{font:inherit;color-scheme:inherit}
 
-input[type="checkbox"],
-input[type="radio"] {
-	accent-color: var(--slateframe-accent);
-}
+input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)}
 
 
-:focus-visible {
-	outline: var(--slateframe-focus-width) solid var(--slateframe-focus);
-	outline-offset: var(--slateframe-focus-offset);
-}
+:focus-visible{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}
 
 .screen-reader-text {
 	position: absolute !important;
@@ -304,9 +276,7 @@ input[type="radio"] {
 	font-size: 0.82rem;
 }
 
-.slateframe-entry-meta a {
-	color: inherit;
-}
+.slateframe-entry-meta a{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);color:inherit}
 
 .slateframe-archive-description {
 	max-width: var(--slateframe-content);

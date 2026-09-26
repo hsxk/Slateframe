@@ -61,6 +61,28 @@ function slateframe_setup() {
 add_action( 'after_setup_theme', 'slateframe_setup' );
 
 /**
+ * Register optional block/widget regions.
+ *
+ * Footer content is deliberately content-owned: sites can compose Core blocks,
+ * subscription widgets, project links, or multilingual widgets without the
+ * theme hard-coding a footer information architecture.
+ */
+function slateframe_register_widget_areas() {
+	register_sidebar(
+		array(
+			'name'          => __( 'Footer content', 'slateframe' ),
+			'id'            => 'footer-content',
+			'description'   => __( 'Optional block or widget content displayed above the footer navigation.', 'slateframe' ),
+			'before_widget' => '<div id="%1$s" class="slateframe-footer-widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h2 class="slateframe-footer-widget-title">',
+			'after_title'   => '</h2>',
+		)
+	);
+}
+add_action( 'widgets_init', 'slateframe_register_widget_areas' );
+
+/**
  * Determine whether the current singular document needs content-mode styles.
  *
  * @return bool

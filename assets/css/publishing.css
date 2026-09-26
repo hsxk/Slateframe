@@ -157,6 +157,11 @@
 	min-block-size: var(--slateframe-control);
 }
 
+.slateframe-prose :where(#ez-toc-container, .ez-toc-container) a {
+	display: flex;
+	align-items: center;
+}
+
 .slateframe-prose :where(#ez-toc-container, .ez-toc-container) .ez-toc-toggle {
 	display: inline-flex;
 	align-items: center;
