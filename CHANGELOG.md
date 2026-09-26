@@ -45,6 +45,8 @@ All notable changes to Slateframe will be documented here.
 - Added semantic prose, heading, heading-after, and list-item rhythm tokens shared by frontend and editor block gaps, with Appearance spacing-density scaling.
 - Refined long-form hierarchy with distinct H2/H3 scale and spacing, nested-list rhythm, blockquote citations, readable code metrics, table heading surfaces, TOC rhythm, and 44px post-navigation targets.
 - Expanded real WordPress browser fixtures and regression assertions for heading hierarchy, nested lists, inline/code rhythm, quoted sources, table presentation, and reading-token behavior across compact/default/spacious profiles.
+- Mirrored bounded Appearance token overrides into the block-editor canvas and added runtime checks that editor styles and dynamic token metadata remain registered.
+- Extended editor-canvas parity to H2/H3 hierarchy, nested lists, quotes, inline code, and table surfaces while consolidating article transitions, pagination, table cells, entry footers, and search buttons onto shared spatial/control tokens.
 
 ### Changed
 

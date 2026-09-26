@@ -241,6 +241,7 @@ jobs:
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
           wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/photography-sequence","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/project-outcomes","slateframe/portfolio-project-grid","slateframe/project-decision-log","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/knowledge-definition","slateframe/knowledge-checklist","slateframe/knowledge-procedure","slateframe/knowledge-comparison","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
+          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
       - name: Validate bounded Appearance settings
         shell: bash
         run: |
@@ -264,6 +265,27 @@ jobs:
             if (7 !== count(slateframe_layout_control_definitions())) {
               throw new RuntimeException("Appearance control registry drifted.");
             }
+
+            $default_editor = slateframe_editor_spatial_tokens(array("styles" => array()));
+            if (!empty($default_editor["styles"])) {
+              throw new RuntimeException("Default Appearance should not add editor token overrides.");
+            }
+
+            set_theme_mod("slateframe_spacing_scale", 1.2);
+            set_theme_mod("slateframe_content_width", 800);
+            $editor = slateframe_editor_spatial_tokens(array("styles" => array()));
+            $entry = $editor["styles"][0] ?? array();
+            $css = $entry["css"] ?? "";
+            foreach (array("--slateframe-space-scale:1.2", "--slateframe-prose-gap:24px", "--slateframe-content:800px") as $needle) {
+              if (false === strpos($css, $needle)) {
+                throw new RuntimeException("Editor Appearance token missing: " . $needle);
+              }
+            }
+            if ("theme" !== ($entry["__unstableType"] ?? "") || false !== ($entry["isGlobalStyles"] ?? null)) {
+              throw new RuntimeException("Editor Appearance style metadata drifted.");
+            }
+            remove_theme_mod("slateframe_spacing_scale");
+            remove_theme_mod("slateframe_content_width");
           ' --path=/tmp/wp-site
 
   browser-smoke:

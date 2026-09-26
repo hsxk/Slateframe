@@ -216,15 +216,26 @@ test('editorial reading rhythm distinguishes headings, nested lists, code, table
 		const nested = document.querySelector('.browser-nested-list li > ul');
 		const code = document.querySelector('.wp-block-code');
 		const th = document.querySelector('.browser-data-table th');
+		const h2Styles = getComputedStyle(h2);
+		const codeStyles = getComputedStyle(code);
+		const thStyles = getComputedStyle(th);
 		return {
 			proseGap: Number.parseFloat(root.getPropertyValue('--slateframe-prose-gap')),
 			headingGap: Number.parseFloat(root.getPropertyValue('--slateframe-heading-gap')),
+			headingAfter: Number.parseFloat(root.getPropertyValue('--slateframe-heading-after')),
 			listGap: Number.parseFloat(root.getPropertyValue('--slateframe-list-item-gap')),
-			h2Size: Number.parseFloat(getComputedStyle(h2).fontSize),
+			stackGap: Number.parseFloat(root.getPropertyValue('--slateframe-stack-gap')),
+			space3: Number.parseFloat(root.getPropertyValue('--slateframe-space-3')),
+			h2Size: Number.parseFloat(h2Styles.fontSize),
 			h3Size: Number.parseFloat(getComputedStyle(h3).fontSize),
+			h2MarginStart: Number.parseFloat(h2Styles.marginBlockStart),
+			h2MarginEnd: Number.parseFloat(h2Styles.marginBlockEnd),
 			nestedGap: Number.parseFloat(getComputedStyle(nested).marginBlockStart),
-			codeLineHeight: Number.parseFloat(getComputedStyle(code).lineHeight),
-			tableHeadBackground: getComputedStyle(th).backgroundColor,
+			codeLineHeight: Number.parseFloat(codeStyles.lineHeight),
+			codePaddingBlock: Number.parseFloat(codeStyles.paddingBlockStart),
+			codePaddingInline: Number.parseFloat(codeStyles.paddingInlineStart),
+			tableCellPadding: Number.parseFloat(thStyles.paddingBlockStart),
+			tableHeadBackground: thStyles.backgroundColor,
 		};
 	});
 
@@ -232,8 +243,13 @@ test('editorial reading rhythm distinguishes headings, nested lists, code, table
 	expect(rhythm.headingGap).toBeGreaterThan(rhythm.proseGap);
 	expect(rhythm.listGap).toBeGreaterThan(0);
 	expect(rhythm.h2Size).toBeGreaterThan(rhythm.h3Size);
+	expect(Math.abs(rhythm.h2MarginStart - rhythm.headingGap)).toBeLessThanOrEqual(1);
+	expect(Math.abs(rhythm.h2MarginEnd - rhythm.headingAfter)).toBeLessThanOrEqual(1);
 	expect(rhythm.nestedGap).toBeGreaterThanOrEqual(rhythm.listGap - 1);
 	expect(rhythm.codeLineHeight).toBeGreaterThan(20);
+	expect(Math.abs(rhythm.codePaddingBlock - rhythm.stackGap)).toBeLessThanOrEqual(1);
+	expect(Math.abs(rhythm.codePaddingInline - rhythm.proseGap)).toBeLessThanOrEqual(1);
+	expect(Math.abs(rhythm.tableCellPadding - rhythm.space3)).toBeLessThanOrEqual(1);
 	expect(rhythm.tableHeadBackground).not.toBe('rgba(0, 0, 0, 0)');
 	await expectNoHorizontalOverflow(page, pagePath);
 

@@ -241,3 +241,31 @@ function slateframe_customizer_spatial_tokens() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'slateframe_customizer_spatial_tokens', 20 );
+
+
+/**
+ * Mirror changed spatial tokens into the block editor canvas.
+ *
+ * @param array $editor_settings Block editor settings.
+ * @return array
+ */
+function slateframe_editor_spatial_tokens( $editor_settings ) {
+	$css = slateframe_customizer_spatial_css();
+
+	if ( ! $css ) {
+		return $editor_settings;
+	}
+
+	if ( ! isset( $editor_settings['styles'] ) || ! is_array( $editor_settings['styles'] ) ) {
+		$editor_settings['styles'] = array();
+	}
+
+	$editor_settings['styles'][] = array(
+		'css'            => $css,
+		'__unstableType' => 'theme',
+		'isGlobalStyles' => false,
+	);
+
+	return $editor_settings;
+}
+add_filter( 'block_editor_settings_all', 'slateframe_editor_spatial_tokens', 20 );

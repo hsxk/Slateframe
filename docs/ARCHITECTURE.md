@@ -6,7 +6,7 @@ Slateframe is a **hybrid WordPress theme**: `theme.json` provides editor/design-
 
 ### 1. Design system
 
-`theme.json` and `--slateframe-*` CSS custom properties define the shared palette, typography, layout measures, control/component spacing, prose/heading/list reading rhythm, radii, motion, and editor-facing presets. The editor block gap uses the same prose-rhythm token as the frontend so authored spacing remains predictable.
+`theme.json` and `--slateframe-*` CSS custom properties define the shared palette, typography, layout measures, control/component spacing, prose/heading/list reading rhythm, radii, motion, and editor-facing presets. The editor block gap uses the same prose-rhythm token as the frontend so authored spacing remains predictable. Bounded Customizer changes are serialized once by `slateframe_customizer_spatial_css()` and injected into both frontend styles and the block-editor `styles` setting, preventing Appearance values from diverging between editing and published views.
 
 Repeated visual values should become tokens rather than drift across component files.
 

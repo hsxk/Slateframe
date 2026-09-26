@@ -233,14 +233,18 @@ textarea {
 }
 
 .slateframe-archive-description {
-	max-width: 46rem;
-	margin-block-start: 1rem;
+	max-width: var(--slateframe-content);
+	margin-block-start: var(--slateframe-stack-gap);
 	color: var(--slateframe-muted);
 	font-size: 1.02rem;
 }
 
 .slateframe-entry-hero {
-	margin-block-end: clamp(2rem, 5vw, 4rem);
+	margin-block-end: clamp(
+		calc(var(--slateframe-stack-gap) + var(--slateframe-stack-gap)),
+		5vw,
+		var(--slateframe-section-max)
+	);
 }
 
 .slateframe-entry-hero-image {
@@ -308,7 +312,7 @@ textarea {
 .slateframe-prose pre,
 .wp-block-code {
 	overflow: auto;
-	padding: 1.1rem 1.2rem;
+	padding: var(--slateframe-stack-gap) var(--slateframe-prose-gap);
 	border-radius: var(--slateframe-radius);
 	background: #111715;
 	color: #eef4f1;
@@ -358,8 +362,8 @@ textarea {
 
 .slateframe-prose th,
 .slateframe-prose td {
-	padding: 0.72rem 0.78rem;
-	border-block-end: 1px solid var(--slateframe-border);
+	padding: var(--slateframe-space-3);
+	border-block-end: var(--slateframe-border-width) solid var(--slateframe-border);
 	text-align: start;
 	vertical-align: top;
 }
@@ -379,7 +383,7 @@ textarea {
 	grid-column: span 6;
 	display: grid;
 	align-content: start;
-	border-block-start: 1px solid var(--slateframe-border);
+	border-block-start: var(--slateframe-border-width) solid var(--slateframe-border);
 	padding-block: 1.25rem 1.8rem;
 }
 
@@ -431,8 +435,8 @@ textarea {
 .slateframe-entry-footer {
 	display: grid;
 	gap: var(--slateframe-component-gap);
-	padding-block-start: 1.25rem;
-	border-block-start: 1px solid var(--slateframe-border);
+	padding-block-start: var(--slateframe-prose-gap);
+	border-block-start: var(--slateframe-border-width) solid var(--slateframe-border);
 	color: var(--slateframe-muted);
 	font-size: 0.88rem;
 }
@@ -496,7 +500,7 @@ textarea {
 .slateframe-search-form button,
 .form-submit .submit {
 	min-height: var(--slateframe-control);
-	padding: var(--slateframe-control-padding-block) var(--slateframe-space-4);
+	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
 	border: var(--slateframe-border-width) solid var(--slateframe-text);
 	border-radius: var(--slateframe-radius);
 	background: var(--slateframe-text);
@@ -505,7 +509,7 @@ textarea {
 }
 
 .slateframe-pagination {
-	margin-block: 2rem var(--slateframe-section);
+	margin-block: calc(var(--slateframe-stack-gap) + var(--slateframe-stack-gap)) var(--slateframe-section);
 }
 
 .slateframe-pagination .nav-links {
@@ -520,7 +524,7 @@ textarea {
 	min-width: var(--slateframe-control);
 	min-height: var(--slateframe-control);
 	padding: var(--slateframe-space-2);
-	border: 1px solid var(--slateframe-border);
+	border: var(--slateframe-border-width) solid var(--slateframe-border);
 	color: var(--slateframe-text);
 	text-decoration: none;
 }
