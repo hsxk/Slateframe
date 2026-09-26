@@ -15,17 +15,17 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 */
 
 :root {
-	--slateframe-bg: #f7f7f4;
-	--slateframe-surface: #fff;
-	--slateframe-surface-soft: #f0f1ee;
-	--slateframe-text: #171918;
-	--slateframe-muted: #656b67;
-	--slateframe-border: #dfe2de;
-	--slateframe-accent: #1d5f50;
-	--slateframe-accent-strong: #12483d;
-	--slateframe-focus: #0b6bcb;
-	--slateframe-shadow: rgb(23 25 24 / 10%);
-	--slateframe-selection: #dbe8e3;
+	--slateframe-bg: light-dark(#f7f7f4, #111412);
+	--slateframe-surface: light-dark(#fff, #181c1a);
+	--slateframe-surface-soft: light-dark(#f0f1ee, #202622);
+	--slateframe-text: light-dark(#171918, #eef1ee);
+	--slateframe-muted: light-dark(#656b67, #a7b0aa);
+	--slateframe-border: light-dark(#dfe2de, #343b37);
+	--slateframe-accent: light-dark(#1d5f50, #7fc8b4);
+	--slateframe-accent-strong: light-dark(#12483d, #a5decf);
+	--slateframe-focus: light-dark(#0b6bcb, #78b7ff);
+	--slateframe-shadow: light-dark(rgb(23 25 24 / 10%), rgb(0 0 0 / 32%));
+	--slateframe-selection: light-dark(#dbe8e3, #214c40);
 	--slateframe-media-chrome: #101513;
 	--slateframe-media-chrome-text: #e7ece9;
 	--slateframe-content: 46rem;
@@ -65,39 +65,12 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 
 @media (prefers-color-scheme: dark) {
 	:root:not([data-slateframe-color-mode]) {
-		--slateframe-bg: #111412;
-		--slateframe-surface: #181c1a;
-		--slateframe-surface-soft: #202622;
-		--slateframe-text: #eef1ee;
-		--slateframe-muted: #a7b0aa;
-		--slateframe-border: #343b37;
-		--slateframe-accent: #7fc8b4;
-		--slateframe-accent-strong: #a5decf;
-		--slateframe-focus: #78b7ff;
-		--slateframe-shadow: rgb(0 0 0 / 32%);
-		--slateframe-selection: #214c40;
 		color-scheme: dark;
 	}
 }
 
-:root[data-slateframe-color-mode="dark"] {
-	--slateframe-bg: #111412;
-	--slateframe-surface: #181c1a;
-	--slateframe-surface-soft: #202622;
-	--slateframe-text: #eef1ee;
-	--slateframe-muted: #a7b0aa;
-	--slateframe-border: #343b37;
-	--slateframe-accent: #7fc8b4;
-	--slateframe-accent-strong: #a5decf;
-	--slateframe-focus: #78b7ff;
-	--slateframe-shadow: rgb(0 0 0 / 32%);
-	--slateframe-selection: #214c40;
-	color-scheme: dark;
-}
-
-:root[data-slateframe-color-mode="light"] {
-	color-scheme: light;
-}
+:root[data-slateframe-color-mode="dark"] { color-scheme: dark; }
+:root[data-slateframe-color-mode="light"] { color-scheme: light; }
 
 * {
 	box-sizing: border-box;
@@ -250,6 +223,54 @@ input[type="radio"] {
 
 .slateframe-header-spacer {
 	flex: 1;
+}
+
+.slateframe-menu-toggle,
+.slateframe-color-toggle {
+	min-inline-size: var(--slateframe-control);
+	min-block-size: var(--slateframe-control);
+	border: 0;
+	border-radius: var(--slateframe-radius);
+	background: transparent;
+	color: inherit;
+	cursor: pointer;
+}
+
+.slateframe-color-toggle {
+	display: none;
+	place-items: center;
+	flex: 0 0 auto;
+	padding: 0;
+}
+
+.has-js .slateframe-color-toggle {
+	display: grid;
+}
+
+.slateframe-color-icon {
+	inline-size: var(--slateframe-icon-size);
+	block-size: var(--slateframe-icon-size);
+}
+
+.slateframe-color-icon-moon,
+:root[data-slateframe-color-mode="dark"] .slateframe-color-icon-sun {
+	display: none;
+}
+
+:root[data-slateframe-color-mode="dark"] .slateframe-color-icon-moon {
+	display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root:not([data-slateframe-color-mode]) .slateframe-color-icon-sun { display: none; }
+	:root:not([data-slateframe-color-mode]) .slateframe-color-icon-moon { display: block; }
+}
+
+@media (hover: hover) {
+	.slateframe-menu-toggle:hover,
+	.slateframe-color-toggle:hover {
+		background: var(--slateframe-surface-soft);
+	}
 }
 
 .slateframe-footer-menu {
