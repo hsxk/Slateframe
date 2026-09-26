@@ -235,7 +235,7 @@ test('core page headers share the tokenized page-start rhythm', async ({ page })
 	}
 });
 
-test('display titles use a script-neutral measure for long CJK strings', async ({ page }) => {
+test('display titles use a script-neutral measure for long CJK strings', async ({ page }, testInfo) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	await page.evaluate(() => {
 		document.documentElement.lang = 'ja';
@@ -251,15 +251,21 @@ test('display titles use a script-neutral measure for long CJK strings', async (
 		const styles = getComputedStyle(node);
 		const rect = node.getBoundingClientRect();
 		return {
-			maxMeasure: Number.parseFloat(styles.maxWidth) / Number.parseFloat(styles.fontSize),
+			maxWidth: styles.maxWidth,
+			maxMeasure: 'none' === styles.maxWidth ? null : Number.parseFloat(styles.maxWidth) / Number.parseFloat(styles.fontSize),
 			right: rect.right,
 			viewport: document.documentElement.clientWidth,
 			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 		};
 	});
 
-	expect(metrics.maxMeasure).toBeGreaterThan(13.5);
-	expect(metrics.maxMeasure).toBeLessThan(14.5);
+	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
+	if (viewportWidth <= 480) {
+		expect(metrics.maxWidth).toBe('none');
+	} else {
+		expect(metrics.maxMeasure).toBeGreaterThan(13.5);
+		expect(metrics.maxMeasure).toBeLessThan(14.5);
+	}
 	expect(metrics.right).toBeLessThanOrEqual(metrics.viewport + 1);
 	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
 });
