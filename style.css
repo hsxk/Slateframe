@@ -49,7 +49,7 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 	--slateframe-control-padding-inline: var(--slateframe-space-3);
 	--slateframe-header-height: 4.5rem;
 	--slateframe-icon-size: 1.25rem;
-	--slateframe-border-width: 1px;
+	--slateframe-border-width:1px;
 	--slateframe-focus-width: 3px;
 	--slateframe-focus-offset: 3px;
 	--slateframe-gutter: clamp(var(--slateframe-gutter-min), 3vw, calc(var(--slateframe-gutter-min) * 2));
@@ -91,20 +91,18 @@ button,input,select,textarea{font:inherit;color-scheme:inherit}
 button:disabled,input:disabled,select:disabled,textarea:disabled,.wp-element-button[aria-disabled="true"]{cursor:not-allowed;opacity:.58}
 
 input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)}
-
-
 :focus-visible{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}
 
 .screen-reader-text {
-	position: absolute !important;
+	position:absolute!important;
 	width: 1px;
-	height: 1px;
-	padding: 0;
-	margin: -1px;
-	overflow: hidden;
+	height:1px;
+	padding:0;
+	margin:-1px;
+	overflow:hidden;
 	clip: rect(0, 0, 0, 0);
-	white-space: nowrap;
-	border: 0;
+	white-space:nowrap;
+	border:0;
 }
 
 .screen-reader-text:focus,
@@ -112,7 +110,7 @@ input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)
 	clip: auto !important;
 	width: auto;
 	height: auto;
-	margin: 0.75rem;
+	margin:.75rem;
 	padding: 0.7rem 1rem;
 	background: var(--slateframe-surface);
 	color: var(--slateframe-text);
