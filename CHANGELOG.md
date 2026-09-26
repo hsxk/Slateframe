@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
-- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, and taxonomy presentation hooks migrated from recurring site-level WPCode needs.
+- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, WordPress-native author avatars, and TOC compatibility migrated from recurring site-level WPCode needs.
 - Public Slateframe hybrid-theme baseline.
 - WordPress-native template hierarchy and `theme.json` design system.
 - Accessible responsive navigation with a no-JavaScript fallback and mobile focus containment.

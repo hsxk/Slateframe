@@ -12,11 +12,16 @@ $slateframe_author_bio = get_the_author_meta( 'description', $slateframe_author_
 ?>
 <main id="main-content" class="slateframe-main">
 	<header class="slateframe-page-header">
-		<div class="slateframe-shell">
+		<div class="slateframe-shell slateframe-author-header">
+			<div class="slateframe-author-avatar">
+				<?php echo get_avatar( $slateframe_author_id, 96, '', '', array( 'loading' => 'eager' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+			<div class="slateframe-author-copy">
 			<h1 class="slateframe-page-title"><?php echo esc_html( get_the_author_meta( 'display_name', $slateframe_author_id ) ); ?></h1>
 			<?php if ( $slateframe_author_bio ) : ?>
 				<p class="slateframe-archive-description"><?php echo esc_html( $slateframe_author_bio ); ?></p>
 			<?php endif; ?>
+			</div>
 		</div>
 	</header>
 

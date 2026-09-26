@@ -280,3 +280,32 @@
 .slateframe-prose .wp-block-table-of-contents li + li {
 	margin-block-start: var(--slateframe-list-item-gap);
 }
+
+
+/* Optional TOC plugin compatibility: presentation only, no plugin dependency. */
+.slateframe-prose :where(#ez-toc-container, .ez-toc-container) {
+	max-inline-size: 100%;
+	padding: var(--slateframe-stack-gap);
+	border: var(--slateframe-border-width) solid var(--slateframe-border);
+	border-radius: var(--slateframe-radius);
+	background: var(--slateframe-surface-soft);
+}
+
+.slateframe-prose :where(#ez-toc-container, .ez-toc-container) :where(.ez-toc-title-container, .ez-toc-title) {
+	margin-block: 0;
+}
+
+.slateframe-prose :where(#ez-toc-container, .ez-toc-container) :where(ul, ol) {
+	margin-block: var(--slateframe-component-gap) 0;
+}
+
+.slateframe-prose :where(#ez-toc-container, .ez-toc-container) :where(a, button, .ez-toc-toggle) {
+	min-block-size: var(--slateframe-control);
+}
+
+.slateframe-prose :where(#ez-toc-container, .ez-toc-container) .ez-toc-toggle {
+	display: inline-flex;
+	align-items: center;
+	max-inline-size: 100%;
+	padding-inline: var(--slateframe-control-padding-inline);
+}

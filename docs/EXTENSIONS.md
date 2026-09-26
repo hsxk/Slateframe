@@ -81,3 +81,29 @@ Return `false` from `slateframe_show_related_posts` to disable the built-in pres
 ## 404 recovery content
 
 `slateframe_not_found_posts_args` filters the small recent-post query shown on the native 404 template. Use it to apply editorial or language context while keeping the 404 template site-neutral.
+
+
+## Post navigation
+
+Slateframe keeps native previous/next navigation enabled by default. Integrations may suppress it when a site supplies a different reading flow:
+
+```php
+add_filter(
+	'slateframe_show_post_navigation',
+	function ( $show, $post_id ) {
+		return $show;
+	},
+	10,
+	2
+);
+```
+
+The default remains portable and requires no Astra-specific hook.
+
+## Avatar compatibility
+
+Author archives render avatars through WordPress core `get_avatar()`. Sites may therefore use any standards-compatible avatar plugin or the normal `get_avatar_url` filter without Slateframe owning local-media paths or user IDs.
+
+## Table of contents compatibility
+
+Slateframe provides restrained presentation for Core's Table of Contents block and common `.ez-toc-container` output, including the shared control-height baseline for TOC actions. The theme does not generate TOC structure, rewrite plugin strings, or own SEO/schema behavior.
