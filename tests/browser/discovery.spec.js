@@ -80,3 +80,55 @@ test('common TOC controls inherit Slateframe touch sizing without plugin ownersh
 	expect((await toggle.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
 	await expectNoRootOverflow(page);
 });
+
+test('entry metadata links keep the shared touch-target baseline', async ({ page }) => {
+	await page.goto(postPath, { waitUntil: 'networkidle' });
+	const links = page.locator('.slateframe-entry-meta a');
+	expect(await links.count()).toBeGreaterThan(0);
+	for (let index = 0; index < await links.count(); index += 1) {
+		expect((await links.nth(index).boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+});
+
+test('language adapter remains reachable through responsive navigation', async ({ page }, testInfo) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const width = testInfo.project.use.viewport?.width || 1440;
+	const switcher = page.locator('.browser-language-switcher');
+	if (width <= 900) {
+		await page.locator('[data-menu-toggle]').click();
+	}
+	await expect(switcher).toBeVisible();
+	const links = switcher.locator('a');
+	await expect(links).toHaveCount(2);
+	for (let index = 0; index < await links.count(); index += 1) {
+		expect((await links.nth(index).boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+	await expectNoRootOverflow(page);
+});
+
+test('native footer content region renders portable block widgets without overflow', async ({ page }) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const content = page.locator('.slateframe-site-footer .slateframe-footer-content .browser-footer-content');
+	await expect(content).toBeVisible();
+	const bounds = await content.evaluate((node) => {
+		const rect = node.getBoundingClientRect();
+		return { left: rect.left, right: rect.right, viewport: document.documentElement.clientWidth };
+	});
+	expect(bounds.left).toBeGreaterThanOrEqual(-1);
+	expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
+	await expectNoRootOverflow(page);
+});
+
+test('common TOC links keep the shared touch-target baseline', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const prose = page.locator('.slateframe-prose').first();
+	await prose.evaluate((node) => {
+		const fixture = document.createElement('nav');
+		fixture.className = 'ez-toc-container';
+		fixture.innerHTML = '<div class="ez-toc-title-container"><button class="ez-toc-toggle" type="button">Contents</button></div><ol><li><a class="ez-toc-link" href="#main-content">Overview</a></li></ol>';
+		node.prepend(fixture);
+	});
+	const link = page.locator('.ez-toc-link');
+	await expect(link).toBeVisible();
+	expect((await link.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+});

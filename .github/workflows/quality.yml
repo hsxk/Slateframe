@@ -53,6 +53,13 @@ jobs:
             grep -q '^ \* Slug: slateframe/' "$file"
             grep -q '^ \* Categories:.*slateframe' "$file"
           done
+          for file in patterns/photo-essay.php patterns/photography-contact-sheet.php patterns/photography-diptych.php patterns/photography-sequence.php; do
+            grep -q '"imageCrop":false' "$file"
+          done
+          if grep -E 'class="[^"]* is-cropped( |")' patterns/photo-essay.php patterns/photography-contact-sheet.php patterns/photography-diptych.php patterns/photography-sequence.php; then
+            echo 'Natural-ratio photography patterns must not serialize Core cropped galleries.' >&2
+            exit 1
+          fi
           if grep -niE 'https?://' "${patterns[@]}"; then
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
@@ -370,7 +377,14 @@ jobs:
               10,
               2
           );
+          add_filter(
+              'slateframe_language_switcher_html',
+              static function () {
+                  return '<div class="browser-language-switcher" aria-label="Languages"><a href="/?fixture-lang=en" lang="en">EN</a><a href="/?fixture-lang=ja" lang="ja">日本語</a></div>';
+              }
+          );
           PHP
+          wp widget add block footer-content 1 --content='<p class="browser-footer-content">Portable footer content fixture.</p>' --path=/tmp/wp-browser
           wp option update thread_comments 1 --path=/tmp/wp-browser
           mkdir -p /tmp/wp-browser/wp-content/uploads/slateframe-fixtures
           cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg <<'SVG'
