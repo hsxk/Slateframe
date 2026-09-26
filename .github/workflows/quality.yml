@@ -76,6 +76,10 @@ jobs:
           test $(wc -c < assets/css/content-modes.css) -le 12500
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
+          if grep -Eq '100(d?v|v)w' assets/css/reading.css; then
+            echo 'Reading primitives must stay container-relative; viewport-width escapes recreate legacy child-theme overflow.' >&2
+            exit 1
+          fi
           base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/js/theme.js) ))
           core_reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
           publishing_runtime_bytes=$(( core_reading_runtime_bytes + $(wc -c < assets/css/publishing.css) ))
@@ -366,6 +370,8 @@ jobs:
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
+          wp rewrite structure '/%postname%/' --path=/tmp/wp-browser
+          wp rewrite flush --path=/tmp/wp-browser
           mkdir -p /tmp/wp-browser/wp-content/mu-plugins
           cat > /tmp/wp-browser/wp-content/mu-plugins/slateframe-browser-fixtures.php <<'PHP'
           <?php
@@ -439,6 +445,10 @@ jobs:
           <figure class="wp-block-table browser-data-table is-style-slateframe-data"><table><thead><tr><th>Metric</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><td>Publishing reach</td><td>1,234</td><td>12,345</td></tr></tbody></table></figure>
           <!-- /wp:table -->
 
+          <!-- wp:html -->
+          <table class="tablepress browser-tablepress"><thead><tr><th>Reference</th><th>Value</th></tr></thead><tbody><tr><td>Plugin-style table with an intentionally long portable reference label that must scroll inside the reading measure instead of widening the document root.</td><td>Slateframe</td></tr></tbody></table>
+          <!-- /wp:html -->
+
           <!-- wp:details {"className":"browser-details is-style-slateframe-disclosure"} -->
           <details class="wp-block-details browser-details is-style-slateframe-disclosure"><summary>Implementation note</summary><!-- wp:paragraph -->
           <p>Native disclosure content remains readable without JavaScript.</p>
@@ -489,6 +499,7 @@ jobs:
             --post_type=post \
             --post_status=publish \
             --comment_status=open \
+            --post_author=1 \
             --post_title='Slateframe Browser Post' \
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)
