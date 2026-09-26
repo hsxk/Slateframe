@@ -112,15 +112,15 @@ test('long translated controls do not shrink below touch baseline', async ({ pag
 test('reduced motion removes meaningful transition duration', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
-	const duration = await page.evaluate(() => {
+	const durationSeconds = await page.evaluate(() => {
 		const probe = document.createElement('div');
 		probe.style.transition = 'opacity 200ms ease';
 		document.body.append(probe);
-		const value = getComputedStyle(probe).transitionDuration;
+		const value = getComputedStyle(probe).transitionDuration.trim();
 		probe.remove();
-		return value;
+		return value.endsWith('ms') ? Number.parseFloat(value) / 1000 : Number.parseFloat(value);
 	});
-	expect(duration === '0s' || duration === '0.00001s').toBeTruthy();
+	expect(durationSeconds).toBeLessThanOrEqual(0.00001);
 });
 
 test('design system remains viewport-contained after 200 percent zoom equivalent', async ({ page }) => {

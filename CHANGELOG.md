@@ -100,6 +100,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Accessibility
 
+- Keep long table headers and cells shrinkable during 200% text resizing so readable mobile pages do not gain document-level horizontal scrolling.
 - Avoid empty author links when content has no resolvable WordPress author, preserving discernible-link semantics.
 
 - Render the footer menu in an explicit navigation landmark only when assigned.

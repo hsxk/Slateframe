@@ -48,4 +48,4 @@ theme.json spacing, typography, content width, wide width, and semantic colors s
 
 ## Review checklist
 
-For any visual-system change, inspect mobile and desktop, long Latin strings, CJK, RTL, keyboard focus, reduced motion, minimum/default/maximum Appearance profiles, horizontal overflow, and image/caption rhythm. Screenshot evidence is required for important visual changes before merge.
+For any visual-system change, inspect mobile and desktop, long Latin strings, CJK, RTL, keyboard focus, reduced motion, 200% text resizing, minimum/default/maximum Appearance profiles, horizontal overflow, table containment, and image/caption rhythm. Screenshot evidence is required for important visual changes before merge.
