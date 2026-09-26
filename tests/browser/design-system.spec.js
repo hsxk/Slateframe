@@ -363,3 +363,43 @@ test('mobile navigation stays inside the viewport when content grows', async ({ 
 	expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
 	expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
 });
+
+
+test('desktop navigation and language adapter share one header row', async ({ page }, testInfo) => {
+	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
+	test.skip(viewportWidth <= 900, 'Desktop header contract.');
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const metrics = await page.evaluate(() => {
+		const nav = document.querySelector('[data-primary-nav]');
+		const menu = nav?.querySelector(':scope > ul');
+		const language = nav?.querySelector('.slateframe-language-slot');
+		const inner = document.querySelector('.slateframe-header-inner');
+		if (!nav || !menu || !language || !inner) {
+			throw new Error('Desktop navigation fixture is incomplete.');
+		}
+		const menuRect = menu.getBoundingClientRect();
+		const languageRect = language.getBoundingClientRect();
+		const innerRect = inner.getBoundingClientRect();
+		const root = getComputedStyle(document.documentElement);
+		const probe = document.createElement('i');
+		probe.style.cssText = 'position:absolute;visibility:hidden;block-size:var(--slateframe-header-height)';
+		document.body.append(probe);
+		const headerHeight = probe.getBoundingClientRect().height;
+		probe.remove();
+		return {
+			menuCenter: menuRect.top + (menuRect.height / 2),
+			languageCenter: languageRect.top + (languageRect.height / 2),
+			innerHeight: innerRect.height,
+			headerHeight,
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			navDisplay: getComputedStyle(nav).display,
+			direction: root.direction,
+		};
+	});
+
+	expect(metrics.navDisplay).toBe('flex');
+	expect(Math.abs(metrics.menuCenter - metrics.languageCenter)).toBeLessThanOrEqual(2);
+	expect(metrics.innerHeight).toBeLessThanOrEqual(metrics.headerHeight + 1);
+	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
+});
