@@ -13,7 +13,6 @@ License: GNU General Public License v3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featured-images, translation-ready, rtl-language-support, block-styles, wide-blocks
 */
-
 :root {
 	--slateframe-bg: light-dark(#f7f7f4, #111412);
 	--slateframe-surface: light-dark(#fff, #181c1a);
@@ -62,25 +61,19 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 	--slateframe-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 	color-scheme:light;
 }
-
 @media (prefers-color-scheme: dark) {
 	:root:not([data-slateframe-color-mode]) {
 		color-scheme: dark;
 	}
 }
-
 :root[data-slateframe-color-mode="dark"] { color-scheme: dark; }
 :root[data-slateframe-color-mode="light"] { color-scheme: light; }
-
 *{box-sizing:border-box}
-
 html{scroll-behavior:smooth}
-
 ::selection {
 	background: var(--slateframe-selection);
 	color: var(--slateframe-text);
 }
-
 body {
 	margin:0;
 	background: var(--slateframe-bg);
@@ -90,11 +83,8 @@ body {
 	overflow-wrap: anywhere;
 	text-rendering: optimizeLegibility;
 }
-
 img,svg,video{display:block;max-width:100%;height:auto}
-
 a{color:var(--slateframe-accent);text-decoration-thickness:.08em;text-underline-offset:.18em}
-
 a:hover{color:var(--slateframe-accent-strong)}
 
 button,input,select,textarea{font:inherit;color-scheme:inherit}
@@ -133,9 +123,7 @@ input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)
 	margin-inline: auto;
 }
 
-.slateframe-main {
-	min-height: 56vh;
-}
+.slateframe-main{min-height:56vh}
 
 .slateframe-site-header {
 	position: sticky;
@@ -168,11 +156,7 @@ input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)
 	object-fit: contain;
 }
 
-.slateframe-brand-copy {
-	display: grid;
-	line-height: 1.1;
-	min-width: 0;
-}
+.slateframe-brand-copy{display:grid;line-height:1.1;min-width:0}
 
 .slateframe-brand-title {
 	display: block;
@@ -192,9 +176,7 @@ input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)
 	white-space: nowrap;
 }
 
-.slateframe-header-spacer {
-	flex: 1;
-}
+.slateframe-header-spacer{flex:1}
 
 .slateframe-menu-toggle,
 .slateframe-color-toggle {
@@ -244,11 +226,7 @@ input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)
 	}
 }
 
-.slateframe-footer-menu {
-	list-style: none;
-	padding: 0;
-	margin: 0;
-}
+.slateframe-footer-menu{list-style:none;padding:0;margin:0}
 
 .slateframe-page-header {
 	padding-block: var(--slateframe-section) calc(var(--slateframe-stack-gap) + var(--slateframe-component-gap));
