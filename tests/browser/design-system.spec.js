@@ -201,3 +201,159 @@ test('core table wrappers own intrinsic overflow after 200 percent text resizing
 	}
 	expect(metrics.rootOverflow, JSON.stringify(metrics)).toBeLessThanOrEqual(1);
 });
+
+
+test('core page headers share the tokenized page-start rhythm', async ({ page }) => {
+	const routes = [pagePath, '/?s=Slateframe', '/slateframe-browser-missing-route/'];
+
+	for (const route of routes) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		const header = page.locator('.slateframe-page-header').first();
+		await expect(header).toBeVisible();
+
+		const rhythm = await header.evaluate((node) => {
+			const resolveToken = (token) => {
+				const probe = document.createElement('i');
+				probe.style.cssText = `position:absolute;visibility:hidden;inline-size:var(${token})`;
+				document.body.append(probe);
+				const value = Number.parseFloat(getComputedStyle(probe).inlineSize);
+				probe.remove();
+				return value;
+			};
+			const styles = getComputedStyle(node);
+			return {
+				start: Number.parseFloat(styles.paddingBlockStart),
+				end: Number.parseFloat(styles.paddingBlockEnd),
+				section: resolveToken('--slateframe-section'),
+				stack: resolveToken('--slateframe-stack-gap'),
+				component: resolveToken('--slateframe-component-gap'),
+			};
+		});
+
+		expect(Math.abs(rhythm.start - rhythm.section), route).toBeLessThanOrEqual(1);
+		expect(Math.abs(rhythm.end - (rhythm.stack + rhythm.component)), route).toBeLessThanOrEqual(1);
+	}
+});
+
+test('display titles use a script-neutral measure for long CJK strings', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	await page.evaluate(() => {
+		document.documentElement.lang = 'ja';
+		document.documentElement.dir = 'ltr';
+	});
+
+	const title = page.locator('.slateframe-entry-title').first();
+	await title.evaluate((node) => {
+		node.textContent = '非常に長い日本語と中文の公開タイトルでも読みやすい幅を保ちレイアウトからはみ出さない';
+	});
+
+	const metrics = await title.evaluate((node) => {
+		const styles = getComputedStyle(node);
+		const rect = node.getBoundingClientRect();
+		return {
+			maxMeasure: Number.parseFloat(styles.maxWidth) / Number.parseFloat(styles.fontSize),
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	});
+
+	expect(metrics.maxMeasure).toBeGreaterThan(13.5);
+	expect(metrics.maxMeasure).toBeLessThan(14.5);
+	expect(metrics.right).toBeLessThanOrEqual(metrics.viewport + 1);
+	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
+});
+
+test('ordinary reading children remain on the shared content measure', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const widths = await page.evaluate(() => {
+		const normal = document.querySelector('.browser-default-prose');
+		const contentWidth = normal?.getBoundingClientRect().width || 0;
+		const ordinary = [...document.querySelectorAll('.slateframe-prose > :not(.alignwide):not(.alignfull)')]
+			.map((node) => ({
+				tag: node.tagName.toLowerCase(),
+				width: node.getBoundingClientRect().width,
+				minInlineSize: getComputedStyle(node).minInlineSize,
+			}));
+		return { contentWidth, ordinary };
+	});
+
+	expect(widths.contentWidth).toBeGreaterThan(0);
+	for (const item of widths.ordinary) {
+		expect(item.width, item.tag).toBeLessThanOrEqual(widths.contentWidth + 2);
+		expect(item.minInlineSize, item.tag).toBe('0px');
+	}
+});
+
+test('plugin-style tables scroll locally and remain keyboard reachable', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const table = page.locator('.browser-tablepress');
+	await expect(table).toBeVisible();
+	await expect(table).toHaveAttribute('tabindex', '0');
+
+	await table.evaluate((node) => {
+		node.style.whiteSpace = 'nowrap';
+	});
+
+	const metrics = await table.evaluate((node) => {
+		const rect = node.getBoundingClientRect();
+		return {
+			clientWidth: node.clientWidth,
+			scrollWidth: node.scrollWidth,
+			left: rect.left,
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			overflowX: getComputedStyle(node).overflowX,
+		};
+	});
+
+	expect(metrics.overflowX).toBe('auto');
+	expect(metrics.scrollWidth).toBeGreaterThanOrEqual(metrics.clientWidth);
+	expect(metrics.left).toBeGreaterThanOrEqual(-1);
+	expect(metrics.right).toBeLessThanOrEqual(metrics.viewport + 1);
+	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
+
+	await table.focus();
+	await expect(table).toBeFocused();
+});
+
+test('mobile navigation stays inside the viewport when content grows', async ({ page }, testInfo) => {
+	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
+	test.skip(viewportWidth > 900, 'Mobile navigation contract.');
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	await page.locator('[data-menu-toggle]').click();
+	const nav = page.locator('[data-primary-nav]');
+	await expect(nav).toBeVisible();
+
+	await nav.evaluate((node) => {
+		const list = node.querySelector('ul');
+		if (!list) return;
+		for (let index = 0; index < 12; index += 1) {
+			const item = document.createElement('li');
+			item.innerHTML = '<a href="#">A deliberately long translated navigation destination</a>';
+			list.append(item);
+		}
+	});
+
+	const metrics = await nav.evaluate((node) => {
+		const rect = node.getBoundingClientRect();
+		const styles = getComputedStyle(node);
+		return {
+			top: rect.top,
+			bottom: rect.bottom,
+			height: rect.height,
+			viewportHeight: window.innerHeight,
+			maxBlockSize: styles.maxBlockSize,
+			overflowY: styles.overflowY,
+			scrollHeight: node.scrollHeight,
+			clientHeight: node.clientHeight,
+		};
+	});
+
+	expect(metrics.maxBlockSize).not.toBe('none');
+	expect(metrics.overflowY).toBe('auto');
+	expect(metrics.bottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+	expect(metrics.scrollHeight).toBeGreaterThanOrEqual(metrics.clientHeight);
+});
