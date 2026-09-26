@@ -48,7 +48,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 }
 
 .wp-block-group.is-style-slateframe-key-facts {
-	padding-block: 1rem;
+	padding-block: var(--slateframe-stack-gap);
 	border-block: 1px solid var(--slateframe-border);
 }
 
@@ -69,7 +69,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 .wp-block-columns.is-style-slateframe-ledger {
 	gap: clamp(1rem, 2.5vw, 2rem);
 	margin-block: 0;
-	padding-block: 1rem;
+	padding-block: var(--slateframe-stack-gap);
 	border-block-start: 1px solid var(--slateframe-border);
 }
 
@@ -145,14 +145,14 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 
 .slateframe-project-meta {
 	display: grid;
-	gap: 0.7rem;
+	gap: var(--slateframe-component-gap);
 	margin: 0;
 	padding: 0;
 	list-style: none;
 }
 
 .slateframe-project-meta li {
-	padding-block-end: 0.65rem;
+	padding-block-end: var(--slateframe-caption-gap);
 	border-block-end: 1px solid var(--slateframe-border);
 }
 
@@ -175,7 +175,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 
 .slateframe-learning-step {
 	min-height: 100%;
-	padding-block-start: 0.9rem;
+	padding-block-start: var(--slateframe-component-gap);
 	border-block-start: 2px solid var(--slateframe-text);
 }
 
@@ -186,18 +186,18 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 .slateframe-project-grid .wp-block-post-template {
 	display: grid !important;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: clamp(1.25rem, 2.8vw, 2rem);
+	gap: calc(var(--slateframe-stack-gap) + var(--slateframe-component-gap));
 }
 
 .slateframe-project-grid .slateframe-project-card {
 	min-width: 0;
 	height: 100%;
-	padding-block-start: 1rem;
+	padding-block-start: var(--slateframe-stack-gap);
 	border-block-start: 1px solid var(--slateframe-border);
 }
 
 .slateframe-project-grid .wp-block-post-featured-image {
-	margin: 0 0 0.9rem;
+	margin: 0 0 var(--slateframe-component-gap);
 	overflow: hidden;
 	background: var(--slateframe-surface-soft);
 }
@@ -232,16 +232,8 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 .slateframe-project-grid .wp-block-query-pagination {
 	gap: 0.5rem;
 	margin-block-start: clamp(1.75rem, 4vw, 3rem);
-	padding-block-start: 1rem;
+	padding-block-start: var(--slateframe-stack-gap);
 	border-block-start: 1px solid var(--slateframe-border);
-}
-
-.slateframe-project-grid .wp-block-query-pagination :is(a, .page-numbers) {
-	display: inline-grid;
-	place-items: center;
-	min-width: var(--slateframe-control);
-	min-height: var(--slateframe-control);
-	padding-inline: 0.65rem;
 }
 
 @media (hover: hover) {
@@ -252,7 +244,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 
 .slateframe-knowledge-checklist .slateframe-learning-checkpoint {
 	gap: 0;
-	margin-block: clamp(1.5rem, 3vw, 2.25rem);
+	margin-block: var(--slateframe-heading-gap);
 	border-block: 1px solid var(--slateframe-border);
 }
 

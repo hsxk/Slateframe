@@ -18,6 +18,8 @@ Do not use one generic gap for every relationship. Use the closest semantic role
 - section whitespace: separation between major page regions
 - page gutter: safe viewport edge spacing
 
+Footer columns and optional footer-widget content are sibling components, so their internal separation derives from stack rhythm; section whitespace remains reserved for the footer's relationship to the page above.
+
 The accessible control baseline is 44px. Customizer settings may increase it, but must not reduce it.
 
 ## Widths
@@ -26,7 +28,7 @@ Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Wide
 
 ## Controls
 
-Buttons, text inputs, selects, pagination targets, menu controls, language integrations, comment controls, and lightbox controls should share the same minimum target, focus language, radius family, and text baseline. Visual compactness should come from border and typography choices, not inaccessible hit areas.
+Buttons, text inputs, selects, pagination targets, menu controls, language integrations, comment controls, and lightbox controls should share the same minimum target, focus language, radius family, and text baseline. This includes Core Search, Core Buttons, Query Pagination, comment consent labels, reply-cancel links, and comment navigation. Visual compactness should come from border and typography choices, not inaccessible hit areas. Disabled controls use the same restrained opacity/cursor language instead of component-specific treatments.
 
 ## Photography and media
 
