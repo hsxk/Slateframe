@@ -1,11 +1,8 @@
 .slateframe-comments :where(textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]), select) {
-	inline-size: 100%; max-inline-size: 100%;
+	inline-size: 100%; max-inline-size: 100%; min-block-size: var(--slateframe-control);
 	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
 	border: var(--slateframe-border-width) solid var(--slateframe-border);
 	border-radius: var(--slateframe-radius); background: var(--slateframe-surface); color: var(--slateframe-text);
-}
-.slateframe-comments :where(input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]), select) {
-	min-block-size: var(--slateframe-control);
 }
 .slateframe-comments textarea { min-block-size: 10rem; resize: vertical; }
 .slateframe-comments label { display: block; max-inline-size: 100%; margin-block-end: var(--slateframe-inline-gap); font-weight: 650; }
@@ -40,3 +37,6 @@
 		grid-template-columns: 1fr; gap: var(--slateframe-inline-gap);
 	}
 }
+
+.slateframe-comments :where(input, select, textarea):disabled { cursor: not-allowed; opacity: 0.58; }
+.slateframe-comments .form-submit { margin-block-start: var(--slateframe-stack-gap); }

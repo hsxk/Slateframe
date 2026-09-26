@@ -65,6 +65,7 @@
 .wp-block-code {
 	overflow: auto;
 	padding: var(--slateframe-stack-gap) var(--slateframe-prose-gap);
+	max-inline-size: 100%;
 	border-radius: var(--slateframe-radius);
 	background: #111715;
 	color: #eef4f1;
@@ -72,6 +73,7 @@
 	line-height: 1.6;
 	tab-size: 4;
 	scrollbar-gutter: stable;
+	overscroll-behavior-inline: contain;
 }
 
 .slateframe-prose :not(pre) > code {
@@ -167,7 +169,7 @@
 }
 
 .slateframe-prose .wp-block-details summary {
-	min-height: var(--slateframe-control);
+	min-block-size: var(--slateframe-control);
 	display: flex;
 	align-items: center;
 	font-weight: 700;
@@ -232,8 +234,8 @@
 .slateframe-prose .post-page-numbers {
 	display: inline-grid;
 	place-items: center;
-	min-width: var(--slateframe-control);
-	min-height: var(--slateframe-control);
+	min-inline-size: var(--slateframe-control);
+	min-block-size: var(--slateframe-control);
 	margin-inline: 0.15rem;
 	padding-inline: 0.6rem;
 	border: 1px solid var(--slateframe-border);
