@@ -129,7 +129,9 @@
 
 .slateframe-prose :is(th, td) {
 	min-inline-size: 0;
+	max-inline-size: 100%;
 	overflow-wrap: anywhere;
+	white-space: normal;
 }
 
 /* Publishing primitives: resilient long-form content without a heavy runtime. */
