@@ -319,6 +319,22 @@ jobs:
           <p class="browser-lead is-style-slateframe-lead">A concise editorial lead gives readers the argument before the detail.</p>
           <!-- /wp:paragraph -->
 
+          <!-- wp:heading {"level":2,"className":"browser-reading-h2"} -->
+          <h2 class="wp-block-heading browser-reading-h2">A reading rhythm with visible hierarchy</h2>
+          <!-- /wp:heading -->
+
+          <!-- wp:paragraph {"className":"browser-inline-code"} -->
+          <p class="browser-inline-code">Inline <code>slateframe_token()</code> examples stay inside the reading flow without overpowering nearby prose.</p>
+          <!-- /wp:paragraph -->
+
+          <!-- wp:heading {"level":3,"className":"browser-reading-h3"} -->
+          <h3 class="wp-block-heading browser-reading-h3">Details remain subordinate</h3>
+          <!-- /wp:heading -->
+
+          <!-- wp:list {"className":"browser-nested-list"} -->
+          <ul class="browser-nested-list"><li>Primary reading point<ul><li>Nested supporting detail</li><li>Second supporting detail</li></ul></li><li>Following reading point</li></ul>
+          <!-- /wp:list -->
+
           <!-- wp:html -->
           <nav class="wp-block-table-of-contents browser-toc" aria-label="On this page"><ol><li><a href="#main-content">Overview</a></li><li><a href="#browser-footnote">Notes</a></li></ol></nav>
           <!-- /wp:html -->
@@ -390,7 +406,7 @@ jobs:
             --post_status=publish \
             --comment_status=open \
             --post_title='Slateframe Browser Post' \
-            --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p></blockquote>' \
+            --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)
 
           for project_index in 1 2 3 4 5 6; do

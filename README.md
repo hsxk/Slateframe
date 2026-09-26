@@ -25,11 +25,11 @@ Slateframe is designed for people who want editorial polish without inheriting a
 
 ## Appearance and spatial system
 
-Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
+Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
 
 Site owners can tune seven bounded settings in **Appearance → Customize → Slateframe layout**: control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Control size cannot fall below 44px, and every range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS. Block authors get the matching XS–2XL spacing presets plus Small/Body/Lead/Heading/Display typography presets in the editor. Defaults add no extra inline CSS; changed settings emit a compact root-token override.
 
-CI renders the designed default plus the minimum/compact and maximum/spacious Appearance profiles at representative mobile and desktop widths. The profiles are checked for control targets, real content/wide measures, gutters, radius, spacing tokens, content-mode overflow, and screenshot evidence.
+CI renders the designed default plus the minimum/compact and maximum/spacious Appearance profiles at representative mobile and desktop widths. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, and screenshot evidence.
 
 ## Current feature set
 

@@ -42,6 +42,9 @@ All notable changes to Slateframe will be documented here.
 - Project decision-log, knowledge-procedure, and knowledge-comparison patterns built entirely from portable core blocks and Slateframe's shared spatial/block-style system.
 - Real showcase and browser coverage for decision evidence, procedural verification, mixed CJK/RTL comparisons, and long-form containment.
 - Project case studies now prompt for inspectable evidence; project outcomes prompt for baseline/time-frame/source context; lesson chapters include prerequisites and verification; learning paths include an explicit checkpoint.
+- Added semantic prose, heading, heading-after, and list-item rhythm tokens shared by frontend and editor block gaps, with Appearance spacing-density scaling.
+- Refined long-form hierarchy with distinct H2/H3 scale and spacing, nested-list rhythm, blockquote citations, readable code metrics, table heading surfaces, TOC rhythm, and 44px post-navigation targets.
+- Expanded real WordPress browser fixtures and regression assertions for heading hierarchy, nested lists, inline/code rhythm, quoted sources, table presentation, and reading-token behavior across compact/default/spacious profiles.
 
 ### Changed
 

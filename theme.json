@@ -157,7 +157,7 @@
 			"text": "var:preset|color|ink"
 		},
 		"spacing": {
-			"blockGap": "1.35rem"
+			"blockGap": "var(--slateframe-prose-gap)"
 		},
 		"typography": {
 			"fontFamily": "var:preset|font-family|sans",

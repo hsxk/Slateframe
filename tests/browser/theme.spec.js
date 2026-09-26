@@ -206,6 +206,45 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 	await expectNoHorizontalOverflow(page, pagePath);
 });
 
+test('editorial reading rhythm distinguishes headings, nested lists, code, tables, and quotes', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	const rhythm = await page.evaluate(() => {
+		const root = getComputedStyle(document.documentElement);
+		const h2 = document.querySelector('.browser-reading-h2');
+		const h3 = document.querySelector('.browser-reading-h3');
+		const nested = document.querySelector('.browser-nested-list li > ul');
+		const code = document.querySelector('.wp-block-code');
+		const th = document.querySelector('.browser-data-table th');
+		return {
+			proseGap: Number.parseFloat(root.getPropertyValue('--slateframe-prose-gap')),
+			headingGap: Number.parseFloat(root.getPropertyValue('--slateframe-heading-gap')),
+			listGap: Number.parseFloat(root.getPropertyValue('--slateframe-list-item-gap')),
+			h2Size: Number.parseFloat(getComputedStyle(h2).fontSize),
+			h3Size: Number.parseFloat(getComputedStyle(h3).fontSize),
+			nestedGap: Number.parseFloat(getComputedStyle(nested).marginBlockStart),
+			codeLineHeight: Number.parseFloat(getComputedStyle(code).lineHeight),
+			tableHeadBackground: getComputedStyle(th).backgroundColor,
+		};
+	});
+
+	expect(rhythm.proseGap).toBeGreaterThan(0);
+	expect(rhythm.headingGap).toBeGreaterThan(rhythm.proseGap);
+	expect(rhythm.listGap).toBeGreaterThan(0);
+	expect(rhythm.h2Size).toBeGreaterThan(rhythm.h3Size);
+	expect(rhythm.nestedGap).toBeGreaterThanOrEqual(rhythm.listGap - 1);
+	expect(rhythm.codeLineHeight).toBeGreaterThan(20);
+	expect(rhythm.tableHeadBackground).not.toBe('rgba(0, 0, 0, 0)');
+	await expectNoHorizontalOverflow(page, pagePath);
+
+	await page.goto(postPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.browser-quote-source')).toBeVisible();
+	const navigationTargets = page.locator('.slateframe-post-navigation a');
+	for (let index = 0; index < await navigationTargets.count(); index += 1) {
+		expect((await navigationTargets.nth(index).boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+});
+
 test('reading helpers preserve print and navigation structure', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const lead = page.locator('.browser-lead');

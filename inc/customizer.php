@@ -205,6 +205,10 @@ function slateframe_customizer_spatial_css() {
 			'--slateframe-media-gap'              => 12,
 			'--slateframe-control-padding-inline' => 12,
 			'--slateframe-caption-gap'            => 10.4,
+			'--slateframe-prose-gap'              => 20,
+			'--slateframe-heading-gap'            => 36,
+			'--slateframe-heading-after'          => 10,
+			'--slateframe-list-item-gap'          => 8,
 			'--slateframe-space-4'                => 16,
 			'--slateframe-stack-gap'              => 16,
 		);

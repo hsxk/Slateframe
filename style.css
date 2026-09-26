@@ -38,6 +38,10 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 	--slateframe-stack-gap: var(--slateframe-space-4);
 	--slateframe-media-gap: var(--slateframe-space-3);
 	--slateframe-caption-gap: 0.65rem;
+	--slateframe-prose-gap: 1.25rem;
+	--slateframe-heading-gap: 2.25rem;
+	--slateframe-heading-after: 0.625rem;
+	--slateframe-list-item-gap: 0.5rem;
 	--slateframe-control-padding-block: var(--slateframe-space-2);
 	--slateframe-control-padding-inline: var(--slateframe-space-3);
 	--slateframe-header-height: 4.5rem;
@@ -252,7 +256,7 @@ textarea {
 
 .slateframe-prose > * {
 	width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-content));
-	margin-block-start: 1.35em;
+	margin-block-start: var(--slateframe-prose-gap);
 	margin-block-end: 0;
 	margin-inline: auto;
 }
@@ -275,10 +279,30 @@ textarea {
 	margin-block-start: 0;
 }
 
-.slateframe-prose h2,
-.slateframe-prose h3 {
+.slateframe-prose :is(h2, h3, h4) {
+	margin-block-start: var(--slateframe-heading-gap);
+	margin-block-end: var(--slateframe-heading-after);
 	line-height: 1.18;
 	text-wrap: balance;
+}
+
+.slateframe-prose h2 {
+	font-size: clamp(1.55rem, 2.6vw, 2.05rem);
+	letter-spacing: -0.035em;
+}
+
+.slateframe-prose h3 {
+	font-size: clamp(1.28rem, 2vw, 1.55rem);
+	letter-spacing: -0.025em;
+}
+
+.slateframe-prose :is(ul, ol) {
+	padding-inline-start: 1.35em;
+}
+
+.slateframe-prose li + li,
+.slateframe-prose li > :is(ul, ol) {
+	margin-block-start: var(--slateframe-list-item-gap);
 }
 
 .slateframe-prose pre,
@@ -289,6 +313,9 @@ textarea {
 	background: #111715;
 	color: #eef4f1;
 	font-family: var(--slateframe-mono);
+	line-height: 1.6;
+	tab-size: 4;
+	scrollbar-gutter: stable;
 }
 
 .slateframe-prose :not(pre) > code {
@@ -301,9 +328,25 @@ textarea {
 
 .slateframe-prose blockquote {
 	margin-inline: auto;
-	padding-inline-start: 1.2rem;
+	padding-inline-start: var(--slateframe-space-4);
 	border-inline-start: 3px solid var(--slateframe-accent);
 	color: var(--slateframe-muted);
+}
+
+.slateframe-prose blockquote > :first-child {
+	margin-block-start: 0;
+}
+
+.slateframe-prose blockquote > :last-child {
+	margin-block-end: 0;
+}
+
+.slateframe-prose blockquote cite {
+	display: block;
+	margin-block-start: var(--slateframe-space-3);
+	color: var(--slateframe-muted);
+	font-size: 0.86rem;
+	font-style: normal;
 }
 
 .slateframe-prose table {
@@ -319,6 +362,11 @@ textarea {
 	border-block-end: 1px solid var(--slateframe-border);
 	text-align: start;
 	vertical-align: top;
+}
+
+.slateframe-prose th {
+	background: var(--slateframe-surface-soft);
+	font-weight: 700;
 }
 
 .slateframe-grid {
@@ -409,8 +457,9 @@ textarea {
 .slateframe-post-navigation a {
 	display: grid;
 	gap: var(--slateframe-inline-gap);
+	min-block-size: var(--slateframe-control);
 	min-height: 100%;
-	padding: 1rem 0;
+	padding-block: var(--slateframe-space-3);
 	color: var(--slateframe-text);
 	text-decoration: none;
 }
@@ -817,13 +866,17 @@ textarea {
 }
 
 .slateframe-prose .wp-block-table-of-contents {
-	padding-block: 1rem;
+	padding-block: var(--slateframe-space-4);
 	border-block: 1px solid var(--slateframe-border);
 }
 
 .slateframe-prose .wp-block-table-of-contents :is(ol, ul) {
 	margin-block: 0;
-	padding-inline-start: 1.4rem;
+	padding-inline-start: 1.35em;
+}
+
+.slateframe-prose .wp-block-table-of-contents li + li {
+	margin-block-start: var(--slateframe-list-item-gap);
 }
 
 @media print {
