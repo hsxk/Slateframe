@@ -32,6 +32,17 @@ function slateframe_entry_meta() {
 	$author_name = trim( (string) get_the_author() );
 	$author_url  = $author_id ? get_author_posts_url( $author_id ) : '';
 
+	/**
+	 * Filters the author destination used by Slateframe entry metadata.
+	 *
+	 * Sites may point a byline at an About/Profile page without globally
+	 * rewriting WordPress author archive URLs.
+	 *
+	 * @param string $author_url Default author archive URL.
+	 * @param int    $author_id  WordPress user ID.
+	 */
+	$author_url = apply_filters( 'slateframe_author_url', $author_url, $author_id );
+
 	echo '<div class="slateframe-entry-meta">';
 	slateframe_posted_on();
 
@@ -67,6 +78,22 @@ function slateframe_entry_footer() {
 
 	$categories = get_the_category_list( esc_html_x( ', ', 'category list separator', 'slateframe' ) );
 	$tags       = get_the_tag_list( '', esc_html_x( ', ', 'tag list separator', 'slateframe' ) );
+
+	/**
+	 * Filters taxonomy markup shown in the single-entry footer.
+	 *
+	 * @param string $categories Category links HTML.
+	 * @param int    $post_id    Current post ID.
+	 */
+	$categories = apply_filters( 'slateframe_entry_categories_html', $categories, get_the_ID() );
+
+	/**
+	 * Filters tag markup shown in the single-entry footer.
+	 *
+	 * @param string $tags    Tag links HTML.
+	 * @param int    $post_id Current post ID.
+	 */
+	$tags = apply_filters( 'slateframe_entry_tags_html', $tags, get_the_ID() );
 
 	if ( ! $categories && ! $tags ) {
 		return;

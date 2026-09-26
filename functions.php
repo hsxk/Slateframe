@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once get_template_directory() . '/inc/template-tags.php';
+require_once get_template_directory() . '/inc/content-discovery.php';
 require_once get_template_directory() . '/inc/customizer.php';
 
 /**

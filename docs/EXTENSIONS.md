@@ -38,3 +38,46 @@ Markers are scanned only on singular post content to decide whether the contextu
 Public Slateframe hooks/filters are treated as compatibility surfaces once documented here. Renaming or removing a documented hook should include a deprecation path when practical.
 
 Integrations should rely on public WordPress APIs and documented Slateframe hooks rather than internal DOM structure or private helper implementation.
+
+
+## Author destinations
+
+Slateframe uses normal WordPress author archives by default. A site that has an editorial About/Profile page may change only the theme byline destination without rewriting WordPress author URLs globally:
+
+```php
+add_filter(
+	'slateframe_author_url',
+	function ( $url, $author_id ) {
+		return $url;
+	},
+	10,
+	2
+);
+```
+
+Do not hard-code user IDs or translated page IDs in the theme itself.
+
+## Related reading
+
+Single posts include a small related-reading surface. Slateframe prefers shared tags, falls back to categories, and finally recent posts. The query remains filterable so multilingual or editorial-relevance plugins can constrain it without a required dependency:
+
+```php
+add_filter(
+	'slateframe_related_posts_args',
+	function ( $args, $post_id ) {
+		return $args;
+	},
+	10,
+	2
+);
+```
+
+Return `false` from `slateframe_show_related_posts` to disable the built-in presentation when a plugin owns related content.
+
+## Taxonomy presentation
+
+`slateframe_entry_categories_html` and `slateframe_entry_tags_html` allow a site or plugin to refine the taxonomy links shown in a single-entry footer. Slateframe does not hide terms based on fixed IDs, slugs, or language assumptions.
+
+## 404 recovery content
+
+`slateframe_not_found_posts_args` filters the small recent-post query shown on the native 404 template. Use it to apply editorial or language context while keeping the 404 template site-neutral.

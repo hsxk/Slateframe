@@ -48,6 +48,10 @@ get_header();
 			</div>
 		</article>
 
+		<div class="slateframe-shell">
+			<?php slateframe_related_posts(); ?>
+		</div>
+
 		<div class="slateframe-shell slateframe-post-navigation">
 			<?php
 			the_post_navigation(
