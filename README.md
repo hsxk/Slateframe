@@ -41,7 +41,7 @@ CI renders the designed default plus the minimum/compact and maximum/spacious sp
 - Wide and full-width Gutenberg alignment without forcing normal paragraphs wider.
 - Long-title handling for CJK, Latin, and long translated strings.
 - Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, Core/common TOC presentation compatibility, editorial leads, and print-friendly long-form output.
-- Post metadata, categories/tags, filterable related reading, optional previous/next navigation, comments, pagination, archives, author pages with WordPress-native avatars, search, and a recovery-oriented 404 surface.
+- Post metadata, categories/tags, filterable related reading, optional previous/next navigation, comments, pagination, archives, author pages with opt-in local profile media, search, and a recovery-oriented 404 surface.
 - Editor-canvas parity for the singular reading layer: title rhythm, H2/H3 hierarchy, nested-list rhythm, quotes, inline code, tables, captions, wide/full alignment, and bounded Appearance token overrides.
 
 ### Photography, portfolio, and knowledge

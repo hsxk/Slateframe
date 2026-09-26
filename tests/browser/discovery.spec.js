@@ -57,8 +57,9 @@ test('author archives expose a native avatar surface without fixed media URLs', 
 
 	await expect(page.locator('body')).toHaveClass(/author/);
 	await expect(page.locator('.slateframe-author-header')).toBeVisible();
-	const avatar = page.locator('.slateframe-author-avatar img');
+	const avatar = page.locator('.slateframe-author-avatar');
 	await expect(avatar).toBeVisible();
+	await expect(avatar.locator('.browser-author-avatar-source')).toBeVisible();
 	expect((await avatar.boundingBox())?.width || 0).toBeGreaterThanOrEqual(64);
 	await expectNoRootOverflow(page);
 });

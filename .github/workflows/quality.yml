@@ -359,6 +359,18 @@ jobs:
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
+          mkdir -p /tmp/wp-browser/wp-content/mu-plugins
+          cat > /tmp/wp-browser/wp-content/mu-plugins/slateframe-browser-fixtures.php <<'PHP'
+          <?php
+          add_filter(
+              'slateframe_author_avatar_html',
+              static function ( $html, $author_id ) {
+                  return '<span class="browser-author-avatar-source" aria-hidden="true">SF</span>';
+              },
+              10,
+              2
+          );
+          PHP
           wp option update thread_comments 1 --path=/tmp/wp-browser
           mkdir -p /tmp/wp-browser/wp-content/uploads/slateframe-fixtures
           cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg <<'SVG'

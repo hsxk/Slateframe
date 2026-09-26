@@ -17,9 +17,11 @@
 	block-size: clamp(4rem, 8vw, 6rem);
 }
 
-.slateframe-author-avatar img {
+.slateframe-author-avatar > * {
+	display: grid;
 	inline-size: 100%;
 	block-size: 100%;
+	place-items: center;
 	border-radius: 50%;
 	object-fit: cover;
 }

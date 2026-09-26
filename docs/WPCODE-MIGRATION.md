@@ -5,6 +5,7 @@ Slateframe was audited against the current Time2Log WPCode inventory as a migrat
 ## Theme capabilities generalized
 
 - Author bylines support a public `slateframe_author_url` adapter instead of a fixed author-ID → About-page map.
+- Author archives expose opt-in `slateframe_author_avatar_html` profile media without introducing a default Gravatar/third-party request.
 - Single posts provide a native, filterable related-reading surface with tag/category/recent fallback.
 - Related queries leave normal WordPress filters enabled so multilingual plugins can constrain results without a hard dependency.
 - Single-entry category and tag markup has public filters instead of Astra-specific taxonomy hooks.

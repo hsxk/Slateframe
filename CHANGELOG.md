@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
-- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, WordPress-native author avatars, and TOC compatibility migrated from recurring site-level WPCode needs.
+- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, opt-in local author media, and TOC compatibility migrated from recurring site-level WPCode needs.
 - Public Slateframe hybrid-theme baseline.
 - WordPress-native template hierarchy and `theme.json` design system.
 - Accessible responsive navigation with a no-JavaScript fallback and mobile focus containment.
@@ -76,6 +76,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Avoid default Gravatar traffic on author archives while preserving a sanitized adapter for locally owned avatar/profile media.
 - Prevent intrinsic long-string and wrapped control content from establishing a wider root document during 200% text resizing.
 - Give Core/TablePress table wrappers sole ownership of horizontal scrolling while preserving intrinsic table width and editor parity.
 - Extend compact/default/spacious visual evidence to portfolio and knowledge fixtures and verify comment-submit, footer, and Query Loop control sizing.

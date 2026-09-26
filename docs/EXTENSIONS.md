@@ -102,7 +102,20 @@ The default remains portable and requires no Astra-specific hook.
 
 ## Avatar compatibility
 
-Author archives render avatars through WordPress core `get_avatar()`. Sites may therefore use any standards-compatible avatar plugin or the normal `get_avatar_url` filter without Slateframe owning local-media paths or user IDs.
+Author archives make avatar/profile media opt-in through `slateframe_author_avatar_html`. The default is empty, so a fresh Slateframe site does not acquire a Gravatar or other third-party request merely by opening an author archive.
+
+```php
+add_filter(
+	'slateframe_author_avatar_html',
+	function ( $html, $author_id ) {
+		return $html;
+	},
+	10,
+	2
+);
+```
+
+A site or avatar plugin may return local-media markup here. Slateframe sanitizes it before output and keeps media URLs, user mapping, and storage policy outside theme core.
 
 ## Table of contents compatibility
 
