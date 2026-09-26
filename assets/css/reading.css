@@ -13,6 +13,7 @@
 }
 
 .slateframe-prose > * {
+	min-inline-size: 0;
 	width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-content));
 	margin-block-start: var(--slateframe-prose-gap);
 	margin-block-end: 0;
@@ -113,6 +114,7 @@
 	display: block;
 	max-inline-size: 100%;
 	overflow-x: auto;
+	scrollbar-gutter: stable;
 	border-collapse: collapse;
 	overscroll-behavior-inline: contain;
 	-webkit-overflow-scrolling: touch;
@@ -144,7 +146,7 @@
 }
 
 .slateframe-prose :is(h2, h3, h4, h5, h6) {
-	scroll-margin-block-start: 6rem;
+	scroll-margin-block-start: calc(var(--slateframe-header-height) + var(--slateframe-stack-gap));
 }
 
 .slateframe-prose :is(figure, .wp-block-image, .wp-block-gallery) {
@@ -211,6 +213,7 @@
 	min-inline-size: 0;
 	max-inline-size: 100%;
 	overflow-x: auto;
+	scrollbar-gutter: stable;
 	contain: inline-size;
 	overscroll-behavior-inline: contain;
 	-webkit-overflow-scrolling: touch;
