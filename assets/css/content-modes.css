@@ -4,7 +4,6 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 .wp-lightbox-overlay .wp-lightbox-close-button{margin-block-start:env(safe-area-inset-top,0px);margin-inline-end:env(safe-area-inset-right,0px)}
 .wp-lightbox-overlay .lightbox-image-container{max-inline-size:calc(100dvi - (2 * var(--slateframe-space-4)));max-block-size:calc(100dvb - (2 * var(--slateframe-space-4)))}
 .wp-lightbox-overlay .wp-block-image img[sizes="100vw"]{inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;object-fit:contain}
-
 .wp-block-gallery:is(.is-style-slateframe-contact-sheet,.is-style-slateframe-diptych,.is-style-slateframe-photo-sequence),.wp-block-gallery.slateframe-gallery-sequence{gap:var(--slateframe-media-gap)}
 .wp-block-gallery.is-style-slateframe-contact-sheet{align-items:flex-start}
 .wp-block-gallery.has-nested-images:is(.is-style-slateframe-contact-sheet,.slateframe-gallery-sequence)>figure.wp-block-image{align-self:start;flex-direction:column;justify-content:flex-start;background:var(--slateframe-surface-soft)}
@@ -27,11 +26,8 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 @media (max-width:540px){.wp-block-gallery.is-style-slateframe-diptych{grid-template-columns:1fr}}
 @media (max-width:640px){.slateframe-photography-sequence .slateframe-gallery-sequence{grid-template-columns:minmax(0,1fr)}.slateframe-photography-sequence .slateframe-gallery-sequence>.wp-block-image:first-child{grid-column:auto}}
 @media (prefers-reduced-motion:reduce){.wp-lightbox-overlay,.wp-lightbox-overlay *{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
-
 .wp-block-list.is-style-slateframe-steps,.is-style-slateframe-steps{counter-reset:slateframe-step;padding-inline-start:0;list-style:none}
-
 .wp-block-list.is-style-slateframe-steps>li,.is-style-slateframe-steps>li{counter-increment:slateframe-step;display:grid;grid-template-columns:2.15rem minmax(0,1fr);gap:.8rem;align-items:start;margin-block:1rem}
-
 .wp-block-list.is-style-slateframe-steps>li::before,.is-style-slateframe-steps>li::before{content:counter(slateframe-step,decimal-leading-zero);display:grid;place-items:center;min-width:2.15rem;min-height:2.15rem;border:1px solid var(--slateframe-border);border-radius:50%;color:var(--slateframe-muted);font-size:.72rem;font-variant-numeric:tabular-nums}
 
 .wp-block-list.is-style-slateframe-checklist,.is-style-slateframe-checklist{padding-inline-start:0;list-style:none}
@@ -61,7 +57,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 }
 
 .wp-block-group.is-style-slateframe-learning-callout {
-	padding: clamp(1rem, 2.5vw, 1.5rem);
+	padding:var(--slateframe-stack-gap);
 	border-inline-start: 3px solid var(--slateframe-accent);
 	background: var(--slateframe-surface-soft);
 }
@@ -190,7 +186,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 }
 
 .slateframe-project-grid .slateframe-project-card {
-	min-width: 0;
+	min-inline-size: 0;
 	height: 100%;
 	padding-block-start: var(--slateframe-stack-gap);
 	border-block-start: 1px solid var(--slateframe-border);
@@ -229,12 +225,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 	font-variant-numeric: tabular-nums;
 }
 
-.slateframe-project-grid .wp-block-query-pagination {
-	gap: 0.5rem;
-	margin-block-start: clamp(1.75rem, 4vw, 3rem);
-	padding-block-start: var(--slateframe-stack-gap);
-	border-block-start: 1px solid var(--slateframe-border);
-}
+.slateframe-project-grid .wp-block-query-pagination{gap:var(--slateframe-inline-gap);margin-block-start:var(--slateframe-heading-gap);padding-block-start:var(--slateframe-stack-gap);border-block-start:1px solid var(--slateframe-border)}
 
 @media (hover: hover) {
 	.slateframe-project-grid .wp-block-post-featured-image a:hover img {
@@ -249,7 +240,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 }
 
 .slateframe-knowledge-checklist .slateframe-learning-checkpoint > .wp-block-column {
-	min-width: 0;
+	min-inline-size: 0;
 	padding: clamp(1rem, 2.5vw, 1.5rem);
 	border-inline-start: 1px solid var(--slateframe-border);
 }
