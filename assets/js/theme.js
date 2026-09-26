@@ -1,5 +1,44 @@
 (() => {
-	document.documentElement.classList.add('has-js');
+	const root = document.documentElement;
+	root.classList.add('has-js');
+
+	const colorToggle = document.querySelector('[data-color-toggle]');
+	const colorMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+	const isDarkMode = () => {
+		const explicitMode = root.dataset.slateframeColorMode;
+		return explicitMode === 'dark' || (!explicitMode && colorMedia.matches);
+	};
+
+	const syncColorToggle = () => {
+		if (!colorToggle) {
+			return;
+		}
+
+		colorToggle.setAttribute('aria-pressed', isDarkMode() ? 'true' : 'false');
+	};
+
+	const rememberColorMode = (mode) => {
+		const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+		document.cookie = `slateframe_color_mode=${mode}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
+	};
+
+	if (colorToggle) {
+		syncColorToggle();
+
+		colorToggle.addEventListener('click', () => {
+			const nextMode = isDarkMode() ? 'light' : 'dark';
+			root.dataset.slateframeColorMode = nextMode;
+			rememberColorMode(nextMode);
+			syncColorToggle();
+		});
+
+		colorMedia.addEventListener?.('change', () => {
+			if (!root.dataset.slateframeColorMode) {
+				syncColorToggle();
+			}
+		});
+	}
 
 	const header = document.querySelector('[data-site-header]');
 	const toggle = document.querySelector('[data-menu-toggle]');

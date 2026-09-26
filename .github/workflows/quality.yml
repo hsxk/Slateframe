@@ -57,7 +57,7 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
@@ -272,6 +272,21 @@ jobs:
             if (7 !== count(slateframe_layout_control_definitions())) {
               throw new RuntimeException("Appearance control registry drifted.");
             }
+            foreach (array("system" => "system", "light" => "light", "dark" => "dark", "unexpected" => "system") as $candidate => $expected) {
+              if ($expected !== slateframe_sanitize_color_mode($candidate)) {
+                throw new RuntimeException("Color-mode sanitization failed: " . $candidate);
+              }
+            }
+            set_theme_mod("slateframe_color_mode", "dark");
+            if ("dark" !== slateframe_resolved_color_mode()) {
+              throw new RuntimeException("Site dark-mode default was not resolved.");
+            }
+            $_COOKIE["slateframe_color_mode"] = "light";
+            if ("light" !== slateframe_resolved_color_mode()) {
+              throw new RuntimeException("Visitor color-mode preference did not override the site default.");
+            }
+            unset($_COOKIE["slateframe_color_mode"]);
+            remove_theme_mod("slateframe_color_mode");
 
             $default_editor = slateframe_editor_spatial_tokens(array("styles" => array()));
             if (!empty($default_editor["styles"])) {
@@ -293,6 +308,16 @@ jobs:
             }
             remove_theme_mod("slateframe_spacing_scale");
             remove_theme_mod("slateframe_content_width");
+
+            set_theme_mod("slateframe_color_mode", "dark");
+            $dark_editor = slateframe_editor_spatial_tokens(array("styles" => array()));
+            $dark_css = $dark_editor["styles"][0]["css"] ?? "";
+            foreach (array("--slateframe-bg:#111412", "--slateframe-text:#eef1ee", "color-scheme:dark") as $needle) {
+              if (false === strpos($dark_css, $needle)) {
+                throw new RuntimeException("Editor dark-mode token missing: " . $needle);
+              }
+            }
+            remove_theme_mod("slateframe_color_mode");
           ' --path=/tmp/wp-site
 
   browser-smoke:
@@ -518,6 +543,24 @@ jobs:
           for mod in slateframe_control_size slateframe_spacing_scale slateframe_gutter_size slateframe_section_scale slateframe_radius_size slateframe_content_width slateframe_wide_width; do
             wp theme mod remove "$mod" --path=/tmp/wp-browser
           done
+      - name: Verify explicit dark site mode
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
+          SLATEFRAME_SITE_COLOR_MODE: dark
+        run: |
+          wp theme mod set slateframe_color_mode dark --path=/tmp/wp-browser
+          npx playwright test tests/browser/color-mode.spec.js --project=viewport-390 --project=viewport-1440
+      - name: Verify explicit light site mode
+        if: ${{ always() }}
+        env:
+          PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
+          SLATEFRAME_SITE_COLOR_MODE: light
+        run: |
+          wp theme mod set slateframe_color_mode light --path=/tmp/wp-browser
+          npx playwright test tests/browser/color-mode.spec.js --project=viewport-390 --project=viewport-1440
+      - name: Reset color-mode fixture
+        if: ${{ always() }}
+        run: wp theme mod remove slateframe_color_mode --path=/tmp/wp-browser
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4

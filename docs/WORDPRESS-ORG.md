@@ -13,11 +13,11 @@ The public quality workflow currently requires:
 - Theme Check against the built `slateframe.zip`;
 - zero Theme Check findings with severity `REQUIRED`;
 - all 21 production patterns present and registered in real WordPress, with no remote media URLs embedded in pattern source;
-- responsive browser regression, including content-mode, print, CJK/RTL, and long-string fixtures;
+- responsive browser regression, including content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
 - separate base, singular-reading, discussion, specialized content-mode, and combined contextual-runtime ceilings so optional presentation does not silently inflate ordinary routes;
 - package-content and 1200×900 screenshot validation.
 
-Theme Check advisory findings remain visible in CI rather than being hidden.
+Theme Check advisory findings remain visible in CI rather than being hidden. Color-mode CI also validates the 44px toggle target, accessible pressed state/name, server-resolved site defaults, visitor-cookie persistence, semantic dark surfaces, and representative mobile/desktop screenshots.
 
 ## Current advisory decisions
 

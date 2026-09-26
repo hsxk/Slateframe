@@ -6,7 +6,9 @@ Slateframe is a **hybrid WordPress theme**: `theme.json` provides editor/design-
 
 ### 1. Design system
 
-`theme.json` and `--slateframe-*` CSS custom properties define the shared palette, typography, layout measures, control/component spacing, prose/heading/list reading rhythm, radii, motion, and editor-facing presets. The editor block gap uses the same prose-rhythm token as the frontend so authored spacing remains predictable. Bounded Customizer changes are serialized once by `slateframe_customizer_spatial_css()` and injected into both frontend styles and the block-editor `styles` setting, preventing Appearance values from diverging between editing and published views.
+`theme.json` and `--slateframe-*` CSS custom properties define the shared palette, typography, layout measures, control/component spacing, prose/heading/list reading rhythm, radii, motion, and editor-facing presets. Light and dark palettes are expressed through the same semantic background/surface/text/muted/border/accent/focus/selection tokens, while explicit authored color presets in `theme.json` resolve to those tokens instead of duplicating light-only values. The editor block gap uses the same prose-rhythm token as the frontend so authored spacing remains predictable.
+
+Bounded Customizer changes are serialized once by `slateframe_customizer_spatial_css()` and injected into both frontend styles and the block-editor `styles` setting. The color-mode setting is separately sanitized to System, Light, or Dark; explicit site defaults are mirrored into the editor while System follows `prefers-color-scheme`. On the frontend, an explicit visitor light/dark preference stored in a functional first-party cookie takes precedence and is emitted on the server through the document language attributes, avoiding a persisted-theme flash without an inline bootstrap script.
 
 Repeated visual values should become tokens rather than drift across component files.
 
@@ -30,7 +32,7 @@ Photography, portfolio, and knowledge block-style CSS lives in `assets/css/conte
 
 ### 5. Progressive enhancement
 
-Frontend JavaScript is intentionally small. Navigation behavior enhances usable server-rendered markup; the theme must remain navigable without JavaScript.
+Frontend JavaScript is intentionally small. Navigation behavior enhances usable server-rendered markup; the theme must remain navigable without JavaScript. The color-mode control is also progressive enhancement: System mode and explicit site defaults work in CSS/server-rendered HTML without JavaScript, while JavaScript only applies and remembers a visitor's explicit light/dark override.
 
 ### 6. Integrations
 

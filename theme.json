@@ -14,27 +14,27 @@
 				{
 					"slug": "ink",
 					"name": "Ink",
-					"color": "#171918"
+					"color": "var(--slateframe-text)"
 				},
 				{
 					"slug": "paper",
 					"name": "Paper",
-					"color": "#f7f7f4"
+					"color": "var(--slateframe-bg)"
 				},
 				{
 					"slug": "surface",
 					"name": "Surface",
-					"color": "#ffffff"
+					"color": "var(--slateframe-surface)"
 				},
 				{
 					"slug": "muted",
 					"name": "Muted",
-					"color": "#656b67"
+					"color": "var(--slateframe-muted)"
 				},
 				{
 					"slug": "accent",
 					"name": "Accent",
-					"color": "#1d5f50"
+					"color": "var(--slateframe-accent)"
 				}
 			]
 		},

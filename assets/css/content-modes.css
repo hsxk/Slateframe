@@ -42,7 +42,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden}
 
 .wp-block-image.is-style-slateframe-photo-feature {
 	margin-block: clamp(1.5rem, 4vw, 3rem);
-	background: #101513;
+	background: var(--slateframe-media-chrome);
 }
 
 .wp-block-image.is-style-slateframe-photo-feature img {
@@ -54,8 +54,8 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden}
 .wp-block-image.is-style-slateframe-photo-feature figcaption {
 	margin: 0;
 	padding: 0.7rem 0.85rem;
-	color: #e7ece9;
-	background: #101513;
+	color: var(--slateframe-media-chrome-text);
+	background: var(--slateframe-media-chrome);
 	text-align: start;
 }
 
@@ -117,15 +117,11 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden}
 	border-block: 1px solid var(--slateframe-border);
 }
 
-.wp-block-group.is-style-slateframe-key-facts > :first-child,
-.wp-block-group.is-style-slateframe-learning-callout > :first-child,
-.wp-block-group.is-style-slateframe-project-brief > :first-child {
+.wp-block-group:is(.is-style-slateframe-key-facts, .is-style-slateframe-learning-callout, .is-style-slateframe-project-brief) > :first-child {
 	margin-block-start: 0;
 }
 
-.wp-block-group.is-style-slateframe-key-facts > :last-child,
-.wp-block-group.is-style-slateframe-learning-callout > :last-child,
-.wp-block-group.is-style-slateframe-project-brief > :last-child {
+.wp-block-group:is(.is-style-slateframe-key-facts, .is-style-slateframe-learning-callout, .is-style-slateframe-project-brief) > :last-child {
 	margin-block-end: 0;
 }
 

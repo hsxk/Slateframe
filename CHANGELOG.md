@@ -49,6 +49,9 @@ All notable changes to Slateframe will be documented here.
 - Extended editor-canvas parity to H2/H3 hierarchy, nested lists, quotes, inline code, and table surfaces while consolidating article transitions, pagination, table cells, entry footers, and search buttons onto shared spatial/control tokens.
 - Split long-form reading presentation into a singular-only stylesheet, reducing base-route CSS while keeping the same layer always available inside the block editor.
 - Added separate CI ceilings for base, reading, discussion, specialized content-mode, and content-mode-plus-discussion runtimes so every shipped request is counted without inflating the base budget.
+- Added adaptive light/dark presentation with system-preference fallback, a 44px accessible header toggle, server-rendered explicit site defaults, and a first-party visitor preference cookie.
+- Added bounded Appearance color-mode selection with System, Light, and Dark choices plus matching block-editor token parity.
+- Added browser regression and screenshot evidence for system/light/dark modes across article, search, comments, mobile navigation, and photography surfaces.
 
 ### Changed
 
@@ -64,6 +67,8 @@ All notable changes to Slateframe will be documented here.
 
 - Moved specialized Photography/Portfolio/Knowledge rules out of the base stylesheet and added separate base-runtime/contextual asset budgets.
 - Project-grid dates now use the site's locale-aware WordPress date format instead of a theme-imposed month/year format.
+- Theme color presets now resolve through Slateframe's semantic design tokens so authored Ink, Paper, Surface, Muted, and Accent colors remain coherent across light and dark presentation.
+- Navigation shadows and photography media chrome now use shared semantic tokens instead of light-only magic colors.
 
 ### Fixed
 
