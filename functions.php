@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once get_template_directory() . '/inc/template-tags.php';
+require_once get_template_directory() . '/inc/content-discovery.php';
 require_once get_template_directory() . '/inc/customizer.php';
 
 /**
@@ -58,6 +59,28 @@ function slateframe_setup() {
 	);
 }
 add_action( 'after_setup_theme', 'slateframe_setup' );
+
+/**
+ * Register optional block/widget regions.
+ *
+ * Footer content is deliberately content-owned: sites can compose Core blocks,
+ * subscription widgets, project links, or multilingual widgets without the
+ * theme hard-coding a footer information architecture.
+ */
+function slateframe_register_widget_areas() {
+	register_sidebar(
+		array(
+			'name'          => __( 'Footer content', 'slateframe' ),
+			'id'            => 'footer-content',
+			'description'   => __( 'Optional block or widget content displayed above the footer navigation.', 'slateframe' ),
+			'before_widget' => '<div id="%1$s" class="slateframe-footer-widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h2 class="slateframe-footer-widget-title">',
+			'after_title'   => '</h2>',
+		)
+	);
+}
+add_action( 'widgets_init', 'slateframe_register_widget_areas' );
 
 /**
  * Determine whether the current singular document needs content-mode styles.
@@ -150,6 +173,17 @@ function slateframe_assets() {
 		);
 	}
 
+	if ( is_singular() || is_author() || is_404() ) {
+		$publishing_dependencies = is_singular() ? array( 'slateframe-reading' ) : array( 'slateframe-style' );
+
+		wp_enqueue_style(
+			'slateframe-publishing',
+			get_template_directory_uri() . '/assets/css/publishing.css',
+			$publishing_dependencies,
+			$version
+		);
+	}
+
 	if ( slateframe_content_modes_needed() ) {
 		wp_enqueue_style(
 			'slateframe-content-modes',
@@ -202,6 +236,71 @@ function slateframe_assets() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'slateframe_assets' );
+
+/**
+ * Keep potentially scrollable Core table blocks reachable from the keyboard.
+ *
+ * The wrapper owns horizontal overflow at narrow widths and text zoom, so it
+ * needs a focus stop even when the table happens to fit at the current width.
+ * Preserve an author-supplied tabindex when one is present.
+ *
+ * @param string $block_content Rendered Core table block markup.
+ * @return string
+ */
+function slateframe_focusable_table_block( $block_content ) {
+	if ( '' === $block_content ) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	while ( $processor->next_tag() ) {
+		if ( ! $processor->has_class( 'wp-block-table' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+
+		break;
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/table', 'slateframe_focusable_table_block' );
+
+/**
+ * Keep direct TablePress output reachable when the table itself becomes the
+ * horizontal scroll owner inside Slateframe's reading measure.
+ *
+ * TablePress shortcodes are expanded before this priority. The fast string
+ * guard avoids parsing ordinary content and the theme does not depend on the
+ * plugin being installed.
+ *
+ * @param string $content Rendered post content.
+ * @return string
+ */
+function slateframe_focusable_tablepress_tables( $content ) {
+	if ( false === strpos( $content, 'tablepress' ) ) {
+		return $content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $content );
+
+	while ( $processor->next_tag( 'table' ) ) {
+		if ( ! $processor->has_class( 'tablepress' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'the_content', 'slateframe_focusable_tablepress_tables', 20 );
 
 /**
  * Render only the custom-logo image inside Slateframe's own brand link.

@@ -35,8 +35,8 @@
 	</div>
 	<!-- /wp:columns -->
 
-	<!-- wp:gallery {"align":"wide","linkTo":"none","sizeSlug":"large","className":"is-style-slateframe-contact-sheet"} -->
-	<figure class="wp-block-gallery alignwide has-nested-images columns-default is-style-slateframe-contact-sheet"></figure>
+	<!-- wp:gallery {"align":"wide","linkTo":"none","sizeSlug":"large","imageCrop":false,"className":"is-style-slateframe-contact-sheet"} -->
+	<figure class="wp-block-gallery alignwide has-nested-images columns-default is-cropped-false is-style-slateframe-contact-sheet"></figure>
 	<!-- /wp:gallery -->
 
 	<!-- wp:paragraph {"className":"slateframe-pattern-caption"} -->

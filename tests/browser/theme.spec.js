@@ -206,6 +206,42 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 	await expectNoHorizontalOverflow(page, pagePath);
 });
 
+test('Core table scroll regions stay on the reading axis and expose keyboard focus', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	const table = page.locator('.browser-data-table');
+	await expect(table).toBeVisible();
+	await expect(table).toHaveAttribute('tabindex', '0');
+
+	await table.focus();
+	await expect(table).toBeFocused();
+
+	const geometry = await page.evaluate(() => {
+		const tableBlock = document.querySelector('.browser-data-table');
+		const prose = document.querySelector('.browser-default-prose');
+		if (!tableBlock || !prose) {
+			throw new Error('Table-axis fixtures are missing.');
+		}
+		const tableRect = tableBlock.getBoundingClientRect();
+		const proseRect = prose.getBoundingClientRect();
+		const styles = getComputedStyle(tableBlock);
+		return {
+			tableLeft: tableRect.left,
+			tableWidth: tableRect.width,
+			proseLeft: proseRect.left,
+			proseWidth: proseRect.width,
+			outlineStyle: styles.outlineStyle,
+			outlineWidth: Number.parseFloat(styles.outlineWidth),
+		};
+	});
+
+	expect(Math.abs(geometry.tableLeft - geometry.proseLeft)).toBeLessThanOrEqual(1);
+	expect(Math.abs(geometry.tableWidth - geometry.proseWidth)).toBeLessThanOrEqual(1);
+	expect(geometry.outlineStyle).not.toBe('none');
+	expect(geometry.outlineWidth).toBeGreaterThanOrEqual(2);
+	await expectNoHorizontalOverflow(page, pagePath);
+});
+
 test('editorial reading rhythm distinguishes headings, nested lists, code, tables, and quotes', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 

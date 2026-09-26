@@ -48,6 +48,11 @@ get_header();
 			</div>
 		</article>
 
+		<div class="slateframe-shell">
+			<?php slateframe_related_posts(); ?>
+		</div>
+
+		<?php if ( apply_filters( 'slateframe_show_post_navigation', true, get_the_ID() ) ) : ?>
 		<div class="slateframe-shell slateframe-post-navigation">
 			<?php
 			the_post_navigation(
@@ -58,6 +63,7 @@ get_header();
 			);
 			?>
 		</div>
+		<?php endif; ?>
 
 		<?php comments_template(); ?>
 	<?php endwhile; ?>

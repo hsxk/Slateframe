@@ -53,6 +53,13 @@ jobs:
             grep -q '^ \* Slug: slateframe/' "$file"
             grep -q '^ \* Categories:.*slateframe' "$file"
           done
+          for file in patterns/photo-essay.php patterns/photography-contact-sheet.php patterns/photography-diptych.php patterns/photography-sequence.php; do
+            grep -q '"imageCrop":false' "$file"
+          done
+          if grep -E 'class="[^"]* is-cropped( |")' patterns/photo-essay.php patterns/photography-contact-sheet.php patterns/photography-diptych.php patterns/photography-sequence.php; then
+            echo 'Natural-ratio photography patterns must not serialize Core cropped galleries.' >&2
+            exit 1
+          fi
           if grep -niE 'https?://' "${patterns[@]}"; then
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
@@ -60,29 +67,37 @@ jobs:
           for file in style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
+          wc -c style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
           test $(wc -c < style.css) -le 16000
           test $(wc -c < assets/css/navigation.css) -le 4000
           test $(wc -c < assets/css/comments.css) -le 3000
           test $(wc -c < assets/css/reading.css) -le 7000
+          test $(wc -c < assets/css/publishing.css) -le 4500
           test $(wc -c < assets/css/content-modes.css) -le 12500
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
+          if grep -Eq '100(d?v|v)w' assets/css/reading.css; then
+            echo 'Reading primitives must stay container-relative; viewport-width escapes recreate legacy child-theme overflow.' >&2
+            exit 1
+          fi
           base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/js/theme.js) ))
-          reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
-          discussion_runtime_bytes=$(( reading_runtime_bytes + $(wc -c < assets/css/comments.css) ))
-          contextual_runtime_bytes=$(( reading_runtime_bytes + $(wc -c < assets/css/content-modes.css) ))
+          core_reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
+          publishing_runtime_bytes=$(( core_reading_runtime_bytes + $(wc -c < assets/css/publishing.css) ))
+          discussion_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          contextual_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/content-modes.css) ))
           contextual_discussion_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/comments.css) ))
           echo "Base CSS+navigation+JS: ${base_runtime_bytes} bytes"
-          echo "Base+reading runtime: ${reading_runtime_bytes} bytes"
-          echo "Base+reading+discussion runtime: ${discussion_runtime_bytes} bytes"
-          echo "Base+reading+content-mode runtime: ${contextual_runtime_bytes} bytes"
-          echo "Base+reading+content-mode+discussion runtime: ${contextual_discussion_bytes} bytes"
+          echo "Base+core reading runtime: ${core_reading_runtime_bytes} bytes"
+          echo "Base+reading+publishing runtime: ${publishing_runtime_bytes} bytes"
+          echo "Base+reading+publishing+discussion runtime: ${discussion_runtime_bytes} bytes"
+          echo "Base+reading+publishing+content-mode runtime: ${contextual_runtime_bytes} bytes"
+          echo "Base+reading+publishing+content-mode+discussion runtime: ${contextual_discussion_bytes} bytes"
           test "$base_runtime_bytes" -le 25000
-          test "$reading_runtime_bytes" -le 30000
-          test "$discussion_runtime_bytes" -le 33000
-          test "$contextual_runtime_bytes" -le 43000
-          test "$contextual_discussion_bytes" -le 46000
+          test "$core_reading_runtime_bytes" -le 30000
+          test "$publishing_runtime_bytes" -le 34500
+          test "$discussion_runtime_bytes" -le 37500
+          test "$contextual_runtime_bytes" -le 47000
+          test "$contextual_discussion_bytes" -le 50000
 
   coding-standards:
     name: WordPress coding standards
@@ -355,6 +370,27 @@ jobs:
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
+          wp rewrite structure '/%postname%/' --path=/tmp/wp-browser
+          wp rewrite flush --path=/tmp/wp-browser
+          mkdir -p /tmp/wp-browser/wp-content/mu-plugins
+          cat > /tmp/wp-browser/wp-content/mu-plugins/slateframe-browser-fixtures.php <<'PHP'
+          <?php
+          add_filter(
+              'slateframe_author_avatar_html',
+              static function ( $html, $author_id ) {
+                  return '<span class="browser-author-avatar-source" aria-hidden="true">SF</span>';
+              },
+              10,
+              2
+          );
+          add_filter(
+              'slateframe_language_switcher_html',
+              static function () {
+                  return '<div class="browser-language-switcher" aria-label="Languages"><a href="/?fixture-lang=en" lang="en">EN</a><a href="/?fixture-lang=ja" lang="ja">日本語</a></div>';
+              }
+          );
+          PHP
+          wp widget add block footer-content 1 --content='<p class="browser-footer-content">Portable footer content fixture.</p>' --path=/tmp/wp-browser
           wp option update thread_comments 1 --path=/tmp/wp-browser
           mkdir -p /tmp/wp-browser/wp-content/uploads/slateframe-fixtures
           cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg <<'SVG'
@@ -409,6 +445,10 @@ jobs:
           <figure class="wp-block-table browser-data-table is-style-slateframe-data"><table><thead><tr><th>Metric</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><td>Publishing reach</td><td>1,234</td><td>12,345</td></tr></tbody></table></figure>
           <!-- /wp:table -->
 
+          <!-- wp:html -->
+          <table class="tablepress browser-tablepress"><thead><tr><th>Reference</th><th>Value</th></tr></thead><tbody><tr><td>Plugin-style table with an intentionally long portable reference label that must scroll inside the reading measure instead of widening the document root.</td><td>Slateframe</td></tr></tbody></table>
+          <!-- /wp:html -->
+
           <!-- wp:details {"className":"browser-details is-style-slateframe-disclosure"} -->
           <details class="wp-block-details browser-details is-style-slateframe-disclosure"><summary>Implementation note</summary><!-- wp:paragraph -->
           <p>Native disclosure content remains readable without JavaScript.</p>
@@ -459,6 +499,7 @@ jobs:
             --post_type=post \
             --post_status=publish \
             --comment_status=open \
+            --post_author=1 \
             --post_title='Slateframe Browser Post' \
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)

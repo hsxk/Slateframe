@@ -138,6 +138,24 @@ test('native lightbox enlarged media remains contained after its opening transit
 	}), { message: 'enlarged media should settle fully inside the viewport' }).toBeLessThanOrEqual(1);
 });
 
+test('photo-feature media chrome does not leak into the native lightbox overlay', async ({ page }) => {
+	await openRasterPhotography(page);
+	const { dialog } = await openLightbox(page, 'keyboard');
+	const frame = dialog.locator('.is-style-slateframe-photo-feature').last();
+	await expect(frame).toBeVisible();
+	const chrome = await frame.evaluate((node) => {
+		const style = getComputedStyle(node);
+		return {
+			background: style.backgroundColor,
+			marginTop: Number.parseFloat(style.marginTop),
+			marginBottom: Number.parseFloat(style.marginBottom),
+		};
+	});
+	expect(chrome.background).toBe('rgba(0, 0, 0, 0)');
+	expect(chrome.marginTop).toBe(0);
+	expect(chrome.marginBottom).toBe(0);
+});
+
 test('native lightbox honors reduced-motion preference', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
 	await openRasterPhotography(page);
