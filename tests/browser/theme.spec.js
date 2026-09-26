@@ -520,6 +520,27 @@ test('capture content-mode showcase screenshots', async ({ page }, testInfo) => 
 });
 
 
+test('reading stylesheet is requested only for singular documents', async ({ page }) => {
+	const requests = [];
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/reading.css')) {
+			requests.push(request.url());
+		}
+	});
+
+	for (const route of ['/', '/?s=Slateframe']) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `non-singular route should keep reading CSS unloaded: ${route}`).toHaveLength(0);
+	}
+
+	for (const route of [pagePath, postPath, photoPath, projectPath, knowledgePath, showcasePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `singular route should load reading CSS: ${route}`).toHaveLength(1);
+	}
+});
+
 test('content-mode stylesheet is requested only when specialized styles are present', async ({ page }) => {
 	const requests = [];
 	page.on('request', (request) => {

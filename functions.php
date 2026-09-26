@@ -25,7 +25,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/reading.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -141,11 +141,20 @@ function slateframe_assets() {
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 
+	if ( is_singular() ) {
+		wp_enqueue_style(
+			'slateframe-reading',
+			get_template_directory_uri() . '/assets/css/reading.css',
+			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
 	if ( slateframe_content_modes_needed() ) {
 		wp_enqueue_style(
 			'slateframe-content-modes',
 			get_template_directory_uri() . '/assets/css/content-modes.css',
-			array( 'slateframe-style' ),
+			array( 'slateframe-reading' ),
 			$version
 		);
 	}
@@ -163,7 +172,7 @@ function slateframe_assets() {
 		wp_enqueue_style(
 			'slateframe-comments',
 			get_template_directory_uri() . '/assets/css/comments.css',
-			array( 'slateframe-style' ),
+			array( 'slateframe-reading' ),
 			$version
 		);
 	}

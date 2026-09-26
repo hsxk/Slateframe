@@ -57,25 +57,32 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css assets/css/navigation.css assets/css/comments.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/navigation.css assets/css/comments.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
-          test $(wc -c < style.css) -le 20500
+          wc -c style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
+          test $(wc -c < style.css) -le 16000
           test $(wc -c < assets/css/navigation.css) -le 4000
           test $(wc -c < assets/css/comments.css) -le 3000
+          test $(wc -c < assets/css/reading.css) -le 7000
           test $(wc -c < assets/css/content-modes.css) -le 12500
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
           base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/js/theme.js) ))
-          discussion_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/comments.css) ))
-          contextual_css_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/css/content-modes.css) ))
+          reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
+          discussion_runtime_bytes=$(( reading_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          contextual_runtime_bytes=$(( reading_runtime_bytes + $(wc -c < assets/css/content-modes.css) ))
+          contextual_discussion_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/comments.css) ))
           echo "Base CSS+navigation+JS: ${base_runtime_bytes} bytes"
-          echo "Base+discussion runtime: ${discussion_runtime_bytes} bytes"
-          echo "Base+navigation+contextual CSS: ${contextual_css_bytes} bytes"
+          echo "Base+reading runtime: ${reading_runtime_bytes} bytes"
+          echo "Base+reading+discussion runtime: ${discussion_runtime_bytes} bytes"
+          echo "Base+reading+content-mode runtime: ${contextual_runtime_bytes} bytes"
+          echo "Base+reading+content-mode+discussion runtime: ${contextual_discussion_bytes} bytes"
           test "$base_runtime_bytes" -le 25000
-          test "$discussion_runtime_bytes" -le 28000
-          test "$contextual_css_bytes" -le 35000
+          test "$reading_runtime_bytes" -le 30000
+          test "$discussion_runtime_bytes" -le 33000
+          test "$contextual_runtime_bytes" -le 43000
+          test "$contextual_discussion_bytes" -le 46000
 
   coding-standards:
     name: WordPress coding standards
@@ -241,7 +248,7 @@ jobs:
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
           wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/photography-sequence","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/project-outcomes","slateframe/portfolio-project-grid","slateframe/project-decision-log","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/knowledge-definition","slateframe/knowledge-checklist","slateframe/knowledge-procedure","slateframe/knowledge-comparison","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
-          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
+          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/reading.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
       - name: Validate bounded Appearance settings
         shell: bash
         run: |

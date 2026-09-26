@@ -20,7 +20,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
-- **Contextual content-mode CSS:** photography, portfolio, and knowledge presentation is split from the base stylesheet and loaded only when relevant blocks appear on singular content.
+- **Contextual assets:** long-form reading presentation is loaded only on singular documents, while photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
 ## Appearance and spatial system
@@ -40,7 +40,7 @@ CI renders the designed default plus the minimum/compact and maximum/spacious Ap
 - Long-title handling for CJK, Latin, and long translated strings.
 - Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, table-of-contents treatment, editorial leads, and print-friendly long-form output.
 - Post metadata, categories/tags, previous/next navigation, comments, pagination, archives, author pages, search, and 404.
-- Editor-canvas parity for title rhythm, H2/H3 hierarchy, nested-list rhythm, quotes, inline code, tables, captions, wide/full alignment, and bounded Appearance token overrides.
+- Editor-canvas parity for the singular reading layer: title rhythm, H2/H3 hierarchy, nested-list rhythm, quotes, inline code, tables, captions, wide/full alignment, and bounded Appearance token overrides.
 
 ### Photography, portfolio, and knowledge
 

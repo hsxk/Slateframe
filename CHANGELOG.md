@@ -47,6 +47,8 @@ All notable changes to Slateframe will be documented here.
 - Expanded real WordPress browser fixtures and regression assertions for heading hierarchy, nested lists, inline/code rhythm, quoted sources, table presentation, and reading-token behavior across compact/default/spacious profiles.
 - Mirrored bounded Appearance token overrides into the block-editor canvas and added runtime checks that editor styles and dynamic token metadata remain registered.
 - Extended editor-canvas parity to H2/H3 hierarchy, nested lists, quotes, inline code, and table surfaces while consolidating article transitions, pagination, table cells, entry footers, and search buttons onto shared spatial/control tokens.
+- Split long-form reading presentation into a singular-only stylesheet, reducing base-route CSS while keeping the same layer always available inside the block editor.
+- Added separate CI ceilings for base, reading, discussion, specialized content-mode, and content-mode-plus-discussion runtimes so every shipped request is counted without inflating the base budget.
 
 ### Changed
 
