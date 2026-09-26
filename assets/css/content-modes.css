@@ -5,7 +5,7 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 .wp-lightbox-overlay .lightbox-image-container{max-inline-size:calc(100dvi - (2 * var(--slateframe-space-4)));max-block-size:calc(100dvb - (2 * var(--slateframe-space-4)))}
 .wp-lightbox-overlay .wp-block-image img[sizes="100vw"]{inline-size:100%;block-size:100%;min-inline-size:0;min-block-size:0;object-fit:contain}
 
-.wp-block-gallery.has-nested-images:is(.is-style-slateframe-contact-sheet,.is-style-slateframe-diptych,.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence){gap:var(--slateframe-media-gap)}
+.wp-block-gallery:is(.is-style-slateframe-contact-sheet,.is-style-slateframe-diptych,.is-style-slateframe-photo-sequence),.wp-block-gallery.slateframe-gallery-sequence{gap:var(--slateframe-media-gap)}
 .wp-block-gallery.is-style-slateframe-contact-sheet{align-items:flex-start}
 .wp-block-gallery.has-nested-images:is(.is-style-slateframe-contact-sheet,.slateframe-gallery-sequence)>figure.wp-block-image{align-self:start;flex-direction:column;justify-content:flex-start;background:var(--slateframe-surface-soft)}
 .wp-block-gallery:is(.is-style-slateframe-contact-sheet,.is-style-slateframe-diptych) .wp-block-image img{inline-size:auto;max-inline-size:100%;block-size:auto;max-block-size:min(62dvh,42rem);margin-inline:auto;aspect-ratio:auto;object-fit:contain}
