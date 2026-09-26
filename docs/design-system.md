@@ -49,3 +49,23 @@ theme.json spacing, typography, content width, wide width, and semantic colors s
 ## Review checklist
 
 For any visual-system change, inspect mobile and desktop, long Latin strings, CJK, RTL, keyboard focus, reduced motion, 200% text resizing, minimum/default/maximum Appearance profiles, horizontal overflow, table containment, and image/caption rhythm. Screenshot evidence is required for important visual changes before merge.
+
+
+## Migration-hardening baseline
+
+Slateframe treats recurring fixes found in long-lived child themes as design-system constraints rather than site-specific patches. These contracts are part of the default product and should be preserved when templates or block styles evolve:
+
+- **One page-start rhythm:** core page, archive, search, author, and recovery surfaces derive header-to-content spacing from the shared section/stack/component tokens. Templates should not introduce independent hero-like top padding simply to compensate for another stylesheet.
+- **Container-relative reading widths:** normal prose stays on the content measure; only explicit wide/full alignments may leave it. Reading primitives must not use `100vw` escapes to repair individual code, table, or media blocks because those rules frequently create double-gutter and horizontal-overflow regressions.
+- **Intrinsic-size containment first:** prose children, grid tracks, controls, navigation items, comments, tables, and editor blocks must be allowed to shrink with `min-inline-size: 0` where intrinsic content could otherwise widen the document.
+- **One accessible table scroll owner:** Core Table and plugin-style tables may scroll horizontally inside the reading measure, while the document root stays fixed. A scroll owner must be keyboard reachable and should use stable scrollbar/overscroll behavior.
+- **Script-neutral display measure:** headings use an em-based measure rather than a Latin `ch` assumption, so CJK and mixed-script titles keep comparable editorial balance without dedicated URL or locale logic.
+- **One control family:** navigation, language adapters, search, pagination, comment controls, disclosure controls, lightbox controls, and plugin-compatible controls inherit the same bounded touch-target and padding system. The default baseline remains at least 44px.
+- **Viewport-contained mobile navigation:** expanded navigation has a viewport-derived maximum block size, local scrolling, overscroll containment, keyboard escape/focus handling, and long-label wrapping. Adding menu depth or translations must not make the page itself scroll sideways.
+- **Sticky-header-aware anchors:** heading scroll offsets derive from the shared header and stack tokens instead of a template-specific literal.
+- **Editor parity is a contract:** content/wide measures, intrinsic containment, title measure, spacing rhythm, captions, tables, and block styles should remain predictable between Gutenberg and the frontend.
+- **Multilingual integration stays adapter-based:** Slateframe does not own a locale list, translated URL structure, Polylang/WPML/TranslatePress relationship storage, or language-specific homepage query. Integrations supply presentation through public filters.
+- **Discovery stays content-model neutral:** the theme must not silently force search to posts only, assume fixed page/category IDs, or hard-code an author/profile destination.
+- **Site identity stays editable:** no fallback logo mark, footer copy, project taxonomy, analytics identifier, personal URL, or fixed publishing content is embedded in runtime.
+
+Browser coverage should reproduce the failure modes behind these rules: long CJK/mixed-script titles, long translated navigation, plain plugin-style tables, 200% text resizing, default/wide/full reading blocks, real 404 routing, and the minimum/default/maximum Appearance profiles.
