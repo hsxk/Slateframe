@@ -271,6 +271,38 @@ function slateframe_focusable_table_block( $block_content ) {
 add_filter( 'render_block_core/table', 'slateframe_focusable_table_block' );
 
 /**
+ * Keep direct TablePress output reachable when the table itself becomes the
+ * horizontal scroll owner inside Slateframe's reading measure.
+ *
+ * TablePress shortcodes are expanded before this priority. The fast string
+ * guard avoids parsing ordinary content and the theme does not depend on the
+ * plugin being installed.
+ *
+ * @param string $content Rendered post content.
+ * @return string
+ */
+function slateframe_focusable_tablepress_tables( $content ) {
+	if ( false === strpos( $content, 'tablepress' ) ) {
+		return $content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $content );
+
+	while ( $processor->next_tag( 'table' ) ) {
+		if ( ! $processor->has_class( 'tablepress' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'the_content', 'slateframe_focusable_tablepress_tables', 20 );
+
+/**
  * Render only the custom-logo image inside Slateframe's own brand link.
  *
  * Core get_custom_logo() includes its own anchor. Rendering the attachment
