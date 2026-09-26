@@ -1,4 +1,5 @@
 html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
+.wp-lightbox-overlay{background:var(--slateframe-bg);color:var(--slateframe-text)}
 .wp-lightbox-overlay :is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next){min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control)}
 .wp-lightbox-overlay .wp-lightbox-close-button{margin-block-start:env(safe-area-inset-top,0px);margin-inline-end:env(safe-area-inset-right,0px)}
 .wp-lightbox-overlay .lightbox-image-container{max-inline-size:calc(100dvi - (2 * var(--slateframe-space-4)));max-block-size:calc(100dvb - (2 * var(--slateframe-space-4)))}
