@@ -205,6 +205,10 @@ function slateframe_customizer_spatial_css() {
 			'--slateframe-media-gap'              => 12,
 			'--slateframe-control-padding-inline' => 12,
 			'--slateframe-caption-gap'            => 10.4,
+			'--slateframe-prose-gap'              => 20,
+			'--slateframe-heading-gap'            => 36,
+			'--slateframe-heading-after'          => 10,
+			'--slateframe-list-item-gap'          => 8,
 			'--slateframe-space-4'                => 16,
 			'--slateframe-stack-gap'              => 16,
 		);
@@ -237,3 +241,31 @@ function slateframe_customizer_spatial_tokens() {
 	}
 }
 add_action( 'wp_enqueue_scripts', 'slateframe_customizer_spatial_tokens', 20 );
+
+
+/**
+ * Mirror changed spatial tokens into the block editor canvas.
+ *
+ * @param array $editor_settings Block editor settings.
+ * @return array
+ */
+function slateframe_editor_spatial_tokens( $editor_settings ) {
+	$css = slateframe_customizer_spatial_css();
+
+	if ( ! $css ) {
+		return $editor_settings;
+	}
+
+	if ( ! isset( $editor_settings['styles'] ) || ! is_array( $editor_settings['styles'] ) ) {
+		$editor_settings['styles'] = array();
+	}
+
+	$editor_settings['styles'][] = array(
+		'css'            => $css,
+		'__unstableType' => 'theme',
+		'isGlobalStyles' => false,
+	);
+
+	return $editor_settings;
+}
+add_filter( 'block_editor_settings_all', 'slateframe_editor_spatial_tokens', 20 );

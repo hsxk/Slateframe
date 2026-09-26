@@ -37,7 +37,10 @@ test('bounded appearance profile drives semantic design tokens and real controls
 			sectionMin: px('--slateframe-section-min'), sectionMax: px('--slateframe-section-max'), radius: px('--slateframe-radius'),
 			content: px('--slateframe-content'), wide: px('--slateframe-wide'), inlineGap: px('--slateframe-inline-gap'),
 			componentGap: px('--slateframe-component-gap'), stackGap: px('--slateframe-stack-gap'),
-			controlPaddingBlock: px('--slateframe-control-padding-block'), normalWidth: normal?.getBoundingClientRect().width || 0,
+			proseGap: px('--slateframe-prose-gap'), headingGap: px('--slateframe-heading-gap'),
+			headingAfter: px('--slateframe-heading-after'), listItemGap: px('--slateframe-list-item-gap'),
+			controlPaddingBlock: px('--slateframe-control-padding-block'), controlPaddingInline: px('--slateframe-control-padding-inline'),
+			normalWidth: normal?.getBoundingClientRect().width || 0,
 			wideWidth: wide?.getBoundingClientRect().width || 0, shellInset: shell?.getBoundingClientRect().left || 0,
 			summaryHeight: summary?.getBoundingClientRect().height || 0, viewport: document.documentElement.clientWidth,
 		};
@@ -46,7 +49,10 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	near(metrics.section, profile.section, 0.01); near(metrics.sectionMin, 44 * profile.section); near(metrics.sectionMax, 72 * profile.section);
 	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide);
 	near(metrics.inlineGap, 4 * profile.spacing); near(metrics.componentGap, 12 * profile.spacing);
-	near(metrics.stackGap, 16 * profile.spacing); near(metrics.controlPaddingBlock, 8 * profile.spacing);
+	near(metrics.stackGap, 16 * profile.spacing); near(metrics.proseGap, 20 * profile.spacing);
+	near(metrics.headingGap, 36 * profile.spacing); near(metrics.headingAfter, 10 * profile.spacing);
+	near(metrics.listItemGap, 8 * profile.spacing); near(metrics.controlPaddingBlock, 8 * profile.spacing);
+	near(metrics.controlPaddingInline, 12 * profile.spacing);
 	expect(metrics.summaryHeight).toBeGreaterThanOrEqual(profile.control - 1);
 	const gutter = Math.min(profile.gutter * 2, Math.max(profile.gutter, metrics.viewport * 0.03));
 	const centeredWideInset = Math.max(0, (metrics.viewport - profile.wide) / 2);
@@ -62,6 +68,7 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		await expect(locator).toBeVisible();
 		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
 	}
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });

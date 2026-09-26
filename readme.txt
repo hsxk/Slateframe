@@ -24,10 +24,10 @@ Highlights include:
 * Starter patterns for photo essays, photography contact sheets/features/diptychs/sequences, project case studies/indexes/briefs/outcomes/query grids/decision logs, learning paths/lesson chapters/knowledge outlines/definitions/checkpoints/procedures/comparisons, editorial openings/notes, and curated reading lists.
 * Block styles for editorial notes/leads, framed images, photo sequences, contact sheets/diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 * An editorial system-font type scale with Small, Body, Lead, Heading, and Display presets and no required third-party font request.
-* A coherent spatial system for control sizing, component rhythm, page gutters, reading/wide widths, section whitespace, and corner radius, with bounded controls in Appearance > Customize.
+* A coherent spatial system for control sizing, component and reading rhythm, page gutters, reading/wide widths, section whitespace, and corner radius, with bounded controls in Appearance > Customize that are mirrored into the block-editor canvas.
 * WordPress i18n APIs, logical CSS properties, RTL support, CJK-safe wrapping, and long-string resilience.
 * Optional multilingual integration through a public filter; no multilingual plugin is required.
-* Contextual Photography, Portfolio, and Knowledge CSS that is requested only when matching content is present, with a documented marker filter for integrations.
+* Contextual CSS architecture: long-form reading styles load only on singular documents, while Photography, Portfolio, and Knowledge styles are requested only when matching content is present, with a documented marker filter for integrations.
 * Keyboard navigation, visible focus, threaded comment replies, reduced-motion support, semantic landmarks, and resilient no-JavaScript behavior.
 * Classic WordPress alignment, caption, gallery-caption, sticky-post, and post-author compatibility classes.
 

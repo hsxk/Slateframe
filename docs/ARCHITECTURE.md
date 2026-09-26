@@ -6,7 +6,7 @@ Slateframe is a **hybrid WordPress theme**: `theme.json` provides editor/design-
 
 ### 1. Design system
 
-`theme.json` and `--slateframe-*` CSS custom properties define the shared palette, typography, layout measures, spacing, radii, motion, and editor-facing presets.
+`theme.json` and `--slateframe-*` CSS custom properties define the shared palette, typography, layout measures, control/component spacing, prose/heading/list reading rhythm, radii, motion, and editor-facing presets. The editor block gap uses the same prose-rhythm token as the frontend so authored spacing remains predictable. Bounded Customizer changes are serialized once by `slateframe_customizer_spatial_css()` and injected into both frontend styles and the block-editor `styles` setting, preventing Appearance values from diverging between editing and published views.
 
 Repeated visual values should become tokens rather than drift across component files.
 
@@ -22,11 +22,11 @@ Patterns provide portable editorial compositions. Block styles alter presentatio
 
 Content inserted through patterns remains ordinary WordPress block content and survives a theme change.
 
-### 4. Contextual content modes
+### 4. Contextual reading and content modes
 
-Photography, portfolio, and knowledge block-style CSS lives in `assets/css/content-modes.css`. The frontend requests it only for singular content containing relevant core blocks; the block editor always receives the same styles for parity.
+Long-form post/Page presentation lives in `assets/css/reading.css` and is requested only for singular frontend documents. The block editor always receives the same reading layer so authored hierarchy matches the published view.
 
-This keeps archive and navigation pages on the smaller base stylesheet without hiding pattern functionality behind JavaScript. The public `slateframe_content_mode_markers` filter allows integrations to append stable, site-neutral content markers without making a plugin or locale scheme part of core.
+Photography, portfolio, and knowledge block-style CSS lives in `assets/css/content-modes.css` and is layered on only when singular content contains relevant core blocks. This keeps home, archive, search, and navigation routes on the smaller base stylesheet without hiding pattern functionality behind JavaScript. The public `slateframe_content_mode_markers` filter allows integrations to append stable, site-neutral content markers without making a plugin or locale scheme part of core.
 
 ### 5. Progressive enhancement
 
@@ -53,7 +53,7 @@ Plugins/services should own SEO metadata/schema, analytics, caching/CDN, custom 
 
 ## Performance model
 
-Slateframe prefers system fonts, contextual CSS, native browser behavior, explicit asset budgets, and minimal DOM wrappers. New runtime dependencies require a measurable product benefit and should not be added merely for visual decoration.
+Slateframe prefers system fonts, contextual CSS, native browser behavior, explicit asset budgets, and minimal DOM wrappers. CI budgets the base route, singular reading layer, discussions, specialized content modes, and their combined worst case separately so optional presentation cannot silently inflate every page. New runtime dependencies require a measurable product benefit and should not be added merely for visual decoration.
 
 ## Accessibility model
 

@@ -38,6 +38,10 @@ Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featur
 	--slateframe-stack-gap: var(--slateframe-space-4);
 	--slateframe-media-gap: var(--slateframe-space-3);
 	--slateframe-caption-gap: 0.65rem;
+	--slateframe-prose-gap: 1.25rem;
+	--slateframe-heading-gap: 2.25rem;
+	--slateframe-heading-after: 0.625rem;
+	--slateframe-list-item-gap: 0.5rem;
 	--slateframe-control-padding-block: var(--slateframe-space-2);
 	--slateframe-control-padding-inline: var(--slateframe-space-3);
 	--slateframe-header-height: 4.5rem;
@@ -229,96 +233,24 @@ textarea {
 }
 
 .slateframe-archive-description {
-	max-width: 46rem;
-	margin-block-start: 1rem;
+	max-width: var(--slateframe-content);
+	margin-block-start: var(--slateframe-stack-gap);
 	color: var(--slateframe-muted);
 	font-size: 1.02rem;
 }
 
 .slateframe-entry-hero {
-	margin-block-end: clamp(2rem, 5vw, 4rem);
+	margin-block-end: clamp(
+		calc(var(--slateframe-stack-gap) + var(--slateframe-stack-gap)),
+		5vw,
+		var(--slateframe-section-max)
+	);
 }
 
 .slateframe-entry-hero-image {
 	width: 100%;
 	max-height: 78vh;
 	object-fit: cover;
-}
-
-.slateframe-prose {
-	width: 100%;
-	padding-block-end: var(--slateframe-section);
-}
-
-.slateframe-prose > * {
-	width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-content));
-	margin-block-start: 1.35em;
-	margin-block-end: 0;
-	margin-inline: auto;
-}
-
-.slateframe-prose > .alignwide {
-	width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-wide));
-	max-width: var(--slateframe-wide);
-}
-
-.slateframe-prose > .alignfull {
-	width: 100%;
-	max-width: none;
-}
-
-.slateframe-prose > .wp-block-group.alignfull {
-	padding-inline: var(--slateframe-gutter);
-}
-
-.slateframe-prose > :first-child {
-	margin-block-start: 0;
-}
-
-.slateframe-prose h2,
-.slateframe-prose h3 {
-	line-height: 1.18;
-	text-wrap: balance;
-}
-
-.slateframe-prose pre,
-.wp-block-code {
-	overflow: auto;
-	padding: 1.1rem 1.2rem;
-	border-radius: var(--slateframe-radius);
-	background: #111715;
-	color: #eef4f1;
-	font-family: var(--slateframe-mono);
-}
-
-.slateframe-prose :not(pre) > code {
-	padding: 0.1em 0.28em;
-	border-radius: 0.3em;
-	background: var(--slateframe-surface-soft);
-	font-family: var(--slateframe-mono);
-	font-size: 0.92em;
-}
-
-.slateframe-prose blockquote {
-	margin-inline: auto;
-	padding-inline-start: 1.2rem;
-	border-inline-start: 3px solid var(--slateframe-accent);
-	color: var(--slateframe-muted);
-}
-
-.slateframe-prose table {
-	display: block;
-	max-width: 100%;
-	overflow-x: auto;
-	border-collapse: collapse;
-}
-
-.slateframe-prose th,
-.slateframe-prose td {
-	padding: 0.72rem 0.78rem;
-	border-block-end: 1px solid var(--slateframe-border);
-	text-align: start;
-	vertical-align: top;
 }
 
 .slateframe-grid {
@@ -331,7 +263,7 @@ textarea {
 	grid-column: span 6;
 	display: grid;
 	align-content: start;
-	border-block-start: 1px solid var(--slateframe-border);
+	border-block-start: var(--slateframe-border-width) solid var(--slateframe-border);
 	padding-block: 1.25rem 1.8rem;
 }
 
@@ -383,8 +315,8 @@ textarea {
 .slateframe-entry-footer {
 	display: grid;
 	gap: var(--slateframe-component-gap);
-	padding-block-start: 1.25rem;
-	border-block-start: 1px solid var(--slateframe-border);
+	padding-block-start: var(--slateframe-prose-gap);
+	border-block-start: var(--slateframe-border-width) solid var(--slateframe-border);
 	color: var(--slateframe-muted);
 	font-size: 0.88rem;
 }
@@ -409,8 +341,9 @@ textarea {
 .slateframe-post-navigation a {
 	display: grid;
 	gap: var(--slateframe-inline-gap);
+	min-block-size: var(--slateframe-control);
 	min-height: 100%;
-	padding: 1rem 0;
+	padding-block: var(--slateframe-space-3);
 	color: var(--slateframe-text);
 	text-decoration: none;
 }
@@ -447,7 +380,7 @@ textarea {
 .slateframe-search-form button,
 .form-submit .submit {
 	min-height: var(--slateframe-control);
-	padding: var(--slateframe-control-padding-block) var(--slateframe-space-4);
+	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
 	border: var(--slateframe-border-width) solid var(--slateframe-text);
 	border-radius: var(--slateframe-radius);
 	background: var(--slateframe-text);
@@ -456,7 +389,7 @@ textarea {
 }
 
 .slateframe-pagination {
-	margin-block: 2rem var(--slateframe-section);
+	margin-block: calc(var(--slateframe-stack-gap) + var(--slateframe-stack-gap)) var(--slateframe-section);
 }
 
 .slateframe-pagination .nav-links {
@@ -471,7 +404,7 @@ textarea {
 	min-width: var(--slateframe-control);
 	min-height: var(--slateframe-control);
 	padding: var(--slateframe-space-2);
-	border: 1px solid var(--slateframe-border);
+	border: var(--slateframe-border-width) solid var(--slateframe-border);
 	color: var(--slateframe-text);
 	text-decoration: none;
 }
@@ -630,127 +563,6 @@ textarea {
 	}
 }
 
-/* Publishing primitives: resilient long-form content without a heavy runtime. */
-.slateframe-prose a {
-	overflow-wrap: anywhere;
-}
-
-.slateframe-prose :is(h2, h3, h4, h5, h6) {
-	scroll-margin-block-start: 6rem;
-}
-
-.slateframe-prose :is(figure, .wp-block-image, .wp-block-gallery) {
-	max-width: 100%;
-}
-
-.slateframe-prose figcaption,
-.slateframe-prose .wp-element-caption {
-	margin-block-start: var(--slateframe-caption-gap);
-	color: var(--slateframe-muted);
-	font-size: 0.84rem;
-	line-height: 1.5;
-	text-align: start;
-}
-
-.slateframe-prose .wp-block-pullquote {
-	padding-block: clamp(1.4rem, 3vw, 2.4rem);
-	border-block: 1px solid var(--slateframe-border);
-	text-align: start;
-}
-
-.slateframe-prose .wp-block-pullquote blockquote {
-	padding-inline-start: 0;
-	border-inline-start: 0;
-	color: var(--slateframe-text);
-	font-size: clamp(1.25rem, 2.4vw, 1.75rem);
-	line-height: 1.45;
-}
-
-.slateframe-prose .wp-block-details {
-	padding-block: 0.9rem;
-	border-block: 1px solid var(--slateframe-border);
-}
-
-.slateframe-prose .wp-block-details summary {
-	min-height: var(--slateframe-control);
-	display: flex;
-	align-items: center;
-	font-weight: 700;
-	cursor: pointer;
-}
-
-.slateframe-prose .wp-block-details[open] summary {
-	margin-block-end: 0.75rem;
-}
-
-.slateframe-prose .wp-block-footnotes {
-	padding-inline-start: 1.35rem;
-	color: var(--slateframe-muted);
-	font-size: 0.9rem;
-}
-
-.slateframe-prose .wp-block-footnotes li {
-	padding-inline-start: 0.25rem;
-	margin-block: 0.6rem;
-}
-
-.slateframe-prose .wp-block-footnotes a[href^="#"] {
-	overflow-wrap: normal;
-}
-
-.slateframe-prose table {
-	overscroll-behavior-inline: contain;
-	-webkit-overflow-scrolling: touch;
-}
-
-.slateframe-prose .tablepress {
-	display: table;
-	width: 100%;
-	max-width: none;
-}
-
-.slateframe-prose .tablepress-scroll-wrapper,
-.slateframe-prose .wp-block-table {
-	max-width: 100%;
-	overflow-x: auto;
-	overscroll-behavior-inline: contain;
-	-webkit-overflow-scrolling: touch;
-}
-
-.wp-block-table.is-style-slateframe-data table,
-.wp-block-table.is-style-slateframe-data {
-	font-variant-numeric: tabular-nums;
-}
-
-.wp-block-table.is-style-slateframe-data th {
-	border-block-end: 2px solid var(--slateframe-text);
-	font-size: 0.82rem;
-	letter-spacing: 0.02em;
-}
-
-.wp-block-details.is-style-slateframe-disclosure {
-	padding-inline: clamp(0.9rem, 2vw, 1.25rem);
-	border: 1px solid var(--slateframe-border);
-	background: var(--slateframe-surface-soft);
-}
-
-.slateframe-prose .post-page-numbers {
-	display: inline-grid;
-	place-items: center;
-	min-width: var(--slateframe-control);
-	min-height: var(--slateframe-control);
-	margin-inline: 0.15rem;
-	padding-inline: 0.6rem;
-	border: 1px solid var(--slateframe-border);
-	text-decoration: none;
-}
-
-.slateframe-prose .post-page-numbers.current {
-	border-color: var(--slateframe-text);
-	background: var(--slateframe-text);
-	color: var(--slateframe-bg);
-}
-
 @media (max-width: 480px) {
 	.slateframe-page-title,
 	.slateframe-entry-title {
@@ -808,23 +620,6 @@ textarea {
 	}
 }
 
-
-/* Focused long-form reading helpers. */
-.wp-block-paragraph.is-style-slateframe-lead {
-	color: var(--slateframe-muted);
-	font-size: clamp(1.12rem, 1.8vw, 1.32rem);
-	line-height: 1.58;
-}
-
-.slateframe-prose .wp-block-table-of-contents {
-	padding-block: 1rem;
-	border-block: 1px solid var(--slateframe-border);
-}
-
-.slateframe-prose .wp-block-table-of-contents :is(ol, ul) {
-	margin-block: 0;
-	padding-inline-start: 1.4rem;
-}
 
 @media print {
 	.slateframe-site-header,

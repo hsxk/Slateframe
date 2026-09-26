@@ -14,7 +14,7 @@ The public quality workflow currently requires:
 - zero Theme Check findings with severity `REQUIRED`;
 - all 21 production patterns present and registered in real WordPress, with no remote media URLs embedded in pattern source;
 - responsive browser regression, including content-mode, print, CJK/RTL, and long-string fixtures;
-- separate base-runtime and contextual-asset ceilings so specialized presentation does not silently inflate ordinary routes;
+- separate base, singular-reading, discussion, specialized content-mode, and combined contextual-runtime ceilings so optional presentation does not silently inflate ordinary routes;
 - package-content and 1200×900 screenshot validation.
 
 Theme Check advisory findings remain visible in CI rather than being hidden.

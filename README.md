@@ -20,16 +20,16 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
-- **Contextual content-mode CSS:** photography, portfolio, and knowledge presentation is split from the base stylesheet and loaded only when relevant blocks appear on singular content.
+- **Contextual assets:** long-form reading presentation is loaded only on singular documents, while photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
 ## Appearance and spatial system
 
-Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
+Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
 
-Site owners can tune seven bounded settings in **Appearance → Customize → Slateframe layout**: control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Control size cannot fall below 44px, and every range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS. Block authors get the matching XS–2XL spacing presets plus Small/Body/Lead/Heading/Display typography presets in the editor. Defaults add no extra inline CSS; changed settings emit a compact root-token override.
+Site owners can tune seven bounded settings in **Appearance → Customize → Slateframe layout**: control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Control size cannot fall below 44px, and every range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS. Block authors get the matching XS–2XL spacing presets plus Small/Body/Lead/Heading/Display typography presets in the editor. Defaults add no extra inline CSS; changed settings emit a compact root-token override on the frontend and the same bounded token override inside the block-editor canvas.
 
-CI renders the designed default plus the minimum/compact and maximum/spacious Appearance profiles at representative mobile and desktop widths. The profiles are checked for control targets, real content/wide measures, gutters, radius, spacing tokens, content-mode overflow, and screenshot evidence.
+CI renders the designed default plus the minimum/compact and maximum/spacious Appearance profiles at representative mobile and desktop widths. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, and screenshot evidence.
 
 ## Current feature set
 
@@ -40,7 +40,7 @@ CI renders the designed default plus the minimum/compact and maximum/spacious Ap
 - Long-title handling for CJK, Latin, and long translated strings.
 - Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, table-of-contents treatment, editorial leads, and print-friendly long-form output.
 - Post metadata, categories/tags, previous/next navigation, comments, pagination, archives, author pages, search, and 404.
-- Editor-canvas parity for title rhythm, prose width, captions, and wide/full alignment.
+- Editor-canvas parity for the singular reading layer: title rhythm, H2/H3 hierarchy, nested-list rhythm, quotes, inline code, tables, captions, wide/full alignment, and bounded Appearance token overrides.
 
 ### Photography, portfolio, and knowledge
 

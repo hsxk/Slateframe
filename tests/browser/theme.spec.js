@@ -206,6 +206,69 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 	await expectNoHorizontalOverflow(page, pagePath);
 });
 
+test('editorial reading rhythm distinguishes headings, nested lists, code, tables, and quotes', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	const rhythm = await page.evaluate(() => {
+		const root = getComputedStyle(document.documentElement);
+		const h2 = document.querySelector('.browser-reading-h2');
+		const h3 = document.querySelector('.browser-reading-h3');
+		const nested = document.querySelector('.browser-nested-list li > ul');
+		const code = document.querySelector('.wp-block-code');
+		const th = document.querySelector('.browser-data-table th');
+		const h2Styles = getComputedStyle(h2);
+		const probe = document.createElement('div');
+		probe.style.position = 'absolute';
+		probe.style.visibility = 'hidden';
+		document.body.append(probe);
+		const tokenPixels = (property) => {
+			probe.style.marginBlockStart = `var(${property})`;
+			return Number.parseFloat(getComputedStyle(probe).marginBlockStart);
+		};
+		const codeStyles = getComputedStyle(code);
+		const thStyles = getComputedStyle(th);
+		return {
+			proseGap: tokenPixels('--slateframe-prose-gap'),
+			headingGap: tokenPixels('--slateframe-heading-gap'),
+			headingAfter: tokenPixels('--slateframe-heading-after'),
+			listGap: tokenPixels('--slateframe-list-item-gap'),
+			stackGap: tokenPixels('--slateframe-stack-gap'),
+			space3: tokenPixels('--slateframe-space-3'),
+			h2Size: Number.parseFloat(h2Styles.fontSize),
+			h3Size: Number.parseFloat(getComputedStyle(h3).fontSize),
+			h2MarginStart: Number.parseFloat(h2Styles.marginBlockStart),
+			h2MarginEnd: Number.parseFloat(h2Styles.marginBlockEnd),
+			nestedGap: Number.parseFloat(getComputedStyle(nested).marginBlockStart),
+			codeLineHeight: Number.parseFloat(codeStyles.lineHeight),
+			codePaddingBlock: Number.parseFloat(codeStyles.paddingBlockStart),
+			codePaddingInline: Number.parseFloat(codeStyles.paddingInlineStart),
+			tableCellPadding: Number.parseFloat(thStyles.paddingBlockStart),
+			tableHeadBackground: thStyles.backgroundColor,
+		};
+	});
+
+	expect(rhythm.proseGap).toBeGreaterThan(0);
+	expect(rhythm.headingGap).toBeGreaterThan(rhythm.proseGap);
+	expect(rhythm.listGap).toBeGreaterThan(0);
+	expect(rhythm.h2Size).toBeGreaterThan(rhythm.h3Size);
+	expect(Math.abs(rhythm.h2MarginStart - rhythm.headingGap)).toBeLessThanOrEqual(1);
+	expect(Math.abs(rhythm.h2MarginEnd - rhythm.headingAfter)).toBeLessThanOrEqual(1);
+	expect(rhythm.nestedGap).toBeGreaterThanOrEqual(rhythm.listGap - 1);
+	expect(rhythm.codeLineHeight).toBeGreaterThan(20);
+	expect(Math.abs(rhythm.codePaddingBlock - rhythm.stackGap)).toBeLessThanOrEqual(1);
+	expect(Math.abs(rhythm.codePaddingInline - rhythm.proseGap)).toBeLessThanOrEqual(1);
+	expect(Math.abs(rhythm.tableCellPadding - rhythm.space3)).toBeLessThanOrEqual(1);
+	expect(rhythm.tableHeadBackground).not.toBe('rgba(0, 0, 0, 0)');
+	await expectNoHorizontalOverflow(page, pagePath);
+
+	await page.goto(postPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.browser-quote-source')).toBeVisible();
+	const navigationTargets = page.locator('.slateframe-post-navigation a');
+	for (let index = 0; index < await navigationTargets.count(); index += 1) {
+		expect((await navigationTargets.nth(index).boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+});
+
 test('reading helpers preserve print and navigation structure', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const lead = page.locator('.browser-lead');
@@ -464,6 +527,27 @@ test('capture content-mode showcase screenshots', async ({ page }, testInfo) => 
 	}
 });
 
+
+test('reading stylesheet is requested only for singular documents', async ({ page }) => {
+	const requests = [];
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/reading.css')) {
+			requests.push(request.url());
+		}
+	});
+
+	for (const route of ['/', '/?s=Slateframe']) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `non-singular route should keep reading CSS unloaded: ${route}`).toHaveLength(0);
+	}
+
+	for (const route of [pagePath, postPath, photoPath, projectPath, knowledgePath, showcasePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `singular route should load reading CSS: ${route}`).toHaveLength(1);
+	}
+});
 
 test('content-mode stylesheet is requested only when specialized styles are present', async ({ page }) => {
 	const requests = [];
