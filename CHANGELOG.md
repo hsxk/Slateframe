@@ -58,6 +58,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Core Search, Core Buttons, Query Pagination, comment auxiliary actions, and optional footer content now consume the same bounded control/spatial system instead of maintaining parallel sizing and spacing rules.
+- Portfolio/Knowledge contextual spacing and Query Loop sizing now use Slateframe semantic/logical primitives where equivalent magic values previously remained.
 - Converted recurring child-theme repair patterns into first-class Slateframe contracts: tokenized page-start rhythm, script-neutral title measure, content-relative reading widths, viewport-contained mobile navigation, and sticky-header-aware anchor spacing.
 
 - Isolated author, related-reading, 404 recovery, and optional TOC compatibility styles into a bounded contextual publishing asset so new discovery features do not increase the base-route CSS budget.
@@ -115,6 +117,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Accessibility
 
+- Keep comment consent labels, reply-cancel actions, comment navigation, Core Search/Buttons, and Query Pagination on the shared accessible target baseline, including bounded Appearance profiles.
 - Keep Core table scroll regions keyboard-focusable with Slateframe's shared focus ring, while preserving an author-supplied tabindex.
 - Keep normal data tables on the centered reading measure instead of stretching their scroll wrapper to the viewport.
 - Keep long table headers and cells shrinkable during 200% text resizing so readable mobile pages do not gain document-level horizontal scrolling.

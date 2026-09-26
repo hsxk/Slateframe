@@ -70,6 +70,22 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
 	}
+	await page.locator('.slateframe-main').evaluate((node) => {
+		const fixture = document.createElement('div');
+		fixture.className = 'browser-core-controls';
+		fixture.innerHTML = '<form class="wp-block-search wp-block-search__button-outside"><div class="wp-block-search__inside-wrapper"><input class="wp-block-search__input" type="search" aria-label="Core search"><button class="wp-block-search__button wp-element-button" type="submit">Search</button></div></form><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#">Action</a></div>';
+		node.prepend(fixture);
+	});
+	for (const locator of [
+		page.locator('.browser-core-controls .wp-block-search__input'),
+		page.locator('.browser-core-controls .wp-block-search__button'),
+		page.locator('.browser-core-controls .wp-block-button__link'),
+	]) {
+		await expect(locator).toBeVisible();
+		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+	}
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const commentInput = page.locator('.slateframe-comments .comment-form-author input').first();
@@ -80,6 +96,9 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	await expect(commentSubmit).toBeVisible();
 	expect((await commentInput.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	expect((await commentSubmit.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	const consentLabel = page.locator('.slateframe-comments .comment-form-cookies-consent label').first();
+	await expect(consentLabel).toBeVisible();
+	expect((await consentLabel.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	for (const field of [commentInput, commentTextarea, commentSubmit]) {
 		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
 	}
@@ -87,11 +106,26 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		Number.parseFloat(getComputedStyle(node).paddingBlockStart)
 	);
 	near(footerPadding, metrics.sectionMin, 1);
+	const footerGap = await page.locator('.slateframe-footer-inner').evaluate((node) =>
+		Number.parseFloat(getComputedStyle(node).gap)
+	);
+	near(footerGap, 32 * profile.spacing, 1);
 
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
 	const projectPagination = page.locator('.slateframe-project-grid .wp-block-query-pagination a').first();
 	if (await projectPagination.count()) {
 		expect((await projectPagination.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		const paginationRhythm = await projectPagination.locator('xpath=..').evaluate((node) => {
+			const styles = getComputedStyle(node);
+			return {
+				gap: Number.parseFloat(styles.gap),
+				marginStart: Number.parseFloat(styles.marginBlockStart),
+				paddingStart: Number.parseFloat(styles.paddingBlockStart),
+			};
+		});
+		near(paginationRhythm.gap, 4 * profile.spacing, 1);
+		near(paginationRhythm.marginStart, 36 * profile.spacing, 1);
+		near(paginationRhythm.paddingStart, 16 * profile.spacing, 1);
 	}
 });
 

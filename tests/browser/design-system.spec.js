@@ -403,3 +403,31 @@ test('desktop navigation and language adapter share one header row', async ({ pa
 	expect(metrics.innerHeight).toBeLessThanOrEqual(metrics.headerHeight + 1);
 	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
 });
+
+
+test('Core search, buttons, and Query Pagination inherit the shared control family', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	await page.locator('.slateframe-prose').first().evaluate((node) => {
+		const fixture = document.createElement('div');
+		fixture.className = 'browser-core-control-system';
+		fixture.innerHTML = '<form class="wp-block-search wp-block-search__button-outside"><div class="wp-block-search__inside-wrapper"><input class="wp-block-search__input" type="search" aria-label="Search fixture"><button class="wp-block-search__button wp-element-button" type="submit">Search</button></div></form><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#main-content">Primary action</a></div><nav class="wp-block-query-pagination"><a href="#main-content">Previous</a><span class="page-numbers current">2</span><a href="#main-content">Next</a></nav>';
+		node.prepend(fixture);
+	});
+
+	const controlSize = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')));
+	const controls = page.locator('.browser-core-control-system :is(.wp-block-search__input,.wp-block-search__button,.wp-block-button__link,.wp-block-query-pagination a,.wp-block-query-pagination .page-numbers)');
+	for (let index = 0; index < await controls.count(); index += 1) {
+		const box = await controls.nth(index).boundingBox();
+		expect(box?.height || 0).toBeGreaterThanOrEqual(controlSize - 1);
+	}
+
+	const disabled = page.locator('.browser-core-control-system .wp-block-button__link');
+	await disabled.evaluate((node) => node.setAttribute('aria-disabled', 'true'));
+	const disabledState = await disabled.evaluate((node) => {
+		const styles = getComputedStyle(node);
+		return { cursor: styles.cursor, opacity: Number.parseFloat(styles.opacity) };
+	});
+	expect(disabledState.cursor).toBe('not-allowed');
+	expect(disabledState.opacity).toBeLessThan(1);
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
