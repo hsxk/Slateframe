@@ -27,9 +27,11 @@ Slateframe is designed for people who want editorial polish without inheriting a
 
 Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
 
-Site owners can tune seven bounded settings in **Appearance → Customize → Slateframe layout**: control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Control size cannot fall below 44px, and every range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS. Block authors get the matching XS–2XL spacing presets plus Small/Body/Lead/Heading/Display typography presets in the editor. Defaults add no extra inline CSS; changed settings emit a compact root-token override on the frontend and the same bounded token override inside the block-editor canvas.
+Site owners can tune eight bounded settings in **Appearance → Customize → Slateframe design**: color mode, control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Color mode can follow the visitor's operating-system preference or establish a light/dark site default. Visitors also get a compact 44px header toggle; an explicit choice is stored only as a first-party functional preference cookie and takes precedence over the site default. Control size cannot fall below 44px, and every numeric range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS.
 
-CI renders the designed default plus the minimum/compact and maximum/spacious Appearance profiles at representative mobile and desktop widths. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, and screenshot evidence.
+The light and dark palettes share the same semantic surface hierarchy, text, border, accent, focus, selection, and media-chrome tokens. System mode requires no JavaScript, while explicit site defaults are present in server-rendered HTML to avoid a theme flash. Block authors get the matching semantic color presets, XS–2XL spacing presets, and Small/Body/Lead/Heading/Display typography presets in the editor. Changed spatial settings and explicit site color defaults are mirrored into the block-editor canvas.
+
+CI renders the designed default plus the minimum/compact and maximum/spacious spatial profiles at representative mobile and desktop widths, and separately exercises system, explicit-light, and explicit-dark color modes. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, color persistence, accessible toggle state, and screenshot evidence.
 
 ## Current feature set
 
@@ -74,7 +76,8 @@ Block styles add editorial notes and leads, framed images, photo sequences, cont
 
 - Primary and footer menu locations with a usable fresh-install fallback.
 - Responsive navigation with Escape, outside-click, link-close behavior, focus return, and mobile focus containment.
-- No-JavaScript fallback remains navigable.
+- No-JavaScript fallback remains navigable, and system light/dark preference still works without JavaScript.
+- Accessible light/dark header control with server-rendered site defaults and a first-party visitor preference cookie.
 - Optional language-selector integration through the public `slateframe_language_switcher_html` filter.
 - Extensible contextual-style detection through `slateframe_content_mode_markers`, without hard-coding multilingual or plugin APIs.
 - Logical CSS properties, RTL corrections, CJK-safe wrapping, and long-string resilience.
@@ -121,7 +124,7 @@ Public GitHub Actions currently enforce:
 - JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual comments/content-mode CSS, and JavaScript, so every shipped request is counted.
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
-- Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious Appearance profiles at representative mobile and desktop widths.
+- Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths.
 - Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.

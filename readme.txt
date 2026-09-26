@@ -25,6 +25,7 @@ Highlights include:
 * Block styles for editorial notes/leads, framed images, photo sequences, contact sheets/diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 * An editorial system-font type scale with Small, Body, Lead, Heading, and Display presets and no required third-party font request.
 * A coherent spatial system for control sizing, component and reading rhythm, page gutters, reading/wide widths, section whitespace, and corner radius, with bounded controls in Appearance > Customize that are mirrored into the block-editor canvas.
+* Adaptive light/dark presentation that can follow the operating system or use a site default, plus an accessible header toggle that remembers a visitor's explicit preference with a first-party functional cookie.
 * WordPress i18n APIs, logical CSS properties, RTL support, CJK-safe wrapping, and long-string resilience.
 * Optional multilingual integration through a public filter; no multilingual plugin is required.
 * Contextual CSS architecture: long-form reading styles load only on singular documents, while Photography, Portfolio, and Knowledge styles are requested only when matching content is present, with a documented marker filter for integrations.
