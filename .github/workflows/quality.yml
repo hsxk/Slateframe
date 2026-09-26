@@ -47,7 +47,7 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           patterns=(patterns/*.php)
-          test "${#patterns[@]}" -ge 18
+          test "${#patterns[@]}" -ge 21
           for file in "${patterns[@]}"; do
             grep -q '^ \* Title:' "$file"
             grep -q '^ \* Slug: slateframe/' "$file"
@@ -239,7 +239,7 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-site
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
-          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/photography-sequence","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/project-outcomes","slateframe/portfolio-project-grid","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/knowledge-definition","slateframe/knowledge-checklist","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
+          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/photography-sequence","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/project-outcomes","slateframe/portfolio-project-grid","slateframe/project-decision-log","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/knowledge-definition","slateframe/knowledge-checklist","slateframe/knowledge-procedure","slateframe/knowledge-comparison","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
       - name: Validate bounded Appearance settings
         shell: bash
