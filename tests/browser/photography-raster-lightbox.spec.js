@@ -183,6 +183,12 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	test.skip(!representativeWidths.includes(projectWidth(testInfo)), 'Focused visual evidence uses representative mobile and desktop widths.');
 	await openRasterPhotography(page);
 	await openLightbox(page, 'keyboard');
+	const lightboxSurface = await page.locator('.wp-lightbox-overlay').evaluate((node) => ({
+		background: getComputedStyle(node).backgroundColor,
+		pageBackground: getComputedStyle(document.body).backgroundColor,
+	}));
+	expect(lightboxSurface.background).toBe(lightboxSurface.pageBackground);
+	expect(lightboxSurface.background).not.toBe('rgba(0, 0, 0, 0)');
 	const screenshotDir = path.resolve('test-results/lightbox-evidence');
 	await fs.mkdir(screenshotDir, { recursive: true });
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-${testInfo.project.name}.png`), fullPage: false });
