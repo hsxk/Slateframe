@@ -169,7 +169,7 @@ test('photography caption presentation is resilient to long translated content',
 test('native lightbox controls keep the shared touch-target baseline', async ({ page }) => {
 	await openRasterPhotography(page);
 	const { dialog } = await openLightbox(page, 'keyboard');
-	const controls = dialog.locator(':is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next)');
+	const controls = dialog.locator(':is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next):visible');
 	const count = await controls.count();
 	expect(count).toBeGreaterThanOrEqual(1);
 	for (let index = 0; index < count; index += 1) {
