@@ -77,6 +77,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Prevent Photo Feature media chrome from leaking into the native lightbox overlay as a dark edge during desktop opening.
 - Make post metadata and common TOC links honor the shared accessible touch-target baseline.
 - Make photo essay, contact sheet, diptych, and sequence patterns explicitly preserve natural image ratios instead of serializing Core Gallery crop defaults.
 - Avoid default Gravatar traffic on author archives while preserving a sanitized adapter for locally owned avatar/profile media.
