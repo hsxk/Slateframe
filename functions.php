@@ -151,6 +151,17 @@ function slateframe_assets() {
 		);
 	}
 
+	if ( is_singular() || is_author() || is_404() ) {
+		$publishing_dependencies = is_singular() ? array( 'slateframe-reading' ) : array( 'slateframe-style' );
+
+		wp_enqueue_style(
+			'slateframe-publishing',
+			get_template_directory_uri() . '/assets/css/publishing.css',
+			$publishing_dependencies,
+			$version
+		);
+	}
+
 	if ( slateframe_content_modes_needed() ) {
 		wp_enqueue_style(
 			'slateframe-content-modes',

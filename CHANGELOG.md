@@ -57,6 +57,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Isolated author, related-reading, 404 recovery, and optional TOC compatibility styles into a bounded contextual publishing asset so new discovery features do not increase the base-route CSS budget.
 - Matured the spatial system into semantic control-padding, inline/component/stack/media/caption gaps, header height, border/focus, reading-width, and wide-canvas tokens.
 - Centralized responsive primary navigation and language-slot presentation in its dedicated stylesheet instead of maintaining conflicting base and navigation rules.
 - Asset budgets now count the always-loaded navigation stylesheet and contextual comment CSS rather than under-reporting the base runtime.
