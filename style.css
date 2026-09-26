@@ -91,7 +91,7 @@ body {
 	color: var(--slateframe-text);
 	font-family: var(--slateframe-sans);
 	line-height: 1.72;
-	overflow-wrap: break-word;
+	overflow-wrap: anywhere;
 	text-rendering: optimizeLegibility;
 }
 
@@ -442,11 +442,13 @@ input[type="radio"] {
 
 .slateframe-search-form label {
 	flex: 1;
+	min-inline-size: 0;
 }
 
 .slateframe-search-form input[type="search"] {
-	width: 100%;
-	min-height: var(--slateframe-control);
+	inline-size: 100%;
+	min-inline-size: 0;
+	min-block-size: var(--slateframe-control);
 	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
 	border: var(--slateframe-border-width) solid var(--slateframe-border);
 	border-radius: var(--slateframe-radius);
@@ -456,7 +458,9 @@ input[type="radio"] {
 
 .slateframe-search-form button,
 .form-submit .submit {
-	min-height: var(--slateframe-control);
+	min-block-size: var(--slateframe-control);
+	max-inline-size: 100%;
+	overflow-wrap: anywhere;
 	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
 	border: var(--slateframe-border-width) solid var(--slateframe-text);
 	border-radius: var(--slateframe-radius);
@@ -478,8 +482,8 @@ input[type="radio"] {
 .slateframe-pagination .page-numbers {
 	display: grid;
 	place-items: center;
-	min-width: var(--slateframe-control);
-	min-height: var(--slateframe-control);
+	min-inline-size: var(--slateframe-control);
+	min-block-size: var(--slateframe-control);
 	padding: var(--slateframe-space-2);
 	border: var(--slateframe-border-width) solid var(--slateframe-border);
 	color: var(--slateframe-text);
@@ -508,6 +512,12 @@ input[type="radio"] {
 	gap: var(--slateframe-section-min);
 	flex-wrap: wrap;
 	color: var(--slateframe-muted);
+}
+
+.slateframe-footer-inner > * {
+	min-inline-size: 0;
+	max-inline-size: 100%;
+	overflow-wrap: anywhere;
 }
 
 .slateframe-footer-inner p {

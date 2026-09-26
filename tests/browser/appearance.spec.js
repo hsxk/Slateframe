@@ -74,11 +74,24 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const commentInput = page.locator('.slateframe-comments .comment-form-author input').first();
 	const commentTextarea = page.locator('.slateframe-comments textarea').first();
+	const commentSubmit = page.locator('.slateframe-comments .submit').first();
 	await expect(commentInput).toBeVisible();
 	await expect(commentTextarea).toBeVisible();
+	await expect(commentSubmit).toBeVisible();
 	expect((await commentInput.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
-	for (const field of [commentInput, commentTextarea]) {
+	expect((await commentSubmit.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	for (const field of [commentInput, commentTextarea, commentSubmit]) {
 		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	}
+	const footerPadding = await page.locator('.slateframe-site-footer').evaluate((node) =>
+		Number.parseFloat(getComputedStyle(node).paddingBlockStart)
+	);
+	near(footerPadding, metrics.sectionMin, 1);
+
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	const projectPagination = page.locator('.slateframe-project-grid .wp-block-query-pagination a').first();
+	if (await projectPagination.count()) {
+		expect((await projectPagination.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	}
 });
 
@@ -116,8 +129,6 @@ test('appearance profile stays contained across content modes and captures revie
 			near(photographyRhythm.diptychGap, photographyRhythm.mediaGap, 1);
 			near(photographyRhythm.captionPadding, photographyRhythm.captionGap, 1);
 		}
-		if (['page', 'showcase', 'photography'].includes(name)) {
-			await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
-		}
+		await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
 });

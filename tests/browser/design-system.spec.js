@@ -142,10 +142,62 @@ test('design system remains viewport-contained after 200 percent zoom equivalent
 			.filter((item) => item.left < -1 || item.right > viewport + 1)
 			.sort((a, b) => Math.max(b.right - viewport, -b.left) - Math.max(a.right - viewport, -a.left))
 			.slice(0, 12);
+		const textOffenders = [];
+		const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+		for (let node = walker.nextNode(); node && textOffenders.length < 12; node = walker.nextNode()) {
+			if (!node.textContent.trim()) continue;
+			const range = document.createRange();
+			range.selectNodeContents(node);
+			const rect = range.getBoundingClientRect();
+			if (rect.left < -1 || rect.right > viewport + 1) {
+				textOffenders.push({
+					text: node.textContent.trim().slice(0, 80),
+					parent: node.parentElement?.tagName.toLowerCase() || '',
+					parentClass: node.parentElement?.className || '',
+					left: Math.round(rect.left),
+					right: Math.round(rect.right),
+					width: Math.round(rect.width),
+				});
+			}
+		}
 		return {
+			viewport,
+			rootScrollWidth: document.documentElement.scrollWidth,
+			bodyScrollWidth: document.body.scrollWidth,
 			overflow: document.documentElement.scrollWidth - viewport,
 			offenders,
+			textOffenders,
 		};
 	});
-	expect(metrics.overflow, JSON.stringify(metrics.offenders)).toBeLessThanOrEqual(1);
+	expect(metrics.overflow, JSON.stringify(metrics)).toBeLessThanOrEqual(1);
+});
+
+test('core table wrappers own intrinsic overflow after 200 percent text resizing', async ({ page }) => {
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	const metrics = await page.evaluate(() => {
+		document.documentElement.style.fontSize = '32px';
+		const viewport = document.documentElement.clientWidth;
+		return {
+			viewport,
+			rootOverflow: document.documentElement.scrollWidth - viewport,
+			tables: [...document.querySelectorAll('.wp-block-table')].map((wrapper) => {
+				const rect = wrapper.getBoundingClientRect();
+				const table = wrapper.querySelector('table');
+				return {
+					left: Math.round(rect.left),
+					right: Math.round(rect.right),
+					clientWidth: Math.round(wrapper.clientWidth),
+					scrollWidth: Math.round(wrapper.scrollWidth),
+					tableWidth: Math.round(table?.getBoundingClientRect().width || 0),
+				};
+			}),
+		};
+	});
+	expect(metrics.tables.length).toBeGreaterThan(0);
+	for (const table of metrics.tables) {
+		expect(table.left).toBeGreaterThanOrEqual(-1);
+		expect(table.right).toBeLessThanOrEqual(metrics.viewport + 1);
+		expect(table.scrollWidth).toBeGreaterThanOrEqual(table.clientWidth);
+	}
+	expect(metrics.rootOverflow, JSON.stringify(metrics)).toBeLessThanOrEqual(1);
 });

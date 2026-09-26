@@ -7,7 +7,9 @@
 
 .slateframe-prose {
 	width: 100%;
+	min-inline-size: 0;
 	padding-block-end: var(--slateframe-section);
+	overflow-wrap: anywhere;
 }
 
 .slateframe-prose > * {
@@ -107,11 +109,14 @@
 	font-style: normal;
 }
 
-.slateframe-prose table {
+.slateframe-prose > table {
 	display: block;
-	max-width: 100%;
+	inline-size: 100%;
+	max-inline-size: 100%;
 	overflow-x: auto;
 	border-collapse: collapse;
+	overscroll-behavior-inline: contain;
+	-webkit-overflow-scrolling: touch;
 }
 
 .slateframe-prose th,
@@ -202,17 +207,6 @@
 	overflow-wrap: normal;
 }
 
-.slateframe-prose table {
-	overscroll-behavior-inline: contain;
-	-webkit-overflow-scrolling: touch;
-}
-
-.slateframe-prose .tablepress {
-	display: table;
-	width: 100%;
-	max-width: none;
-}
-
 .slateframe-prose .tablepress-scroll-wrapper,
 .slateframe-prose .wp-block-table {
 	inline-size: 100%;
@@ -222,6 +216,16 @@
 	contain: inline-size;
 	overscroll-behavior-inline: contain;
 	-webkit-overflow-scrolling: touch;
+}
+
+.slateframe-prose .wp-block-table table,
+.slateframe-prose .tablepress-scroll-wrapper .tablepress {
+	display: table;
+	inline-size: max-content;
+	min-inline-size: 100%;
+	max-inline-size: none;
+	overflow: visible;
+	border-collapse: collapse;
 }
 
 .wp-block-table.is-style-slateframe-data table,

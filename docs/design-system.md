@@ -22,7 +22,7 @@ The accessible control baseline is 44px. Customizer settings may increase it, bu
 
 ## Widths
 
-Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Wide media must not force ordinary prose to grow beyond the reading measure. Long translated strings and CJK titles must wrap without horizontal overflow.
+Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Wide media must not force ordinary prose to grow beyond the reading measure. Long translated strings and CJK titles must wrap without horizontal overflow. Intrinsic sizing is part of that contract: emergency wrapping must also reduce min-content width so 200% text resizing cannot silently widen the root document.
 
 ## Controls
 
@@ -36,7 +36,7 @@ WordPress Core's native lightbox remains the interaction owner. Slateframe only 
 
 ## Appearance bounds
 
-Customizer ranges are product guardrails, not arbitrary CSS editors. Minimum/default/maximum states must remain visually balanced across header, search, article, galleries, portfolio patterns, knowledge patterns, pagination, comments, and footer. Photography evidence is captured at representative mobile and desktop widths for all three spatial profiles so media rhythm changes are reviewed rather than inferred from token values alone.
+Customizer ranges are product guardrails, not arbitrary CSS editors. Minimum/default/maximum states must remain visually balanced across header, search, article, galleries, portfolio patterns, knowledge patterns, pagination, comments, and footer. Page, showcase, photography, portfolio, and knowledge evidence is captured at representative mobile and desktop widths for all three spatial profiles so layout changes are reviewed rather than inferred from token values alone.
 
 ## Direction and language
 
@@ -44,7 +44,7 @@ Prefer logical properties. UI copy is translatable with the slateframe text doma
 
 ## Editor parity
 
-theme.json spacing, typography, content width, wide width, and semantic colors should remain conceptually aligned with frontend tokens. A pattern should not become unexpectedly looser or narrower merely because it is viewed in the editor. Scrollable data tables are inline-size contained so their internal scroll area does not become page-level overflow during text resizing.
+theme.json spacing, typography, content width, wide width, and semantic colors should remain conceptually aligned with frontend tokens. A pattern should not become unexpectedly looser or narrower merely because it is viewed in the editor. Scrollable data tables use a single scroll owner: the Core/TablePress wrapper owns overflow while the inner table may keep its intrinsic width. The editor mirrors the same containment and wrapping model so text resizing does not turn internal table width into page-level overflow.
 
 ## Review checklist
 

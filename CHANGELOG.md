@@ -74,6 +74,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Prevent intrinsic long-string and wrapped control content from establishing a wider root document during 200% text resizing.
+- Give Core/TablePress table wrappers sole ownership of horizontal scrolling while preserving intrinsic table width and editor parity.
+- Extend compact/default/spacious visual evidence to portfolio and knowledge fixtures and verify comment-submit, footer, and Query Loop control sizing.
 - Target WordPress Core's actual lightbox close/navigation controls with Slateframe's accessible control baseline.
 - Override Core lightbox minimum image dimensions in contextual photography CSS so enlarged media stays inside short desktop viewports without cropping.
 - Bring multi-page post pagination and comment form/reply targets into the shared control-size system.

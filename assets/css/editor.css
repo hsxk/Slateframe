@@ -10,6 +10,7 @@
 	color: var(--slateframe-text);
 	font-family: var(--slateframe-sans);
 	line-height: 1.72;
+	overflow-wrap: anywhere;
 }
 
 .editor-styles-wrapper .wp-block-post-title {
@@ -113,9 +114,25 @@
 	font-size: 0.92em;
 }
 
+.editor-styles-wrapper .wp-block-table {
+	max-inline-size: 100%;
+	overflow-x: auto;
+}
+
+.editor-styles-wrapper .wp-block-table table {
+	inline-size: max-content;
+	min-inline-size: 100%;
+	max-inline-size: none;
+	border-collapse: collapse;
+}
+
 .editor-styles-wrapper .wp-block-table :is(th, td) {
+	min-inline-size: 0;
+	max-inline-size: 100%;
 	padding: var(--slateframe-space-3);
 	border-block-end: var(--slateframe-border-width) solid var(--slateframe-border);
+	overflow-wrap: anywhere;
+	white-space: normal;
 	text-align: start;
 	vertical-align: top;
 }

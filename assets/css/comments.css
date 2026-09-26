@@ -1,5 +1,5 @@
 .slateframe-comments :where(textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]), select) {
-	inline-size: 100%; max-inline-size: 100%; min-block-size: var(--slateframe-control);
+	inline-size: 100%; min-inline-size: 0; max-inline-size: 100%; min-block-size: var(--slateframe-control);
 	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
 	border: var(--slateframe-border-width) solid var(--slateframe-border);
 	border-radius: var(--slateframe-radius); background: var(--slateframe-surface); color: var(--slateframe-text);
@@ -14,18 +14,19 @@
 .slateframe-comment-list .comment-body {
 	padding-block: var(--slateframe-stack-gap); border-block-start: var(--slateframe-border-width) solid var(--slateframe-border);
 }
-.slateframe-comment-list .comment-author { display: flex; align-items: center; gap: var(--slateframe-component-gap); }
+.slateframe-comment-list .comment-author { display: flex; flex-wrap: wrap; align-items: center; gap: var(--slateframe-component-gap); min-inline-size: 0; }
 .slateframe-comment-list .avatar { inline-size: 2.5rem; block-size: 2.5rem; border-radius: 50%; }
 .slateframe-comment-list :is(.comment-metadata, .comment-content, .reply) { margin-inline-start: 3.2rem; }
 .slateframe-comment-list .comment-metadata {
 	margin-block-start: calc(-1 * var(--slateframe-inline-gap)); color: var(--slateframe-muted); font-size: 0.82rem;
 }
-.slateframe-comment-list .comment-content { margin-block-start: var(--slateframe-component-gap); }
+.slateframe-comment-list .comment-content { margin-block-start: var(--slateframe-component-gap); overflow-wrap: anywhere; }
 .slateframe-comment-list .reply { margin-block-start: var(--slateframe-caption-gap); font-size: 0.88rem; }
 .slateframe-comment-list .reply a { display: inline-flex; align-items: center; min-block-size: var(--slateframe-control); }
 .slateframe-comments :is(.comment-form-author, .comment-form-email, .comment-form-url) {
 	display: grid; grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
-	align-items: center; gap: var(--slateframe-component-gap); max-inline-size: 34rem;
+	inline-size: 100%; min-inline-size: 0; max-inline-size: 34rem;
+	align-items: center; gap: var(--slateframe-component-gap);
 }
 .slateframe-comments .comment-form-cookies-consent {
 	display: flex; align-items: flex-start; gap: var(--slateframe-component-gap);
