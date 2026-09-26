@@ -1,5 +1,5 @@
 .slateframe-comments :where(textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]), select) {
-	inline-size: 100%; max-inline-size: 100%;
+	inline-size: 100%; max-inline-size: 100%; min-block-size: var(--slateframe-control);
 	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
 	border: var(--slateframe-border-width) solid var(--slateframe-border);
 	border-radius: var(--slateframe-radius); background: var(--slateframe-surface); color: var(--slateframe-text);
@@ -8,7 +8,7 @@
 	min-block-size: var(--slateframe-control);
 }
 .slateframe-comments textarea { min-block-size: 10rem; resize: vertical; }
-.slateframe-comments label { display: block; max-inline-size: 100%; margin-block-end: var(--slateframe-inline-gap); font-weight: 650; }
+.slateframe-comments label { display: block; max-inline-size: 100%; margin-block-end: var(--slateframe-label-gap, var(--slateframe-inline-gap)); font-weight: 650; }
 .slateframe-comment-list {
 	width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-content));
 	margin-block: 0; margin-inline: auto; padding: 0; list-style: none;
@@ -28,7 +28,7 @@
 .slateframe-comment-list .reply a { display: inline-flex; align-items: center; min-block-size: var(--slateframe-control); }
 .slateframe-comments :is(.comment-form-author, .comment-form-email, .comment-form-url) {
 	display: grid; grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
-	align-items: center; gap: var(--slateframe-component-gap); max-inline-size: 34rem;
+	align-items: center; gap: var(--slateframe-field-gap, var(--slateframe-component-gap)); max-inline-size: 34rem;
 }
 .slateframe-comments .comment-form-cookies-consent {
 	display: flex; align-items: flex-start; gap: var(--slateframe-component-gap);
@@ -40,3 +40,6 @@
 		grid-template-columns: 1fr; gap: var(--slateframe-inline-gap);
 	}
 }
+
+.slateframe-comments :where(input, select, textarea):disabled { cursor: not-allowed; opacity: 0.58; }
+.slateframe-comments .form-submit { margin-block-start: var(--slateframe-stack-gap); }
