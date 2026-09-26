@@ -48,6 +48,7 @@
 		inset-block-start: calc(100% + var(--slateframe-space-2)); padding: var(--slateframe-stack-gap);
 		border: var(--slateframe-border-width) solid var(--slateframe-border); border-radius: var(--slateframe-radius);
 		background: var(--slateframe-surface); box-shadow: 0 1rem 2.5rem var(--slateframe-shadow);
+		max-block-size:calc(100dvh - var(--slateframe-header-height) - (2 * var(--slateframe-stack-gap)));overflow-y:auto;overscroll-behavior:contain;
 		visibility: hidden; opacity: 0;
 	}
 	.has-js .slateframe-site-header.is-open .slateframe-primary-nav { visibility: visible; opacity: 1; }
