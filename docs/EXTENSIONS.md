@@ -120,3 +120,9 @@ A site or avatar plugin may return local-media markup here. Slateframe sanitizes
 ## Table of contents compatibility
 
 Slateframe provides restrained presentation for Core's Table of Contents block and common `.ez-toc-container` output, including the shared control-height baseline for TOC actions. The theme does not generate TOC structure, rewrite plugin strings, or own SEO/schema behavior.
+
+## Footer content region
+
+Slateframe registers an optional `footer-content` widget area above the compact brand/navigation/copyright row. It accepts Core block widgets and normal WordPress widgets, so sites can build multi-column project links, subscriptions, or multilingual footer content without template overrides or WPCode.
+
+The region is empty by default and emits no wrapper when unused. Content ownership, language visibility, subscription behavior, and external links remain with WordPress/plugins rather than theme runtime.

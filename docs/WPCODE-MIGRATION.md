@@ -15,6 +15,9 @@ Slateframe was audited against the current Time2Log WPCode inventory as a migrat
 - TablePress-style wrappers are visually contained without the theme taking ownership of the plugin's enqueue policy.
 - Native previous/next post navigation remains available and accessible; sites can disable or replace it at the template/integration layer instead of carrying an Astra-specific switch.
 - Core navigation, language slots, search, pagination, comments, and 404 recovery share Slateframe's control/touch/focus system.
+- A native `footer-content` block/widget region replaces theme-specific footer HTML injection while leaving localized content to the site's multilingual/content layer.
+- Entry-meta and common TOC links use the shared touch-target baseline instead of Astra-specific accessibility CSS.
+- Natural-ratio photography patterns explicitly disable Core Gallery cropping rather than relying on CSS to undo serialized crop behavior.
 - TOC and knowledge presentation remain presentation concerns; SEO/schema generation stays with the owning plugin.
 - Content-discovery surfaces use locale-aware WordPress dates and translatable Slateframe UI strings.
 
@@ -33,3 +36,9 @@ These responsibilities remain site/plugin/service concerns:
 - Astra-specific filters and markup rewriting.
 
 This boundary keeps Slateframe portable while still covering the reusable presentation and content-discovery needs that previously required site snippets.
+
+## Reference audit coverage
+
+The September 2026 Time2Log reference audit covered all 27 WPCode records visible to WordPress: 19 published snippets, 1 draft, and 7 trashed historical snippets. Trashed records were reviewed only as migration history; they are not treated as active production behavior.
+
+Reusable presentation needs found across active and historical snippets are represented by Slateframe core capabilities or public adapters. Analytics, SEO/schema ownership, redirects, translation relationship storage, fixed content IDs, product routing, content migrations, and administration policy remain explicitly outside theme runtime.
