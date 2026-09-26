@@ -91,7 +91,32 @@ test('appearance profile stays contained across content modes and captures revie
 		await page.goto(route, { waitUntil: 'networkidle' });
 		expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
 			`${profileName} profile overflow on ${name}`).toBeLessThanOrEqual(1);
-		if (['page', 'showcase'].includes(name)) {
+		if (name === 'photography') {
+			const photographyRhythm = await page.evaluate(() => {
+				const resolveTokenPixels = (token) => {
+					const probe = document.createElement('span');
+					probe.style.cssText = `position:absolute;visibility:hidden;inline-size:var(${token});`;
+					document.body.append(probe);
+					const value = Number.parseFloat(getComputedStyle(probe).inlineSize);
+					probe.remove();
+					return value;
+				};
+				const gallery = document.querySelector('.is-style-slateframe-contact-sheet');
+				const caption = gallery?.querySelector('figcaption');
+				const diptych = document.querySelector('.is-style-slateframe-diptych');
+				return {
+					mediaGap: resolveTokenPixels('--slateframe-media-gap'),
+					galleryGap: gallery ? Number.parseFloat(getComputedStyle(gallery).gap) : 0,
+					diptychGap: diptych ? Number.parseFloat(getComputedStyle(diptych).gap) : 0,
+					captionGap: resolveTokenPixels('--slateframe-caption-gap'),
+					captionPadding: caption ? Number.parseFloat(getComputedStyle(caption).paddingBlockStart) : 0,
+				};
+			});
+			near(photographyRhythm.galleryGap, photographyRhythm.mediaGap, 1);
+			near(photographyRhythm.diptychGap, photographyRhythm.mediaGap, 1);
+			near(photographyRhythm.captionPadding, photographyRhythm.captionGap, 1);
+		}
+		if (['page', 'showcase', 'photography'].includes(name)) {
 			await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
 		}
 	}

@@ -1,6 +1,10 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 
 const rasterPath = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
+const representativeWidths = [390, 1440];
+const projectWidth = (testInfo) => Number(testInfo.project.name.replace('viewport-', ''));
 
 test.skip(!rasterPath, 'Raster photography fixture is only available in the focused CI workflow.');
 
@@ -100,10 +104,12 @@ test('native lightbox exposes an accessible close target and prevents background
 
 	const locked = await page.evaluate(() => ({
 		overflow: getComputedStyle(document.documentElement).overflow,
+		overscroll: getComputedStyle(document.documentElement).overscrollBehavior,
 		horizontal: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 		scrollY: window.scrollY,
 	}));
 	expect(locked.overflow).toBe('hidden');
+	expect(locked.overscroll).toBe('none');
 	expect(locked.horizontal).toBeLessThanOrEqual(1);
 
 	const viewport = page.viewportSize();
@@ -140,4 +146,50 @@ test('native lightbox honors reduced-motion preference', async ({ page }) => {
 	for (const duration of [...seconds(durations.transition), ...seconds(durations.animation)]) {
 		expect(duration).toBeLessThanOrEqual(0.01);
 	}
+});
+
+test('photography caption presentation is resilient to long translated content', async ({ page }) => {
+	await openRasterPhotography(page);
+	const caption = page.locator('#main-content figcaption').first();
+	await expect(caption).toBeVisible();
+	await caption.evaluate((node) => {
+		node.textContent = '中文摄影说明与日本語の長いキャプション العربية ' + 'unbroken-reference-token-'.repeat(12);
+	});
+	const metrics = await caption.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		const style = getComputedStyle(node);
+		return { left: box.left, right: box.right, viewport: document.documentElement.clientWidth, wrap: style.overflowWrap, align: style.textAlign };
+	});
+	expect(metrics.left).toBeGreaterThanOrEqual(-1);
+	expect(metrics.right).toBeLessThanOrEqual(metrics.viewport + 1);
+	expect(metrics.wrap).toBe('anywhere');
+	expect(['start', 'left', 'right']).toContain(metrics.align);
+});
+
+test('native lightbox controls keep the shared touch-target baseline', async ({ page }) => {
+	await openRasterPhotography(page);
+	const { dialog } = await openLightbox(page, 'keyboard');
+	const controls = dialog.locator(':is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next):visible');
+	const count = await controls.count();
+	expect(count).toBeGreaterThanOrEqual(1);
+	for (let index = 0; index < count; index += 1) {
+		const box = await controls.nth(index).boundingBox();
+		expect(box?.width || 0).toBeGreaterThanOrEqual(44);
+		expect(box?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+});
+
+test('native lightbox captures representative mobile and desktop evidence', async ({ page }, testInfo) => {
+	test.skip(!representativeWidths.includes(projectWidth(testInfo)), 'Focused visual evidence uses representative mobile and desktop widths.');
+	await openRasterPhotography(page);
+	await openLightbox(page, 'keyboard');
+	const lightboxSurface = await page.locator('.wp-lightbox-overlay').evaluate((node) => ({
+		background: getComputedStyle(node).backgroundColor,
+		pageBackground: getComputedStyle(document.body).backgroundColor,
+	}));
+	expect(lightboxSurface.background).toBe(lightboxSurface.pageBackground);
+	expect(lightboxSurface.background).not.toBe('rgba(0, 0, 0, 0)');
+	const screenshotDir = path.resolve('test-results/lightbox-evidence');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await page.screenshot({ path: path.join(screenshotDir, `lightbox-${testInfo.project.name}.png`), fullPage: false });
 });

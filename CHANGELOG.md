@@ -52,6 +52,7 @@ All notable changes to Slateframe will be documented here.
 - Added adaptive light/dark presentation with system-preference fallback, a 44px accessible header toggle, server-rendered explicit site defaults, and a first-party visitor preference cookie.
 - Added bounded Appearance color-mode selection with System, Light, and Dark choices plus matching block-editor token parity.
 - Added browser regression and screenshot evidence for system/light/dark modes across article, search, comments, mobile navigation, and photography surfaces.
+- Added Photography Appearance evidence for compact/default/spacious profiles and focused native-lightbox screenshots at representative mobile and desktop widths.
 
 ### Changed
 
@@ -69,6 +70,7 @@ All notable changes to Slateframe will be documented here.
 - Project-grid dates now use the site's locale-aware WordPress date format instead of a theme-imposed month/year format.
 - Theme color presets now resolve through Slateframe's semantic design tokens so authored Ink, Paper, Surface, Muted, and Accent colors remain coherent across light and dark presentation.
 - Navigation shadows and photography media chrome now use shared semantic tokens instead of light-only magic colors.
+- Contact sheets, diptychs, photography sequences, and feature captions now consume the shared media/caption/stack rhythm instead of maintaining separate gap and padding values.
 
 ### Fixed
 
@@ -81,7 +83,9 @@ All notable changes to Slateframe will be documented here.
 - Place contact-sheet captions below photographs instead of inheriting WordPress Core's gradient image overlay.
 - Keep photography-sequence captions below images with Core-compatible selector specificity instead of the nested Gallery overlay.
 - Let native Query Loop project grids use the wide canvas so three-column desktop cards remain readable rather than collapsing into narrow text columns.
-- Balance mixed portrait/landscape contact sheets and diptychs with natural-ratio viewport-height caps instead of letting tall images create oversized desktop voids.
+- Balance mixed portrait/landscape contact sheets and diptychs with natural-ratio dynamic-viewport caps instead of letting tall images create oversized desktop voids.
+- Harden Core lightbox presentation with overscroll locking, dynamic viewport containment, safe-area-aware close placement, and contextual reduced-motion safeguards without replacing Core's interaction logic.
+- Keep long translated photography captions inside the viewport with logical sizing and anywhere wrapping.
 
 - Restrict content-mode asset loading to documents that actually use Slateframe photography, portfolio, or knowledge styles.
 
