@@ -217,15 +217,23 @@ test('editorial reading rhythm distinguishes headings, nested lists, code, table
 		const code = document.querySelector('.wp-block-code');
 		const th = document.querySelector('.browser-data-table th');
 		const h2Styles = getComputedStyle(h2);
+		const probe = document.createElement('div');
+		probe.style.position = 'absolute';
+		probe.style.visibility = 'hidden';
+		document.body.append(probe);
+		const tokenPixels = (property) => {
+			probe.style.marginBlockStart = `var(${property})`;
+			return Number.parseFloat(getComputedStyle(probe).marginBlockStart);
+		};
 		const codeStyles = getComputedStyle(code);
 		const thStyles = getComputedStyle(th);
 		return {
-			proseGap: Number.parseFloat(root.getPropertyValue('--slateframe-prose-gap')),
-			headingGap: Number.parseFloat(root.getPropertyValue('--slateframe-heading-gap')),
-			headingAfter: Number.parseFloat(root.getPropertyValue('--slateframe-heading-after')),
-			listGap: Number.parseFloat(root.getPropertyValue('--slateframe-list-item-gap')),
-			stackGap: Number.parseFloat(root.getPropertyValue('--slateframe-stack-gap')),
-			space3: Number.parseFloat(root.getPropertyValue('--slateframe-space-3')),
+			proseGap: tokenPixels('--slateframe-prose-gap'),
+			headingGap: tokenPixels('--slateframe-heading-gap'),
+			headingAfter: tokenPixels('--slateframe-heading-after'),
+			listGap: tokenPixels('--slateframe-list-item-gap'),
+			stackGap: tokenPixels('--slateframe-stack-gap'),
+			space3: tokenPixels('--slateframe-space-3'),
 			h2Size: Number.parseFloat(h2Styles.fontSize),
 			h3Size: Number.parseFloat(getComputedStyle(h3).fontSize),
 			h2MarginStart: Number.parseFloat(h2Styles.marginBlockStart),
