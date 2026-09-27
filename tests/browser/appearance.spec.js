@@ -60,7 +60,7 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	expect(metrics.normalWidth).toBeLessThanOrEqual(Math.min(profile.content, metrics.viewport - (2 * gutter)) + 2);
 	expect(metrics.wideWidth).toBeLessThanOrEqual(Math.min(profile.wide, metrics.viewport - (2 * gutter)) + 2);
 	if (width(testInfo) === 1440) expect(metrics.wideWidth).toBeGreaterThan(metrics.normalWidth + 150);
-	const target = width(testInfo) <= 900 ? page.locator('[data-menu-toggle]') : page.locator('[data-primary-nav] a').first();
+	const target = width(testInfo) <= 1280 ? page.locator('[data-menu-toggle]') : page.locator('[data-primary-nav] a').first();
 	await expect(target).toBeVisible();
 	expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	await page.goto('/?s=Slateframe', { waitUntil: 'networkidle' });
