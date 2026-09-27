@@ -121,6 +121,28 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
+test('tablet and compact desktop navigation share one operable breakpoint', async ({ page }) => {
+	await page.setViewportSize({ width: 1024, height: 768 });
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	const toggle = page.locator('[data-menu-toggle]');
+	const nav = page.locator('[data-primary-nav]');
+	await expect(toggle).toBeVisible();
+	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+	await expect(nav).toHaveAttribute('inert', '');
+
+	await toggle.click();
+	await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+	await expect(nav).not.toHaveAttribute('inert', '');
+	await expect(nav.locator('a:visible').first()).toBeFocused();
+
+	await page.keyboard.press('Escape');
+	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+	await expect(nav).toHaveAttribute('inert', '');
+	await expect(toggle).toBeFocused();
+	await expectNoHorizontalOverflow(page, '/');
+});
+
 test('spatial tokens keep interactive controls coherent and accessible', async ({ page }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 	const tokens = await page.evaluate(() => {
