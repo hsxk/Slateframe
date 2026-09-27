@@ -111,10 +111,7 @@ background: var(--slateframe-surface);
 color: var(--slateframe-text);
 z-index: 10000;
 }
-.slateframe-shell {
-width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-wide));
-margin-inline: auto;
-}
+.slateframe-shell{width:min(calc(100% - 2*var(--slateframe-gutter)),var(--slateframe-wide));margin-inline:auto}
 .slateframe-main{min-height:56vh}
 .slateframe-site-header {
 position:sticky;
