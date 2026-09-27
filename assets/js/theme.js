@@ -48,7 +48,7 @@
 		return;
 	}
 
-	const mediaQuery = window.matchMedia('(max-width: 900px)');
+	const mediaQuery = window.matchMedia('(max-width: 1280px)');
 	const focusableSelector = [
 		'a[href]',
 		'button:not([disabled])',
