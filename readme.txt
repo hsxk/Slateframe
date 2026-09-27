@@ -6,7 +6,7 @@ Requires PHP: 7.4
 Stable tag: 0.1.0
 License: GPLv3 or later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
-Tags: blog, photography, portfolio, translation-ready, rtl-language-support, block-styles, accessibility-ready
+Tags: blog, photography, portfolio, translation-ready, rtl-language-support, block-styles
 
 A fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites.
 

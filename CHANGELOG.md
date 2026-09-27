@@ -59,6 +59,7 @@ All notable changes to Slateframe will be documented here.
 ### Changed
 
 - Core Search, Core Buttons, Query Pagination, comment auxiliary actions, and optional footer content now consume the same bounded control/spatial system instead of maintaining parallel sizing and spacing rules.
+- Portfolio Query Loop grid presentation now ships in its own project-only stylesheet, with CI budgets for both that asset and the real combined Portfolio route cost.
 - Portfolio/Knowledge contextual spacing and Query Loop sizing now use Slateframe semantic/logical primitives where equivalent magic values previously remained.
 - Converted recurring child-theme repair patterns into first-class Slateframe contracts: tokenized page-start rhythm, script-neutral title measure, content-relative reading widths, viewport-contained mobile navigation, and sticky-header-aware anchor spacing.
 
@@ -82,6 +83,7 @@ All notable changes to Slateframe will be documented here.
 ### Fixed
 
 - Keep direct plugin-style TablePress output locally scrollable and keyboard reachable without requiring TablePress, while CI now reproduces long-table and real pretty-404 failure modes.
+- Preserve a readable minimum table-cell measure on narrow screens instead of collapsing long plugin/Core table values into character-by-character wrapping; mirror the same rule into Gutenberg.
 - Keep ordinary frontend and editor blocks shrinkable inside the reading measure so intrinsic long content cannot recreate inconsistent box/table widths or root overflow.
 
 - Prevent Photo Feature media chrome from leaking into the native lightbox overlay as a dark edge during desktop opening.
@@ -127,4 +129,5 @@ All notable changes to Slateframe will be documented here.
 - Exercise skip-link keyboard navigation in the browser regression suite.
 - Trap focus within the open mobile navigation and return focus to the toggle when closed.
 - Exercise reduced-motion behavior and long mixed-script titles in browser regression.
+- Disable decorative Portfolio featured-image hover transforms when reduced motion is requested, with a dedicated browser regression.
 - Exercise project pagination touch targets and run Axe against the combined content-mode showcase.
