@@ -603,6 +603,27 @@ test('content-mode stylesheet is requested only when specialized styles are pres
 	}
 });
 
+test('portfolio Query Loop stylesheet is requested only for project-grid documents', async ({ page }) => {
+	const requests = [];
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/query-loop.css')) {
+			requests.push(request.url());
+		}
+	});
+
+	for (const route of [postPath, photoPath, knowledgePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `non-project route should keep Query Loop CSS unloaded: ${route}`).toHaveLength(0);
+	}
+
+	for (const route of [projectPath, showcasePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `project-grid route should load Query Loop CSS: ${route}`).toHaveLength(1);
+	}
+});
+
 
 
 test('portable showcase modes respond as a coherent editorial system', async ({ page }, testInfo) => {

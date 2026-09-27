@@ -20,7 +20,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
-- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404/TOC publishing extras are isolated from base routes; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear.
+- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404/TOC publishing extras are isolated from base routes; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear, with native Portfolio Query Loop grid rules isolated to project-grid documents.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
 ## Appearance and spatial system
@@ -121,7 +121,7 @@ Public GitHub Actions currently enforce:
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
-- JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual publishing/reading/comments/content-mode CSS, and JavaScript, so every shipped request is counted.
+- JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual publishing/reading/comments/content-mode CSS, the Portfolio Query Loop layer, and JavaScript, including route-level aggregate budgets so moving CSS between requests cannot hide runtime growth.
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths; Photography is also captured in each spatial profile and Core lightbox behavior is exercised in the focused raster runtime.
