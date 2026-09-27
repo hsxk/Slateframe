@@ -676,7 +676,10 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 	const grid = page.locator('.browser-project-grid .wp-block-post-template');
 	await expect(grid).toBeVisible();
 	await expect(page.locator('.browser-project-grid .slateframe-project-card')).toHaveCount(6);
-	await expect(page.locator('.browser-project-grid .wp-block-post-featured-image img')).toHaveCount(6);
+	await expect(page.locator('.browser-project-grid .wp-block-post-featured-image img')).toHaveCount(5);
+	const firstCard = page.locator('.browser-project-grid .slateframe-project-card').first();
+	await expect(firstCard.locator('.wp-block-post-featured-image')).toHaveCount(0);
+	await expect(firstCard.locator('.wp-block-post-title a')).toContainText('可迁移的项目案例');
 
 	const tracks = await grid.evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').filter(Boolean).length);
 	if (projectWidth(testInfo) <= 640) {
@@ -694,9 +697,22 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 		expect((box?.x || 0) + (box?.width || 0)).toBeLessThanOrEqual((await page.evaluate(() => document.documentElement.clientWidth)) + 1);
 	}
 
-	const next = page.locator('.browser-project-grid .wp-block-query-pagination-next:visible');
+	const pagination = page.locator('.browser-project-grid .wp-block-query-pagination');
+	const numbers = pagination.locator('.wp-block-query-pagination-numbers');
+	const next = pagination.locator('.wp-block-query-pagination-next:visible');
+	await expect(pagination).toBeVisible();
+	await expect(numbers).toBeVisible();
 	await expect(next).toHaveCount(1);
 	expect((await next.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	expect(await numbers.evaluate((node) => getComputedStyle(node).display)).toBe('flex');
+	const current = numbers.locator('.current');
+	await expect(current).toBeVisible();
+	const currentStyle = await current.evaluate((node) => ({
+		background: getComputedStyle(node).backgroundColor,
+		radius: Number.parseFloat(getComputedStyle(node).borderRadius),
+	}));
+	expect(currentStyle.background).not.toBe('rgba(0, 0, 0, 0)');
+	expect(currentStyle.radius).toBeGreaterThanOrEqual(0);
 	await expectNoHorizontalOverflow(page, projectPath);
 });
 

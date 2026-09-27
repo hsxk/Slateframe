@@ -202,6 +202,18 @@ function slateframe_assets() {
 	$query_loop_needed    = slateframe_query_loop_styles_needed();
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
+	wp_enqueue_style(
+		'slateframe-navigation',
+		get_template_directory_uri() . '/assets/css/navigation.css',
+		array( 'slateframe-style' ),
+		$version
+	);
+	wp_enqueue_style(
+		'slateframe-footer',
+		get_template_directory_uri() . '/assets/css/footer.css',
+		array( 'slateframe-style' ),
+		$version
+	);
 
 	if ( is_singular() ) {
 		wp_enqueue_style(

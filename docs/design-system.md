@@ -18,7 +18,9 @@ Do not use one generic gap for every relationship. Use the closest semantic role
 - section whitespace: separation between major page regions
 - page gutter: safe viewport edge spacing
 
-Footer columns and optional footer-widget content are sibling components, so their internal separation derives from stack rhythm; section whitespace remains reserved for the footer's relationship to the page above.
+Footer columns and optional footer-widget content are sibling components, so their internal separation derives from stack rhythm; section whitespace remains reserved for the footer's relationship to the page above. Footer widgets render in a responsive auto-fit grid, reset list chrome, and keep links on the shared control-height baseline; the brand/navigation/copyright row becomes a single logical column on narrow screens. The footer stylesheet is a global shell asset alongside navigation and remains inside the unchanged aggregate base-runtime budget.
+
+Native Portfolio Query Pagination uses the same control radius, touch target, inline/component gaps, and current-state surface hierarchy as archive pagination. Project cards must remain coherent when a post has no featured image; absence of media never creates a fake placeholder or content-model dependency.
 
 The accessible control baseline is 44px. Customizer settings may increase it, but must not reduce it.
 

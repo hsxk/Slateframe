@@ -94,7 +94,7 @@ test('language adapter remains reachable through responsive navigation', async (
 	await page.goto('/', { waitUntil: 'networkidle' });
 	const width = testInfo.project.use.viewport?.width || 1440;
 	const switcher = page.locator('.browser-language-switcher');
-	if (width <= 900) {
+	if (width <= 1280) {
 		await page.locator('[data-menu-toggle]').click();
 	}
 	await expect(switcher).toBeVisible();
@@ -106,17 +106,49 @@ test('language adapter remains reachable through responsive navigation', async (
 	await expectNoRootOverflow(page);
 });
 
-test('native footer content region renders portable block widgets without overflow', async ({ page }) => {
+test('native footer content uses the shared responsive control and spatial system', async ({ page }, testInfo) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
-	const content = page.locator('.slateframe-site-footer .slateframe-footer-content .browser-footer-content');
+	const region = page.locator('.slateframe-site-footer .slateframe-footer-content');
+	const content = region.locator('.browser-footer-content');
+	const link = region.locator('.browser-footer-link');
+	await expect(region).toBeVisible();
 	await expect(content).toBeVisible();
-	const bounds = await content.evaluate((node) => {
-		const rect = node.getBoundingClientRect();
-		return { left: rect.left, right: rect.right, viewport: document.documentElement.clientWidth };
+	await expect(link).toBeVisible();
+	expect((await link.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	const metrics = await page.evaluate(() => {
+		const region = document.querySelector('.slateframe-footer-content');
+		const inner = document.querySelector('.slateframe-footer-inner');
+		const link = document.querySelector('.browser-footer-link');
+		if (!region || !inner || !link) throw new Error('Footer fixture is incomplete.');
+		const linkRect = link.getBoundingClientRect();
+		return {
+			regionDisplay: getComputedStyle(region).display,
+			innerColumns: getComputedStyle(inner).gridTemplateColumns.split(' ').filter(Boolean).length,
+			linkLeft: linkRect.left,
+			linkRight: linkRect.right,
+			viewport: document.documentElement.clientWidth,
+		};
 	});
-	expect(bounds.left).toBeGreaterThanOrEqual(-1);
-	expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
+	expect(metrics.regionDisplay).toBe('grid');
+	expect(metrics.innerColumns).toBe((testInfo.project.use.viewport?.width || 1440) <= 640 ? 1 : 3);
+	expect(metrics.linkLeft).toBeGreaterThanOrEqual(-1);
+	expect(metrics.linkRight).toBeLessThanOrEqual(metrics.viewport + 1);
 	await expectNoRootOverflow(page);
+});
+
+test('global shell styles load exactly once across ordinary and specialized routes', async ({ page }) => {
+	const requests = { navigation: [], footer: [] };
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/navigation.css')) requests.navigation.push(request.url());
+		if (request.url().includes('/assets/css/footer.css')) requests.footer.push(request.url());
+	});
+	for (const route of ['/', pagePath, postPath]) {
+		requests.navigation.length = 0;
+		requests.footer.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests.navigation, `navigation shell asset on ${route}`).toHaveLength(1);
+		expect(requests.footer, `footer shell asset on ${route}`).toHaveLength(1);
+	}
 });
 
 test('common TOC links keep the shared touch-target baseline', async ({ page }) => {

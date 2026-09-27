@@ -11,15 +11,7 @@
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="color-scheme" content="light dark">
-	<?php
-	wp_enqueue_style(
-		'slateframe-navigation',
-		get_template_directory_uri() . '/assets/css/navigation.css',
-		array( 'slateframe-style' ),
-		wp_get_theme()->get( 'Version' )
-	);
-	wp_head();
-	?>
+	<?php wp_head(); ?>
 </head>
 <body <?php body_class(); ?>>
 <?php wp_body_open(); ?>

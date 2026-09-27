@@ -369,7 +369,7 @@ test('plugin-style tables scroll locally and remain keyboard reachable', async (
 
 test('mobile navigation stays inside the viewport when content grows', async ({ page }, testInfo) => {
 	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
-	test.skip(viewportWidth > 900, 'Mobile navigation contract.');
+	test.skip(viewportWidth > 1280, 'Compact navigation contract.');
 
 	await page.goto('/', { waitUntil: 'networkidle' });
 	await page.locator('[data-menu-toggle]').click();
@@ -410,7 +410,7 @@ test('mobile navigation stays inside the viewport when content grows', async ({ 
 
 test('desktop navigation and language adapter share one header row', async ({ page }, testInfo) => {
 	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
-	test.skip(viewportWidth <= 900, 'Desktop header contract.');
+	test.skip(viewportWidth <= 1280, 'Wide desktop header contract.');
 
 	await page.goto('/', { waitUntil: 'networkidle' });
 	const metrics = await page.evaluate(() => {

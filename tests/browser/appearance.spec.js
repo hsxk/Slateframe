@@ -110,6 +110,9 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		Number.parseFloat(getComputedStyle(node).gap)
 	);
 	near(footerGap, 32 * profile.spacing, 1);
+	const footerLink = page.locator('.browser-footer-link');
+	await expect(footerLink).toBeVisible();
+	expect((await footerLink.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
 	const projectPagination = page.locator('.slateframe-project-grid .wp-block-query-pagination a').first();
