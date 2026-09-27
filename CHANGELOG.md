@@ -7,6 +7,8 @@ All notable changes to Slateframe will be documented here.
 ### Added
 
 - Optional native `footer-content` block/widget region for portable rich footers without site-specific template injection.
+- Responsive footer-widget grid and deterministic multilingual footer fixture with shared 44px control targets and overflow coverage.
+- Portfolio regression fixture for a real no-featured-image project with mixed CJK/RTL long-title wrapping.
 - Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, opt-in local author media, and TOC compatibility migrated from recurring site-level WPCode needs.
 - Public Slateframe hybrid-theme baseline.
 - WordPress-native template hierarchy and `theme.json` design system.
@@ -57,6 +59,10 @@ All notable changes to Slateframe will be documented here.
 - Added Photography Appearance evidence for compact/default/spacious profiles and focused native-lightbox screenshots at representative mobile and desktop widths.
 
 ### Changed
+
+- Centralized global navigation/footer stylesheet enqueueing and kept both inside the existing aggregate base-runtime ceilings.
+- Refined native Portfolio Query Pagination with shared radius/current-state/spacing tokens and explicit horizontal-number grouping.
+- Aligned responsive navigation runtime, Discovery, Design System, Appearance, and screenshot contracts on the same 1280px compact-navigation breakpoint.
 
 - Core Search, Core Buttons, Query Pagination, comment auxiliary actions, and optional footer content now consume the same bounded control/spatial system instead of maintaining parallel sizing and spacing rules.
 - Portfolio Query Loop grid presentation now ships in its own project-only stylesheet, with CI budgets for both that asset and the real combined Portfolio route cost.

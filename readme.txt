@@ -18,7 +18,7 @@ Highlights include:
 
 * Editorial post and Page reading layouts with a restrained readable measure.
 * Wide and full-width block support.
-* Responsive primary navigation and optional footer navigation.
+* Responsive primary navigation, optional footer navigation, and a responsive Core block/widget footer region with shared accessible control sizing.
 * Native comments, archives, author pages, search, pagination, and 404 handling.
 * Lightweight code, table, gallery, caption, footnote, pullquote, disclosure, editorial lead, table-of-contents, and print presentation.
 * Starter patterns for photo essays, photography contact sheets/features/diptychs/sequences, project case studies/indexes/briefs/outcomes/query grids/decision logs, learning paths/lesson chapters/knowledge outlines/definitions/checkpoints/procedures/comparisons, editorial openings/notes, and curated reading lists.
