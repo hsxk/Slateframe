@@ -123,6 +123,19 @@ test('reduced motion removes meaningful transition duration', async ({ page }) =
 	expect(durationSeconds).toBeLessThanOrEqual(0.00001);
 });
 
+test('portfolio media hover respects reduced-motion preference', async ({ page }) => {
+	await page.emulateMedia({ reducedMotion: 'reduce' });
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	const image = page.locator('.browser-project-grid .wp-block-post-featured-image img').first();
+	await expect(image).toBeVisible();
+	const state = await image.evaluate((node) => {
+		const styles = getComputedStyle(node);
+		return { transition: Number.parseFloat(styles.transitionDuration), transform: styles.transform };
+	});
+	expect(state.transition).toBeLessThanOrEqual(0.01);
+	expect(state.transform).toBe('none');
+});
+
 test('design system remains viewport-contained after 200 percent zoom equivalent', async ({ page }) => {
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
 	const metrics = await page.evaluate(() => {

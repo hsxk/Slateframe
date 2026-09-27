@@ -179,60 +179,6 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 	margin-block-end: 0;
 }
 
-.slateframe-project-grid .wp-block-post-template {
-	display: grid !important;
-	grid-template-columns: repeat(3, minmax(0, 1fr));
-	gap: calc(var(--slateframe-stack-gap) + var(--slateframe-component-gap));
-}
-
-.slateframe-project-grid .slateframe-project-card {
-	min-inline-size: 0;
-	height: 100%;
-	padding-block-start: var(--slateframe-stack-gap);
-	border-block-start: 1px solid var(--slateframe-border);
-}
-
-.slateframe-project-grid .wp-block-post-featured-image {
-	margin: 0 0 var(--slateframe-component-gap);
-	overflow: hidden;
-	background: var(--slateframe-surface-soft);
-}
-
-.slateframe-project-grid .wp-block-post-featured-image img {
-	width: 100%;
-	transition: transform 180ms ease;
-}
-
-.slateframe-project-grid .wp-block-post-title {
-	margin-block: 0;
-	line-height: 1.18;
-	overflow-wrap: anywhere;
-	text-wrap: balance;
-}
-
-.slateframe-project-grid .wp-block-post-title a {
-	color: var(--slateframe-text);
-	text-decoration: none;
-}
-
-.slateframe-project-grid .wp-block-post-excerpt {
-	color: var(--slateframe-muted);
-}
-
-.slateframe-project-grid .wp-block-post-date {
-	color: var(--slateframe-muted);
-	font-size: 0.78rem;
-	font-variant-numeric: tabular-nums;
-}
-
-.slateframe-project-grid .wp-block-query-pagination{gap:var(--slateframe-inline-gap);margin-block-start:var(--slateframe-heading-gap);padding-block-start:var(--slateframe-stack-gap);border-block-start:1px solid var(--slateframe-border)}
-
-@media (hover: hover) {
-	.slateframe-project-grid .wp-block-post-featured-image a:hover img {
-		transform: scale(1.015);
-	}
-}
-
 .slateframe-knowledge-checklist .slateframe-learning-checkpoint {
 	gap: 0;
 	margin-block: var(--slateframe-heading-gap);
@@ -261,12 +207,6 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 	margin-block-start: clamp(1.5rem, 3vw, 2.25rem);
 }
 
-@media (max-width: 900px) {
-	.slateframe-project-grid .wp-block-post-template {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-}
-
 @media (max-width: 781px) {
 	.wp-block-group.is-style-slateframe-project-feature,
 	.wp-block-group.is-style-slateframe-learning-path {
@@ -284,8 +224,3 @@ html:has(.wp-lightbox-overlay.active){overflow:hidden;overscroll-behavior:none}
 	}
 }
 
-@media (max-width: 640px) {
-	.slateframe-project-grid .wp-block-post-template {
-		grid-template-columns: minmax(0, 1fr);
-	}
-}

@@ -128,7 +128,7 @@
 }
 
 .editor-styles-wrapper .wp-block-table :is(th, td) {
-	min-inline-size: 0;
+	min-inline-size: min(9rem, 68vw);
 	max-inline-size: 100%;
 	padding: var(--slateframe-space-3);
 	border-block-end: var(--slateframe-border-width) solid var(--slateframe-border);

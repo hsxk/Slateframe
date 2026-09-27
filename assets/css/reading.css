@@ -104,39 +104,15 @@
 	font-style: normal;
 }
 
-.slateframe-prose > table {
-	display: block;
-	max-inline-size: 100%;
-	overflow-x: auto;
-	scrollbar-gutter: stable;
-	border-collapse: collapse;
-	overscroll-behavior-inline: contain;
-	-webkit-overflow-scrolling: touch;
-}
+.slateframe-prose>table{display:block;max-inline-size:100%;overflow-x:auto;scrollbar-gutter:stable;border-collapse:collapse;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
 
-.slateframe-prose th,
-.slateframe-prose td {
-	padding: var(--slateframe-space-3);
-	border-block-end: var(--slateframe-border-width) solid var(--slateframe-border);
-	text-align: start;
-	vertical-align: top;
-}
+.slateframe-prose th,.slateframe-prose td{padding:var(--slateframe-space-3);border-block-end:var(--slateframe-border-width) solid var(--slateframe-border);text-align:start;vertical-align:top}
 
-.slateframe-prose th {
-	background: var(--slateframe-surface-soft);
-	font-weight: 700;
-}
+.slateframe-prose th{background:var(--slateframe-surface-soft);font-weight:700}
 
-.slateframe-prose :is(th, td) {
-	min-inline-size: 0;
-	max-inline-size: 100%;
-	overflow-wrap: anywhere;
-	white-space: normal;
-}
+.slateframe-prose :is(th,td){min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere;white-space:normal}
 
-:is(.slateframe-prose > table, .slateframe-prose .wp-block-table table, .slateframe-prose .tablepress) :is(th, td) {
-	min-inline-size: min(9rem, 68vw);
-}
+:is(.slateframe-prose>table,.slateframe-prose .wp-block-table table,.slateframe-prose .tablepress) :is(th,td){min-inline-size:min(9rem,68vw)}
 
 .slateframe-prose a {
 	overflow-wrap: anywhere;
@@ -205,26 +181,9 @@
 	overflow-wrap: normal;
 }
 
-.slateframe-prose .tablepress-scroll-wrapper,
-.slateframe-prose .wp-block-table {
-	min-inline-size: 0;
-	max-inline-size: 100%;
-	overflow-x: auto;
-	scrollbar-gutter: stable;
-	contain: inline-size;
-	overscroll-behavior-inline: contain;
-	-webkit-overflow-scrolling: touch;
-}
+.slateframe-prose .tablepress-scroll-wrapper,.slateframe-prose .wp-block-table{min-inline-size:0;max-inline-size:100%;overflow-x:auto;scrollbar-gutter:stable;contain:inline-size;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
 
-.slateframe-prose .wp-block-table table,
-.slateframe-prose .tablepress-scroll-wrapper .tablepress {
-	display: table;
-	inline-size: max-content;
-	min-inline-size: 100%;
-	max-inline-size: none;
-	overflow: visible;
-	border-collapse: collapse;
-}
+.slateframe-prose .wp-block-table table,.slateframe-prose .tablepress-scroll-wrapper .tablepress{display:table;inline-size:max-content;min-inline-size:100%;max-inline-size:none;overflow:visible;border-collapse:collapse}
 
 .wp-block-table.is-style-slateframe-data table,
 .wp-block-table.is-style-slateframe-data {

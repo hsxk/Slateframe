@@ -36,6 +36,8 @@ Photography uses the same spatial language instead of maintaining a parallel set
 
 WordPress Core's native lightbox remains the interaction owner. Slateframe only supplies presentation safeguards: the shared control target, dynamic-viewport containment, scroll/overscroll locking, safe-area-aware close placement, focus visibility, and reduced-motion handling. The theme does not fork Core's lightbox JavaScript.
 
+Reduced motion is a system-wide presentation contract: decorative hover transforms and transitions must settle immediately when `prefers-reduced-motion: reduce` is active, including portfolio media outside the lightbox.
+
 ## Appearance bounds
 
 Customizer ranges are product guardrails, not arbitrary CSS editors. Minimum/default/maximum states must remain visually balanced across header, search, article, galleries, portfolio patterns, knowledge patterns, pagination, comments, and footer. Page, showcase, photography, portfolio, and knowledge evidence is captured at representative mobile and desktop widths for all three spatial profiles so layout changes are reviewed rather than inferred from token values alone.
