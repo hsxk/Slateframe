@@ -503,11 +503,29 @@ test('photography diptych switches from one to two columns without cropping', as
 	await expectNoHorizontalOverflow(page, photoPath);
 });
 
-test('portfolio brief keeps long references contained', async ({ page }) => {
+test('portfolio Query Loop keeps multilingual project references contained', async ({ page }) => {
 	await page.goto(projectPath, { waitUntil: 'networkidle' });
-	await expect(page.locator('.browser-project-brief')).toBeVisible();
-	await expect(page.locator('.browser-project-brief a')).toBeVisible();
-	await expect(page.locator('.browser-project-metrics .wp-block-column')).toHaveCount(3);
+
+	const grid = page.locator('.browser-project-grid');
+	await expect(grid).toBeVisible();
+	await expect(grid.locator('.slateframe-project-card')).toHaveCount(6);
+
+	const firstTitleLink = grid.locator('.wp-block-post-title a').first();
+	await expect(firstTitleLink).toBeVisible();
+	await expect(firstTitleLink).toContainText('可迁移的项目案例');
+	await expect(grid.locator('.wp-block-post-excerpt')).toHaveCount(6);
+	await expect(grid.locator('.wp-block-post-date')).toHaveCount(6);
+
+	const bounds = await firstTitleLink.evaluate((element) => {
+		const rect = element.getBoundingClientRect();
+		return {
+			left: rect.left,
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+		};
+	});
+	expect(bounds.left).toBeGreaterThanOrEqual(-1);
+	expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
 	await expectNoHorizontalOverflow(page, projectPath);
 });
 
