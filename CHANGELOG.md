@@ -82,6 +82,11 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Make contextual asset detection class-aware so marker names in prose or code do not trigger Photography/Portfolio/Knowledge CSS.
+- Let integrations extend Portfolio Query Loop detection through `slateframe_query_loop_markers` without page IDs, slugs, post types, or locale assumptions.
+- Ensure documents that opt into Query Loop presentation also receive its shared content-mode dependency.
+- Exercise the real native Portfolio Query Loop in browser CI with populated cards, featured media, multilingual long titles, responsive 1/2/3-column tracks, 44px pagination, reduced motion, and horizontal-containment checks.
+
 - Keep direct plugin-style TablePress output locally scrollable and keyboard reachable without requiring TablePress, while CI now reproduces long-table and real pretty-404 failure modes.
 - Preserve a readable minimum table-cell measure on narrow screens instead of collapsing long plugin/Core table values into character-by-character wrapping; mirror the same rule into Gutenberg.
 - Keep ordinary frontend and editor blocks shrinkable inside the reading measure so intrinsic long content cannot recreate inconsistent box/table widths or root overflow.

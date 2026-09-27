@@ -511,15 +511,21 @@ jobs:
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)
 
-          for project_index in 1 2 3 4 5 6; do
-            wp post create \
+          PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/screenshot.png" --porcelain --path=/tmp/wp-browser)
+          for project_index in 1 2 3 4 5 6 7; do
+            project_title="Portable project fixture ${project_index}"
+            if [ "$project_index" -eq 1 ]; then
+              project_title='可迁移的项目案例 — مشروع طويل متعدد اللغات for wrapping validation'
+            fi
+            PROJECT_POST_ID=$(wp post create \
               --path=/tmp/wp-browser \
               --post_type=post \
               --post_status=publish \
-              --post_title="Portable project fixture ${project_index}" \
+              --post_title="$project_title" \
               --post_excerpt="A site-neutral project summary for responsive Query Loop coverage." \
               --post_content="<p>Project fixture ${project_index} keeps the theme independent from custom content models.</p>" \
-              >/dev/null
+              --porcelain)
+            wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
           done
 
           wp comment create \
@@ -531,7 +537,13 @@ jobs:
             --comment_approved=1
 
           PHOTO_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Photography Fixture' --post_content='<!-- wp:group {"align":"wide","className":"slateframe-pattern slateframe-photography-feature","layout":{"type":"constrained"}} --><div class="wp-block-group alignwide slateframe-pattern slateframe-photography-feature"><!-- wp:image {"align":"wide","className":"browser-photo-feature is-style-slateframe-photo-feature"} --><figure class="wp-block-image alignwide browser-photo-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Landscape fixture"><figcaption>Landscape fixture caption</figcaption></figure><!-- /wp:image --><!-- wp:gallery {"align":"wide","className":"browser-photo-gallery is-style-slateframe-contact-sheet"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-gallery is-style-slateframe-contact-sheet"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide landscape fixture"><figcaption>Wide frame</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Tall portrait fixture"><figcaption>Portrait frame</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery --></div><!-- /wp:group --><!-- wp:gallery {"align":"wide","className":"browser-photo-diptych is-style-slateframe-diptych"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-diptych is-style-slateframe-diptych"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Diptych landscape"></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Diptych portrait"></figure><!-- /wp:image --></figure><!-- /wp:gallery -->' --porcelain)
-          PROJECT_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Portfolio Fixture' --post_content='<!-- wp:group {"className":"browser-project-brief is-style-slateframe-project-brief"} --><div class="wp-block-group browser-project-brief is-style-slateframe-project-brief"><!-- wp:paragraph {"className":"slateframe-pattern-kicker"} --><p class="slateframe-pattern-kicker">Project brief</p><!-- /wp:paragraph --><!-- wp:heading {"level":2} --><h2 class="wp-block-heading">A portable project story</h2><!-- /wp:heading --><!-- wp:columns --><div class="wp-block-columns"><!-- wp:column --><div class="wp-block-column"><h3>Context</h3><p>Context for a portable project page.</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Role</h3><p>Role and constraints.</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Outcome</h3><p>Outcome and next step.</p></div><!-- /wp:column --></div><!-- /wp:columns --><p><a href="https://example.com/a-very-long-project-reference-without-site-specific-assumptions-and-with-a-long-readable-path">Long project reference</a></p></div><!-- /wp:group --><!-- wp:columns {"className":"browser-project-metrics is-style-slateframe-metrics"} --><div class="wp-block-columns browser-project-metrics is-style-slateframe-metrics"><!-- wp:column --><div class="wp-block-column"><h3>Reach</h3><p>12 markets</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Latency</h3><p>−38%</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Status</h3><p>Maintained</p></div><!-- /wp:column --></div><!-- /wp:columns -->' --porcelain)
+          PROJECT_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_title='Portfolio Fixture' \
+            --post_content="$(cat "$GITHUB_WORKSPACE/tests/fixtures/portfolio-query.html")" \
+            --porcelain)
           SHOWCASE_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \

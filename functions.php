@@ -83,6 +83,35 @@ function slateframe_register_widget_areas() {
 add_action( 'widgets_init', 'slateframe_register_widget_areas' );
 
 /**
+ * Check stored post content for exact CSS class markers.
+ *
+ * Marker detection is intentionally class-aware instead of substring-based so
+ * prose, code samples, or translated copy that mention a marker name do not
+ * accidentally load contextual assets.
+ *
+ * @param string   $content Stored post content.
+ * @param string[] $markers Class markers to detect.
+ * @return bool
+ */
+function slateframe_content_has_class_marker( $content, $markers ) {
+	if ( '' === trim( (string) $content ) || ! is_array( $markers ) || empty( $markers ) ) {
+		return false;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $content );
+
+	while ( $processor->next_tag() ) {
+		foreach ( $markers as $marker ) {
+			if ( is_string( $marker ) && '' !== $marker && $processor->has_class( $marker ) ) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
  * Determine whether the current singular document needs content-mode styles.
  *
  * @return bool
@@ -132,13 +161,7 @@ function slateframe_content_modes_needed() {
 		return false;
 	}
 
-	foreach ( $markers as $marker ) {
-		if ( false !== strpos( $post->post_content, $marker ) ) {
-			return true;
-		}
-	}
-
-	return false;
+	return slateframe_content_has_class_marker( $post->post_content, $markers );
 }
 
 /**
@@ -153,14 +176,30 @@ function slateframe_query_loop_styles_needed() {
 
 	$post = get_post();
 
-	return $post instanceof WP_Post && false !== strpos( $post->post_content, 'slateframe-project-grid' );
+	if ( ! $post instanceof WP_Post ) {
+		return false;
+	}
+
+	/**
+	 * Filters class markers that opt a document into Slateframe Query Loop presentation.
+	 *
+	 * Integrations may append portable markers without coupling the theme to a post
+	 * type, taxonomy, page ID, slug, or multilingual URL structure.
+	 *
+	 * @param string[] $markers Query Loop presentation markers.
+	 */
+	$markers = apply_filters( 'slateframe_query_loop_markers', array( 'slateframe-project-grid' ) );
+
+	return slateframe_content_has_class_marker( $post->post_content, $markers );
 }
 
 /**
  * Enqueue the intentionally small frontend asset layer.
  */
 function slateframe_assets() {
-	$version = wp_get_theme()->get( 'Version' );
+	$version              = wp_get_theme()->get( 'Version' );
+	$content_modes_needed = slateframe_content_modes_needed();
+	$query_loop_needed    = slateframe_query_loop_styles_needed();
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 
@@ -184,7 +223,7 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( slateframe_content_modes_needed() ) {
+	if ( $content_modes_needed || $query_loop_needed ) {
 		wp_enqueue_style(
 			'slateframe-content-modes',
 			get_template_directory_uri() . '/assets/css/content-modes.css',
@@ -193,7 +232,7 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( slateframe_query_loop_styles_needed() ) {
+	if ( $query_loop_needed ) {
 		wp_enqueue_style(
 			'slateframe-query-loop',
 			get_template_directory_uri() . '/assets/css/query-loop.css',

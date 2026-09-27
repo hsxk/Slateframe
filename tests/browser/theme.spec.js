@@ -624,6 +624,35 @@ test('portfolio Query Loop stylesheet is requested only for project-grid documen
 	}
 });
 
+test('native portfolio Query Loop is populated, responsive, and accessible', async ({ page }, testInfo) => {
+	await page.goto(projectPath, { waitUntil: 'networkidle' });
+	const grid = page.locator('.browser-project-grid .wp-block-post-template');
+	await expect(grid).toBeVisible();
+	await expect(page.locator('.browser-project-grid .slateframe-project-card')).toHaveCount(6);
+	await expect(page.locator('.browser-project-grid .wp-block-post-featured-image img')).toHaveCount(6);
+
+	const tracks = await grid.evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').filter(Boolean).length);
+	if (projectWidth(testInfo) <= 640) {
+		expect(tracks).toBe(1);
+	} else if (projectWidth(testInfo) <= 900) {
+		expect(tracks).toBe(2);
+	} else {
+		expect(tracks).toBe(3);
+	}
+
+	const titles = page.locator('.browser-project-grid .wp-block-post-title');
+	for (let index = 0; index < await titles.count(); index += 1) {
+		const box = await titles.nth(index).boundingBox();
+		expect(box?.width || 0).toBeGreaterThan(0);
+		expect((box?.x || 0) + (box?.width || 0)).toBeLessThanOrEqual((await page.evaluate(() => document.documentElement.clientWidth)) + 1);
+	}
+
+	const next = page.locator('.browser-project-grid .wp-block-query-pagination-next:visible');
+	await expect(next).toHaveCount(1);
+	expect((await next.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	await expectNoHorizontalOverflow(page, projectPath);
+});
+
 
 
 test('portable showcase modes respond as a coherent editorial system', async ({ page }, testInfo) => {

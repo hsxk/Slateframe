@@ -30,6 +30,10 @@ Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Wide
 
 Buttons, text inputs, selects, pagination targets, menu controls, language integrations, comment controls, and lightbox controls should share the same minimum target, focus language, radius family, and text baseline. This includes Core Search, Core Buttons, Query Pagination, comment consent labels, reply-cancel links, and comment navigation. Visual compactness should come from border and typography choices, not inaccessible hit areas. Disabled controls use the same restrained opacity/cursor language instead of component-specific treatments.
 
+## Contextual assets
+
+Slateframe loads specialized presentation only when the current singular document actually uses it. Context detection matches exact CSS class tokens in stored markup rather than raw substrings, so prose or code samples that merely mention a class name cannot opt a page into extra CSS. Portfolio Query Loop presentation uses the public `slateframe_query_loop_markers` filter and automatically brings the shared content-mode layer with it; integrations therefore do not need a page ID, slug, post type, taxonomy, locale route, or multilingual plugin assumption.
+
 ## Photography and media
 
 Photography uses the same spatial language instead of maintaining a parallel set of gallery numbers. Contact sheets, diptychs, and sequences consume `--slateframe-media-gap`; captions consume `--slateframe-caption-gap`; feature media enters the document using stack/component rhythm. Images preserve their intrinsic ratio and use dynamic viewport caps rather than fixed crops.

@@ -3,6 +3,7 @@ const { test, expect } = require('@playwright/test');
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
 const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH || pagePath;
 const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
+const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
 
 async function rootTokens(page, names) {
 	return page.evaluate((tokenNames) => {
@@ -125,7 +126,7 @@ test('reduced motion removes meaningful transition duration', async ({ page }) =
 
 test('portfolio media hover respects reduced-motion preference', async ({ page }) => {
 	await page.emulateMedia({ reducedMotion: 'reduce' });
-	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	await page.goto(projectPath, { waitUntil: 'networkidle' });
 	const image = page.locator('.browser-project-grid .wp-block-post-featured-image img').first();
 	await expect(image).toBeVisible();
 	const state = await image.evaluate((node) => {
