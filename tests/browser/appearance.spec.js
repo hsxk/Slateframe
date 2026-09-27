@@ -115,7 +115,7 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	const projectPagination = page.locator('.slateframe-project-grid .wp-block-query-pagination a').first();
 	if (await projectPagination.count()) {
 		expect((await projectPagination.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
-		const paginationRhythm = await projectPagination.locator('xpath=..').evaluate((node) => {
+		const paginationRhythm = await projectPagination.locator('xpath=../..').evaluate((node) => {
 			const styles = getComputedStyle(node);
 			return {
 				gap: Number.parseFloat(styles.gap),
