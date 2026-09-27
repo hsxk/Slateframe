@@ -14,116 +14,109 @@ License URI: https://www.gnu.org/licenses/gpl-3.0.html
 Tags: blog, photography, portfolio, one-column, custom-logo, custom-menu, featured-images, translation-ready, rtl-language-support, block-styles, wide-blocks
 */
 :root {
-	--slateframe-bg: light-dark(#f7f7f4, #111412);
-	--slateframe-surface: light-dark(#fff, #181c1a);
-	--slateframe-surface-soft: light-dark(#f0f1ee, #202622);
-	--slateframe-text: light-dark(#171918, #eef1ee);
-	--slateframe-muted: light-dark(#656b67, #a7b0aa);
-	--slateframe-border: light-dark(#dfe2de, #343b37);
-	--slateframe-accent: light-dark(#1d5f50, #7fc8b4);
-	--slateframe-accent-strong: light-dark(#12483d, #a5decf);
-	--slateframe-focus: light-dark(#0b6bcb, #78b7ff);
-	--slateframe-shadow: light-dark(rgb(23 25 24 / 10%), rgb(0 0 0 / 32%));
-	--slateframe-selection: light-dark(#dbe8e3, #214c40);
-	--slateframe-media-chrome: #101513;
-	--slateframe-media-chrome-text: #e7ece9;
-	--slateframe-content: 46rem;
-	--slateframe-wide: 74rem;
-	--slateframe-control: 44px;
-	--slateframe-space-scale: 1;
-	--slateframe-gutter-min: 16px;
-	--slateframe-section-scale: 1;
-	--slateframe-space-2: 0.5rem;
-	--slateframe-space-3: 0.75rem;
-	--slateframe-space-4: 1rem;
-	--slateframe-inline-gap: 0.25rem;
-	--slateframe-component-gap: var(--slateframe-space-3);
-	--slateframe-stack-gap: var(--slateframe-space-4);
-	--slateframe-media-gap: var(--slateframe-space-3);
-	--slateframe-caption-gap: 0.65rem;
-	--slateframe-prose-gap: 1.25rem;
-	--slateframe-heading-gap: 2.25rem;
-	--slateframe-heading-after: 0.625rem;
-	--slateframe-list-item-gap: 0.5rem;
-	--slateframe-control-padding-block: var(--slateframe-space-2);
-	--slateframe-control-padding-inline: var(--slateframe-space-3);
-	--slateframe-header-height: 4.5rem;
-	--slateframe-icon-size: 1.25rem;
-	--slateframe-border-width:1px;
-	--slateframe-focus-width: 3px;
-	--slateframe-focus-offset: 3px;
-	--slateframe-gutter: clamp(var(--slateframe-gutter-min), 3vw, calc(var(--slateframe-gutter-min) * 2));
-	--slateframe-section-min: 2.75rem;
-	--slateframe-section-max: 4.5rem;
-	--slateframe-section: clamp(var(--slateframe-section-min), 5vw, var(--slateframe-section-max));
-	--slateframe-radius: 12px;
-	--slateframe-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Arial, sans-serif;
-	--slateframe-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-	color-scheme:light;
+--slateframe-bg: light-dark(#f7f7f4, #111412);
+--slateframe-surface: light-dark(#fff, #181c1a);
+--slateframe-surface-soft: light-dark(#f0f1ee, #202622);
+--slateframe-text: light-dark(#171918, #eef1ee);
+--slateframe-muted: light-dark(#656b67, #a7b0aa);
+--slateframe-border: light-dark(#dfe2de, #343b37);
+--slateframe-accent: light-dark(#1d5f50, #7fc8b4);
+--slateframe-accent-strong: light-dark(#12483d, #a5decf);
+--slateframe-focus: light-dark(#0b6bcb, #78b7ff);
+--slateframe-shadow: light-dark(rgb(23 25 24 / 10%), rgb(0 0 0 / 32%));
+--slateframe-selection: light-dark(#dbe8e3, #214c40);
+--slateframe-media-chrome: #101513;
+--slateframe-media-chrome-text: #e7ece9;
+--slateframe-content: 46rem;
+--slateframe-wide: 74rem;
+--slateframe-control: 44px;
+--slateframe-space-scale: 1;
+--slateframe-gutter-min: 16px;
+--slateframe-section-scale: 1;
+--slateframe-space-2: 0.5rem;
+--slateframe-space-3: 0.75rem;
+--slateframe-space-4: 1rem;
+--slateframe-inline-gap: 0.25rem;
+--slateframe-component-gap: var(--slateframe-space-3);
+--slateframe-stack-gap: var(--slateframe-space-4);
+--slateframe-media-gap: var(--slateframe-space-3);
+--slateframe-caption-gap: 0.65rem;
+--slateframe-prose-gap: 1.25rem;
+--slateframe-heading-gap: 2.25rem;
+--slateframe-heading-after: 0.625rem;
+--slateframe-list-item-gap: 0.5rem;
+--slateframe-control-padding-block: var(--slateframe-space-2);
+--slateframe-control-padding-inline: var(--slateframe-space-3);
+--slateframe-header-height: 4.5rem;
+--slateframe-icon-size: 1.25rem;
+--slateframe-border-width:1px;
+--slateframe-focus-width: 3px;
+--slateframe-focus-offset: 3px;
+--slateframe-gutter: clamp(var(--slateframe-gutter-min), 3vw, calc(var(--slateframe-gutter-min) * 2));
+--slateframe-section-min: 2.75rem;
+--slateframe-section-max: 4.5rem;
+--slateframe-section: clamp(var(--slateframe-section-min), 5vw, var(--slateframe-section-max));
+--slateframe-radius: 12px;
+--slateframe-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Arial, sans-serif;
+--slateframe-mono: ui-monospace, "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+color-scheme:light;
 }
 @media (prefers-color-scheme: dark) {
-	:root:not([data-slateframe-color-mode]) {
-		color-scheme: dark;
-	}
+:root:not([data-slateframe-color-mode]) {
+color-scheme: dark;
+}
 }
 :root[data-slateframe-color-mode="dark"] { color-scheme: dark; }
 :root[data-slateframe-color-mode="light"] { color-scheme: light; }
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
 ::selection {
-	background: var(--slateframe-selection);
-	color: var(--slateframe-text);
+background: var(--slateframe-selection);
+color: var(--slateframe-text);
 }
 body {
-	margin:0;
-	background: var(--slateframe-bg);
-	color: var(--slateframe-text);
-	font-family: var(--slateframe-sans);
-	line-height: 1.72;
-	overflow-wrap: anywhere;
-	text-rendering: optimizeLegibility;
+margin:0;
+background: var(--slateframe-bg);
+color: var(--slateframe-text);
+font-family: var(--slateframe-sans);
+line-height: 1.72;
+overflow-wrap: anywhere;
+text-rendering: optimizeLegibility;
 }
 img,svg,video{display:block;max-width:100%;height:auto}
 a{color:var(--slateframe-accent);text-decoration-thickness:.08em;text-underline-offset:.18em}
 a:hover{color:var(--slateframe-accent-strong)}
-
 button,input,select,textarea{font:inherit;color-scheme:inherit}
 button:disabled,input:disabled,select:disabled,textarea:disabled,.wp-element-button[aria-disabled="true"]{cursor:not-allowed;opacity:.58}
-
 input[type="checkbox"],input[type="radio"]{accent-color:var(--slateframe-accent)}
 :focus-visible{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}
-
 .screen-reader-text {
-	position:absolute!important;
-	width: 1px;
-	height:1px;
-	padding:0;
-	margin:-1px;
-	overflow:hidden;
-	clip: rect(0, 0, 0, 0);
-	white-space:nowrap;
-	border:0;
+position:absolute!important;
+width: 1px;
+height:1px;
+padding:0;
+margin:-1px;
+overflow:hidden;
+clip: rect(0, 0, 0, 0);
+white-space:nowrap;
+border:0;
 }
-
 .screen-reader-text:focus,
 .skip-link:focus {
-	clip:auto!important;
-	width:auto;
-	height: auto;
-	margin:.75rem;
-	padding: 0.7rem 1rem;
-	background: var(--slateframe-surface);
-	color: var(--slateframe-text);
-	z-index: 10000;
+clip:auto!important;
+width:auto;
+height: auto;
+margin:.75rem;
+padding: 0.7rem 1rem;
+background: var(--slateframe-surface);
+color: var(--slateframe-text);
+z-index: 10000;
 }
-
 .slateframe-shell {
-	width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-wide));
-	margin-inline: auto;
+width: min(calc(100% - (2 * var(--slateframe-gutter))), var(--slateframe-wide));
+margin-inline: auto;
 }
-
 .slateframe-main{min-height:56vh}
-
 .slateframe-site-header {
 position:sticky;
 inset-block-start:0;
@@ -362,8 +355,8 @@ color:var(--slateframe-text);
 }
 .slateframe-search-form button,
 .form-submit .submit,
-.wp-block-search__button,
-.wp-element-button {
+.wp-block-search .wp-block-search__button.wp-element-button,
+.wp-block-button .wp-block-button__link.wp-element-button {
 min-block-size:var(--slateframe-control);
 max-inline-size:100%;
 padding:var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
