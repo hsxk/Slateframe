@@ -90,7 +90,7 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 
 	const toggle = page.locator('[data-menu-toggle]');
 
-	if (projectWidth(testInfo) <= 900) {
+	if (projectWidth(testInfo) <= 1280) {
 		await expect(toggle).toBeVisible();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
@@ -110,6 +110,11 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	} else {
 		await expect(toggle).toBeHidden();
 		await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
+		const topLevelLinks = page.locator('[data-primary-nav] > ul > li > a');
+		for (let index = 0; index < await topLevelLinks.count(); index += 1) {
+			const clipped = await topLevelLinks.nth(index).evaluate((link) => link.scrollWidth > link.clientWidth + 1);
+			expect(clipped, 'desktop navigation labels must not be ellipsized').toBe(false);
+		}
 	}
 
 	await expectNoHorizontalOverflow(page, '/');
@@ -333,7 +338,7 @@ test('fallback child navigation is available at every responsive width', async (
 	const nestedList = page.locator('[data-primary-nav] .children').first();
 	await expect(nestedList).toHaveCount(1);
 
-	if (projectWidth(testInfo) <= 900) {
+	if (projectWidth(testInfo) <= 1280) {
 		const toggle = page.locator('[data-menu-toggle]');
 		await toggle.click();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -558,6 +563,8 @@ test('capture WordPress.org screenshot candidate from the real showcase fixture'
 
 	await page.setViewportSize({ width: 1200, height: 900 });
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	await expect(page.locator('[data-menu-toggle]')).toBeVisible();
+	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
 	await expect(page.locator('h1')).toHaveText('A clean frame for whatever you publish');
 	await expect(page.locator('.slateframe-showcase-feature img')).toBeVisible();
 	await expect(page.locator('.slateframe-showcase-grid .wp-block-column')).toHaveCount(3);

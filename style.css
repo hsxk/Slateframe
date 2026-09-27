@@ -125,6 +125,7 @@ background:color-mix(in srgb, var(--slateframe-bg) 90%, transparent);
 backdrop-filter:blur(14px);
 }
 .slateframe-header-inner {
+width:min(calc(100% - (2 * var(--slateframe-gutter))), 96rem);
 min-height:var(--slateframe-header-height);
 display:flex;
 align-items:center;
