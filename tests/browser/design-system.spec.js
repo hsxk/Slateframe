@@ -297,6 +297,10 @@ test('plugin-style tables scroll locally and remain keyboard reachable', async (
 	await expect(table).toBeVisible();
 	await expect(table).toHaveAttribute('tabindex', '0');
 
+	const readableCellWidths = await table.locator('td').evaluateAll((cells) => cells.map((cell) => cell.getBoundingClientRect().width));
+	expect(readableCellWidths.length).toBeGreaterThan(0);
+	expect(Math.min(...readableCellWidths)).toBeGreaterThanOrEqual(120);
+
 	await table.evaluate((node) => {
 		node.style.whiteSpace = 'nowrap';
 	});
@@ -322,6 +326,31 @@ test('plugin-style tables scroll locally and remain keyboard reachable', async (
 
 	await table.focus();
 	await expect(table).toBeFocused();
+	const focus = await table.evaluate((node) => {
+		const styles = getComputedStyle(node);
+		return { style: styles.outlineStyle, width: Number.parseFloat(styles.outlineWidth) };
+	});
+	expect(focus.style).not.toBe('none');
+	expect(focus.width).toBeGreaterThanOrEqual(2);
+
+	const zoomed = await page.evaluate(() => {
+		document.documentElement.dir = 'rtl';
+		document.documentElement.style.fontSize = '32px';
+		const node = document.querySelector('.browser-tablepress');
+		const rect = node.getBoundingClientRect();
+		return {
+			clientWidth: node.clientWidth,
+			scrollWidth: node.scrollWidth,
+			left: rect.left,
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	});
+	expect(zoomed.scrollWidth).toBeGreaterThanOrEqual(zoomed.clientWidth);
+	expect(zoomed.left).toBeGreaterThanOrEqual(-1);
+	expect(zoomed.right).toBeLessThanOrEqual(zoomed.viewport + 1);
+	expect(zoomed.rootOverflow).toBeLessThanOrEqual(1);
 });
 
 test('mobile navigation stays inside the viewport when content grows', async ({ page }, testInfo) => {

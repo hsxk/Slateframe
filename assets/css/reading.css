@@ -134,6 +134,10 @@
 	white-space: normal;
 }
 
+:is(.slateframe-prose > table, .slateframe-prose .wp-block-table table, .slateframe-prose .tablepress) :is(th, td) {
+	min-inline-size: min(9rem, 68vw);
+}
+
 .slateframe-prose a {
 	overflow-wrap: anywhere;
 }
