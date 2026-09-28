@@ -49,6 +49,8 @@
 	}
 
 	const mediaQuery = window.matchMedia('(max-width: 1280px)');
+	const headerInner = header.querySelector('.slateframe-header-inner');
+	let isCompact = mediaQuery.matches;
 	const focusableSelector = [
 		'a[href]',
 		'button:not([disabled])',
@@ -65,7 +67,7 @@
 		header.classList.remove('is-open');
 		toggle.setAttribute('aria-expanded', 'false');
 
-		if (mediaQuery.matches) {
+		if (isCompact) {
 			nav.setAttribute('inert', '');
 		} else {
 			nav.removeAttribute('inert');
@@ -98,7 +100,7 @@
 			return;
 		}
 
-		if (event.key !== 'Tab' || !mediaQuery.matches || !header.classList.contains('is-open')) {
+		if (event.key !== 'Tab' || !isCompact || !header.classList.contains('is-open')) {
 			return;
 		}
 
@@ -121,7 +123,7 @@
 	});
 
 	nav.addEventListener('click', (event) => {
-		if (mediaQuery.matches && event.target.closest('a[href]')) {
+		if (isCompact && event.target.closest('a[href]')) {
 			closeMenu();
 		}
 	});
@@ -132,6 +134,46 @@
 		}
 	});
 
-	mediaQuery.addEventListener?.('change', () => closeMenu());
+	const needsCompactNavigation = () => {
+		if (mediaQuery.matches || !headerInner) {
+			return mediaQuery.matches;
+		}
+
+		const wasCompact = header.classList.contains('is-compact');
+		header.classList.remove('is-compact');
+		const needsCompact = headerInner.scrollWidth > headerInner.clientWidth + 1;
+
+		if (wasCompact) {
+			header.classList.add('is-compact');
+		}
+
+		return needsCompact;
+	};
+
+	const syncNavigationMode = () => {
+		const nextCompact = needsCompactNavigation();
+
+		if (nextCompact === isCompact && header.classList.contains('is-compact') === nextCompact) {
+			return;
+		}
+
+		isCompact = nextCompact;
+		header.classList.toggle('is-compact', isCompact);
+		closeMenu();
+	};
+
+	mediaQuery.addEventListener?.('change', syncNavigationMode);
+
+	if ('ResizeObserver' in window && headerInner) {
+		const navigationResizeObserver = new ResizeObserver(() => {
+			window.requestAnimationFrame(syncNavigationMode);
+		});
+		navigationResizeObserver.observe(headerInner);
+		navigationResizeObserver.observe(nav);
+	} else {
+		window.addEventListener('resize', syncNavigationMode, { passive: true });
+	}
+
+	syncNavigationMode();
 	closeMenu();
 })();
