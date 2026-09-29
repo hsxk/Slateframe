@@ -18,7 +18,7 @@ Do not use one generic gap for every relationship. Use the closest semantic role
 - section whitespace: separation between major page regions
 - page gutter: safe viewport edge spacing
 
-The six editor spacing presets (`XS` through `2XL`) resolve through `--slateframe-space-2` … `--slateframe-space-7`. Appearance spacing density therefore changes the Gutenberg preset scale and the published frontend together instead of leaving editor-authored spacing on a fixed parallel scale.
+The six editor spacing presets (`XS` through `2XL`) resolve from `--slateframe-space-2` … `--slateframe-space-4`, with larger presets expressed as semantic multiples of the same scale. Appearance spacing density therefore changes the Gutenberg preset scale and the published frontend together instead of maintaining a fixed parallel scale.
 
 Footer columns and optional footer-widget content are sibling components, so their internal separation derives from stack rhythm; section whitespace remains reserved for the footer's relationship to the page above. Footer widgets render in a responsive auto-fit grid, reset list chrome, and keep links on the shared control-height baseline; the brand/navigation/copyright row becomes a single logical column on narrow screens. The footer stylesheet is a global shell asset alongside navigation and remains inside the unchanged aggregate base-runtime budget.
 

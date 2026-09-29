@@ -67,17 +67,17 @@
 				{
 					"slug": "lg",
 					"name": "L",
-					"size": "var(--slateframe-space-5)"
+					"size": "calc(var(--slateframe-space-4) * 1.5)"
 				},
 				{
 					"slug": "xl",
 					"name": "XL",
-					"size": "var(--slateframe-space-6)"
+					"size": "calc(var(--slateframe-space-4) * 2)"
 				},
 				{
 					"slug": "2xl",
 					"name": "2XL",
-					"size": "var(--slateframe-space-7)"
+					"size": "calc(var(--slateframe-space-4) * 3)"
 				}
 			],
 			"blockGap": true,

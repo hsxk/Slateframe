@@ -359,9 +359,6 @@ function slateframe_customizer_spatial_css() {
 			'--slateframe-list-item-gap'          => 8,
 			'--slateframe-space-4'                => 16,
 			'--slateframe-stack-gap'              => 16,
-			'--slateframe-space-5'                => 24,
-			'--slateframe-space-6'                => 32,
-			'--slateframe-space-7'                => 48,
 		);
 		$rules[]        = '--slateframe-space-scale:' . slateframe_format_css_number( $spacing_scale );
 

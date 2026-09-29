@@ -45,7 +45,6 @@ test('bounded appearance profile drives semantic design tokens and real controls
 			sectionMin: px('--slateframe-section-min'), sectionMax: px('--slateframe-section-max'), radius: px('--slateframe-radius'),
 			content: px('--slateframe-content'), wide: px('--slateframe-wide'), inlineGap: px('--slateframe-inline-gap'),
 			space2: px('--slateframe-space-2'), space3: px('--slateframe-space-3'), space4: px('--slateframe-space-4'),
-			space5: px('--slateframe-space-5'), space6: px('--slateframe-space-6'), space7: px('--slateframe-space-7'),
 			presetXs: resolvedPx('--wp--preset--spacing--xs'), presetSm: resolvedPx('--wp--preset--spacing--sm'),
 			presetMd: resolvedPx('--wp--preset--spacing--md'), presetLg: resolvedPx('--wp--preset--spacing--lg'),
 			presetXl: resolvedPx('--wp--preset--spacing--xl'), preset2xl: resolvedPx('--wp--preset--spacing--2-xl'),
@@ -63,9 +62,8 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide);
 	near(metrics.inlineGap, 4 * profile.spacing); near(metrics.componentGap, 12 * profile.spacing);
 	near(metrics.space2, 8 * profile.spacing); near(metrics.space3, 12 * profile.spacing); near(metrics.space4, 16 * profile.spacing);
-	near(metrics.space5, 24 * profile.spacing); near(metrics.space6, 32 * profile.spacing); near(metrics.space7, 48 * profile.spacing);
 	near(metrics.presetXs, metrics.space2); near(metrics.presetSm, metrics.space3); near(metrics.presetMd, metrics.space4);
-	near(metrics.presetLg, metrics.space5); near(metrics.presetXl, metrics.space6); near(metrics.preset2xl, metrics.space7);
+	near(metrics.presetLg, metrics.space4 * 1.5); near(metrics.presetXl, metrics.space4 * 2); near(metrics.preset2xl, metrics.space4 * 3);
 	near(metrics.stackGap, 16 * profile.spacing); near(metrics.proseGap, 20 * profile.spacing);
 	near(metrics.headingGap, 36 * profile.spacing); near(metrics.headingAfter, 10 * profile.spacing);
 	near(metrics.listItemGap, 8 * profile.spacing); near(metrics.controlPaddingBlock, 8 * profile.spacing);

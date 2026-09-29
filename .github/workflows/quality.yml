@@ -321,7 +321,7 @@ jobs:
             $editor = slateframe_editor_spatial_tokens(array("styles" => array()));
             $entry = $editor["styles"][0] ?? array();
             $css = $entry["css"] ?? "";
-            foreach (array("--slateframe-space-scale:1.2", "--slateframe-prose-gap:24px", "--slateframe-space-5:28.8px", "--slateframe-space-6:38.4px", "--slateframe-space-7:57.6px", "--slateframe-content:800px") as $needle) {
+            foreach (array("--slateframe-space-scale:1.2", "--slateframe-prose-gap:24px", "--slateframe-space-4:19.2px", "--slateframe-content:800px") as $needle) {
               if (false === strpos($css, $needle)) {
                 throw new RuntimeException("Editor Appearance token missing: " . $needle);
               }
