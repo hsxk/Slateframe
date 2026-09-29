@@ -52,32 +52,32 @@
 				{
 					"slug": "xs",
 					"name": "XS",
-					"size": "0.5rem"
+					"size": "var(--slateframe-space-2)"
 				},
 				{
 					"slug": "sm",
 					"name": "S",
-					"size": "0.75rem"
+					"size": "var(--slateframe-space-3)"
 				},
 				{
 					"slug": "md",
 					"name": "M",
-					"size": "1rem"
+					"size": "var(--slateframe-space-4)"
 				},
 				{
 					"slug": "lg",
 					"name": "L",
-					"size": "1.5rem"
+					"size": "var(--slateframe-space-5)"
 				},
 				{
 					"slug": "xl",
 					"name": "XL",
-					"size": "2rem"
+					"size": "var(--slateframe-space-6)"
 				},
 				{
 					"slug": "2xl",
 					"name": "2XL",
-					"size": "3rem"
+					"size": "var(--slateframe-space-7)"
 				}
 			],
 			"blockGap": true,
