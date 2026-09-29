@@ -103,6 +103,10 @@
 	} else {
 		window.addEventListener('resize', syncNav, { passive: true });
 	}
+	if ('MutationObserver' in window) {
+		const contentObserver = new MutationObserver(() => window.requestAnimationFrame(syncNav));
+		contentObserver.observe(nav, { childList: true, characterData: true, subtree: true });
+	}
 	syncNav();
 	close();
 })();
