@@ -18,7 +18,7 @@ test('semantic spatial tokens are defined and non-empty', async ({ page }) => {
 		'--slateframe-control', '--slateframe-inline-gap', '--slateframe-component-gap',
 		'--slateframe-stack-gap', '--slateframe-media-gap', '--slateframe-caption-gap',
 		'--slateframe-prose-gap', '--slateframe-heading-gap', '--slateframe-gutter',
-		'--slateframe-section', '--slateframe-content', '--slateframe-wide',
+		'--slateframe-section', '--slateframe-content', '--slateframe-wide', '--slateframe-chrome',
 		'--slateframe-radius', '--slateframe-focus-width', '--slateframe-icon-size',
 	];
 	const tokens = await rootTokens(page, names);

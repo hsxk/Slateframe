@@ -28,7 +28,7 @@ Primary navigation has a hard compact baseline at 1280px and below, then remains
 
 ## Widths
 
-Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Wide media must not force ordinary prose to grow beyond the reading measure. Long translated strings and CJK titles must wrap without horizontal overflow. Intrinsic sizing is part of that contract: emergency wrapping must also reduce min-content width so 200% text resizing cannot silently widen the root document.
+Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Site chrome uses a separate 92rem ceiling so navigation can use large displays without widening article content. Wide media must not force ordinary prose to grow beyond the reading measure. Long translated strings and CJK titles must wrap without horizontal overflow. Intrinsic sizing is part of that contract: emergency wrapping must also reduce min-content width so 200% text resizing cannot silently widen the root document.
 
 ## Controls
 
