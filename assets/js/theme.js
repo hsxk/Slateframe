@@ -4,115 +4,63 @@
 
 	const colorToggle = document.querySelector('[data-color-toggle]');
 	const colorMedia = window.matchMedia('(prefers-color-scheme: dark)');
-
-	const isDarkMode = () => {
-		const explicitMode = root.dataset.slateframeColorMode;
-		return explicitMode === 'dark' || (!explicitMode && colorMedia.matches);
-	};
-
-	const syncColorToggle = () => {
-		if (!colorToggle) {
-			return;
-		}
-
-		colorToggle.setAttribute('aria-pressed', isDarkMode() ? 'true' : 'false');
-	};
-
-	const rememberColorMode = (mode) => {
+	const isDark = () => root.dataset.slateframeColorMode === 'dark' ||
+		(!root.dataset.slateframeColorMode && colorMedia.matches);
+	const syncColor = () => colorToggle?.setAttribute('aria-pressed', isDark() ? 'true' : 'false');
+	const remember = (mode) => {
 		const secure = window.location.protocol === 'https:' ? '; Secure' : '';
 		document.cookie = `slateframe_color_mode=${mode}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
 	};
 
 	if (colorToggle) {
-		syncColorToggle();
-
+		syncColor();
 		colorToggle.addEventListener('click', () => {
-			const nextMode = isDarkMode() ? 'light' : 'dark';
-			root.dataset.slateframeColorMode = nextMode;
-			rememberColorMode(nextMode);
-			syncColorToggle();
+			const mode = isDark() ? 'light' : 'dark';
+			root.dataset.slateframeColorMode = mode;
+			remember(mode);
+			syncColor();
 		});
-
 		colorMedia.addEventListener?.('change', () => {
-			if (!root.dataset.slateframeColorMode) {
-				syncColorToggle();
-			}
+			if (!root.dataset.slateframeColorMode) syncColor();
 		});
 	}
 
 	const header = document.querySelector('[data-site-header]');
 	const toggle = document.querySelector('[data-menu-toggle]');
 	const nav = document.querySelector('[data-primary-nav]');
+	if (!header || !toggle || !nav) return;
 
-	if (!header || !toggle || !nav) {
-		return;
-	}
+	const media = window.matchMedia('(max-width: 1280px)');
+	const inner = header.querySelector('.slateframe-header-inner');
+	let compact = media.matches;
+	const focusable = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+	const menuItems = () => [toggle, ...nav.querySelectorAll(focusable)].filter((item) => item.offsetParent !== null);
 
-	const mediaQuery = window.matchMedia('(max-width: 1280px)');
-	const headerInner = header.querySelector('.slateframe-header-inner');
-	let isCompact = mediaQuery.matches;
-	const focusableSelector = [
-		'a[href]',
-		'button:not([disabled])',
-		'input:not([disabled])',
-		'select:not([disabled])',
-		'textarea:not([disabled])',
-		'[tabindex]:not([tabindex="-1"])',
-	].join(',');
-
-	const menuFocusables = () => [toggle, ...nav.querySelectorAll(focusableSelector)]
-		.filter((element) => element.offsetParent !== null);
-
-	const closeMenu = (returnFocus = false) => {
+	const close = (returnFocus = false) => {
 		header.classList.remove('is-open');
 		toggle.setAttribute('aria-expanded', 'false');
-
-		if (isCompact) {
-			nav.setAttribute('inert', '');
-		} else {
-			nav.removeAttribute('inert');
-		}
-
-		if (returnFocus) {
-			toggle.focus();
-		}
+		nav.toggleAttribute('inert', compact);
+		if (returnFocus) toggle.focus();
 	};
-
-	const openMenu = () => {
+	const open = () => {
 		nav.removeAttribute('inert');
 		header.classList.add('is-open');
 		toggle.setAttribute('aria-expanded', 'true');
-		nav.querySelector('a, button')?.focus();
+		nav.querySelector('a,button')?.focus();
 	};
 
-	toggle.addEventListener('click', () => {
-		if (header.classList.contains('is-open')) {
-			closeMenu(true);
-		} else {
-			openMenu();
-		}
-	});
-
+	toggle.addEventListener('click', () => header.classList.contains('is-open') ? close(true) : open());
 	document.addEventListener('keydown', (event) => {
 		if (event.key === 'Escape' && header.classList.contains('is-open')) {
 			event.preventDefault();
-			closeMenu(true);
+			close(true);
 			return;
 		}
-
-		if (event.key !== 'Tab' || !isCompact || !header.classList.contains('is-open')) {
-			return;
-		}
-
-		const focusables = menuFocusables();
-
-		if (focusables.length < 2) {
-			return;
-		}
-
-		const first = focusables[0];
-		const last = focusables[focusables.length - 1];
-
+		if (event.key !== 'Tab' || !compact || !header.classList.contains('is-open')) return;
+		const items = menuItems();
+		if (items.length < 2) return;
+		const first = items[0];
+		const last = items[items.length - 1];
 		if (event.shiftKey && document.activeElement === first) {
 			event.preventDefault();
 			last.focus();
@@ -121,58 +69,40 @@
 			first.focus();
 		}
 	});
-
 	nav.addEventListener('click', (event) => {
-		if (isCompact && event.target.closest('a[href]')) {
-			closeMenu();
-		}
+		if (compact && event.target.closest('a[href]')) close();
 	});
-
 	document.addEventListener('pointerdown', (event) => {
-		if (header.classList.contains('is-open') && !header.contains(event.target)) {
-			closeMenu();
-		}
+		if (header.classList.contains('is-open') && !header.contains(event.target)) close();
 	});
 
-	const needsCompactNavigation = () => {
-		if (mediaQuery.matches || !headerInner) {
-			return mediaQuery.matches;
-		}
-
-		const wasCompact = header.classList.contains('is-compact');
+	const needsCompact = () => {
+		if (media.matches || !inner) return media.matches;
+		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const needsCompact = headerInner.scrollWidth > headerInner.clientWidth + 1;
-		header.classList.toggle('is-compact', wasCompact);
-		nav.classList.toggle('is-compact', wasCompact);
-		return needsCompact;
+		const needed = inner.scrollWidth > inner.clientWidth + 1;
+		header.classList.toggle('is-compact', previous);
+		nav.classList.toggle('is-compact', previous);
+		return needed;
+	};
+	const syncNav = () => {
+		const next = needsCompact();
+		if (next === compact && header.classList.contains('is-compact') === next) return;
+		compact = next;
+		header.classList.toggle('is-compact', compact);
+		nav.classList.toggle('is-compact', compact);
+		close();
 	};
 
-	const syncNavigationMode = () => {
-		const nextCompact = needsCompactNavigation();
-
-		if (nextCompact === isCompact && header.classList.contains('is-compact') === nextCompact) {
-			return;
-		}
-
-		isCompact = nextCompact;
-		header.classList.toggle('is-compact', isCompact);
-		nav.classList.toggle('is-compact', isCompact);
-		closeMenu();
-	};
-
-	mediaQuery.addEventListener?.('change', syncNavigationMode);
-
-	if ('ResizeObserver' in window && headerInner) {
-		const navigationResizeObserver = new ResizeObserver(() => {
-			window.requestAnimationFrame(syncNavigationMode);
-		});
-		navigationResizeObserver.observe(headerInner);
-		navigationResizeObserver.observe(nav);
+	media.addEventListener?.('change', syncNav);
+	if ('ResizeObserver' in window && inner) {
+		const observer = new ResizeObserver(() => window.requestAnimationFrame(syncNav));
+		observer.observe(inner);
+		observer.observe(nav);
 	} else {
-		window.addEventListener('resize', syncNavigationMode, { passive: true });
+		window.addEventListener('resize', syncNav, { passive: true });
 	}
-
-	syncNavigationMode();
-	closeMenu();
+	syncNav();
+	close();
 })();
