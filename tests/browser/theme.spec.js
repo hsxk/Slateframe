@@ -89,8 +89,14 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 
 	const toggle = page.locator('[data-menu-toggle]');
+	const header = page.locator('[data-site-header]');
+	const compact = await header.evaluate((node) => node.classList.contains('is-compact'));
 
 	if (projectWidth(testInfo) <= 1280) {
+		expect(compact).toBe(true);
+	}
+
+	if (compact) {
 		await expect(toggle).toBeVisible();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
@@ -360,7 +366,11 @@ test('fallback child navigation is available at every responsive width', async (
 	const nestedList = page.locator('[data-primary-nav] .children').first();
 	await expect(nestedList).toHaveCount(1);
 
+	const compact = await page.locator('[data-site-header]').evaluate((node) => node.classList.contains('is-compact'));
 	if (projectWidth(testInfo) <= 1280) {
+		expect(compact).toBe(true);
+	}
+	if (compact) {
 		const toggle = page.locator('[data-menu-toggle]');
 		await toggle.click();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');

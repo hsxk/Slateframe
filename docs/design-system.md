@@ -24,6 +24,8 @@ Native Portfolio Query Pagination uses the same control radius, touch target, in
 
 The accessible control baseline is 44px. Customizer settings may increase it, but must not reduce it.
 
+Primary navigation has a hard compact baseline at 1280px and below, then remains content-aware above that breakpoint: if the site identity, translated menu labels, optional language adapter, and header controls cannot coexist without overflow, the same keyboard-accessible compact menu is used. When space returns, the wide row is restored. No-JavaScript navigation remains visible and wrapping rather than being hidden behind the enhancement layer.
+
 ## Widths
 
 Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Wide media must not force ordinary prose to grow beyond the reading measure. Long translated strings and CJK titles must wrap without horizontal overflow. Intrinsic sizing is part of that contract: emergency wrapping must also reduce min-content width so 200% text resizing cannot silently widen the root document.

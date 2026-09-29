@@ -94,7 +94,11 @@ test('language adapter remains reachable through responsive navigation', async (
 	await page.goto('/', { waitUntil: 'networkidle' });
 	const width = testInfo.project.use.viewport?.width || 1440;
 	const switcher = page.locator('.browser-language-switcher');
+	const compact = await page.locator('[data-site-header]').evaluate((node) => node.classList.contains('is-compact'));
 	if (width <= 1280) {
+		expect(compact).toBe(true);
+	}
+	if (compact) {
 		await page.locator('[data-menu-toggle]').click();
 	}
 	await expect(switcher).toBeVisible();

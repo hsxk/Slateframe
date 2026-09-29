@@ -141,12 +141,10 @@
 
 		const wasCompact = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
+		nav.classList.remove('is-compact');
 		const needsCompact = headerInner.scrollWidth > headerInner.clientWidth + 1;
-
-		if (wasCompact) {
-			header.classList.add('is-compact');
-		}
-
+		header.classList.toggle('is-compact', wasCompact);
+		nav.classList.toggle('is-compact', wasCompact);
 		return needsCompact;
 	};
 
@@ -159,6 +157,7 @@
 
 		isCompact = nextCompact;
 		header.classList.toggle('is-compact', isCompact);
+		nav.classList.toggle('is-compact', isCompact);
 		closeMenu();
 	};
 

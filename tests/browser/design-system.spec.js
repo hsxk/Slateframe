@@ -408,9 +408,41 @@ test('mobile navigation stays inside the viewport when content grows', async ({ 
 });
 
 
+test('wide navigation compacts for translated growth and recovers when space returns', async ({ page }, testInfo) => {
+	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
+	test.skip(viewportWidth !== 1920, 'Content-driven compact navigation is sampled on the widest project.');
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const header = page.locator('[data-site-header]');
+	const nav = page.locator('[data-primary-nav]');
+	const toggle = page.locator('[data-menu-toggle]');
+	await expect(header).not.toHaveClass(/is-compact/);
+
+	await nav.locator(':scope > ul').evaluate((list) => {
+		for (let index = 0; index < 4; index += 1) {
+			const item = document.createElement('li');
+			item.className = 'browser-long-navigation-item';
+			item.innerHTML = '<a href="#">A deliberately extensive translated navigation destination 中文 العربية 日本語</a>';
+			list.append(item);
+		}
+	});
+
+	await expect(header).toHaveClass(/is-compact/);
+	await expect(nav).toHaveClass(/is-compact/);
+	await expect(toggle).toBeVisible();
+	await expect(nav).toHaveAttribute('inert', '');
+
+	await nav.locator('.browser-long-navigation-item').evaluateAll((items) => items.forEach((item) => item.remove()));
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(nav).not.toHaveClass(/is-compact/);
+	await expect(toggle).toBeHidden();
+	await expect(nav).not.toHaveAttribute('inert', '');
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
 test('desktop navigation and language adapter share one header row', async ({ page }, testInfo) => {
 	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
-	test.skip(viewportWidth <= 1280, 'Wide desktop header contract.');
+	test.skip(viewportWidth !== 1920, 'Wide header row is sampled where the fixture has enough inline space.');
 
 	await page.goto('/', { waitUntil: 'networkidle' });
 	const metrics = await page.evaluate(() => {
