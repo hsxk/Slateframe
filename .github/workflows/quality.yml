@@ -64,10 +64,10 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/content-modes.css assets/css/query-loop.css assets/css/editor.css assets/js/theme.js
+          wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
           test $(wc -c < style.css) -le 16000
           test $(wc -c < assets/css/navigation.css) -le 4000
           test $(wc -c < assets/css/footer.css) -le 2000
@@ -76,6 +76,7 @@ jobs:
           test $(wc -c < assets/css/publishing.css) -le 4500
           test $(wc -c < assets/css/content-modes.css) -le 12500
           test $(wc -c < assets/css/query-loop.css) -le 3000
+          test $(wc -c < assets/css/empty-state.css) -le 1000
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
           if grep -Eq '100(d?v|v)w' assets/css/reading.css; then
@@ -83,6 +84,7 @@ jobs:
             exit 1
           fi
           base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/css/footer.css) + $(wc -c < assets/js/theme.js) ))
+          empty_state_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/empty-state.css) ))
           core_reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
           publishing_runtime_bytes=$(( core_reading_runtime_bytes + $(wc -c < assets/css/publishing.css) ))
           discussion_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/comments.css) ))
@@ -91,6 +93,7 @@ jobs:
           portfolio_runtime_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/query-loop.css) ))
           portfolio_discussion_bytes=$(( portfolio_runtime_bytes + $(wc -c < assets/css/comments.css) ))
           echo "Base CSS+navigation+JS: ${base_runtime_bytes} bytes"
+          echo "Empty-state route runtime: ${empty_state_runtime_bytes} bytes"
           echo "Base+core reading runtime: ${core_reading_runtime_bytes} bytes"
           echo "Base+reading+publishing runtime: ${publishing_runtime_bytes} bytes"
           echo "Base+reading+publishing+discussion runtime: ${discussion_runtime_bytes} bytes"
@@ -99,6 +102,7 @@ jobs:
           echo "Portfolio runtime with Query Loop layer: ${portfolio_runtime_bytes} bytes"
           echo "Portfolio runtime with Query Loop layer+discussion: ${portfolio_discussion_bytes} bytes"
           test "$base_runtime_bytes" -le 25000
+          test "$empty_state_runtime_bytes" -le 25000
           test "$core_reading_runtime_bytes" -le 30000
           test "$publishing_runtime_bytes" -le 34500
           test "$discussion_runtime_bytes" -le 37500
@@ -556,6 +560,8 @@ jobs:
             --porcelain)
 
           KNOWLEDGE_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Knowledge Fixture — 中文とالعربية long-string validation' --post_content='<!-- wp:group {"className":"browser-learning-callout is-style-slateframe-learning-callout"} --><div class="wp-block-group browser-learning-callout is-style-slateframe-learning-callout" dir="rtl"><h2>مسار تعلم مرن</h2><p>هذا مثال طويل لاختبار اتجاه الكتابة والتخطيط المنطقي دون افتراض لغة أو إضافة متعددة اللغات.</p></div><!-- /wp:group --><!-- wp:list {"ordered":true,"className":"browser-rtl-steps is-style-slateframe-steps"} --><ol class="browser-rtl-steps is-style-slateframe-steps" dir="rtl"><li>افهم الفكرة الأساسية.</li><li>طبّقها على مثال عملي.</li><li>اربط النتيجة بالخطوة التالية.</li></ol><!-- /wp:list --><!-- wp:group {"className":"browser-definition is-style-slateframe-definition"} --><div class="wp-block-group browser-definition is-style-slateframe-definition" dir="rtl"><h3>Definition</h3><p>A concise term explanation that stays in normal document flow.</p></div><!-- /wp:group -->' --porcelain)
+          EMPTY_AUTHOR_ID=$(wp user create empty-author empty-author@example.com --role=subscriber --display_name='Empty Author' --porcelain --path=/tmp/wp-browser)
+
 
           echo "SLATEFRAME_SHOWCASE_PATH=/?page_id=$SHOWCASE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PHOTO_PATH=/?page_id=$PHOTO_ID" >> "$GITHUB_ENV"
@@ -563,6 +569,7 @@ jobs:
           echo "SLATEFRAME_KNOWLEDGE_PATH=/?page_id=$KNOWLEDGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_EMPTY_AUTHOR_PATH=/?author=$EMPTY_AUTHOR_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress
         run: |
           npm install --package-lock=false --no-audit --no-fund

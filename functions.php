@@ -224,6 +224,18 @@ function slateframe_assets() {
 		);
 	}
 
+	global $wp_query;
+	$empty_state_needed = ( is_home() || is_archive() || is_search() ) && isset( $wp_query ) && 0 === (int) $wp_query->post_count;
+
+	if ( $empty_state_needed ) {
+		wp_enqueue_style(
+			'slateframe-empty-state',
+			get_template_directory_uri() . '/assets/css/empty-state.css',
+			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
 	if ( is_singular() || is_author() || is_404() ) {
 		$publishing_dependencies = is_singular() ? array( 'slateframe-reading' ) : array( 'slateframe-style' );
 

@@ -6,6 +6,7 @@
  */
 
 get_header();
+global $wp_query;
 
 $slateframe_author_id  = get_queried_object_id();
 $slateframe_author_bio = get_the_author_meta( 'description', $slateframe_author_id );
@@ -38,16 +39,22 @@ $slateframe_author_avatar = apply_filters( 'slateframe_author_avatar_html', '', 
 
 	<div class="slateframe-shell slateframe-grid">
 		<?php
-		while ( have_posts() ) :
-			the_post();
-			get_template_part( 'template-parts/content', 'card' );
-		endwhile;
+		if ( have_posts() ) :
+			while ( have_posts() ) :
+				the_post();
+				get_template_part( 'template-parts/content', 'card' );
+			endwhile;
+		else :
+			get_template_part( 'template-parts/content', 'none' );
+		endif;
 		?>
 	</div>
 
-	<div class="slateframe-shell slateframe-pagination">
-		<?php slateframe_pagination(); ?>
-	</div>
+	<?php if ( $wp_query->max_num_pages > 1 ) : ?>
+		<div class="slateframe-shell slateframe-pagination">
+			<?php slateframe_pagination(); ?>
+		</div>
+	<?php endif; ?>
 </main>
 <?php
 get_footer();

@@ -1,7 +1,10 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 
 const postPath = process.env.SLATEFRAME_POST_PATH || '/';
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
+const emptyAuthorPath = process.env.SLATEFRAME_EMPTY_AUTHOR_PATH || '/?author=2';
 
 async function expectNoRootOverflow(page) {
 	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -167,4 +170,58 @@ test('common TOC links keep the shared touch-target baseline', async ({ page }) 
 	const link = page.locator('.ez-toc-link');
 	await expect(link).toBeVisible();
 	expect((await link.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+});
+
+
+test('empty discovery states remain actionable without empty pagination chrome', async ({ page }) => {
+	const routes = [
+		['search', '/?s=slateframe-empty-state-fixture-987654321'],
+		['author', emptyAuthorPath],
+	];
+
+	for (const [kind, route] of routes) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		const state = page.locator('.slateframe-empty-state');
+		await expect(state).toBeVisible();
+		await expect(state.locator('h2')).toBeVisible();
+		await expect(page.locator('.slateframe-pagination')).toHaveCount(0);
+
+		if (kind === 'author') {
+			const search = state.locator('.slateframe-search-form');
+			await expect(search).toBeVisible();
+			for (const control of [search.locator('input[type="search"]'), search.locator('button')]) {
+				expect((await control.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+			}
+		}
+
+		await expectNoRootOverflow(page);
+	}
+});
+
+test('empty-state presentation is contextual and captures mobile/desktop evidence', async ({ page }, testInfo) => {
+	const viewport = testInfo.project.use.viewport?.width || 1440;
+	test.skip(![390, 1440].includes(viewport), 'Empty-state visual evidence uses representative mobile and desktop widths.');
+
+	const requests = [];
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/empty-state.css')) requests.push(request.url());
+	});
+
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	expect(requests).toHaveLength(0);
+
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	for (const [kind, route] of [
+		['search', '/?s=slateframe-empty-state-fixture-987654321'],
+		['author', emptyAuthorPath],
+	]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, kind).toHaveLength(1);
+		await page.screenshot({
+			path: path.join(screenshotDir, `empty-${kind}-${testInfo.project.name}.png`),
+			fullPage: true,
+		});
+	}
 });

@@ -6,6 +6,7 @@
  */
 
 get_header();
+global $wp_query;
 ?>
 <main id="main-content" class="slateframe-main">
 	<header class="slateframe-page-header">
@@ -30,16 +31,16 @@ get_header();
 				get_template_part( 'template-parts/content', 'card' );
 			endwhile;
 		else :
-			?>
-			<p><?php esc_html_e( 'Nothing found.', 'slateframe' ); ?></p>
-			<?php
+			get_template_part( 'template-parts/content', 'none' );
 		endif;
 		?>
 	</div>
 
-	<div class="slateframe-shell slateframe-pagination">
-		<?php slateframe_pagination(); ?>
-	</div>
+	<?php if ( $wp_query->max_num_pages > 1 ) : ?>
+		<div class="slateframe-shell slateframe-pagination">
+			<?php slateframe_pagination(); ?>
+		</div>
+	<?php endif; ?>
 </main>
 <?php
 get_footer();

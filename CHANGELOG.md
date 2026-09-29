@@ -60,6 +60,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Unified index, archive, search, and author empty states with contextual recovery guidance, contextual styling, and no empty pagination chrome.
+
 - Centralized global navigation/footer stylesheet enqueueing and kept both inside the existing aggregate base-runtime ceilings.
 - Refined native Portfolio Query Pagination with shared radius/current-state/spacing tokens and explicit horizontal-number grouping.
 - Aligned responsive navigation runtime, Discovery, Design System, Appearance, and screenshot contracts on the same 1280px compact-navigation breakpoint.
