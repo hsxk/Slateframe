@@ -1,8 +1,10 @@
 (() => {
 	const root = document.documentElement;
+	const q = (selector) => q(selector);
+	const raf = requestAnimationFrame;
 	root.classList.add('has-js');
 
-	const colorToggle = document.querySelector('[data-color-toggle]');
+	const colorToggle = q('[data-color-toggle]');
 	const colorMedia = matchMedia('(prefers-color-scheme: dark)');
 	const isDark = () => root.dataset.slateframeColorMode === 'dark' ||
 		(!root.dataset.slateframeColorMode && colorMedia.matches);
@@ -25,9 +27,9 @@
 		});
 	}
 
-	const header = document.querySelector('[data-site-header]');
-	const toggle = document.querySelector('[data-menu-toggle]');
-	const nav = document.querySelector('[data-primary-nav]');
+	const header = q('[data-site-header]');
+	const toggle = q('[data-menu-toggle]');
+	const nav = q('[data-primary-nav]');
 	if (!header || !toggle || !nav) return;
 
 	const media = matchMedia('(max-width: 1280px)');
@@ -81,7 +83,7 @@
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const needed = inner.scrollWidth > inner.clientWidth + 1;
+		const needed = inner.scrollWidth > inner.clientWidth + 1 || nav.offsetHeight > (colorToggle?.offsetHeight || 44) + 1;
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
@@ -97,14 +99,14 @@
 
 	media.addEventListener?.('change', syncNav);
 	if ('ResizeObserver' in window && inner) {
-		const observer = new ResizeObserver(() => requestAnimationFrame(syncNav));
+		const observer = new ResizeObserver(() => raf(syncNav));
 		observer.observe(inner);
 		observer.observe(nav);
 	} else {
 		window.addEventListener('resize', syncNav, { passive: true });
 	}
 	if ('MutationObserver' in window) {
-		const contentObserver = new MutationObserver(() => requestAnimationFrame(() => requestAnimationFrame(syncNav)));
+		const contentObserver = new MutationObserver(() => raf(() => raf(syncNav)));
 		contentObserver.observe(nav, { childList: true, characterData: true, subtree: true });
 	}
 	syncNav();
