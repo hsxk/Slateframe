@@ -409,6 +409,31 @@ test('mobile navigation stays inside the viewport when content grows', async ({ 
 });
 
 
+test('desktop navigation compacts under 200 percent text enlargement', async ({ page }, testInfo) => {
+	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
+	test.skip(viewportWidth !== 1920, 'Desktop text-enlargement navigation is sampled on the widest project.');
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const header = page.locator('[data-site-header]');
+	const nav = page.locator('[data-primary-nav]');
+	await expect(header).not.toHaveClass(/is-compact/);
+
+	await page.evaluate(() => {
+		document.documentElement.style.fontSize = '32px';
+	});
+	await expect(header).toHaveClass(/is-compact/);
+	await expect(nav).toHaveAttribute('inert', '');
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+
+	await page.evaluate(() => {
+		document.documentElement.style.fontSize = '';
+	});
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(nav).not.toHaveAttribute('inert', '');
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
+
 test('wide navigation compacts for translated growth and recovers when space returns', async ({ page }, testInfo) => {
 	const viewportWidth = testInfo.project.use.viewport?.width || 1440;
 	test.skip(viewportWidth !== 1920, 'Content-driven compact navigation is sampled on the widest project.');
