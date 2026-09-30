@@ -146,6 +146,13 @@ test('adaptive desktop navigation responds to translated label growth and recove
 	await expect(toggle).toBeVisible();
 	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
 
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await page.screenshot({
+		path: path.join(screenshotDir, `${testInfo.project.name}-translated-nav-compact.png`),
+		fullPage: false,
+	});
+
 	await firstLink.evaluate((link, label) => {
 		link.textContent = label;
 	}, original);
@@ -153,6 +160,10 @@ test('adaptive desktop navigation responds to translated label growth and recove
 	await expect(toggle).toBeHidden();
 	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
 	await expectNoHorizontalOverflow(page, '/');
+	await page.screenshot({
+		path: path.join(screenshotDir, `${testInfo.project.name}-translated-nav-recovered.png`),
+		fullPage: false,
+	});
 });
 
 test('tablet and compact desktop navigation share one operable breakpoint', async ({ page }) => {
