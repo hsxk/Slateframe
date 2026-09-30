@@ -36,7 +36,8 @@
 	const inner = header.querySelector('.slateframe-header-inner');
 	let compact = media.matches;
 	const focusable = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
-	const menuItems = () => [toggle, ...nav.querySelectorAll(focusable)].filter((item) => item.offsetParent !== null);\n\tconst desktopNavHeight = nav.offsetHeight;
+	const menuItems = () => [toggle, ...nav.querySelectorAll(focusable)].filter((item) => item.offsetParent !== null);
+	const desktopNavHeight = nav.offsetHeight;
 
 	const close = (returnFocus = false) => {
 		header.classList.remove('is-open');
