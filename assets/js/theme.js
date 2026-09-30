@@ -36,7 +36,7 @@
 	const inner = header.querySelector('.slateframe-header-inner');
 	let compact = media.matches;
 	const focusable = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
-	const menuItems = () => [toggle, ...nav.querySelectorAll(focusable)].filter((item) => item.offsetParent !== null);
+	const menuItems = () => [toggle, ...nav.querySelectorAll(focusable)].filter((item) => item.offsetParent !== null);\n\tconst desktopNavHeight = nav.offsetHeight;
 
 	const close = (returnFocus = false) => {
 		header.classList.remove('is-open');
@@ -83,7 +83,7 @@
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const needed=inner.scrollWidth>inner.clientWidth+1||menuItems().some((item)=>item.offsetHeight>colorToggle.offsetHeight+1);
+		const needed=inner.scrollWidth>inner.clientWidth+1||nav.offsetHeight>desktopNavHeight+1;
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
