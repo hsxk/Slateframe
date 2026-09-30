@@ -139,6 +139,7 @@ Public GitHub Actions currently enforce:
 - Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
+- Browser runs publish reviewable screenshot artifacts for core Page/Post surfaces, Photography, Portfolio, Knowledge, color modes, Appearance profiles, and adaptive translated-navigation states; visual evidence is reviewed alongside automated geometry checks rather than treated as a substitute for them.
 
 A failed gate is treated as a defect; tests are not removed merely to make CI green.
 
