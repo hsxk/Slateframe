@@ -59,7 +59,7 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	});
 	near(metrics.control, profile.control); near(metrics.spacing, profile.spacing, 0.01); near(metrics.gutter, profile.gutter);
 	near(metrics.section, profile.section, 0.01); near(metrics.sectionMin, 44 * profile.section); near(metrics.sectionMax, 72 * profile.section);
-	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide); near(metrics.chrome, 1472);
+	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide); near(metrics.chrome, 1728);
 	near(metrics.inlineGap, 4 * profile.spacing); near(metrics.componentGap, 12 * profile.spacing);
 	near(metrics.space2, 8 * profile.spacing); near(metrics.space3, 12 * profile.spacing); near(metrics.space4, 16 * profile.spacing);
 	near(metrics.presetXs, metrics.space2); near(metrics.presetSm, metrics.space3); near(metrics.presetMd, metrics.space4);
