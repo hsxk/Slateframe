@@ -3,7 +3,7 @@
 	root.classList.add('has-js');
 
 	const colorToggle = document.querySelector('[data-color-toggle]');
-	const colorMedia = window.matchMedia('(prefers-color-scheme: dark)');
+	const colorMedia = matchMedia('(prefers-color-scheme: dark)');
 	const isDark = () => root.dataset.slateframeColorMode === 'dark' ||
 		(!root.dataset.slateframeColorMode && colorMedia.matches);
 	const syncColor = () => colorToggle?.setAttribute('aria-pressed', isDark() ? 'true' : 'false');
@@ -30,7 +30,7 @@
 	const nav = document.querySelector('[data-primary-nav]');
 	if (!header || !toggle || !nav) return;
 
-	const media = window.matchMedia('(max-width: 1280px)');
+	const media = matchMedia('(max-width: 1280px)');
 	const inner = header.querySelector('.slateframe-header-inner');
 	let compact = media.matches;
 	const focusable = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
@@ -97,14 +97,14 @@
 
 	media.addEventListener?.('change', syncNav);
 	if ('ResizeObserver' in window && inner) {
-		const observer = new ResizeObserver(() => window.requestAnimationFrame(syncNav));
+		const observer = new ResizeObserver(() => requestAnimationFrame(syncNav));
 		observer.observe(inner);
 		observer.observe(nav);
 	} else {
 		window.addEventListener('resize', syncNav, { passive: true });
 	}
 	if ('MutationObserver' in window) {
-		const contentObserver = new MutationObserver(() => window.requestAnimationFrame(() => window.requestAnimationFrame(syncNav)));
+		const contentObserver = new MutationObserver(() => requestAnimationFrame(() => requestAnimationFrame(syncNav)));
 		contentObserver.observe(nav, { childList: true, characterData: true, subtree: true });
 	}
 	syncNav();
