@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Authenticated real-Gutenberg authoring regression at representative mobile/desktop widths, with registered Photography/Portfolio/Knowledge/Editorial patterns, invalid-block detection, editor containment checks, and screenshot artifacts.
+- Editor-canvas parity for Code, Pullquote, Details, and Footnotes primitives while preserving the existing editor stylesheet budget.
 - Native attachment publishing surface with responsive media, content-owned captions, portable metadata, original-file access, parent-document recovery, and browser/Axe screenshot coverage.
 - Shared Page/post featured-media rendering, locale-aware search result totals, a translatable untitled-content fallback, and restrained native sticky-post status.
 - Optional native `footer-content` block/widget region for portable rich footers without site-specific template injection.
