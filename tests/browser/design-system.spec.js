@@ -12,6 +12,15 @@ async function rootTokens(page, names) {
 	}, names);
 }
 
+async function useShortDesktopNavigation(page) {
+	await page.locator('[data-primary-nav] > ul > li > a').evaluateAll((links) =>
+		links.forEach((link, index) => { link.textContent = `Nav ${index + 1}`; })
+	);
+	await page.locator('.slateframe-language-slot a').evaluateAll((links) =>
+		links.forEach((link, index) => { link.textContent = index ? 'JA' : 'EN'; })
+	);
+}
+
 test('semantic spatial tokens are defined and non-empty', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const names = [
@@ -414,6 +423,7 @@ test('desktop navigation compacts under 200 percent text enlargement', async ({ 
 	test.skip(viewportWidth !== 1920, 'Desktop text-enlargement navigation is sampled on the widest project.');
 
 	await page.goto('/', { waitUntil: 'networkidle' });
+	await useShortDesktopNavigation(page);
 	const header = page.locator('[data-site-header]');
 	const nav = page.locator('[data-primary-nav]');
 	await expect(header).not.toHaveClass(/is-compact/);
@@ -439,6 +449,7 @@ test('wide navigation compacts for translated growth and recovers when space ret
 	test.skip(viewportWidth !== 1920, 'Content-driven compact navigation is sampled on the widest project.');
 
 	await page.goto('/', { waitUntil: 'networkidle' });
+	await useShortDesktopNavigation(page);
 	const header = page.locator('[data-site-header]');
 	const nav = page.locator('[data-primary-nav]');
 	const toggle = page.locator('[data-menu-toggle]');
@@ -471,6 +482,7 @@ test('desktop navigation and language adapter share one header row', async ({ pa
 	test.skip(viewportWidth !== 1920, 'Wide header row is sampled where the fixture has enough inline space.');
 
 	await page.goto('/', { waitUntil: 'networkidle' });
+	await useShortDesktopNavigation(page);
 	const metrics = await page.evaluate(() => {
 		const nav = document.querySelector('[data-primary-nav]');
 		const menu = nav?.querySelector(':scope > ul');
