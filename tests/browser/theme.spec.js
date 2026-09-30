@@ -127,6 +127,34 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
+test('adaptive desktop navigation responds to translated label growth and recovery', async ({ page }, testInfo) => {
+	test.skip(projectWidth(testInfo) < 1440, 'Adaptive desktop navigation requires a wide viewport.');
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	const header = page.locator('[data-site-header]');
+	const toggle = page.locator('[data-menu-toggle]');
+	const firstLink = page.locator('[data-primary-nav] > ul > li > a').first();
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(toggle).toBeHidden();
+
+	const original = await firstLink.textContent();
+	await firstLink.evaluate((link) => {
+		link.textContent = 'Außergewöhnlich lange übersetzte Navigationsbezeichnung 中文 العربية 日本語 — portable multilingual navigation';
+	});
+	await expect(header).toHaveClass(/is-compact/);
+	await expect(toggle).toBeVisible();
+	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
+
+	await firstLink.evaluate((link, label) => {
+		link.textContent = label;
+	}, original);
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(toggle).toBeHidden();
+	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
+});
+
 test('tablet and compact desktop navigation share one operable breakpoint', async ({ page }) => {
 	await page.setViewportSize({ width: 1024, height: 768 });
 	await page.goto('/', { waitUntil: 'networkidle' });
