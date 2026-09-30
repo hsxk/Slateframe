@@ -81,17 +81,20 @@
 	const needsCompact = () => {
 		if (media.matches || !inner) return media.matches;
 		const previous = header.classList.contains('is-compact');
+		const links=[...nav.querySelectorAll(':scope>ul>li>a,.slateframe-language-slot a')];
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		let needed=false;
-		for(const a of nav.querySelectorAll(':scope>ul>li>a,.slateframe-language-slot a')){const w=a.style.whiteSpace;a.style.whiteSpace='nowrap';needed||=a.scrollWidth>a.clientWidth+1;a.style.whiteSpace=w}
+		const whiteSpace=links.map((link)=>link.style.whiteSpace);
+		links.forEach((link)=>{link.style.whiteSpace='nowrap'});
+		const needed=nav.scrollWidth>nav.clientWidth+1||inner.scrollWidth>inner.clientWidth+1;
+		links.forEach((link,index)=>{link.style.whiteSpace=whiteSpace[index]});
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
 	};
 	const syncNav = () => {
 		const next = needsCompact();
-		if (next === compact && header.classList.contains('is-compact') === next) return;
+		if (next === compact && header.classList.contains('is-compact') === next && nav.classList.contains('is-compact') === next) return;
 		compact = next;
 		header.classList.toggle('is-compact', compact);
 		nav.classList.toggle('is-compact', compact);
