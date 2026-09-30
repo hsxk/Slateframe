@@ -81,11 +81,7 @@
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const menu = nav.querySelector(':scope > ul');
-		const language = nav.querySelector('.slateframe-language-slot');
-		const gap = Number.parseFloat(getComputedStyle(nav).columnGap) || 0;
-		const required = (menu?.scrollWidth || 0) + (language?.scrollWidth || 0) + (language ? gap : 0);
-		const needed = inner.scrollWidth > inner.clientWidth + 1 || required > nav.clientWidth + 1;
+		const needed = inner.scrollWidth > inner.clientWidth + 1;
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
