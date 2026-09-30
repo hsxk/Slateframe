@@ -24,6 +24,16 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Small global shell:** navigation and footer presentation are explicit always-loaded shell assets, both counted in the unchanged aggregate base-runtime budget; footer widgets use a responsive grid and the same control/touch system as the rest of Slateframe.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
+## Who Slateframe is for
+
+Slateframe is a general-purpose publishing theme for writers, photographers, independent publishers, documentation and knowledge sites, and portfolio owners who want a finished editorial baseline without turning WordPress into a page-builder application.
+
+A fresh installation is intended to be useful before customization: the theme supplies a restrained responsive shell, long-form reading typography, accessible controls, native menus and comments, search/archive/author/404 states, Gutenberg-wide layouts, and portable starter patterns. Specialized presentation for photography, portfolio Query Loops, and knowledge/learning content stays content-driven and does not create proprietary post types or lock content into Slateframe.
+
+The theme is deliberately small in scope. It does **not** bundle analytics, SEO ownership, caching, CDN configuration, custom business data, remote fonts, or a JavaScript UI framework. Those responsibilities remain with WordPress core or purpose-built plugins, so changing themes does not require migrating application logic.
+
+Responsive navigation adapts to both viewport width and the real rendered width of translated menu labels. Long Latin, CJK, Arabic, and mixed-language navigation can fall back to the same keyboard-operable compact menu used on tablets, without truncating labels or assuming a fixed locale.
+
 ## Appearance and spatial system
 
 Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
