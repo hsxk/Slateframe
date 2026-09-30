@@ -1,6 +1,6 @@
 (() => {
 	const root = document.documentElement;
-	const q = (selector) => q(selector);
+	const q = (selector) => document.querySelector(selector);
 	const raf = requestAnimationFrame;
 	root.classList.add('has-js');
 
