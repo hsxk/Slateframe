@@ -1,7 +1,7 @@
 (() => {
-	const root = document.documentElement;
-	const q = (selector) => document.querySelector(selector);
-	const raf = requestAnimationFrame;
+	const root=document.documentElement;
+	const q=document.querySelector.bind(document);
+	const raf=requestAnimationFrame;
 	root.classList.add('has-js');
 
 	const colorToggle = q('[data-color-toggle]');
@@ -83,7 +83,7 @@
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const needed = inner.scrollWidth > inner.clientWidth + 1 || nav.offsetHeight > (colorToggle?.offsetHeight || 44) + 1;
+		const needed=inner.scrollWidth>inner.clientWidth+1||menuItems().some((item)=>item.offsetHeight>colorToggle.offsetHeight+1);
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
