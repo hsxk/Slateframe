@@ -78,15 +78,18 @@
 		if (header.classList.contains('is-open') && !header.contains(event.target)) close();
 	});
 
+	const linkWraps = (link) => {
+		const style=getComputedStyle(link);
+		const single=Math.max(parseFloat(style.minHeight)||0,(parseFloat(style.lineHeight)||0)+(parseFloat(style.paddingTop)||0)+(parseFloat(style.paddingBottom)||0));
+		return link.scrollHeight>single+1;
+	};
 	const needsCompact = () => {
 		if (media.matches || !inner) return media.matches;
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const whiteSpace=nav.style.whiteSpace;
-		nav.style.whiteSpace='nowrap';
-		const needed=nav.scrollWidth>nav.clientWidth+1||inner.scrollWidth>inner.clientWidth+1;
-		nav.style.whiteSpace=whiteSpace;
+		const links=nav.querySelectorAll(':scope>ul>li>a,.slateframe-language-slot a');
+		const needed=[...links].some(linkWraps)||nav.scrollWidth>nav.clientWidth+1||inner.scrollWidth>inner.clientWidth+1;
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;

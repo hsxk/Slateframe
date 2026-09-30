@@ -43,20 +43,33 @@ function slateframe_featured_media( $post_id = 0 ) {
 	$thumbnail_id = get_post_thumbnail_id( $post_id );
 	$caption      = wp_get_attachment_caption( $thumbnail_id );
 
-	echo '<figure class="slateframe-shell slateframe-entry-hero">';
-	echo wp_kses_post(
-		wp_get_attachment_image(
-			$thumbnail_id,
-			'full',
-			false,
-			array(
-				'class'         => 'slateframe-entry-hero-image',
-				'loading'       => 'eager',
-				'decoding'      => 'async',
-				'fetchpriority' => 'high',
-			)
+	$image_html = wp_get_attachment_image(
+		$thumbnail_id,
+		'full',
+		false,
+		array(
+			'class'    => 'slateframe-entry-hero-image',
+			'loading'  => 'eager',
+			'decoding' => 'async',
 		)
 	);
+
+	if ( '' === $image_html ) {
+		return;
+	}
+
+	$image_processor = new WP_HTML_Tag_Processor( $image_html );
+
+	if ( $image_processor->next_tag( 'img' ) ) {
+		$image_processor->set_attribute( 'loading', 'eager' );
+		$image_processor->set_attribute( 'decoding', 'async' );
+		$image_processor->set_attribute( 'fetchpriority', 'high' );
+		$image_html = $image_processor->get_updated_html();
+	}
+
+	echo '<figure class="slateframe-shell slateframe-entry-hero">';
+	// wp_get_attachment_image() escapes its responsive image markup; attributes above are set through Core's HTML processor.
+	echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 	if ( '' !== trim( (string) $caption ) ) {
 		printf( '<figcaption class="wp-caption-text">%s</figcaption>', wp_kses_post( $caption ) );

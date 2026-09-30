@@ -570,15 +570,24 @@ test('Pages share responsive featured media and content-owned captions with post
 	const hero = page.locator('.slateframe-entry-hero');
 	await expect(hero.locator('img')).toBeVisible();
 	await expect(hero.locator('figcaption')).toHaveText('A reusable featured image caption.');
-	await expect(hero.locator('img')).toHaveAttribute('fetchpriority', 'high');
-	const dimensions = await hero.locator('img').evaluate((image) => ({
-		width: image.getBoundingClientRect().width,
-		naturalWidth: image.naturalWidth,
-		naturalHeight: image.naturalHeight,
+	const image = hero.locator('img');
+	await expect(image).toHaveAttribute('fetchpriority', 'high');
+	await expect(image).toHaveAttribute('loading', 'eager');
+	await expect(image).toHaveAttribute('decoding', 'async');
+	await expect(image).toHaveAttribute('srcset', /\s\d+w(?:,|$)/);
+	await expect(image).toHaveAttribute('sizes', /.+/);
+	const dimensions = await image.evaluate((node) => ({
+		width: node.getBoundingClientRect().width,
+		naturalWidth: node.naturalWidth,
+		naturalHeight: node.naturalHeight,
+		intrinsicWidth: Number(node.getAttribute('width')),
+		intrinsicHeight: Number(node.getAttribute('height')),
 	}));
 	expect(dimensions.width).toBeGreaterThan(0);
 	expect(dimensions.naturalWidth).toBe(1200);
 	expect(dimensions.naturalHeight).toBe(900);
+	expect(dimensions.intrinsicWidth).toBe(1200);
+	expect(dimensions.intrinsicHeight).toBe(900);
 	await expectNoHorizontalOverflow(page, featuredPagePath);
 });
 
