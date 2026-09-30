@@ -48,7 +48,7 @@ CI renders the designed default plus the minimum/compact and maximum/spacious sp
 
 Slateframe treats the first activation as a product surface rather than a blank styling layer. Core page, search, archive, author, missing-content, post, comment, and footer surfaces share the same tokenized page-start rhythm and content measures. Controls keep an accessible minimum target, while headings, prose, code, tables, captions, navigation, and media reuse the same bounded spatial system.
 
-Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu when the rendered header runs out of inline space or text enlargement makes the row wrap. Labels are allowed to wrap safely during that transition instead of creating page-level horizontal scrolling. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
+Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu when translated labels need more intrinsic inline space than the rendered row can provide. Slateframe measures that intrinsic demand synchronously, restores each label's normal wrapping before paint, and then applies compact mode when required; this keeps 200% text enlargement and long CJK/RTL labels contained without leaving `nowrap` in the rendered UI. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
 
 ## Current feature set
 
