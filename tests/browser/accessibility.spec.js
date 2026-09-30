@@ -7,6 +7,9 @@ const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
 const knowledgePath = process.env.SLATEFRAME_KNOWLEDGE_PATH || pagePath;
 const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH || pagePath;
+const featuredPagePath = process.env.SLATEFRAME_FEATURED_PAGE_PATH || pagePath;
+const attachmentPath = process.env.SLATEFRAME_ATTACHMENT_PATH || pagePath;
+const untitledPostPath = process.env.SLATEFRAME_UNTITLED_POST_PATH || postPath;
 
 function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
@@ -28,7 +31,7 @@ function formatViolations(violations) {
 test('representative routes have no automated WCAG A/AA violations', async ({ page }, testInfo) => {
 	test.skip(!isRepresentativeWidth(testInfo), 'Axe runs at representative mobile and desktop widths.');
 
-	for (const route of ['/', pagePath, postPath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe']) {
+	for (const route of ['/', pagePath, postPath, featuredPagePath, attachmentPath, untitledPostPath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe']) {
 		await page.goto(route, { waitUntil: 'networkidle' });
 
 		const results = await new AxeBuilder({ page })
@@ -82,6 +85,32 @@ test('primary mobile controls meet the 44px touch-target baseline', async ({ pag
 	expect(submitBox).not.toBeNull();
 	expect(submitBox.height).toBeGreaterThanOrEqual(44);
 
+	const consentLabel = page.locator('.slateframe-comments .comment-form-cookies-consent label').first();
+	await expect(consentLabel).toBeVisible();
+	expect((await consentLabel.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+
+	await page.locator('.slateframe-prose').first().evaluate((node) => {
+		const fixture = document.createElement('div');
+		fixture.className = 'browser-core-controls';
+		fixture.innerHTML = '<form class="wp-block-search wp-block-search__button-outside"><label class="wp-block-search__label" for="browser-core-search">Search</label><div class="wp-block-search__inside-wrapper"><input id="browser-core-search" class="wp-block-search__input" type="search"><button class="wp-block-search__button wp-element-button" type="submit">Search</button></div></form><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#main-content">Continue</a></div>';
+		node.prepend(fixture);
+	});
+	for (const control of [
+		page.locator('#browser-core-search'),
+		page.locator('.browser-core-controls .wp-block-search__button'),
+		page.locator('.browser-core-controls .wp-block-button__link'),
+	]) {
+		await expect(control).toBeVisible();
+		expect((await control.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+
+	await page.goto(attachmentPath, { waitUntil: 'networkidle' });
+	for (const action of await page.locator('.slateframe-action-link').all()) {
+		const box = await action.boundingBox();
+		expect(box).not.toBeNull();
+		expect(box.height).toBeGreaterThanOrEqual(44);
+	}
+
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
 	const paginationLink = page.locator('.browser-project-grid .wp-block-query-pagination a').first();
 	await expect(paginationLink).toBeVisible();
@@ -101,4 +130,27 @@ test('interactive form controls retain accessible names', async ({ page }, testI
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	await expect(page.locator('.slateframe-comments textarea').first()).toHaveAccessibleName(/comment/i);
+});
+
+
+test('comment auxiliary actions keep the shared keyboard target', async ({ page }, testInfo) => {
+	test.skip(!isRepresentativeWidth(testInfo), 'Comment auxiliary controls are sampled at representative widths.');
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const comments = page.locator('.slateframe-comments');
+	await comments.evaluate((node) => {
+		const cancel = node.querySelector('#cancel-comment-reply-link');
+		if (cancel) cancel.style.display = '';
+		const nav = document.createElement('nav');
+		nav.className = 'comment-navigation';
+		nav.innerHTML = '<a href="#comments">Older responses</a>';
+		node.append(nav);
+	});
+	const cancel = page.locator('#cancel-comment-reply-link');
+	if (await cancel.count()) {
+		await expect(cancel).toBeVisible();
+		expect((await cancel.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+	const navLink = page.locator('.comment-navigation a').last();
+	await expect(navLink).toBeVisible();
+	expect((await navLink.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
 });

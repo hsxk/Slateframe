@@ -13,7 +13,7 @@ The public quality workflow currently requires:
 - Theme Check against the built `slateframe.zip`;
 - zero Theme Check findings with severity `REQUIRED`;
 - all 21 production patterns present and registered in real WordPress, with no remote media URLs embedded in pattern source;
-- responsive browser regression, including content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
+- responsive browser regression, including core attachment/media templates, untitled/sticky/search discovery states, content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
 - separate base, singular-reading, discussion, specialized content-mode, and combined contextual-runtime ceilings so optional presentation does not silently inflate ordinary routes;
 - package-content and 1200×900 screenshot validation.
 
@@ -21,13 +21,11 @@ Theme Check advisory findings remain visible in CI rather than being hidden. Col
 
 ## Current advisory decisions
 
-Theme Check currently recommends three optional legacy capabilities that Slateframe does not implement by design:
+Theme Check currently recommends two optional legacy capabilities that Slateframe does not implement by design:
 
 - **Custom Header:** Slateframe supports the WordPress Custom Logo API. It does not own a separate decorative header-image system.
 - **Custom Background:** Slateframe uses `theme.json` and WordPress appearance tools for presentation instead of adding a legacy Customizer background-image API.
-- **Widget/sidebar area:** Slateframe is intentionally a one-column editorial theme. Requiring a sidebar would add layout and content assumptions that conflict with that product boundary.
-
-These are reviewed as product decisions, not ignored errors. If Slateframe's layout model changes, the decisions must be revisited.
+These are reviewed as product decisions, not ignored errors. If Slateframe's layout model changes, the decisions must be revisited. Slateframe does register the `footer-content` block/widget region; it deliberately does not add a content sidebar or a second reading column.
 
 ## Submission artifact
 

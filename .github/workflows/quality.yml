@@ -53,36 +53,63 @@ jobs:
             grep -q '^ \* Slug: slateframe/' "$file"
             grep -q '^ \* Categories:.*slateframe' "$file"
           done
+          for file in patterns/photo-essay.php patterns/photography-contact-sheet.php patterns/photography-diptych.php patterns/photography-sequence.php; do
+            grep -q '"imageCrop":false' "$file"
+          done
+          if grep -E 'class="[^"]* is-cropped( |")' patterns/photo-essay.php patterns/photography-contact-sheet.php patterns/photography-diptych.php patterns/photography-sequence.php; then
+            echo 'Natural-ratio photography patterns must not serialize Core cropped galleries.' >&2
+            exit 1
+          fi
           if grep -niE 'https?://' "${patterns[@]}"; then
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css index.php functions.php theme.json rtl.css template-parts/content-card.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/navigation.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/editor.css assets/js/theme.js
+          wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
           test $(wc -c < style.css) -le 16000
           test $(wc -c < assets/css/navigation.css) -le 4000
+          test $(wc -c < assets/css/footer.css) -le 2000
           test $(wc -c < assets/css/comments.css) -le 3000
           test $(wc -c < assets/css/reading.css) -le 7000
+          test $(wc -c < assets/css/publishing.css) -le 4500
           test $(wc -c < assets/css/content-modes.css) -le 12500
+          test $(wc -c < assets/css/query-loop.css) -le 3000
+          test $(wc -c < assets/css/empty-state.css) -le 1000
           test $(wc -c < assets/css/editor.css) -le 5000
           test $(wc -c < assets/js/theme.js) -le 7000
-          base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/js/theme.js) ))
-          reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
-          discussion_runtime_bytes=$(( reading_runtime_bytes + $(wc -c < assets/css/comments.css) ))
-          contextual_runtime_bytes=$(( reading_runtime_bytes + $(wc -c < assets/css/content-modes.css) ))
+          if grep -Eq '100(d?v|v)w' assets/css/reading.css; then
+            echo 'Reading primitives must stay container-relative; viewport-width escapes recreate legacy child-theme overflow.' >&2
+            exit 1
+          fi
+          base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/css/footer.css) + $(wc -c < assets/js/theme.js) ))
+          empty_state_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/empty-state.css) ))
+          core_reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
+          publishing_runtime_bytes=$(( core_reading_runtime_bytes + $(wc -c < assets/css/publishing.css) ))
+          discussion_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          contextual_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/content-modes.css) ))
           contextual_discussion_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          portfolio_runtime_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/query-loop.css) ))
+          portfolio_discussion_bytes=$(( portfolio_runtime_bytes + $(wc -c < assets/css/comments.css) ))
           echo "Base CSS+navigation+JS: ${base_runtime_bytes} bytes"
-          echo "Base+reading runtime: ${reading_runtime_bytes} bytes"
-          echo "Base+reading+discussion runtime: ${discussion_runtime_bytes} bytes"
-          echo "Base+reading+content-mode runtime: ${contextual_runtime_bytes} bytes"
-          echo "Base+reading+content-mode+discussion runtime: ${contextual_discussion_bytes} bytes"
+          echo "Empty-state route runtime: ${empty_state_runtime_bytes} bytes"
+          echo "Base+core reading runtime: ${core_reading_runtime_bytes} bytes"
+          echo "Base+reading+publishing runtime: ${publishing_runtime_bytes} bytes"
+          echo "Base+reading+publishing+discussion runtime: ${discussion_runtime_bytes} bytes"
+          echo "Base+reading+publishing+content-mode runtime: ${contextual_runtime_bytes} bytes"
+          echo "Base+reading+publishing+content-mode+discussion runtime: ${contextual_discussion_bytes} bytes"
+          echo "Portfolio runtime with Query Loop layer: ${portfolio_runtime_bytes} bytes"
+          echo "Portfolio runtime with Query Loop layer+discussion: ${portfolio_discussion_bytes} bytes"
           test "$base_runtime_bytes" -le 25000
-          test "$reading_runtime_bytes" -le 30000
-          test "$discussion_runtime_bytes" -le 33000
-          test "$contextual_runtime_bytes" -le 43000
-          test "$contextual_discussion_bytes" -le 46000
+          test "$empty_state_runtime_bytes" -le 25000
+          test "$core_reading_runtime_bytes" -le 30000
+          test "$publishing_runtime_bytes" -le 34500
+          test "$discussion_runtime_bytes" -le 37500
+          test "$contextual_runtime_bytes" -le 47000
+          test "$contextual_discussion_bytes" -le 50000
+          test "$portfolio_runtime_bytes" -le 48000
+          test "$portfolio_discussion_bytes" -le 51000
 
   coding-standards:
     name: WordPress coding standards
@@ -298,7 +325,7 @@ jobs:
             $editor = slateframe_editor_spatial_tokens(array("styles" => array()));
             $entry = $editor["styles"][0] ?? array();
             $css = $entry["css"] ?? "";
-            foreach (array("--slateframe-space-scale:1.2", "--slateframe-prose-gap:24px", "--slateframe-content:800px") as $needle) {
+            foreach (array("--slateframe-space-scale:1.2", "--slateframe-prose-gap:24px", "--slateframe-space-4:19.2px", "--slateframe-content:800px") as $needle) {
               if (false === strpos($css, $needle)) {
                 throw new RuntimeException("Editor Appearance token missing: " . $needle);
               }
@@ -355,6 +382,27 @@ jobs:
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
+          wp rewrite structure '/%postname%/' --path=/tmp/wp-browser
+          wp rewrite flush --path=/tmp/wp-browser
+          mkdir -p /tmp/wp-browser/wp-content/mu-plugins
+          cat > /tmp/wp-browser/wp-content/mu-plugins/slateframe-browser-fixtures.php <<'PHP'
+          <?php
+          add_filter(
+              'slateframe_author_avatar_html',
+              static function ( $html, $author_id ) {
+                  return '<span class="browser-author-avatar-source" aria-hidden="true">SF</span>';
+              },
+              10,
+              2
+          );
+          add_filter(
+              'slateframe_language_switcher_html',
+              static function () {
+                  return '<div class="browser-language-switcher" aria-label="Languages"><a href="/?fixture-lang=en" lang="en">EN</a><a href="/?fixture-lang=ja" lang="ja">日本語</a></div>';
+              }
+          );
+          PHP
+          wp widget add block footer-content 1 --content='<p class="browser-footer-content">Portable footer content fixture. <a class="browser-footer-link" href="/?s=Slateframe">Browse archive / 归档 / アーカイブ</a></p>' --path=/tmp/wp-browser
           wp option update thread_comments 1 --path=/tmp/wp-browser
           mkdir -p /tmp/wp-browser/wp-content/uploads/slateframe-fixtures
           cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg <<'SVG'
@@ -409,6 +457,10 @@ jobs:
           <figure class="wp-block-table browser-data-table is-style-slateframe-data"><table><thead><tr><th>Metric</th><th>2026</th><th>2027</th></tr></thead><tbody><tr><td>Publishing reach</td><td>1,234</td><td>12,345</td></tr></tbody></table></figure>
           <!-- /wp:table -->
 
+          <!-- wp:html -->
+          <table class="tablepress browser-tablepress"><thead><tr><th>Reference</th><th>Value</th></tr></thead><tbody><tr><td>Plugin-style table with an intentionally long portable reference label that must scroll inside the reading measure instead of widening the document root.</td><td>Slateframe</td></tr></tbody></table>
+          <!-- /wp:html -->
+
           <!-- wp:details {"className":"browser-details is-style-slateframe-disclosure"} -->
           <details class="wp-block-details browser-details is-style-slateframe-disclosure"><summary>Implementation note</summary><!-- wp:paragraph -->
           <p>Native disclosure content remains readable without JavaScript.</p>
@@ -459,20 +511,57 @@ jobs:
             --post_type=post \
             --post_status=publish \
             --comment_status=open \
+            --post_author=1 \
             --post_title='Slateframe Browser Post' \
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)
 
-          for project_index in 1 2 3 4 5 6; do
-            wp post create \
+          wp eval "stick_post( $POST_ID );" --path=/tmp/wp-browser
+
+          PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/tests/fixtures/slateframe-media-fixture.png" --porcelain --path=/tmp/wp-browser)
+          FEATURED_PAGE_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_title='Slateframe Featured Media Page' \
+            --post_content='<p>Featured media remains content-owned and reusable across Pages and posts.</p>' \
+            --porcelain)
+          wp post update "$PROJECT_THUMBNAIL_ID" \
+            --path=/tmp/wp-browser \
+            --post_title='Slateframe Media Attachment' \
+            --post_excerpt='A reusable featured image caption.' \
+            --post_content='<p>Attachment description fixture for media-focused publishing.</p>' \
+            --post_parent="$FEATURED_PAGE_ID" >/dev/null
+          wp post meta update "$FEATURED_PAGE_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
+          wp option update wp_attachment_pages_enabled 1 --path=/tmp/wp-browser >/dev/null
+
+          for project_index in 1 2 3 4 5 6 7; do
+            project_title="Portable project fixture ${project_index}"
+            if [ "$project_index" -eq 7 ]; then
+              project_title='可迁移的项目案例 — مشروع طويل متعدد اللغات for wrapping validation'
+            fi
+            PROJECT_POST_ID=$(wp post create \
               --path=/tmp/wp-browser \
               --post_type=post \
               --post_status=publish \
-              --post_title="Portable project fixture ${project_index}" \
+              --post_title="$project_title" \
               --post_excerpt="A site-neutral project summary for responsive Query Loop coverage." \
               --post_content="<p>Project fixture ${project_index} keeps the theme independent from custom content models.</p>" \
-              >/dev/null
+              --porcelain)
+            if [ "$project_index" -ne 7 ]; then
+              wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
+            fi
           done
+
+          UNTITLED_POST_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=post \
+            --post_status=publish \
+            --post_author=1 \
+            --post_date='2000-01-01 00:00:00' \
+            --post_title='' \
+            --post_content='<p>slateframe-untitled-fixture-token keeps untitled content discoverable.</p>' \
+            --porcelain)
 
           wp comment create \
             --path=/tmp/wp-browser \
@@ -483,7 +572,13 @@ jobs:
             --comment_approved=1
 
           PHOTO_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Photography Fixture' --post_content='<!-- wp:group {"align":"wide","className":"slateframe-pattern slateframe-photography-feature","layout":{"type":"constrained"}} --><div class="wp-block-group alignwide slateframe-pattern slateframe-photography-feature"><!-- wp:image {"align":"wide","className":"browser-photo-feature is-style-slateframe-photo-feature"} --><figure class="wp-block-image alignwide browser-photo-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Landscape fixture"><figcaption>Landscape fixture caption</figcaption></figure><!-- /wp:image --><!-- wp:gallery {"align":"wide","className":"browser-photo-gallery is-style-slateframe-contact-sheet"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-gallery is-style-slateframe-contact-sheet"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide landscape fixture"><figcaption>Wide frame</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Tall portrait fixture"><figcaption>Portrait frame</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery --></div><!-- /wp:group --><!-- wp:gallery {"align":"wide","className":"browser-photo-diptych is-style-slateframe-diptych"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-diptych is-style-slateframe-diptych"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Diptych landscape"></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Diptych portrait"></figure><!-- /wp:image --></figure><!-- /wp:gallery -->' --porcelain)
-          PROJECT_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Portfolio Fixture' --post_content='<!-- wp:group {"className":"browser-project-brief is-style-slateframe-project-brief"} --><div class="wp-block-group browser-project-brief is-style-slateframe-project-brief"><!-- wp:paragraph {"className":"slateframe-pattern-kicker"} --><p class="slateframe-pattern-kicker">Project brief</p><!-- /wp:paragraph --><!-- wp:heading {"level":2} --><h2 class="wp-block-heading">A portable project story</h2><!-- /wp:heading --><!-- wp:columns --><div class="wp-block-columns"><!-- wp:column --><div class="wp-block-column"><h3>Context</h3><p>Context for a portable project page.</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Role</h3><p>Role and constraints.</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Outcome</h3><p>Outcome and next step.</p></div><!-- /wp:column --></div><!-- /wp:columns --><p><a href="https://example.com/a-very-long-project-reference-without-site-specific-assumptions-and-with-a-long-readable-path">Long project reference</a></p></div><!-- /wp:group --><!-- wp:columns {"className":"browser-project-metrics is-style-slateframe-metrics"} --><div class="wp-block-columns browser-project-metrics is-style-slateframe-metrics"><!-- wp:column --><div class="wp-block-column"><h3>Reach</h3><p>12 markets</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Latency</h3><p>−38%</p></div><!-- /wp:column --><!-- wp:column --><div class="wp-block-column"><h3>Status</h3><p>Maintained</p></div><!-- /wp:column --></div><!-- /wp:columns -->' --porcelain)
+          PROJECT_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_title='Portfolio Fixture' \
+            --post_content="$(cat "$GITHUB_WORKSPACE/tests/fixtures/portfolio-query.html")" \
+            --porcelain)
           SHOWCASE_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \
@@ -493,13 +588,19 @@ jobs:
             --porcelain)
 
           KNOWLEDGE_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Knowledge Fixture — 中文とالعربية long-string validation' --post_content='<!-- wp:group {"className":"browser-learning-callout is-style-slateframe-learning-callout"} --><div class="wp-block-group browser-learning-callout is-style-slateframe-learning-callout" dir="rtl"><h2>مسار تعلم مرن</h2><p>هذا مثال طويل لاختبار اتجاه الكتابة والتخطيط المنطقي دون افتراض لغة أو إضافة متعددة اللغات.</p></div><!-- /wp:group --><!-- wp:list {"ordered":true,"className":"browser-rtl-steps is-style-slateframe-steps"} --><ol class="browser-rtl-steps is-style-slateframe-steps" dir="rtl"><li>افهم الفكرة الأساسية.</li><li>طبّقها على مثال عملي.</li><li>اربط النتيجة بالخطوة التالية.</li></ol><!-- /wp:list --><!-- wp:group {"className":"browser-definition is-style-slateframe-definition"} --><div class="wp-block-group browser-definition is-style-slateframe-definition" dir="rtl"><h3>Definition</h3><p>A concise term explanation that stays in normal document flow.</p></div><!-- /wp:group -->' --porcelain)
+          EMPTY_AUTHOR_ID=$(wp user create empty-author empty-author@example.com --role=subscriber --display_name='Empty Author' --porcelain --path=/tmp/wp-browser)
+
 
           echo "SLATEFRAME_SHOWCASE_PATH=/?page_id=$SHOWCASE_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_FEATURED_PAGE_PATH=/?page_id=$FEATURED_PAGE_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_ATTACHMENT_PATH=/?attachment_id=$PROJECT_THUMBNAIL_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_UNTITLED_POST_PATH=/?p=$UNTITLED_POST_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PHOTO_PATH=/?page_id=$PHOTO_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PROJECT_PATH=/?page_id=$PROJECT_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_KNOWLEDGE_PATH=/?page_id=$KNOWLEDGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_EMPTY_AUTHOR_PATH=/?author=$EMPTY_AUTHOR_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress
         run: |
           npm install --package-lock=false --no-audit --no-fund

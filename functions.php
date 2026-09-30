@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once get_template_directory() . '/inc/template-tags.php';
+require_once get_template_directory() . '/inc/content-discovery.php';
 require_once get_template_directory() . '/inc/customizer.php';
 
 /**
@@ -58,6 +59,57 @@ function slateframe_setup() {
 	);
 }
 add_action( 'after_setup_theme', 'slateframe_setup' );
+
+/**
+ * Register optional block/widget regions.
+ *
+ * Footer content is deliberately content-owned: sites can compose Core blocks,
+ * subscription widgets, project links, or multilingual widgets without the
+ * theme hard-coding a footer information architecture.
+ */
+function slateframe_register_widget_areas() {
+	register_sidebar(
+		array(
+			'name'          => __( 'Footer content', 'slateframe' ),
+			'id'            => 'footer-content',
+			'description'   => __( 'Optional block or widget content displayed above the footer navigation.', 'slateframe' ),
+			'before_widget' => '<div id="%1$s" class="slateframe-footer-widget %2$s">',
+			'after_widget'  => '</div>',
+			'before_title'  => '<h2 class="slateframe-footer-widget-title">',
+			'after_title'   => '</h2>',
+		)
+	);
+}
+add_action( 'widgets_init', 'slateframe_register_widget_areas' );
+
+/**
+ * Check stored post content for exact CSS class markers.
+ *
+ * Marker detection is intentionally class-aware instead of substring-based so
+ * prose, code samples, or translated copy that mention a marker name do not
+ * accidentally load contextual assets.
+ *
+ * @param string   $content Stored post content.
+ * @param string[] $markers Class markers to detect.
+ * @return bool
+ */
+function slateframe_content_has_class_marker( $content, $markers ) {
+	if ( '' === trim( (string) $content ) || ! is_array( $markers ) || empty( $markers ) ) {
+		return false;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $content );
+
+	while ( $processor->next_tag() ) {
+		foreach ( $markers as $marker ) {
+			if ( is_string( $marker ) && '' !== $marker && $processor->has_class( $marker ) ) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
 
 /**
  * Determine whether the current singular document needs content-mode styles.
@@ -109,13 +161,7 @@ function slateframe_content_modes_needed() {
 		return false;
 	}
 
-	foreach ( $markers as $marker ) {
-		if ( false !== strpos( $post->post_content, $marker ) ) {
-			return true;
-		}
-	}
-
-	return false;
+	return slateframe_content_has_class_marker( $post->post_content, $markers );
 }
 
 /**
@@ -130,16 +176,44 @@ function slateframe_query_loop_styles_needed() {
 
 	$post = get_post();
 
-	return $post instanceof WP_Post && false !== strpos( $post->post_content, 'slateframe-project-grid' );
+	if ( ! $post instanceof WP_Post ) {
+		return false;
+	}
+
+	/**
+	 * Filters class markers that opt a document into Slateframe Query Loop presentation.
+	 *
+	 * Integrations may append portable markers without coupling the theme to a post
+	 * type, taxonomy, page ID, slug, or multilingual URL structure.
+	 *
+	 * @param string[] $markers Query Loop presentation markers.
+	 */
+	$markers = apply_filters( 'slateframe_query_loop_markers', array( 'slateframe-project-grid' ) );
+
+	return slateframe_content_has_class_marker( $post->post_content, $markers );
 }
 
 /**
  * Enqueue the intentionally small frontend asset layer.
  */
 function slateframe_assets() {
-	$version = wp_get_theme()->get( 'Version' );
+	$version              = wp_get_theme()->get( 'Version' );
+	$content_modes_needed = slateframe_content_modes_needed();
+	$query_loop_needed    = slateframe_query_loop_styles_needed();
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
+	wp_enqueue_style(
+		'slateframe-navigation',
+		get_template_directory_uri() . '/assets/css/navigation.css',
+		array( 'slateframe-style' ),
+		$version
+	);
+	wp_enqueue_style(
+		'slateframe-footer',
+		get_template_directory_uri() . '/assets/css/footer.css',
+		array( 'slateframe-style' ),
+		$version
+	);
 
 	if ( is_singular() ) {
 		wp_enqueue_style(
@@ -150,7 +224,30 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( slateframe_content_modes_needed() ) {
+	global $wp_query;
+	$empty_state_needed = ( is_home() || is_archive() || is_search() ) && isset( $wp_query ) && 0 === (int) $wp_query->post_count;
+
+	if ( $empty_state_needed ) {
+		wp_enqueue_style(
+			'slateframe-empty-state',
+			get_template_directory_uri() . '/assets/css/empty-state.css',
+			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
+	if ( is_singular() || is_author() || is_404() ) {
+		$publishing_dependencies = is_singular() ? array( 'slateframe-reading' ) : array( 'slateframe-style' );
+
+		wp_enqueue_style(
+			'slateframe-publishing',
+			get_template_directory_uri() . '/assets/css/publishing.css',
+			$publishing_dependencies,
+			$version
+		);
+	}
+
+	if ( $content_modes_needed || $query_loop_needed ) {
 		wp_enqueue_style(
 			'slateframe-content-modes',
 			get_template_directory_uri() . '/assets/css/content-modes.css',
@@ -159,7 +256,7 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( slateframe_query_loop_styles_needed() ) {
+	if ( $query_loop_needed ) {
 		wp_enqueue_style(
 			'slateframe-query-loop',
 			get_template_directory_uri() . '/assets/css/query-loop.css',
@@ -202,6 +299,71 @@ function slateframe_assets() {
 	);
 }
 add_action( 'wp_enqueue_scripts', 'slateframe_assets' );
+
+/**
+ * Keep potentially scrollable Core table blocks reachable from the keyboard.
+ *
+ * The wrapper owns horizontal overflow at narrow widths and text zoom, so it
+ * needs a focus stop even when the table happens to fit at the current width.
+ * Preserve an author-supplied tabindex when one is present.
+ *
+ * @param string $block_content Rendered Core table block markup.
+ * @return string
+ */
+function slateframe_focusable_table_block( $block_content ) {
+	if ( '' === $block_content ) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	while ( $processor->next_tag() ) {
+		if ( ! $processor->has_class( 'wp-block-table' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+
+		break;
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/table', 'slateframe_focusable_table_block' );
+
+/**
+ * Keep direct TablePress output reachable when the table itself becomes the
+ * horizontal scroll owner inside Slateframe's reading measure.
+ *
+ * TablePress shortcodes are expanded before this priority. The fast string
+ * guard avoids parsing ordinary content and the theme does not depend on the
+ * plugin being installed.
+ *
+ * @param string $content Rendered post content.
+ * @return string
+ */
+function slateframe_focusable_tablepress_tables( $content ) {
+	if ( false === strpos( $content, 'tablepress' ) ) {
+		return $content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $content );
+
+	while ( $processor->next_tag( 'table' ) ) {
+		if ( ! $processor->has_class( 'tablepress' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'the_content', 'slateframe_focusable_tablepress_tables', 20 );
 
 /**
  * Render only the custom-logo image inside Slateframe's own brand link.

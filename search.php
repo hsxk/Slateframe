@@ -6,6 +6,7 @@
  */
 
 get_header();
+global $wp_query;
 ?>
 <main id="main-content" class="slateframe-main">
 	<header class="slateframe-page-header">
@@ -19,6 +20,17 @@ get_header();
 				);
 				?>
 			</h1>
+			<p class="slateframe-archive-description">
+				<?php
+				printf(
+					esc_html(
+						/* translators: %s: number of search results. */
+						_n( '%s result found', '%s results found', (int) $wp_query->found_posts, 'slateframe' )
+					),
+					esc_html( number_format_i18n( (int) $wp_query->found_posts ) )
+				);
+				?>
+			</p>
 			<?php get_search_form(); ?>
 		</div>
 	</header>
@@ -31,19 +43,16 @@ get_header();
 				get_template_part( 'template-parts/content', 'card' );
 			endwhile;
 		else :
-			?>
-			<section class="slateframe-empty-state">
-				<h2><?php esc_html_e( 'No results', 'slateframe' ); ?></h2>
-				<p><?php esc_html_e( 'Try a different search term.', 'slateframe' ); ?></p>
-			</section>
-			<?php
+			get_template_part( 'template-parts/content', 'none' );
 		endif;
 		?>
 	</div>
 
-	<div class="slateframe-shell slateframe-pagination">
-		<?php slateframe_pagination(); ?>
-	</div>
+	<?php if ( $wp_query->max_num_pages > 1 ) : ?>
+		<div class="slateframe-shell slateframe-pagination">
+			<?php slateframe_pagination(); ?>
+		</div>
+	<?php endif; ?>
 </main>
 <?php
 get_footer();

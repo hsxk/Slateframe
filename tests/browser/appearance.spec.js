@@ -27,6 +27,14 @@ test('bounded appearance profile drives semantic design tokens and real controls
 			const value = root.getPropertyValue(name).trim();
 			return value.endsWith('rem') ? Number.parseFloat(value) * rem : Number.parseFloat(value);
 		};
+		const resolvedPx = (name) => {
+			const probe = document.createElement('i');
+			probe.style.cssText = `position:absolute;visibility:hidden;inline-size:var(${name})`;
+			document.body.append(probe);
+			const value = Number.parseFloat(getComputedStyle(probe).inlineSize);
+			probe.remove();
+			return value;
+		};
 		const normal = document.querySelector('.browser-default-prose');
 		const wide = document.querySelector('.browser-wide-block');
 		const shell = document.querySelector('.slateframe-header-inner');
@@ -35,7 +43,11 @@ test('bounded appearance profile drives semantic design tokens and real controls
 			control: px('--slateframe-control'), spacing: Number.parseFloat(root.getPropertyValue('--slateframe-space-scale')),
 			gutter: px('--slateframe-gutter-min'), section: Number.parseFloat(root.getPropertyValue('--slateframe-section-scale')),
 			sectionMin: px('--slateframe-section-min'), sectionMax: px('--slateframe-section-max'), radius: px('--slateframe-radius'),
-			content: px('--slateframe-content'), wide: px('--slateframe-wide'), inlineGap: px('--slateframe-inline-gap'),
+			content: px('--slateframe-content'), wide: px('--slateframe-wide'), chrome: px('--slateframe-chrome'), inlineGap: px('--slateframe-inline-gap'),
+			space2: px('--slateframe-space-2'), space3: px('--slateframe-space-3'), space4: px('--slateframe-space-4'),
+			presetXs: resolvedPx('--wp--preset--spacing--xs'), presetSm: resolvedPx('--wp--preset--spacing--sm'),
+			presetMd: resolvedPx('--wp--preset--spacing--md'), presetLg: resolvedPx('--wp--preset--spacing--lg'),
+			presetXl: resolvedPx('--wp--preset--spacing--xl'), preset2xl: resolvedPx('--wp--preset--spacing--2-xl'),
 			componentGap: px('--slateframe-component-gap'), stackGap: px('--slateframe-stack-gap'),
 			proseGap: px('--slateframe-prose-gap'), headingGap: px('--slateframe-heading-gap'),
 			headingAfter: px('--slateframe-heading-after'), listItemGap: px('--slateframe-list-item-gap'),
@@ -47,20 +59,25 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	});
 	near(metrics.control, profile.control); near(metrics.spacing, profile.spacing, 0.01); near(metrics.gutter, profile.gutter);
 	near(metrics.section, profile.section, 0.01); near(metrics.sectionMin, 44 * profile.section); near(metrics.sectionMax, 72 * profile.section);
-	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide);
+	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide); near(metrics.chrome, 1728);
 	near(metrics.inlineGap, 4 * profile.spacing); near(metrics.componentGap, 12 * profile.spacing);
+	near(metrics.space2, 8 * profile.spacing); near(metrics.space3, 12 * profile.spacing); near(metrics.space4, 16 * profile.spacing);
+	near(metrics.presetXs, metrics.space2); near(metrics.presetSm, metrics.space3); near(metrics.presetMd, metrics.space4);
+	near(metrics.presetLg, metrics.space4 * 1.5); near(metrics.presetXl, metrics.space4 * 2); near(metrics.preset2xl, metrics.space4 * 3);
 	near(metrics.stackGap, 16 * profile.spacing); near(metrics.proseGap, 20 * profile.spacing);
 	near(metrics.headingGap, 36 * profile.spacing); near(metrics.headingAfter, 10 * profile.spacing);
 	near(metrics.listItemGap, 8 * profile.spacing); near(metrics.controlPaddingBlock, 8 * profile.spacing);
 	near(metrics.controlPaddingInline, 12 * profile.spacing);
 	expect(metrics.summaryHeight).toBeGreaterThanOrEqual(profile.control - 1);
 	const gutter = Math.min(profile.gutter * 2, Math.max(profile.gutter, metrics.viewport * 0.03));
-	const centeredWideInset = Math.max(0, (metrics.viewport - profile.wide) / 2);
-	near(metrics.shellInset, Math.max(gutter, centeredWideInset), 1.5);
+	const centeredChromeInset = Math.max(0, (metrics.viewport - metrics.chrome) / 2);
+	near(metrics.shellInset, Math.max(gutter, centeredChromeInset), 1.5);
 	expect(metrics.normalWidth).toBeLessThanOrEqual(Math.min(profile.content, metrics.viewport - (2 * gutter)) + 2);
 	expect(metrics.wideWidth).toBeLessThanOrEqual(Math.min(profile.wide, metrics.viewport - (2 * gutter)) + 2);
 	if (width(testInfo) === 1440) expect(metrics.wideWidth).toBeGreaterThan(metrics.normalWidth + 150);
-	const target = width(testInfo) <= 900 ? page.locator('[data-menu-toggle]') : page.locator('[data-primary-nav] a').first();
+	const compactNavigation = await page.locator('[data-site-header]').evaluate((node) => node.classList.contains('is-compact'));
+	if (width(testInfo) <= 1280) expect(compactNavigation).toBe(true);
+	const target = compactNavigation ? page.locator('[data-menu-toggle]') : page.locator('[data-primary-nav] a').first();
 	await expect(target).toBeVisible();
 	expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	await page.goto('/?s=Slateframe', { waitUntil: 'networkidle' });
@@ -70,15 +87,65 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
 	}
+	await page.locator('.slateframe-main').evaluate((node) => {
+		const fixture = document.createElement('div');
+		fixture.className = 'browser-core-controls';
+		fixture.innerHTML = '<form class="wp-block-search wp-block-search__button-outside"><div class="wp-block-search__inside-wrapper"><input class="wp-block-search__input" type="search" aria-label="Core search"><button class="wp-block-search__button wp-element-button" type="submit">Search</button></div></form><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#">Action</a></div>';
+		node.prepend(fixture);
+	});
+	for (const locator of [
+		page.locator('.browser-core-controls .wp-block-search__input'),
+		page.locator('.browser-core-controls .wp-block-search__button'),
+		page.locator('.browser-core-controls .wp-block-button__link'),
+	]) {
+		await expect(locator).toBeVisible();
+		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+	}
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const commentInput = page.locator('.slateframe-comments .comment-form-author input').first();
 	const commentTextarea = page.locator('.slateframe-comments textarea').first();
+	const commentSubmit = page.locator('.slateframe-comments .submit').first();
 	await expect(commentInput).toBeVisible();
 	await expect(commentTextarea).toBeVisible();
+	await expect(commentSubmit).toBeVisible();
 	expect((await commentInput.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
-	for (const field of [commentInput, commentTextarea]) {
+	expect((await commentSubmit.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	const consentLabel = page.locator('.slateframe-comments .comment-form-cookies-consent label').first();
+	await expect(consentLabel).toBeVisible();
+	expect((await consentLabel.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	for (const field of [commentInput, commentTextarea, commentSubmit]) {
 		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	}
+	const footerPadding = await page.locator('.slateframe-site-footer').evaluate((node) =>
+		Number.parseFloat(getComputedStyle(node).paddingBlockStart)
+	);
+	near(footerPadding, metrics.sectionMin, 1);
+	const footerGap = await page.locator('.slateframe-footer-inner').evaluate((node) =>
+		Number.parseFloat(getComputedStyle(node).gap)
+	);
+	near(footerGap, 32 * profile.spacing, 1);
+	const footerLink = page.locator('.browser-footer-link');
+	await expect(footerLink).toBeVisible();
+	expect((await footerLink.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+
+	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	const projectPagination = page.locator('.slateframe-project-grid .wp-block-query-pagination a').first();
+	if (await projectPagination.count()) {
+		expect((await projectPagination.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		const paginationRhythm = await projectPagination.locator('xpath=../..').evaluate((node) => {
+			const styles = getComputedStyle(node);
+			return {
+				gap: Number.parseFloat(styles.gap),
+				marginStart: Number.parseFloat(styles.marginBlockStart),
+				paddingStart: Number.parseFloat(styles.paddingBlockStart),
+			};
+		});
+		near(paginationRhythm.gap, 4 * profile.spacing, 1);
+		near(paginationRhythm.marginStart, 36 * profile.spacing, 1);
+		near(paginationRhythm.paddingStart, 16 * profile.spacing, 1);
 	}
 });
 
@@ -116,8 +183,6 @@ test('appearance profile stays contained across content modes and captures revie
 			near(photographyRhythm.diptychGap, photographyRhythm.mediaGap, 1);
 			near(photographyRhythm.captionPadding, photographyRhythm.captionGap, 1);
 		}
-		if (['page', 'showcase', 'photography'].includes(name)) {
-			await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
-		}
+		await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
 });

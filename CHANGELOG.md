@@ -6,6 +6,12 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Native attachment publishing surface with responsive media, content-owned captions, portable metadata, original-file access, parent-document recovery, and browser/Axe screenshot coverage.
+- Shared Page/post featured-media rendering, locale-aware search result totals, a translatable untitled-content fallback, and restrained native sticky-post status.
+- Optional native `footer-content` block/widget region for portable rich footers without site-specific template injection.
+- Responsive footer-widget grid and deterministic multilingual footer fixture with shared 44px control targets and overflow coverage.
+- Portfolio regression fixture for a real no-featured-image project with mixed CJK/RTL long-title wrapping.
+- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, opt-in local author media, and TOC compatibility migrated from recurring site-level WPCode needs.
 - Public Slateframe hybrid-theme baseline.
 - WordPress-native template hierarchy and `theme.json` design system.
 - Accessible responsive navigation with a no-JavaScript fallback and mobile focus containment.
@@ -56,6 +62,18 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Unified index, archive, search, and author empty states with contextual recovery guidance, contextual styling, and no empty pagination chrome.
+
+- Centralized global navigation/footer stylesheet enqueueing and kept both inside the existing aggregate base-runtime ceilings.
+- Refined native Portfolio Query Pagination with shared radius/current-state/spacing tokens and explicit horizontal-number grouping.
+- Aligned responsive navigation runtime, Discovery, Design System, Appearance, and screenshot contracts on the same 1280px compact-navigation breakpoint.
+
+- Core Search, Core Buttons, Query Pagination, comment auxiliary actions, and optional footer content now consume the same bounded control/spatial system instead of maintaining parallel sizing and spacing rules.
+- Portfolio Query Loop grid presentation now ships in its own project-only stylesheet, with CI budgets for both that asset and the real combined Portfolio route cost.
+- Portfolio/Knowledge contextual spacing and Query Loop sizing now use Slateframe semantic/logical primitives where equivalent magic values previously remained.
+- Converted recurring child-theme repair patterns into first-class Slateframe contracts: tokenized page-start rhythm, script-neutral title measure, content-relative reading widths, viewport-contained mobile navigation, and sticky-header-aware anchor spacing.
+
+- Isolated author, related-reading, 404 recovery, and optional TOC compatibility styles into a bounded contextual publishing asset so new discovery features do not increase the base-route CSS budget.
 - Matured the spatial system into semantic control-padding, inline/component/stack/media/caption gaps, header height, border/focus, reading-width, and wide-canvas tokens.
 - Centralized responsive primary navigation and language-slot presentation in its dedicated stylesheet instead of maintaining conflicting base and navigation rules.
 - Asset budgets now count the always-loaded navigation stylesheet and contextual comment CSS rather than under-reporting the base runtime.
@@ -74,6 +92,23 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Keep translated primary and language-adapter navigation in the desktop row only when intrinsic labels actually fit; otherwise enter the accessible compact menu without exposing `nowrap` during rendering or 200% text enlargement.
+- Make contextual asset detection class-aware so marker names in prose or code do not trigger Photography/Portfolio/Knowledge CSS.
+- Let integrations extend Portfolio Query Loop detection through `slateframe_query_loop_markers` without page IDs, slugs, post types, or locale assumptions.
+- Ensure documents that opt into Query Loop presentation also receive its shared content-mode dependency.
+- Exercise the real native Portfolio Query Loop in browser CI with populated cards, featured media, multilingual long titles, responsive 1/2/3-column tracks, 44px pagination, reduced motion, and horizontal-containment checks.
+
+- Keep direct plugin-style TablePress output locally scrollable and keyboard reachable without requiring TablePress, while CI now reproduces long-table and real pretty-404 failure modes.
+- Preserve a readable minimum table-cell measure on narrow screens instead of collapsing long plugin/Core table values into character-by-character wrapping; mirror the same rule into Gutenberg.
+- Keep ordinary frontend and editor blocks shrinkable inside the reading measure so intrinsic long content cannot recreate inconsistent box/table widths or root overflow.
+
+- Prevent Photo Feature media chrome from leaking into the native lightbox overlay as a dark edge during desktop opening.
+- Make post metadata and common TOC links honor the shared accessible touch-target baseline.
+- Make photo essay, contact sheet, diptych, and sequence patterns explicitly preserve natural image ratios instead of serializing Core Gallery crop defaults.
+- Avoid default Gravatar traffic on author archives while preserving a sanitized adapter for locally owned avatar/profile media.
+- Prevent intrinsic long-string and wrapped control content from establishing a wider root document during 200% text resizing.
+- Give Core/TablePress table wrappers sole ownership of horizontal scrolling while preserving intrinsic table width and editor parity.
+- Extend compact/default/spacious visual evidence to portfolio and knowledge fixtures and verify comment-submit, footer, and Query Loop control sizing.
 - Target WordPress Core's actual lightbox close/navigation controls with Slateframe's accessible control baseline.
 - Override Core lightbox minimum image dimensions in contextual photography CSS so enlarged media stays inside short desktop viewports without cropping.
 - Bring multi-page post pagination and comment form/reply targets into the shared control-size system.
@@ -100,10 +135,15 @@ All notable changes to Slateframe will be documented here.
 
 ### Accessibility
 
+- Keep comment consent labels, reply-cancel actions, comment navigation, Core Search/Buttons, and Query Pagination on the shared accessible target baseline, including bounded Appearance profiles.
+- Keep Core table scroll regions keyboard-focusable with Slateframe's shared focus ring, while preserving an author-supplied tabindex.
+- Keep normal data tables on the centered reading measure instead of stretching their scroll wrapper to the viewport.
+- Keep long table headers and cells shrinkable during 200% text resizing so readable mobile pages do not gain document-level horizontal scrolling.
 - Avoid empty author links when content has no resolvable WordPress author, preserving discernible-link semantics.
 
 - Render the footer menu in an explicit navigation landmark only when assigned.
 - Exercise skip-link keyboard navigation in the browser regression suite.
 - Trap focus within the open mobile navigation and return focus to the toggle when closed.
 - Exercise reduced-motion behavior and long mixed-script titles in browser regression.
+- Disable decorative Portfolio featured-image hover transforms when reduced motion is requested, with a dedicated browser regression.
 - Exercise project pagination touch targets and run Axe against the combined content-mode showcase.

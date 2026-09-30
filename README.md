@@ -20,18 +20,35 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
-- **Contextual assets:** long-form reading presentation is loaded only on singular documents, while photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear.
+- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404/TOC publishing extras are isolated from base routes; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear, with native Portfolio Query Loop grid rules isolated to project-grid documents.
+- **Small global shell:** navigation and footer presentation are explicit always-loaded shell assets, both counted in the unchanged aggregate base-runtime budget; footer widgets use a responsive grid and the same control/touch system as the rest of Slateframe.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
+
+## Who Slateframe is for
+
+Slateframe is a general-purpose publishing theme for writers, photographers, independent publishers, documentation and knowledge sites, and portfolio owners who want a finished editorial baseline without turning WordPress into a page-builder application.
+
+A fresh installation is intended to be useful before customization: the theme supplies a restrained responsive shell, long-form reading typography, accessible controls, native menus and comments, search/archive/author/404 states, Gutenberg-wide layouts, and portable starter patterns. Specialized presentation for photography, portfolio Query Loops, and knowledge/learning content stays content-driven and does not create proprietary post types or lock content into Slateframe.
+
+The theme is deliberately small in scope. It does **not** bundle analytics, SEO ownership, caching, CDN configuration, custom business data, remote fonts, or a JavaScript UI framework. Those responsibilities remain with WordPress core or purpose-built plugins, so changing themes does not require migrating application logic.
+
+Responsive navigation adapts to both viewport width and the real rendered width of translated menu labels. Long Latin, CJK, Arabic, and mixed-language navigation can fall back to the same keyboard-operable compact menu used on tablets, without truncating labels or assuming a fixed locale.
 
 ## Appearance and spatial system
 
-Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
+Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Header chrome uses its own wider measure, up to 108rem on large displays, so translated navigation has room to breathe without widening article prose or Gutenberg wide blocks. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
 
 Site owners can tune eight bounded settings in **Appearance → Customize → Slateframe design**: color mode, control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Color mode can follow the visitor's operating-system preference or establish a light/dark site default. Visitors also get a compact 44px header toggle; an explicit choice is stored only as a first-party functional preference cookie and takes precedence over the site default. Control size cannot fall below 44px, and every numeric range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS.
 
 The light and dark palettes share the same semantic surface hierarchy, text, border, accent, focus, selection, and media-chrome tokens. System mode requires no JavaScript, while explicit site defaults are present in server-rendered HTML to avoid a theme flash. Block authors get the matching semantic color presets, XS–2XL spacing presets, and Small/Body/Lead/Heading/Display typography presets in the editor. Changed spatial settings and explicit site color defaults are mirrored into the block-editor canvas.
 
 CI renders the designed default plus the minimum/compact and maximum/spacious spatial profiles at representative mobile and desktop widths, and separately exercises system, explicit-light, and explicit-dark color modes. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, color persistence, accessible toggle state, and screenshot evidence.
+
+## Default experience
+
+Slateframe treats the first activation as a product surface rather than a blank styling layer. Core page, search, archive, author, missing-content, post, comment, and footer surfaces share the same tokenized page-start rhythm and content measures. Controls keep an accessible minimum target, while headings, prose, code, tables, captions, navigation, and media reuse the same bounded spatial system.
+
+Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu when translated labels need more intrinsic inline space than the rendered row can provide. Slateframe measures that row-level intrinsic demand synchronously, restores normal navigation wrapping before paint, and then applies compact mode when required; this keeps 200% text enlargement and long CJK/RTL labels contained without leaving `nowrap` in the rendered UI. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
 
 ## Current feature set
 
@@ -40,9 +57,13 @@ CI renders the designed default plus the minimum/compact and maximum/spacious sp
 - Editorial single-post and Page layouts with readable prose measure.
 - Wide and full-width Gutenberg alignment without forcing normal paragraphs wider.
 - Long-title handling for CJK, Latin, and long translated strings.
-- Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, table-of-contents treatment, editorial leads, and print-friendly long-form output.
-- Post metadata, categories/tags, previous/next navigation, comments, pagination, archives, author pages, search, and 404.
+- Code blocks, inline code, blockquotes, pullquotes, captions, footnotes, multi-page posts, native tables, TablePress-friendly overflow, Core/common TOC presentation compatibility, editorial leads, and print-friendly long-form output.
+- Post metadata, categories/tags, filterable related reading, optional previous/next navigation, comments, pagination, archives, author pages with opt-in local profile media, search, a recovery-oriented 404 surface, and an optional Core block/widget footer-content region.
 - Editor-canvas parity for the singular reading layer: title rhythm, H2/H3 hierarchy, nested-list rhythm, quotes, inline code, tables, captions, wide/full alignment, and bounded Appearance token overrides.
+
+### Core publishing and media
+
+Slateframe treats ordinary WordPress content as a complete product surface: untitled entries receive a translatable frontend fallback, sticky posts receive a restrained editorial status, search results report locale-aware totals, and Pages share the same responsive featured-media/caption contract as posts. Native attachment pages preserve image, audio, and video presentation; expose portable MIME/dimension/file-size metadata when WordPress has it; link to the original asset; and return readers to the parent document without leaking server paths or inventing a media content model.
 
 ### Photography, portfolio, and knowledge
 
@@ -121,13 +142,14 @@ Public GitHub Actions currently enforce:
 - `theme.json`, theme metadata, required files, and pattern metadata.
 - Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
-- JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual comments/content-mode CSS, and JavaScript, so every shipped request is counted.
+- JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual publishing/reading/comments/content-mode CSS, the Portfolio Query Loop layer, and JavaScript, including route-level aggregate budgets so moving CSS between requests cannot hide runtime growth.
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths; Photography is also captured in each spatial profile and Core lightbox behavior is exercised in the focused raster runtime.
-- Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
+- Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, 200% text-enlargement containment, adaptive desktop navigation, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
+- Browser runs publish reviewable screenshot artifacts for core Page/Post surfaces, Photography, Portfolio, Knowledge, color modes, Appearance profiles, and adaptive translated-navigation states; visual evidence is reviewed alongside automated geometry checks rather than treated as a substitute for them.
 
 A failed gate is treated as a defect; tests are not removed merely to make CI green.
 
@@ -165,6 +187,7 @@ Repository documentation:
 - [Roadmap](docs/ROADMAP.md)
 - [WordPress.org readiness](docs/WORDPRESS-ORG.md)
 - [Migration audit](docs/MIGRATION.md)
+- [WPCode migration boundary](docs/WPCODE-MIGRATION.md)
 - [Changelog](CHANGELOG.md)
 
 ## Theme boundaries

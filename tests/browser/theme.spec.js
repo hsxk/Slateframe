@@ -8,9 +8,21 @@ const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
 const knowledgePath = process.env.SLATEFRAME_KNOWLEDGE_PATH || pagePath;
 const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH || pagePath;
+const featuredPagePath = process.env.SLATEFRAME_FEATURED_PAGE_PATH || pagePath;
+const attachmentPath = process.env.SLATEFRAME_ATTACHMENT_PATH || pagePath;
+const untitledPostPath = process.env.SLATEFRAME_UNTITLED_POST_PATH || postPath;
 
 function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
+}
+
+async function useShortDesktopNavigation(page) {
+	await page.locator('[data-primary-nav] > ul > li > a').evaluateAll((links) =>
+		links.forEach((link, index) => { link.textContent = `Nav ${index + 1}`; })
+	);
+	await page.locator('.slateframe-language-slot a').evaluateAll((links) =>
+		links.forEach((link, index) => { link.textContent = index ? 'JA' : 'EN'; })
+	);
 }
 
 function watchRuntime(page) {
@@ -62,7 +74,7 @@ async function expectNoHorizontalOverflow(page, route = page.url()) {
 
 test('core routes render without theme runtime failures', async ({ page }) => {
 	const failures = watchRuntime(page);
-	const routes = ['/', postPath, pagePath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
+	const routes = ['/', postPath, pagePath, featuredPagePath, attachmentPath, untitledPostPath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
 
 	for (const route of routes) {
 		failures.length = 0;
@@ -89,8 +101,14 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 
 	const toggle = page.locator('[data-menu-toggle]');
+	const header = page.locator('[data-site-header]');
+	const compact = await header.evaluate((node) => node.classList.contains('is-compact'));
 
-	if (projectWidth(testInfo) <= 900) {
+	if (projectWidth(testInfo) <= 1280) {
+		expect(compact).toBe(true);
+	}
+
+	if (compact) {
 		await expect(toggle).toBeVisible();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
@@ -110,10 +128,97 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	} else {
 		await expect(toggle).toBeHidden();
 		await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
+		const topLevelLinks = page.locator('[data-primary-nav] > ul > li > a');
+		for (let index = 0; index < await topLevelLinks.count(); index += 1) {
+			const clipped = await topLevelLinks.nth(index).evaluate((link) => link.scrollWidth > link.clientWidth + 1);
+			expect(clipped, 'desktop navigation labels must not be ellipsized').toBe(false);
+		}
 	}
 
 	await expectNoHorizontalOverflow(page, '/');
 	expect(failures).toEqual([]);
+});
+
+test('adaptive desktop navigation responds to translated label growth and recovery', async ({ page }, testInfo) => {
+	test.skip(projectWidth(testInfo) !== 1920, 'Translated growth/recovery is sampled on the widest desktop fixture; narrower desktops may already need compact navigation.');
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	const header = page.locator('[data-site-header]');
+	const toggle = page.locator('[data-menu-toggle]');
+	const firstLink = page.locator('[data-primary-nav] > ul > li > a').first();
+	await useShortDesktopNavigation(page);
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(toggle).toBeHidden();
+
+	const languageLink = page.locator('.slateframe-language-slot a').first();
+	const original = await firstLink.textContent();
+	const originalLanguage = await languageLink.textContent();
+	await firstLink.evaluate((link) => {
+		link.textContent = 'Außergewöhnlich lange übersetzte Navigationsbezeichnung 中文 العربية 日本語 — portable multilingual navigation';
+	});
+
+	// A long translation that still fits the 92rem header shell should stay in
+	// the wide presentation instead of collapsing merely because it is long.
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(toggle).toBeHidden();
+	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
+
+	// Combined menu + language growth must cross the real inline-space boundary
+	// and use the same accessible compact navigation rather than wrap or clip.
+	await languageLink.evaluate((link) => {
+		link.textContent = 'Deutsch 日本語 العربية 中文 — exceptionally long language destination — français português 한국어';
+	});
+	await expect(header).toHaveClass(/is-compact/);
+	await expect(toggle).toBeVisible();
+	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
+	expect(await page.locator('[data-primary-nav]').evaluate((node) => node.style.whiteSpace)).toBe('');
+
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await page.screenshot({
+		path: path.join(screenshotDir, `${testInfo.project.name}-translated-nav-compact.png`),
+		fullPage: false,
+	});
+
+	await firstLink.evaluate((link, label) => {
+		link.textContent = label;
+	}, original);
+	await languageLink.evaluate((link, label) => {
+		link.textContent = label;
+	}, originalLanguage);
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(toggle).toBeHidden();
+	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
+	await page.screenshot({
+		path: path.join(screenshotDir, `${testInfo.project.name}-translated-nav-recovered.png`),
+		fullPage: false,
+	});
+});
+
+test('tablet and compact desktop navigation share one operable breakpoint', async ({ page }) => {
+	await page.setViewportSize({ width: 1024, height: 768 });
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	const toggle = page.locator('[data-menu-toggle]');
+	const nav = page.locator('[data-primary-nav]');
+	await expect(toggle).toBeVisible();
+	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+	await expect(nav).toHaveAttribute('inert', '');
+
+	await toggle.click();
+	await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+	await expect(nav).not.toHaveAttribute('inert', '');
+	await expect(nav.locator('a:visible').first()).toBeFocused();
+
+	await page.keyboard.press('Escape');
+	await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+	await expect(nav).toHaveAttribute('inert', '');
+	await expect(toggle).toBeFocused();
+	await expectNoHorizontalOverflow(page, '/');
 });
 
 test('spatial tokens keep interactive controls coherent and accessible', async ({ page }) => {
@@ -203,6 +308,42 @@ test('publishing primitives remain readable and contained', async ({ page }) => 
 	expect(fullChildBounds.left).toBeGreaterThanOrEqual(12);
 	expect(fullChildBounds.right).toBeLessThanOrEqual(fullChildBounds.viewport - 12);
 
+	await expectNoHorizontalOverflow(page, pagePath);
+});
+
+test('Core table scroll regions stay on the reading axis and expose keyboard focus', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+
+	const table = page.locator('.browser-data-table');
+	await expect(table).toBeVisible();
+	await expect(table).toHaveAttribute('tabindex', '0');
+
+	await table.focus();
+	await expect(table).toBeFocused();
+
+	const geometry = await page.evaluate(() => {
+		const tableBlock = document.querySelector('.browser-data-table');
+		const prose = document.querySelector('.browser-default-prose');
+		if (!tableBlock || !prose) {
+			throw new Error('Table-axis fixtures are missing.');
+		}
+		const tableRect = tableBlock.getBoundingClientRect();
+		const proseRect = prose.getBoundingClientRect();
+		const styles = getComputedStyle(tableBlock);
+		return {
+			tableLeft: tableRect.left,
+			tableWidth: tableRect.width,
+			proseLeft: proseRect.left,
+			proseWidth: proseRect.width,
+			outlineStyle: styles.outlineStyle,
+			outlineWidth: Number.parseFloat(styles.outlineWidth),
+		};
+	});
+
+	expect(Math.abs(geometry.tableLeft - geometry.proseLeft)).toBeLessThanOrEqual(1);
+	expect(Math.abs(geometry.tableWidth - geometry.proseWidth)).toBeLessThanOrEqual(1);
+	expect(geometry.outlineStyle).not.toBe('none');
+	expect(geometry.outlineWidth).toBeGreaterThanOrEqual(2);
 	await expectNoHorizontalOverflow(page, pagePath);
 });
 
@@ -297,7 +438,11 @@ test('fallback child navigation is available at every responsive width', async (
 	const nestedList = page.locator('[data-primary-nav] .children').first();
 	await expect(nestedList).toHaveCount(1);
 
-	if (projectWidth(testInfo) <= 900) {
+	const compact = await page.locator('[data-site-header]').evaluate((node) => node.classList.contains('is-compact'));
+	if (projectWidth(testInfo) <= 1280) {
+		expect(compact).toBe(true);
+	}
+	if (compact) {
 		const toggle = page.locator('[data-menu-toggle]');
 		await toggle.click();
 		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
@@ -398,6 +543,95 @@ test('capture responsive reference screenshots', async ({ page }, testInfo) => {
 });
 
 
+
+test('untitled content keeps a translatable navigation label in direct and search views', async ({ page }) => {
+	await page.goto(untitledPostPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.slateframe-entry-title')).toHaveText('Untitled');
+
+	await page.goto('/?s=slateframe-untitled-fixture-token', { waitUntil: 'networkidle' });
+	const card = page.locator('.slateframe-card').filter({ hasText: 'Untitled' });
+	await expect(card).toHaveCount(1);
+	await expect(card.locator('.slateframe-card-title a')).toHaveText('Untitled');
+	await expectNoHorizontalOverflow(page, '/?s=slateframe-untitled-fixture-token');
+});
+
+test('sticky posts expose restrained editorial status on the home index', async ({ page }) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const card = page.locator('.slateframe-card').filter({ hasText: 'Slateframe Browser Post' });
+	await expect(card).toHaveCount(1);
+	await expect(card.locator('.slateframe-pattern-kicker')).toHaveText('Featured');
+});
+
+test('search reports a locale-aware result total', async ({ page }) => {
+	await page.goto('/?s=slateframe-untitled-fixture-token', { waitUntil: 'networkidle' });
+	await expect(page.locator('.slateframe-archive-description')).toContainText('1 result found');
+});
+
+test('Pages share responsive featured media and content-owned captions with posts', async ({ page }) => {
+	await page.goto(featuredPagePath, { waitUntil: 'networkidle' });
+	const hero = page.locator('.slateframe-entry-hero');
+	await expect(hero.locator('img')).toBeVisible();
+	await expect(hero.locator('figcaption')).toHaveText('A reusable featured image caption.');
+	const image = hero.locator('img');
+	await expect(image).toHaveAttribute('fetchpriority', 'high');
+	await expect(image).toHaveAttribute('loading', 'eager');
+	await expect(image).toHaveAttribute('decoding', 'async');
+	const responsive = await image.evaluate((node) => ({
+		srcset: node.getAttribute('srcset'),
+		sizes: node.getAttribute('sizes'),
+	}));
+	if (responsive.srcset) {
+		expect(responsive.srcset).toMatch(/\s\d+w(?:,|$)/);
+		expect(responsive.sizes).toBeTruthy();
+	} else {
+		expect(responsive.sizes).toBeNull();
+	}
+	const dimensions = await image.evaluate((node) => ({
+		width: node.getBoundingClientRect().width,
+		naturalWidth: node.naturalWidth,
+		naturalHeight: node.naturalHeight,
+		intrinsicWidth: Number(node.getAttribute('width')),
+		intrinsicHeight: Number(node.getAttribute('height')),
+	}));
+	expect(dimensions.width).toBeGreaterThan(0);
+	expect(dimensions.naturalWidth).toBe(1200);
+	expect(dimensions.naturalHeight).toBe(900);
+	expect(dimensions.intrinsicWidth).toBe(1200);
+	expect(dimensions.intrinsicHeight).toBe(900);
+	await expectNoHorizontalOverflow(page, featuredPagePath);
+});
+
+test('attachment pages expose media, metadata, original file, and parent recovery', async ({ page }) => {
+	await page.goto(attachmentPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.slateframe-entry-title')).toHaveText('Slateframe Media Attachment');
+	await expect(page.locator('.slateframe-prose img')).toBeVisible();
+	await expect(page.locator('.slateframe-prose figcaption')).toHaveText('A reusable featured image caption.');
+	await expect(page.locator('.slateframe-entry-footer')).toContainText('image/png');
+	await expect(page.locator('.slateframe-entry-footer')).toContainText('1,200 × 900 px');
+	const original = page.getByRole('link', { name: 'Open original file' });
+	const parent = page.getByRole('link', { name: 'Back to Slateframe Featured Media Page' });
+	await expect(original).toHaveAttribute('href', /slateframe-media-fixture\.png$/);
+	await expect(parent).toBeVisible();
+	for (const target of [original, parent]) {
+		expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+	await expectNoHorizontalOverflow(page, attachmentPath);
+});
+
+test('capture core media publishing evidence', async ({ page }, testInfo) => {
+	test.skip(![390, 1440].includes(projectWidth(testInfo)), 'Representative media screenshots only.');
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+
+	for (const [name, route] of [['featured-page', featuredPagePath], ['attachment', attachmentPath]]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.screenshot({
+			path: path.join(screenshotDir, `${testInfo.project.name}-${name}.png`),
+			fullPage: true,
+		});
+	}
+});
+
 test('photography fixtures preserve natural image proportions and captions', async ({ page }) => {
 	await page.goto(photoPath, { waitUntil: 'networkidle' });
 	await expect(page.locator('.browser-photo-feature img')).toBeVisible();
@@ -467,11 +701,29 @@ test('photography diptych switches from one to two columns without cropping', as
 	await expectNoHorizontalOverflow(page, photoPath);
 });
 
-test('portfolio brief keeps long references contained', async ({ page }) => {
+test('portfolio Query Loop keeps multilingual project references contained', async ({ page }) => {
 	await page.goto(projectPath, { waitUntil: 'networkidle' });
-	await expect(page.locator('.browser-project-brief')).toBeVisible();
-	await expect(page.locator('.browser-project-brief a')).toBeVisible();
-	await expect(page.locator('.browser-project-metrics .wp-block-column')).toHaveCount(3);
+
+	const grid = page.locator('.browser-project-grid');
+	await expect(grid).toBeVisible();
+	await expect(grid.locator('.slateframe-project-card')).toHaveCount(6);
+
+	const firstTitleLink = grid.locator('.wp-block-post-title a').first();
+	await expect(firstTitleLink).toBeVisible();
+	await expect(firstTitleLink).toContainText('可迁移的项目案例');
+	await expect(grid.locator('.wp-block-post-excerpt')).toHaveCount(6);
+	await expect(grid.locator('.wp-block-post-date')).toHaveCount(6);
+
+	const bounds = await firstTitleLink.evaluate((element) => {
+		const rect = element.getBoundingClientRect();
+		return {
+			left: rect.left,
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+		};
+	});
+	expect(bounds.left).toBeGreaterThanOrEqual(-1);
+	expect(bounds.right).toBeLessThanOrEqual(bounds.viewport + 1);
 	await expectNoHorizontalOverflow(page, projectPath);
 });
 
@@ -504,6 +756,8 @@ test('capture WordPress.org screenshot candidate from the real showcase fixture'
 
 	await page.setViewportSize({ width: 1200, height: 900 });
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
+	await expect(page.locator('[data-menu-toggle]')).toBeVisible();
+	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
 	await expect(page.locator('h1')).toHaveText('A clean frame for whatever you publish');
 	await expect(page.locator('.slateframe-showcase-feature img')).toBeVisible();
 	await expect(page.locator('.slateframe-showcase-grid .wp-block-column')).toHaveCount(3);
@@ -565,6 +819,72 @@ test('content-mode stylesheet is requested only when specialized styles are pres
 		await page.goto(route, { waitUntil: 'networkidle' });
 		expect(requests, `content-mode stylesheet should load on ${route}`).toHaveLength(1);
 	}
+});
+
+test('portfolio Query Loop stylesheet is requested only for project-grid documents', async ({ page }) => {
+	const requests = [];
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/query-loop.css')) {
+			requests.push(request.url());
+		}
+	});
+
+	for (const route of [postPath, photoPath, knowledgePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `non-project route should keep Query Loop CSS unloaded: ${route}`).toHaveLength(0);
+	}
+
+	for (const route of [projectPath, showcasePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `project-grid route should load Query Loop CSS: ${route}`).toHaveLength(1);
+	}
+});
+
+test('native portfolio Query Loop is populated, responsive, and accessible', async ({ page }, testInfo) => {
+	await page.goto(projectPath, { waitUntil: 'networkidle' });
+	const grid = page.locator('.browser-project-grid .wp-block-post-template');
+	await expect(grid).toBeVisible();
+	await expect(page.locator('.browser-project-grid .slateframe-project-card')).toHaveCount(6);
+	await expect(page.locator('.browser-project-grid .wp-block-post-featured-image img')).toHaveCount(5);
+	const firstCard = page.locator('.browser-project-grid .slateframe-project-card').first();
+	await expect(firstCard.locator('.wp-block-post-featured-image')).toHaveCount(0);
+	await expect(firstCard.locator('.wp-block-post-title a')).toContainText('可迁移的项目案例');
+
+	const tracks = await grid.evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').filter(Boolean).length);
+	if (projectWidth(testInfo) <= 640) {
+		expect(tracks).toBe(1);
+	} else if (projectWidth(testInfo) <= 900) {
+		expect(tracks).toBe(2);
+	} else {
+		expect(tracks).toBe(3);
+	}
+
+	const titles = page.locator('.browser-project-grid .wp-block-post-title');
+	for (let index = 0; index < await titles.count(); index += 1) {
+		const box = await titles.nth(index).boundingBox();
+		expect(box?.width || 0).toBeGreaterThan(0);
+		expect((box?.x || 0) + (box?.width || 0)).toBeLessThanOrEqual((await page.evaluate(() => document.documentElement.clientWidth)) + 1);
+	}
+
+	const pagination = page.locator('.browser-project-grid .wp-block-query-pagination');
+	const numbers = pagination.locator('.wp-block-query-pagination-numbers');
+	const next = pagination.locator('.wp-block-query-pagination-next:visible');
+	await expect(pagination).toBeVisible();
+	await expect(numbers).toBeVisible();
+	await expect(next).toHaveCount(1);
+	expect((await next.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	expect(await numbers.evaluate((node) => getComputedStyle(node).display)).toBe('flex');
+	const current = numbers.locator('.current');
+	await expect(current).toBeVisible();
+	const currentStyle = await current.evaluate((node) => ({
+		background: getComputedStyle(node).backgroundColor,
+		radius: Number.parseFloat(getComputedStyle(node).borderRadius),
+	}));
+	expect(currentStyle.background).not.toBe('rgba(0, 0, 0, 0)');
+	expect(currentStyle.radius).toBeGreaterThanOrEqual(0);
+	await expectNoHorizontalOverflow(page, projectPath);
 });
 
 

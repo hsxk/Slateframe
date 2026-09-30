@@ -6,6 +6,12 @@
  */
 ?>
 <footer class="slateframe-site-footer">
+	<?php if ( is_active_sidebar( 'footer-content' ) ) : ?>
+		<div class="slateframe-shell slateframe-footer-content">
+			<?php dynamic_sidebar( 'footer-content' ); ?>
+		</div>
+	<?php endif; ?>
+
 	<div class="slateframe-shell slateframe-footer-inner">
 		<div class="slateframe-footer-brand">
 			<strong><?php bloginfo( 'name' ); ?></strong>

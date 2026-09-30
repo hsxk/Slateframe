@@ -22,8 +22,11 @@
 
 	<div class="slateframe-card-body">
 		<?php slateframe_entry_meta(); ?>
+		<?php if ( is_sticky() && is_home() && ! is_paged() ) : ?>
+			<p class="slateframe-pattern-kicker"><?php esc_html_e( 'Featured', 'slateframe' ); ?></p>
+		<?php endif; ?>
 		<h2 class="slateframe-card-title">
-			<a href="<?php the_permalink(); ?>" rel="bookmark"><?php the_title(); ?></a>
+			<a href="<?php the_permalink(); ?>" rel="bookmark"><?php echo wp_kses_post( slateframe_get_display_title() ); ?></a>
 		</h2>
 		<div class="slateframe-card-excerpt">
 			<?php the_excerpt(); ?>

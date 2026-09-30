@@ -10,6 +10,113 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Return a resilient display title for frontend discovery surfaces.
+ *
+ * WordPress permits untitled content. Theme navigation must still expose a
+ * meaningful, translatable label instead of an empty link target.
+ *
+ * @param int $post_id Optional post ID. Defaults to the current post.
+ * @return string
+ */
+function slateframe_get_display_title( $post_id = 0 ) {
+	$title = get_the_title( $post_id );
+
+	if ( '' === trim( wp_strip_all_tags( (string) $title ) ) ) {
+		return __( 'Untitled', 'slateframe' );
+	}
+
+	return $title;
+}
+
+/**
+ * Render featured media shared by posts and Pages.
+ *
+ * @param int $post_id Optional post ID. Defaults to the current post.
+ */
+function slateframe_featured_media( $post_id = 0 ) {
+	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+
+	if ( ! $post_id || ! has_post_thumbnail( $post_id ) ) {
+		return;
+	}
+
+	$thumbnail_id = get_post_thumbnail_id( $post_id );
+	$caption      = wp_get_attachment_caption( $thumbnail_id );
+
+	$image_html = wp_get_attachment_image(
+		$thumbnail_id,
+		'full',
+		false,
+		array(
+			'class'    => 'slateframe-entry-hero-image',
+			'loading'  => 'eager',
+			'decoding' => 'async',
+		)
+	);
+
+	if ( '' === $image_html ) {
+		return;
+	}
+
+	$image_processor = new WP_HTML_Tag_Processor( $image_html );
+
+	if ( $image_processor->next_tag( 'img' ) ) {
+		$image_processor->set_attribute( 'loading', 'eager' );
+		$image_processor->set_attribute( 'decoding', 'async' );
+		$image_processor->set_attribute( 'fetchpriority', 'high' );
+		$image_html = $image_processor->get_updated_html();
+	}
+
+	echo '<figure class="slateframe-shell slateframe-entry-hero">';
+	// wp_get_attachment_image() escapes its responsive image markup; attributes above are set through Core's HTML processor.
+	echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+
+	if ( '' !== trim( (string) $caption ) ) {
+		printf( '<figcaption class="wp-caption-text">%s</figcaption>', wp_kses_post( $caption ) );
+	}
+
+	echo '</figure>';
+}
+
+/**
+ * Return portable attachment metadata without exposing server file paths.
+ *
+ * @param int $attachment_id Attachment post ID.
+ * @return array<string,string>
+ */
+function slateframe_attachment_details( $attachment_id ) {
+	$attachment_id = absint( $attachment_id );
+	$metadata      = wp_get_attachment_metadata( $attachment_id );
+	$details       = array();
+	$mime_type     = get_post_mime_type( $attachment_id );
+
+	if ( $mime_type ) {
+		$details[ __( 'File type', 'slateframe' ) ] = $mime_type;
+	}
+
+	if ( is_array( $metadata ) && ! empty( $metadata['width'] ) && ! empty( $metadata['height'] ) ) {
+		$details[ __( 'Dimensions', 'slateframe' ) ] = sprintf(
+			/* translators: 1: image width, 2: image height. */
+			__( '%1$s × %2$s px', 'slateframe' ),
+			number_format_i18n( (int) $metadata['width'] ),
+			number_format_i18n( (int) $metadata['height'] )
+		);
+	}
+
+	if ( is_array( $metadata ) && ! empty( $metadata['filesize'] ) ) {
+		$details[ __( 'File size', 'slateframe' ) ] = size_format( (int) $metadata['filesize'] );
+	}
+
+	/**
+	 * Filters metadata displayed on an attachment page.
+	 *
+	 * @param array<string,string> $details       Label/value metadata.
+	 * @param int                  $attachment_id Attachment post ID.
+	 */
+	return apply_filters( 'slateframe_attachment_details', $details, $attachment_id );
+}
+
+/**
  * Print the published date.
  */
 function slateframe_posted_on() {
@@ -31,6 +138,17 @@ function slateframe_entry_meta() {
 	$author_id   = (int) get_the_author_meta( 'ID' );
 	$author_name = trim( (string) get_the_author() );
 	$author_url  = $author_id ? get_author_posts_url( $author_id ) : '';
+
+	/**
+	 * Filters the author destination used by Slateframe entry metadata.
+	 *
+	 * Sites may point a byline at an About/Profile page without globally
+	 * rewriting WordPress author archive URLs.
+	 *
+	 * @param string $author_url Default author archive URL.
+	 * @param int    $author_id  WordPress user ID.
+	 */
+	$author_url = apply_filters( 'slateframe_author_url', $author_url, $author_id );
 
 	echo '<div class="slateframe-entry-meta">';
 	slateframe_posted_on();
@@ -67,6 +185,22 @@ function slateframe_entry_footer() {
 
 	$categories = get_the_category_list( esc_html_x( ', ', 'category list separator', 'slateframe' ) );
 	$tags       = get_the_tag_list( '', esc_html_x( ', ', 'tag list separator', 'slateframe' ) );
+
+	/**
+	 * Filters taxonomy markup shown in the single-entry footer.
+	 *
+	 * @param string $categories Category links HTML.
+	 * @param int    $post_id    Current post ID.
+	 */
+	$categories = apply_filters( 'slateframe_entry_categories_html', $categories, get_the_ID() );
+
+	/**
+	 * Filters tag markup shown in the single-entry footer.
+	 *
+	 * @param string $tags    Tag links HTML.
+	 * @param int    $post_id Current post ID.
+	 */
+	$tags = apply_filters( 'slateframe_entry_tags_html', $tags, get_the_ID() );
 
 	if ( ! $categories && ! $tags ) {
 		return;
