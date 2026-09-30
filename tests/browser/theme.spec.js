@@ -600,7 +600,7 @@ test('attachment pages expose media, metadata, original file, and parent recover
 	await expect(page.locator('.slateframe-entry-footer')).toContainText('1,200 × 900 px');
 	const original = page.getByRole('link', { name: 'Open original file' });
 	const parent = page.getByRole('link', { name: 'Back to Slateframe Featured Media Page' });
-	await expect(original).toHaveAttribute('href', /screenshot\.png$/);
+	await expect(original).toHaveAttribute('href', /slateframe-media-fixture\.png$/);
 	await expect(parent).toBeVisible();
 	for (const target of [original, parent]) {
 		expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);

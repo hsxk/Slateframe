@@ -518,7 +518,7 @@ jobs:
 
           wp eval "stick_post( $POST_ID );" --path=/tmp/wp-browser
 
-          PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/screenshot.png" --porcelain --path=/tmp/wp-browser)
+          PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/tests/fixtures/slateframe-media-fixture.png" --porcelain --path=/tmp/wp-browser)
           FEATURED_PAGE_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \
