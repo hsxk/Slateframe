@@ -145,6 +145,8 @@ test('adaptive desktop navigation responds to translated label growth and recove
 	await expect(header).toHaveClass(/is-compact/);
 	await expect(toggle).toBeVisible();
 	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
+	expect(await firstLink.evaluate((link) => link.style.whiteSpace)).toBe('');
 
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
