@@ -61,6 +61,10 @@ Desktop navigation remains visible when the available row can contain it and mov
 - Post metadata, categories/tags, filterable related reading, optional previous/next navigation, comments, pagination, archives, author pages with opt-in local profile media, search, a recovery-oriented 404 surface, and an optional Core block/widget footer-content region.
 - Editor-canvas parity for the singular reading layer: title rhythm, H2/H3 hierarchy, nested-list rhythm, quotes, inline code, tables, captions, wide/full alignment, and bounded Appearance token overrides.
 
+### Core publishing and media
+
+Slateframe treats ordinary WordPress content as a complete product surface: untitled entries receive a translatable frontend fallback, sticky posts receive a restrained editorial status, search results report locale-aware totals, and Pages share the same responsive featured-media/caption contract as posts. Native attachment pages preserve image, audio, and video presentation; expose portable MIME/dimension/file-size metadata when WordPress has it; link to the original asset; and return readers to the parent document without leaking server paths or inventing a media content model.
+
 ### Photography, portfolio, and knowledge
 
 Slateframe currently ships twenty-one site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:

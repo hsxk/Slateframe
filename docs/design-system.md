@@ -40,6 +40,10 @@ Buttons, text inputs, selects, pagination targets, menu controls, language integ
 
 Slateframe loads specialized presentation only when the current singular document actually uses it. Context detection matches exact CSS class tokens in stored markup rather than raw substrings, so prose or code samples that merely mention a class name cannot opt a page into extra CSS. Portfolio Query Loop presentation uses the public `slateframe_query_loop_markers` filter and automatically brings the shared content-mode layer with it; integrations therefore do not need a page ID, slug, post type, taxonomy, locale route, or multilingual plugin assumption.
 
+## Core media surfaces
+
+Featured media is presentation, not content ownership. Posts and Pages share one hero contract, intrinsic responsive image markup comes from WordPress Core, and attachment captions remain attachment data. Attachment pages reuse the reading measure, entry-footer metadata hierarchy, and shared action-link control family rather than introducing a parallel component scale. Missing titles must never create empty navigation targets: public discovery surfaces use the translatable Slateframe untitled fallback.
+
 ## Photography and media
 
 Photography uses the same spatial language instead of maintaining a parallel set of gallery numbers. Contact sheets, diptychs, and sequences consume `--slateframe-media-gap`; captions consume `--slateframe-caption-gap`; feature media enters the document using stack/component rhythm. Images preserve their intrinsic ratio and use dynamic viewport caps rather than fixed crops.

@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Native attachment publishing surface with responsive media, content-owned captions, portable metadata, original-file access, parent-document recovery, and browser/Axe screenshot coverage.
+- Shared Page/post featured-media rendering, locale-aware search result totals, a translatable untitled-content fallback, and restrained native sticky-post status.
 - Optional native `footer-content` block/widget region for portable rich footers without site-specific template injection.
 - Responsive footer-widget grid and deterministic multilingual footer fixture with shared 44px control targets and overflow coverage.
 - Portfolio regression fixture for a real no-featured-image project with mixed CJK/RTL long-title wrapping.

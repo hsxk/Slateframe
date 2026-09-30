@@ -516,7 +516,25 @@ jobs:
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)
 
+          wp eval "stick_post( $POST_ID );" --path=/tmp/wp-browser
+
           PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/screenshot.png" --porcelain --path=/tmp/wp-browser)
+          FEATURED_PAGE_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_title='Slateframe Featured Media Page' \
+            --post_content='<p>Featured media remains content-owned and reusable across Pages and posts.</p>' \
+            --porcelain)
+          wp post update "$PROJECT_THUMBNAIL_ID" \
+            --path=/tmp/wp-browser \
+            --post_title='Slateframe Media Attachment' \
+            --post_excerpt='A reusable featured image caption.' \
+            --post_content='<p>Attachment description fixture for media-focused publishing.</p>' \
+            --post_parent="$FEATURED_PAGE_ID" >/dev/null
+          wp post meta update "$FEATURED_PAGE_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
+          wp option update wp_attachment_pages_enabled 1 --path=/tmp/wp-browser >/dev/null
+
           for project_index in 1 2 3 4 5 6 7; do
             project_title="Portable project fixture ${project_index}"
             if [ "$project_index" -eq 7 ]; then
@@ -534,6 +552,16 @@ jobs:
               wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
             fi
           done
+
+          UNTITLED_POST_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=post \
+            --post_status=publish \
+            --post_author=1 \
+            --post_date='2000-01-01 00:00:00' \
+            --post_title='' \
+            --post_content='<p>slateframe-untitled-fixture-token keeps untitled content discoverable.</p>' \
+            --porcelain)
 
           wp comment create \
             --path=/tmp/wp-browser \
@@ -564,6 +592,9 @@ jobs:
 
 
           echo "SLATEFRAME_SHOWCASE_PATH=/?page_id=$SHOWCASE_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_FEATURED_PAGE_PATH=/?page_id=$FEATURED_PAGE_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_ATTACHMENT_PATH=/?attachment_id=$PROJECT_THUMBNAIL_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_UNTITLED_POST_PATH=/?p=$UNTITLED_POST_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PHOTO_PATH=/?page_id=$PHOTO_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PROJECT_PATH=/?page_id=$PROJECT_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_KNOWLEDGE_PATH=/?page_id=$KNOWLEDGE_ID" >> "$GITHUB_ENV"

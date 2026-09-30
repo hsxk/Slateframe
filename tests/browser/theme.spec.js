@@ -8,6 +8,9 @@ const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
 const knowledgePath = process.env.SLATEFRAME_KNOWLEDGE_PATH || pagePath;
 const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH || pagePath;
+const featuredPagePath = process.env.SLATEFRAME_FEATURED_PAGE_PATH || pagePath;
+const attachmentPath = process.env.SLATEFRAME_ATTACHMENT_PATH || pagePath;
+const untitledPostPath = process.env.SLATEFRAME_UNTITLED_POST_PATH || postPath;
 
 function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
@@ -71,7 +74,7 @@ async function expectNoHorizontalOverflow(page, route = page.url()) {
 
 test('core routes render without theme runtime failures', async ({ page }) => {
 	const failures = watchRuntime(page);
-	const routes = ['/', postPath, pagePath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
+	const routes = ['/', postPath, pagePath, featuredPagePath, attachmentPath, untitledPostPath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe', '/slateframe-browser-missing/'];
 
 	for (const route of routes) {
 		failures.length = 0;
@@ -537,6 +540,78 @@ test('capture responsive reference screenshots', async ({ page }, testInfo) => {
 	}
 });
 
+
+
+test('untitled content keeps a translatable navigation label in direct and search views', async ({ page }) => {
+	await page.goto(untitledPostPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.slateframe-entry-title')).toHaveText('Untitled');
+
+	await page.goto('/?s=slateframe-untitled-fixture-token', { waitUntil: 'networkidle' });
+	const card = page.locator('.slateframe-card').filter({ hasText: 'Untitled' });
+	await expect(card).toHaveCount(1);
+	await expect(card.locator('.slateframe-card-title a')).toHaveText('Untitled');
+	await expectNoHorizontalOverflow(page, '/?s=slateframe-untitled-fixture-token');
+});
+
+test('sticky posts expose restrained editorial status on the home index', async ({ page }) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const card = page.locator('.slateframe-card').filter({ hasText: 'Slateframe Browser Post' });
+	await expect(card).toHaveCount(1);
+	await expect(card.locator('.slateframe-pattern-kicker')).toHaveText('Featured');
+});
+
+test('search reports a locale-aware result total', async ({ page }) => {
+	await page.goto('/?s=slateframe-untitled-fixture-token', { waitUntil: 'networkidle' });
+	await expect(page.locator('.slateframe-archive-description')).toContainText('1 result found');
+});
+
+test('Pages share responsive featured media and content-owned captions with posts', async ({ page }) => {
+	await page.goto(featuredPagePath, { waitUntil: 'networkidle' });
+	const hero = page.locator('.slateframe-entry-hero');
+	await expect(hero.locator('img')).toBeVisible();
+	await expect(hero.locator('figcaption')).toHaveText('A reusable featured image caption.');
+	await expect(hero.locator('img')).toHaveAttribute('fetchpriority', 'high');
+	const dimensions = await hero.locator('img').evaluate((image) => ({
+		width: image.getBoundingClientRect().width,
+		naturalWidth: image.naturalWidth,
+		naturalHeight: image.naturalHeight,
+	}));
+	expect(dimensions.width).toBeGreaterThan(0);
+	expect(dimensions.naturalWidth).toBe(1200);
+	expect(dimensions.naturalHeight).toBe(900);
+	await expectNoHorizontalOverflow(page, featuredPagePath);
+});
+
+test('attachment pages expose media, metadata, original file, and parent recovery', async ({ page }) => {
+	await page.goto(attachmentPath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.slateframe-entry-title')).toHaveText('Slateframe Media Attachment');
+	await expect(page.locator('.slateframe-prose img')).toBeVisible();
+	await expect(page.locator('.slateframe-prose figcaption')).toHaveText('A reusable featured image caption.');
+	await expect(page.locator('.slateframe-entry-footer')).toContainText('image/png');
+	await expect(page.locator('.slateframe-entry-footer')).toContainText('1,200 × 900 px');
+	const original = page.getByRole('link', { name: 'Open original file' });
+	const parent = page.getByRole('link', { name: 'Back to Slateframe Featured Media Page' });
+	await expect(original).toHaveAttribute('href', /screenshot\.png$/);
+	await expect(parent).toBeVisible();
+	for (const target of [original, parent]) {
+		expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+	await expectNoHorizontalOverflow(page, attachmentPath);
+});
+
+test('capture core media publishing evidence', async ({ page }, testInfo) => {
+	test.skip(![390, 1440].includes(projectWidth(testInfo)), 'Representative media screenshots only.');
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+
+	for (const [name, route] of [['featured-page', featuredPagePath], ['attachment', attachmentPath]]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.screenshot({
+			path: path.join(screenshotDir, `${testInfo.project.name}-${name}.png`),
+			fullPage: true,
+		});
+	}
+});
 
 test('photography fixtures preserve natural image proportions and captions', async ({ page }) => {
 	await page.goto(photoPath, { waitUntil: 'networkidle' });

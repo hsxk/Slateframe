@@ -7,6 +7,9 @@ const photoPath = process.env.SLATEFRAME_PHOTO_PATH || pagePath;
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH || pagePath;
 const knowledgePath = process.env.SLATEFRAME_KNOWLEDGE_PATH || pagePath;
 const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH || pagePath;
+const featuredPagePath = process.env.SLATEFRAME_FEATURED_PAGE_PATH || pagePath;
+const attachmentPath = process.env.SLATEFRAME_ATTACHMENT_PATH || pagePath;
+const untitledPostPath = process.env.SLATEFRAME_UNTITLED_POST_PATH || postPath;
 
 function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
@@ -28,7 +31,7 @@ function formatViolations(violations) {
 test('representative routes have no automated WCAG A/AA violations', async ({ page }, testInfo) => {
 	test.skip(!isRepresentativeWidth(testInfo), 'Axe runs at representative mobile and desktop widths.');
 
-	for (const route of ['/', pagePath, postPath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe']) {
+	for (const route of ['/', pagePath, postPath, featuredPagePath, attachmentPath, untitledPostPath, photoPath, projectPath, knowledgePath, showcasePath, '/?s=Slateframe']) {
 		await page.goto(route, { waitUntil: 'networkidle' });
 
 		const results = await new AxeBuilder({ page })
@@ -99,6 +102,13 @@ test('primary mobile controls meet the 44px touch-target baseline', async ({ pag
 	]) {
 		await expect(control).toBeVisible();
 		expect((await control.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	}
+
+	await page.goto(attachmentPath, { waitUntil: 'networkidle' });
+	for (const action of await page.locator('.slateframe-action-link').all()) {
+		const box = await action.boundingBox();
+		expect(box).not.toBeNull();
+		expect(box.height).toBeGreaterThanOrEqual(44);
 	}
 
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
