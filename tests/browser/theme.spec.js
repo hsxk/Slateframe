@@ -151,9 +151,24 @@ test('adaptive desktop navigation responds to translated label growth and recove
 	await expect(header).not.toHaveClass(/is-compact/);
 	await expect(toggle).toBeHidden();
 
+	const languageLink = page.locator('.slateframe-language-slot a').first();
 	const original = await firstLink.textContent();
+	const originalLanguage = await languageLink.textContent();
 	await firstLink.evaluate((link) => {
 		link.textContent = 'Außergewöhnlich lange übersetzte Navigationsbezeichnung 中文 العربية 日本語 — portable multilingual navigation';
+	});
+
+	// A long translation that still fits the 92rem header shell should stay in
+	// the wide presentation instead of collapsing merely because it is long.
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(toggle).toBeHidden();
+	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
+
+	// Combined menu + language growth must cross the real inline-space boundary
+	// and use the same accessible compact navigation rather than wrap or clip.
+	await languageLink.evaluate((link) => {
+		link.textContent = 'Deutsch 日本語 العربية 中文 — exceptionally long language destination — français português 한국어';
 	});
 	await expect(header).toHaveClass(/is-compact/);
 	await expect(toggle).toBeVisible();
@@ -171,6 +186,9 @@ test('adaptive desktop navigation responds to translated label growth and recove
 	await firstLink.evaluate((link, label) => {
 		link.textContent = label;
 	}, original);
+	await languageLink.evaluate((link, label) => {
+		link.textContent = label;
+	}, originalLanguage);
 	await expect(header).not.toHaveClass(/is-compact/);
 	await expect(toggle).toBeHidden();
 	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
@@ -179,22 +197,6 @@ test('adaptive desktop navigation responds to translated label growth and recove
 		path: path.join(screenshotDir, `${testInfo.project.name}-translated-nav-recovered.png`),
 		fullPage: false,
 	});
-
-	const languageLink = page.locator('.slateframe-language-slot a').first();
-	const originalLanguage = await languageLink.textContent();
-	await languageLink.evaluate((link) => {
-		link.textContent = 'Deutsch 日本語 العربية 中文 — exceptionally long language destination';
-	});
-	await expect(header).toHaveClass(/is-compact/);
-	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
-	await expectNoHorizontalOverflow(page, '/');
-
-	await languageLink.evaluate((link, label) => {
-		link.textContent = label;
-	}, originalLanguage);
-	await expect(header).not.toHaveClass(/is-compact/);
-	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
-	await expectNoHorizontalOverflow(page, '/');
 });
 
 test('tablet and compact desktop navigation share one operable breakpoint', async ({ page }) => {
