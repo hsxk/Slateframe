@@ -44,6 +44,12 @@ The light and dark palettes share the same semantic surface hierarchy, text, bor
 
 CI renders the designed default plus the minimum/compact and maximum/spacious spatial profiles at representative mobile and desktop widths, and separately exercises system, explicit-light, and explicit-dark color modes. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, color persistence, accessible toggle state, and screenshot evidence.
 
+## Default experience
+
+Slateframe treats the first activation as a product surface rather than a blank styling layer. Core page, search, archive, author, missing-content, post, comment, and footer surfaces share the same tokenized page-start rhythm and content measures. Controls keep an accessible minimum target, while headings, prose, code, tables, captions, navigation, and media reuse the same bounded spatial system.
+
+Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu only when the rendered header actually runs out of inline space. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
+
 ## Current feature set
 
 ### Publishing and reading
