@@ -43,7 +43,7 @@ test('bounded appearance profile drives semantic design tokens and real controls
 			control: px('--slateframe-control'), spacing: Number.parseFloat(root.getPropertyValue('--slateframe-space-scale')),
 			gutter: px('--slateframe-gutter-min'), section: Number.parseFloat(root.getPropertyValue('--slateframe-section-scale')),
 			sectionMin: px('--slateframe-section-min'), sectionMax: px('--slateframe-section-max'), radius: px('--slateframe-radius'),
-			content: px('--slateframe-content'), wide: px('--slateframe-wide'), inlineGap: px('--slateframe-inline-gap'),
+			content: px('--slateframe-content'), wide: px('--slateframe-wide'), chrome: px('--slateframe-chrome'), inlineGap: px('--slateframe-inline-gap'),
 			space2: px('--slateframe-space-2'), space3: px('--slateframe-space-3'), space4: px('--slateframe-space-4'),
 			presetXs: resolvedPx('--wp--preset--spacing--xs'), presetSm: resolvedPx('--wp--preset--spacing--sm'),
 			presetMd: resolvedPx('--wp--preset--spacing--md'), presetLg: resolvedPx('--wp--preset--spacing--lg'),
@@ -59,7 +59,7 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	});
 	near(metrics.control, profile.control); near(metrics.spacing, profile.spacing, 0.01); near(metrics.gutter, profile.gutter);
 	near(metrics.section, profile.section, 0.01); near(metrics.sectionMin, 44 * profile.section); near(metrics.sectionMax, 72 * profile.section);
-	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide);
+	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide); near(metrics.chrome, 1472);
 	near(metrics.inlineGap, 4 * profile.spacing); near(metrics.componentGap, 12 * profile.spacing);
 	near(metrics.space2, 8 * profile.spacing); near(metrics.space3, 12 * profile.spacing); near(metrics.space4, 16 * profile.spacing);
 	near(metrics.presetXs, metrics.space2); near(metrics.presetSm, metrics.space3); near(metrics.presetMd, metrics.space4);
@@ -70,8 +70,8 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	near(metrics.controlPaddingInline, 12 * profile.spacing);
 	expect(metrics.summaryHeight).toBeGreaterThanOrEqual(profile.control - 1);
 	const gutter = Math.min(profile.gutter * 2, Math.max(profile.gutter, metrics.viewport * 0.03));
-	const centeredWideInset = Math.max(0, (metrics.viewport - profile.wide) / 2);
-	near(metrics.shellInset, Math.max(gutter, centeredWideInset), 1.5);
+	const centeredChromeInset = Math.max(0, (metrics.viewport - metrics.chrome) / 2);
+	near(metrics.shellInset, Math.max(gutter, centeredChromeInset), 1.5);
 	expect(metrics.normalWidth).toBeLessThanOrEqual(Math.min(profile.content, metrics.viewport - (2 * gutter)) + 2);
 	expect(metrics.wideWidth).toBeLessThanOrEqual(Math.min(profile.wide, metrics.viewport - (2 * gutter)) + 2);
 	if (width(testInfo) === 1440) expect(metrics.wideWidth).toBeGreaterThan(metrics.normalWidth + 150);
