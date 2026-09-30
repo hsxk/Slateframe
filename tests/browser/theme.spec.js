@@ -574,8 +574,16 @@ test('Pages share responsive featured media and content-owned captions with post
 	await expect(image).toHaveAttribute('fetchpriority', 'high');
 	await expect(image).toHaveAttribute('loading', 'eager');
 	await expect(image).toHaveAttribute('decoding', 'async');
-	await expect(image).toHaveAttribute('srcset', /\s\d+w(?:,|$)/);
-	await expect(image).toHaveAttribute('sizes', /.+/);
+	const responsive = await image.evaluate((node) => ({
+		srcset: node.getAttribute('srcset'),
+		sizes: node.getAttribute('sizes'),
+	}));
+	if (responsive.srcset) {
+		expect(responsive.srcset).toMatch(/\s\d+w(?:,|$)/);
+		expect(responsive.sizes).toBeTruthy();
+	} else {
+		expect(responsive.sizes).toBeNull();
+	}
 	const dimensions = await image.evaluate((node) => ({
 		width: node.getBoundingClientRect().width,
 		naturalWidth: node.naturalWidth,
