@@ -15,9 +15,11 @@ get_header();
 		<article <?php post_class( 'slateframe-entry' ); ?>>
 			<header class="slateframe-page-header">
 				<div class="slateframe-shell">
-					<h1 class="slateframe-entry-title"><?php the_title(); ?></h1>
+					<h1 class="slateframe-entry-title"><?php echo wp_kses_post( slateframe_get_display_title() ); ?></h1>
 				</div>
 			</header>
+
+			<?php slateframe_featured_media(); ?>
 
 			<div class="slateframe-prose">
 				<?php

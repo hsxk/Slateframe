@@ -20,6 +20,17 @@ global $wp_query;
 				);
 				?>
 			</h1>
+			<p class="slateframe-archive-description">
+				<?php
+				printf(
+					esc_html(
+						/* translators: %s: number of search results. */
+						_n( '%s result found', '%s results found', (int) $wp_query->found_posts, 'slateframe' )
+					),
+					esc_html( number_format_i18n( (int) $wp_query->found_posts ) )
+				);
+				?>
+			</p>
 			<?php get_search_form(); ?>
 		</div>
 	</header>

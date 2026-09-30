@@ -10,6 +10,100 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Return a resilient display title for frontend discovery surfaces.
+ *
+ * WordPress permits untitled content. Theme navigation must still expose a
+ * meaningful, translatable label instead of an empty link target.
+ *
+ * @param int $post_id Optional post ID. Defaults to the current post.
+ * @return string
+ */
+function slateframe_get_display_title( $post_id = 0 ) {
+	$title = get_the_title( $post_id );
+
+	if ( '' === trim( wp_strip_all_tags( (string) $title ) ) ) {
+		return __( 'Untitled', 'slateframe' );
+	}
+
+	return $title;
+}
+
+/**
+ * Render featured media shared by posts and Pages.
+ *
+ * @param int $post_id Optional post ID. Defaults to the current post.
+ */
+function slateframe_featured_media( $post_id = 0 ) {
+	$post_id = $post_id ? absint( $post_id ) : get_the_ID();
+
+	if ( ! $post_id || ! has_post_thumbnail( $post_id ) ) {
+		return;
+	}
+
+	$thumbnail_id = get_post_thumbnail_id( $post_id );
+	$caption      = wp_get_attachment_caption( $thumbnail_id );
+
+	echo '<figure class="slateframe-shell slateframe-entry-hero">';
+	echo wp_kses_post(
+		wp_get_attachment_image(
+			$thumbnail_id,
+			'full',
+			false,
+			array(
+				'class'         => 'slateframe-entry-hero-image',
+				'loading'       => 'eager',
+				'decoding'      => 'async',
+				'fetchpriority' => 'high',
+			)
+		)
+	);
+
+	if ( '' !== trim( (string) $caption ) ) {
+		printf( '<figcaption class="wp-caption-text">%s</figcaption>', wp_kses_post( $caption ) );
+	}
+
+	echo '</figure>';
+}
+
+/**
+ * Return portable attachment metadata without exposing server file paths.
+ *
+ * @param int $attachment_id Attachment post ID.
+ * @return array<string,string>
+ */
+function slateframe_attachment_details( $attachment_id ) {
+	$attachment_id = absint( $attachment_id );
+	$metadata      = wp_get_attachment_metadata( $attachment_id );
+	$details       = array();
+	$mime_type     = get_post_mime_type( $attachment_id );
+
+	if ( $mime_type ) {
+		$details[ __( 'File type', 'slateframe' ) ] = $mime_type;
+	}
+
+	if ( is_array( $metadata ) && ! empty( $metadata['width'] ) && ! empty( $metadata['height'] ) ) {
+		$details[ __( 'Dimensions', 'slateframe' ) ] = sprintf(
+			/* translators: 1: image width, 2: image height. */
+			__( '%1$s × %2$s px', 'slateframe' ),
+			number_format_i18n( (int) $metadata['width'] ),
+			number_format_i18n( (int) $metadata['height'] )
+		);
+	}
+
+	if ( is_array( $metadata ) && ! empty( $metadata['filesize'] ) ) {
+		$details[ __( 'File size', 'slateframe' ) ] = size_format( (int) $metadata['filesize'] );
+	}
+
+	/**
+	 * Filters metadata displayed on an attachment page.
+	 *
+	 * @param array<string,string> $details       Label/value metadata.
+	 * @param int                  $attachment_id Attachment post ID.
+	 */
+	return apply_filters( 'slateframe_attachment_details', $details, $attachment_id );
+}
+
+/**
  * Print the published date.
  */
 function slateframe_posted_on() {

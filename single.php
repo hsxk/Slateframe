@@ -16,25 +16,11 @@ get_header();
 			<header class="slateframe-page-header">
 				<div class="slateframe-shell">
 					<?php slateframe_entry_meta(); ?>
-					<h1 class="slateframe-entry-title"><?php the_title(); ?></h1>
+					<h1 class="slateframe-entry-title"><?php echo wp_kses_post( slateframe_get_display_title() ); ?></h1>
 				</div>
 			</header>
 
-			<?php if ( has_post_thumbnail() ) : ?>
-				<figure class="slateframe-shell slateframe-entry-hero">
-					<?php
-					the_post_thumbnail(
-						'full',
-						array(
-							'class'         => 'slateframe-entry-hero-image',
-							'loading'       => 'eager',
-							'decoding'      => 'async',
-							'fetchpriority' => 'high',
-						)
-					);
-					?>
-				</figure>
-			<?php endif; ?>
+			<?php slateframe_featured_media(); ?>
 
 			<div class="slateframe-prose">
 				<?php

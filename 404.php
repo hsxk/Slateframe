@@ -34,7 +34,7 @@ $slateframe_recent = slateframe_not_found_posts_query();
 					?>
 					<article <?php post_class( 'slateframe-related-item' ); ?>>
 						<a href="<?php the_permalink(); ?>">
-							<span class="slateframe-related-title"><?php the_title(); ?></span>
+							<span class="slateframe-related-title"><?php echo wp_kses_post( slateframe_get_display_title() ); ?></span>
 							<time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time>
 						</a>
 					</article>
