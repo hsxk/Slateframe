@@ -83,10 +83,8 @@
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const whiteSpace=nav.style.whiteSpace;
-		nav.style.whiteSpace='nowrap';
-		const needed=inner.scrollWidth>inner.clientWidth+1||nav.scrollWidth>nav.clientWidth+1;
-		nav.style.whiteSpace=whiteSpace;
+		let needed=false;
+		for(const a of nav.querySelectorAll(':scope>ul>li>a,.slateframe-language-slot a')){const w=a.style.whiteSpace;a.style.whiteSpace='nowrap';needed||=a.scrollWidth>a.clientWidth+1;a.style.whiteSpace=w}
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
