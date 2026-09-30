@@ -37,7 +37,6 @@
 	let compact = media.matches;
 	const focusable = 'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
 	const menuItems = () => [toggle, ...nav.querySelectorAll(focusable)].filter((item) => item.offsetParent !== null);
-	const desktopNavHeight = nav.offsetHeight;
 
 	const close = (returnFocus = false) => {
 		header.classList.remove('is-open');
@@ -84,7 +83,14 @@
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const needed=inner.scrollWidth>inner.clientWidth+1||nav.offsetHeight>desktopNavHeight+1;
+		let wrapped=false;
+		for(const link of nav.querySelectorAll(':scope>ul>li>a,.slateframe-language-slot a')){
+			const whiteSpace=link.style.whiteSpace;
+			link.style.whiteSpace='nowrap';
+			wrapped ||= link.scrollWidth>link.clientWidth+1;
+			link.style.whiteSpace=whiteSpace;
+		}
+		const needed=inner.scrollWidth>inner.clientWidth+1||wrapped;
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
