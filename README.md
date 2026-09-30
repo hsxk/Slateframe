@@ -36,7 +36,7 @@ Responsive navigation adapts to both viewport width and the real rendered width 
 
 ## Appearance and spatial system
 
-Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Header chrome uses its own wider measure so translated navigation has room to breathe without widening article prose or Gutenberg wide blocks. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
+Slateframe uses one coherent spatial system instead of sizing each component independently. Its default visual language is restrained and editorial: a 44px accessible control baseline, semantic inline/component/stack/media/caption gaps, dedicated prose/heading/list reading rhythm, responsive page gutters, deliberate section whitespace, a readable 46rem text measure, a 74rem wide canvas, and one shared corner-radius language. Header chrome uses its own wider measure, up to 108rem on large displays, so translated navigation has room to breathe without widening article prose or Gutenberg wide blocks. Navigation, forms, comments, search, pagination, panels, media captions, and editorial layouts consume those tokens rather than maintaining separate sizing systems.
 
 Site owners can tune eight bounded settings in **Appearance → Customize → Slateframe design**: color mode, control size, spacing density, page gutter, section whitespace, corner radius, reading width, and wide canvas. Color mode can follow the visitor's operating-system preference or establish a light/dark site default. Visitors also get a compact 44px header toggle; an explicit choice is stored only as a first-party functional preference cookie and takes precedence over the site default. Control size cannot fall below 44px, and every numeric range is intentionally narrow enough to preserve Slateframe's proportions rather than exposing arbitrary CSS.
 
@@ -48,7 +48,7 @@ CI renders the designed default plus the minimum/compact and maximum/spacious sp
 
 Slateframe treats the first activation as a product surface rather than a blank styling layer. Core page, search, archive, author, missing-content, post, comment, and footer surfaces share the same tokenized page-start rhythm and content measures. Controls keep an accessible minimum target, while headings, prose, code, tables, captions, navigation, and media reuse the same bounded spatial system.
 
-Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu only when the rendered header actually runs out of inline space. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
+Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu when the rendered header runs out of inline space or text enlargement makes the row wrap. Labels are allowed to wrap safely during that transition instead of creating page-level horizontal scrolling. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
 
 ## Current feature set
 
