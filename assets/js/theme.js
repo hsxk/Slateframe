@@ -78,11 +78,7 @@
 		if (header.classList.contains('is-open') && !header.contains(event.target)) close();
 	});
 
-	const linkWraps = (link) => {
-		const style=getComputedStyle(link);
-		const single=Math.max(parseFloat(style.minHeight)||0,(parseFloat(style.lineHeight)||0)+(parseFloat(style.paddingTop)||0)+(parseFloat(style.paddingBottom)||0));
-		return link.scrollHeight>single+1;
-	};
+	const linkWraps=(link)=>link.offsetHeight>parseFloat(getComputedStyle(link).minHeight)+1;
 	const needsCompact = () => {
 		if (media.matches || !inner) return media.matches;
 		const previous = header.classList.contains('is-compact');
