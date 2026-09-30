@@ -142,7 +142,7 @@ Public GitHub Actions currently enforce:
 - Real WordPress + MariaDB installation and theme activation.
 - Runtime pattern registration.
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths; Photography is also captured in each spatial profile and Core lightbox behavior is exercised in the focused raster runtime.
-- Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
+- Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, 200% text-enlargement containment, adaptive desktop navigation, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
 - Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
 - Browser runs publish reviewable screenshot artifacts for core Page/Post surfaces, Photography, Portfolio, Knowledge, color modes, Appearance profiles, and adaptive translated-navigation states; visual evidence is reviewed alongside automated geometry checks rather than treated as a substitute for them.
