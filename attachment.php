@@ -59,11 +59,11 @@ while ( have_posts() ) :
 
 			<div class="slateframe-shell slateframe-entry-context">
 				<?php if ( $slateframe_details ) : ?>
-					<div class="slateframe-entry-footer" aria-label="<?php esc_attr_e( 'Media details', 'slateframe' ); ?>">
+					<section class="slateframe-entry-footer" aria-label="<?php esc_attr_e( 'Media details', 'slateframe' ); ?>">
 						<?php foreach ( $slateframe_details as $slateframe_label => $slateframe_value ) : ?>
 							<div><span class="slateframe-entry-footer-label"><?php echo esc_html( $slateframe_label ); ?></span> <?php echo esc_html( $slateframe_value ); ?></div>
 						<?php endforeach; ?>
-					</div>
+					</section>
 				<?php endif; ?>
 
 				<div class="slateframe-not-found-actions">

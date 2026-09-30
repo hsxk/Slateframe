@@ -81,13 +81,12 @@
 	const needsCompact = () => {
 		if (media.matches || !inner) return media.matches;
 		const previous = header.classList.contains('is-compact');
-		const links=[...nav.querySelectorAll(':scope>ul>li>a,.slateframe-language-slot a')];
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const whiteSpace=links.map((link)=>link.style.whiteSpace);
-		links.forEach((link)=>{link.style.whiteSpace='nowrap'});
+		const whiteSpace=nav.style.whiteSpace;
+		nav.style.whiteSpace='nowrap';
 		const needed=nav.scrollWidth>nav.clientWidth+1||inner.scrollWidth>inner.clientWidth+1;
-		links.forEach((link,index)=>{link.style.whiteSpace=whiteSpace[index]});
+		nav.style.whiteSpace=whiteSpace;
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
