@@ -166,6 +166,22 @@ test('adaptive desktop navigation responds to translated label growth and recove
 		path: path.join(screenshotDir, `${testInfo.project.name}-translated-nav-recovered.png`),
 		fullPage: false,
 	});
+
+	const languageLink = page.locator('.slateframe-language-slot a').first();
+	const originalLanguage = await languageLink.textContent();
+	await languageLink.evaluate((link) => {
+		link.textContent = 'Deutsch 日本語 العربية 中文 — exceptionally long language destination';
+	});
+	await expect(header).toHaveClass(/is-compact/);
+	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
+
+	await languageLink.evaluate((link, label) => {
+		link.textContent = label;
+	}, originalLanguage);
+	await expect(header).not.toHaveClass(/is-compact/);
+	await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
+	await expectNoHorizontalOverflow(page, '/');
 });
 
 test('tablet and compact desktop navigation share one operable breakpoint', async ({ page }) => {
