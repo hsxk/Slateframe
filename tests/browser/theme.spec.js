@@ -13,6 +13,15 @@ function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
 }
 
+async function useShortDesktopNavigation(page) {
+	await page.locator('[data-primary-nav] > ul > li > a').evaluateAll((links) =>
+		links.forEach((link, index) => { link.textContent = `Nav ${index + 1}`; })
+	);
+	await page.locator('.slateframe-language-slot a').evaluateAll((links) =>
+		links.forEach((link, index) => { link.textContent = index ? 'JA' : 'EN'; })
+	);
+}
+
 function watchRuntime(page) {
 	const failures = [];
 
@@ -135,6 +144,7 @@ test('adaptive desktop navigation responds to translated label growth and recove
 	const header = page.locator('[data-site-header]');
 	const toggle = page.locator('[data-menu-toggle]');
 	const firstLink = page.locator('[data-primary-nav] > ul > li > a').first();
+	await useShortDesktopNavigation(page);
 	await expect(header).not.toHaveClass(/is-compact/);
 	await expect(toggle).toBeHidden();
 
