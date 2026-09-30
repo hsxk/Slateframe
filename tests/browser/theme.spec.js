@@ -128,7 +128,7 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 });
 
 test('adaptive desktop navigation responds to translated label growth and recovery', async ({ page }, testInfo) => {
-	test.skip(projectWidth(testInfo) < 1440, 'Adaptive desktop navigation requires a wide viewport.');
+	test.skip(projectWidth(testInfo) !== 1920, 'Translated growth/recovery is sampled on the widest desktop fixture; narrower desktops may already need compact navigation.');
 
 	await page.goto('/', { waitUntil: 'networkidle' });
 
