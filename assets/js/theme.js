@@ -81,7 +81,7 @@
 		const previous = header.classList.contains('is-compact');
 		header.classList.remove('is-compact');
 		nav.classList.remove('is-compact');
-		const needed = inner.scrollWidth > inner.clientWidth + 1 || nav.scrollWidth > nav.clientWidth + 1;
+		const needed = inner.scrollWidth > inner.clientWidth + 1;
 		header.classList.toggle('is-compact', previous);
 		nav.classList.toggle('is-compact', previous);
 		return needed;
@@ -104,7 +104,7 @@
 		window.addEventListener('resize', syncNav, { passive: true });
 	}
 	if ('MutationObserver' in window) {
-		const contentObserver = new MutationObserver(() => window.requestAnimationFrame(syncNav));
+		const contentObserver = new MutationObserver(() => window.requestAnimationFrame(() => window.requestAnimationFrame(syncNav)));
 		contentObserver.observe(nav, { childList: true, characterData: true, subtree: true });
 	}
 	syncNav();
