@@ -25,6 +25,17 @@ async function loginAndOpenEditor(page) {
 		return Boolean(select?.getBlocks?.().length);
 	});
 
+	const welcomeGuide = page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i }).first();
+	try {
+		await welcomeGuide.waitFor({ state: 'visible', timeout: 2_000 });
+		const closeButton = welcomeGuide.getByRole('button', { name: /close/i }).first();
+		await expect(closeButton).toBeVisible();
+		await closeButton.click();
+		await expect(welcomeGuide).toBeHidden();
+	} catch (error) {
+		if (await welcomeGuide.isVisible().catch(() => false)) throw error;
+	}
+
 	const frame = page.locator('iframe[name="editor-canvas"]');
 	if (await frame.count()) {
 		await expect(frame).toBeVisible();
@@ -137,6 +148,8 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	}));
 	expect(rtlMetrics.direction).toBe('rtl');
 	expect(rtlMetrics.rootOverflow).toBeLessThanOrEqual(1);
+
+	await expect(page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i })).toBeHidden();
 
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
