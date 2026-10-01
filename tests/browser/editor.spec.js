@@ -48,6 +48,29 @@ async function loginAndOpenEditor(page) {
 	return page;
 }
 
+async function withFocusedEvidence(page, callback) {
+	const chromeSuppression = await page.addStyleTag({
+		content: [
+			'#wpadminbar',
+			'.interface-interface-skeleton__header',
+			'.edit-post-header',
+			'.editor-header',
+			'.components-snackbar-list',
+		].join(',') + ' { visibility: hidden !important; pointer-events: none !important; }',
+	});
+	await chromeSuppression.evaluate((node) => {
+		node.dataset.slateframeEvidence = 'focused';
+	});
+
+	try {
+		await callback();
+	} finally {
+		await chromeSuppression.evaluate((node) => node.remove()).catch(() => {});
+	}
+
+	expect(await page.locator('style[data-slateframe-evidence="focused"]').count()).toBe(0);
+}
+
 test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and contained', async ({ page }, testInfo) => {
 	const canvas = await loginAndOpenEditor(page);
 
@@ -162,15 +185,30 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 
 	const evidence = [
 		['editorial', canvas.locator('.slateframe-editorial-opening').first()],
+		['reading-table', table],
+		['reading-code', code],
+		['reading-disclosure', details],
+		['reading-footnotes', canvas.locator('.browser-footnotes').first()],
+		['reading-pullquote', pullquote],
 		['photography', canvas.locator('.slateframe-photography-diptych').first()],
 		['portfolio', canvas.locator('.slateframe-project-grid').first()],
 		['knowledge', canvas.locator('.slateframe-knowledge-procedure').first()],
 	];
-	for (const [name, region] of evidence) {
-		await region.scrollIntoViewIfNeeded();
-		await expect(region).toBeVisible();
-		await region.screenshot({
-			path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-${name}.png`),
-		});
-	}
+
+	await withFocusedEvidence(page, async () => {
+		for (const [name, region] of evidence) {
+			await region.scrollIntoViewIfNeeded();
+			await expect(region).toBeVisible();
+
+			const box = await region.boundingBox();
+			expect(box?.width || 0).toBeGreaterThan(0);
+			expect(box?.height || 0).toBeGreaterThan(0);
+
+			await region.screenshot({
+				path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-${name}.png`),
+			});
+		}
+	});
+
+	await expect(page.locator('.interface-interface-skeleton__header, .editor-header').first()).toBeVisible();
 });
