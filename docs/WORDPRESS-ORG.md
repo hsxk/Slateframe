@@ -12,8 +12,8 @@ The public quality workflow currently requires:
 - compatibility smoke coverage for WordPress 6.7 and current WordPress across PHP 7.4 and PHP 8.3;
 - Theme Check against the built `slateframe.zip`;
 - zero Theme Check findings with severity `REQUIRED`;
-- all 21 production patterns present and registered in real WordPress, with no remote media URLs embedded in pattern source;
-- responsive browser regression, including core attachment/media templates, untitled/sticky/search discovery states, content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
+- every shipped `patterns/*.php` file has a valid `slateframe/` slug matching its filename, exactly matches the live WordPress pattern registry, parses as block content, and embeds no remote media URLs;
+- responsive browser regression, including real Gutenberg authoring evidence, core attachment/media templates, untitled/sticky/search discovery states, content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
 - separate base, singular-reading, discussion, specialized content-mode, and combined contextual-runtime ceilings so optional presentation does not silently inflate ordinary routes;
 - package-content and 1200×900 screenshot validation.
 

@@ -8,6 +8,7 @@ All notable changes to Slateframe will be documented here.
 
 - Self-updating shipped-pattern runtime validation derived from pattern headers, with exact registry parity, duplicate/mismatched slug detection, and parseability coverage for future patterns.
 - Gutenberg visual fixtures now dismiss the Core welcome guide before screenshot capture so editor artifacts remain directly reviewable.
+- Gutenberg visual evidence is split into editor-top and representative Editorial, Photography, Portfolio, and Knowledge pattern captures at mobile and desktop widths so Core's long editor canvas cannot hide the surfaces under review.
 - Authenticated real-Gutenberg authoring regression at representative mobile/desktop widths, with registered Photography/Portfolio/Knowledge/Editorial patterns, invalid-block detection, editor containment checks, and screenshot artifacts.
 - Editor-canvas parity for Code, Pullquote, Details, and Footnotes primitives while preserving the existing editor stylesheet budget.
 - Native attachment publishing surface with responsive media, content-owned captions, portable metadata, original-file access, parent-document recovery, and browser/Axe screenshot coverage.

@@ -153,7 +153,24 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
-	await root.screenshot({
-		path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}.png`),
+
+	await title.scrollIntoViewIfNeeded();
+	await page.screenshot({
+		path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-top.png`),
+		fullPage: false,
 	});
+
+	const evidence = [
+		['editorial', canvas.locator('.slateframe-editorial-opening').first()],
+		['photography', canvas.locator('.slateframe-photography-diptych').first()],
+		['portfolio', canvas.locator('.slateframe-project-grid').first()],
+		['knowledge', canvas.locator('.slateframe-knowledge-procedure').first()],
+	];
+	for (const [name, region] of evidence) {
+		await region.scrollIntoViewIfNeeded();
+		await expect(region).toBeVisible();
+		await region.screenshot({
+			path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-${name}.png`),
+		});
+	}
 });
