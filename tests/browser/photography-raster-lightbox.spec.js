@@ -3,7 +3,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 
 const rasterPath = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
-const representativeWidths = [390, 1440];
+const representativeWidths = [320, 390, 768, 1440, 1920];
 const projectWidth = (testInfo) => Number(testInfo.project.name.replace('viewport-', ''));
 
 test.skip(!rasterPath, 'Raster photography fixture is only available in the focused CI workflow.');
@@ -195,6 +195,102 @@ test('native lightbox controls keep the shared touch-target baseline', async ({ 
 		expect(box?.width || 0).toBeGreaterThanOrEqual(44);
 		expect(box?.height || 0).toBeGreaterThanOrEqual(44);
 	}
+});
+
+test('native lightbox controls inherit Slateframe control geometry and interaction language', async ({ page }) => {
+	await openRasterPhotography(page);
+	const { dialog, close } = await openLightbox(page, 'keyboard');
+	const controls = dialog.locator(':is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next):visible');
+	const rootRadius = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-radius')));
+	const count = await controls.count();
+	expect(count).toBeGreaterThanOrEqual(1);
+
+	for (let index = 0; index < count; index += 1) {
+		const geometry = await controls.nth(index).evaluate((node) => {
+			const rect = node.getBoundingClientRect();
+			const style = getComputedStyle(node);
+			return {
+				left: rect.left,
+				top: rect.top,
+				right: rect.right,
+				bottom: rect.bottom,
+				width: rect.width,
+				height: rect.height,
+				viewportWidth: document.documentElement.clientWidth,
+				viewportHeight: window.innerHeight,
+				radius: Number.parseFloat(style.borderRadius),
+				background: style.backgroundColor,
+				touchAction: style.touchAction,
+			};
+		});
+		expect(geometry.width).toBeGreaterThanOrEqual(44);
+		expect(geometry.height).toBeGreaterThanOrEqual(44);
+		expect(geometry.left).toBeGreaterThanOrEqual(-1);
+		expect(geometry.top).toBeGreaterThanOrEqual(-1);
+		expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+		expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+		expect(Math.abs(geometry.radius - rootRadius)).toBeLessThanOrEqual(1);
+		expect(geometry.background).not.toBe('rgba(0, 0, 0, 0)');
+		expect(geometry.touchAction).toContain('manipulation');
+	}
+
+	await close.focus();
+	const focus = await close.evaluate((node) => {
+		const style = getComputedStyle(node);
+		return { outlineStyle: style.outlineStyle, outlineWidth: Number.parseFloat(style.outlineWidth) };
+	});
+	expect(focus.outlineStyle).not.toBe('none');
+	expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+});
+
+test('native lightbox remains contained in RTL and at 200 percent text size', async ({ page }) => {
+	await openRasterPhotography(page);
+	await page.evaluate(() => {
+		document.documentElement.dir = 'rtl';
+		document.documentElement.style.fontSize = '200%';
+	});
+	const { dialog, enlarged } = await openLightbox(page, 'keyboard');
+	await expect(enlarged).toBeVisible();
+
+	const metrics = await dialog.evaluate((node) => {
+		const media = node.querySelector('img[sizes="100vw"]');
+		const mediaBox = media?.getBoundingClientRect();
+		return {
+			direction: getComputedStyle(node).direction,
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			mediaLeft: mediaBox?.left ?? 0,
+			mediaRight: mediaBox?.right ?? 0,
+			mediaTop: mediaBox?.top ?? 0,
+			mediaBottom: mediaBox?.bottom ?? 0,
+			viewportWidth: document.documentElement.clientWidth,
+			viewportHeight: window.innerHeight,
+		};
+	});
+	expect(metrics.direction).toBe('rtl');
+	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
+	expect(metrics.mediaLeft).toBeGreaterThanOrEqual(-1);
+	expect(metrics.mediaRight).toBeLessThanOrEqual(metrics.viewportWidth + 1);
+	expect(metrics.mediaTop).toBeGreaterThanOrEqual(-1);
+	expect(metrics.mediaBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
+});
+
+test('native lightbox controls remain discernible in forced colors', async ({ page }) => {
+	await page.emulateMedia({ forcedColors: 'active' });
+	await openRasterPhotography(page);
+	const { dialog } = await openLightbox(page, 'keyboard');
+	const control = dialog.locator(':is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next):visible').first();
+	await expect(control).toBeVisible();
+	const styles = await control.evaluate((node) => {
+		const style = getComputedStyle(node);
+		return {
+			borderStyle: style.borderStyle,
+			borderWidth: Number.parseFloat(style.borderWidth),
+			forcedColorAdjust: style.forcedColorAdjust,
+		};
+	});
+	expect(styles.borderStyle).not.toBe('none');
+	expect(styles.borderWidth).toBeGreaterThanOrEqual(1);
+	expect(styles.forcedColorAdjust).toBe('auto');
 });
 
 test('native lightbox captures representative mobile and desktop evidence', async ({ page }, testInfo) => {

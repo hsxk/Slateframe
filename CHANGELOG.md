@@ -68,6 +68,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Brought WordPress Core lightbox controls fully into Slateframe's control family with shared radius/contrast/touch behavior and safe-area-aware viewport containment while leaving interaction ownership in Core.
+- Expanded focused Photography runtime evidence from two representative widths to mobile, tablet, desktop, and wide-desktop captures without increasing frontend JavaScript.
 - Unified index, archive, search, and author empty states with contextual recovery guidance, contextual styling, and no empty pagination chrome.
 
 - Centralized global navigation/footer stylesheet enqueueing and kept both inside the existing aggregate base-runtime ceilings.
@@ -141,6 +143,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Accessibility
 
+- Validate native lightbox control geometry, visible focus, forced-colors borders, RTL containment, and 200% text enlargement in real WordPress + Chromium.
 - Keep comment consent labels, reply-cancel actions, comment navigation, Core Search/Buttons, and Query Pagination on the shared accessible target baseline, including bounded Appearance profiles.
 - Keep Core table scroll regions keyboard-focusable with Slateframe's shared focus ring, while preserving an author-supplied tabindex.
 - Keep normal data tables on the centered reading measure instead of stretching their scroll wrapper to the viewport.

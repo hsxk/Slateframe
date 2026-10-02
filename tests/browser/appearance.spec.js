@@ -135,6 +135,8 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	const projectPagination = page.locator('.slateframe-project-grid .wp-block-query-pagination a').first();
 	if (await projectPagination.count()) {
 		expect((await projectPagination.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		near(await projectPagination.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+		near(await projectPagination.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingBlockStart)), 8 * profile.spacing, 1);
 		const paginationRhythm = await projectPagination.locator('xpath=../..').evaluate((node) => {
 			const styles = getComputedStyle(node);
 			return {
@@ -182,6 +184,26 @@ test('appearance profile stays contained across content modes and captures revie
 			near(photographyRhythm.galleryGap, photographyRhythm.mediaGap, 1);
 			near(photographyRhythm.diptychGap, photographyRhythm.mediaGap, 1);
 			near(photographyRhythm.captionPadding, photographyRhythm.captionGap, 1);
+			const photographyGeometry = await page.locator('#main-content').evaluate((main) => {
+				const images = [...main.querySelectorAll('.is-style-slateframe-contact-sheet img, .is-style-slateframe-diptych img, .slateframe-gallery-sequence img, .is-style-slateframe-photo-feature img')];
+				return images.map((image) => {
+					const box = image.getBoundingClientRect();
+					return {
+						left: box.left,
+						right: box.right,
+						width: box.width,
+						viewport: document.documentElement.clientWidth,
+						objectFit: getComputedStyle(image).objectFit,
+					};
+				});
+			});
+			expect(photographyGeometry.length).toBeGreaterThan(0);
+			for (const image of photographyGeometry) {
+				expect(image.width).toBeGreaterThan(0);
+				expect(image.left).toBeGreaterThanOrEqual(-1);
+				expect(image.right).toBeLessThanOrEqual(image.viewport + 1);
+				expect(['contain', 'fill']).toContain(image.objectFit);
+			}
 		}
 		await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
