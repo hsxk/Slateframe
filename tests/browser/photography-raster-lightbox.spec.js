@@ -252,26 +252,28 @@ test('native lightbox remains contained in RTL and at 200 percent text size', as
 	const { dialog, enlarged } = await openLightbox(page, 'keyboard');
 	await expect(enlarged).toBeVisible();
 
-	const metrics = await dialog.evaluate((node) => {
+	await expect.poll(async () => dialog.evaluate((node) => {
 		const media = node.querySelector('img[sizes="100vw"]');
 		const mediaBox = media?.getBoundingClientRect();
-		return {
-			direction: getComputedStyle(node).direction,
-			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-			mediaLeft: mediaBox?.left ?? 0,
-			mediaRight: mediaBox?.right ?? 0,
-			mediaTop: mediaBox?.top ?? 0,
-			mediaBottom: mediaBox?.bottom ?? 0,
-			viewportWidth: document.documentElement.clientWidth,
-			viewportHeight: window.innerHeight,
-		};
-	});
+		const viewportWidth = document.documentElement.clientWidth;
+		const viewportHeight = window.innerHeight;
+		const rootOverflow = document.documentElement.scrollWidth - viewportWidth;
+		return Math.max(
+			0,
+			rootOverflow,
+			-(mediaBox?.left ?? 0),
+			(mediaBox?.right ?? 0) - viewportWidth,
+			-(mediaBox?.top ?? 0),
+			(mediaBox?.bottom ?? 0) - viewportHeight
+		);
+	}), { message: 'RTL lightbox media should settle within one CSS pixel at 200% text size' }).toBeLessThanOrEqual(1);
+
+	const metrics = await dialog.evaluate((node) => ({
+		direction: getComputedStyle(node).direction,
+		rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+	}));
 	expect(metrics.direction).toBe('rtl');
 	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
-	expect(metrics.mediaLeft).toBeGreaterThanOrEqual(-1);
-	expect(metrics.mediaRight).toBeLessThanOrEqual(metrics.viewportWidth + 1);
-	expect(metrics.mediaTop).toBeGreaterThanOrEqual(-1);
-	expect(metrics.mediaBottom).toBeLessThanOrEqual(metrics.viewportHeight + 1);
 });
 
 test('native lightbox controls remain discernible in forced colors', async ({ page }) => {
