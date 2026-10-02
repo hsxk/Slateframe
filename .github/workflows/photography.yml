@@ -2,7 +2,7 @@ name: Photography runtime quality
 
 on:
   push:
-    branches: [automation/continuous-development]
+    branches: [main, automation/continuous-development]
   pull_request:
     branches: [main]
 

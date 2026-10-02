@@ -2,7 +2,7 @@ name: Theme quality
 
 on:
   push:
-    branches: [main]
+    branches: [main, automation/continuous-development]
   pull_request:
     branches: [main]
 
