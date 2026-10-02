@@ -100,6 +100,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Keep native lightbox SVG controls on Slateframe's media-chrome text token even when WordPress Core injects its own inline `fill`, including forced-colors mode.
 - Keep translated primary and language-adapter navigation in the desktop row only when intrinsic labels actually fit; otherwise enter the accessible compact menu without exposing `nowrap` during rendering or 200% text enlargement.
 - Make contextual asset detection class-aware so marker names in prose or code do not trigger Photography/Portfolio/Knowledge CSS.
 - Let integrations extend Portfolio Query Loop detection through `slateframe_query_loop_markers` without page IDs, slugs, post types, or locale assumptions.

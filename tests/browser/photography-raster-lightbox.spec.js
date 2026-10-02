@@ -201,7 +201,18 @@ test('native lightbox controls inherit Slateframe control geometry and interacti
 	await openRasterPhotography(page);
 	const { dialog, close } = await openLightbox(page, 'keyboard');
 	const controls = dialog.locator(':is(.wp-lightbox-close-button,.wp-lightbox-navigation-button-prev,.wp-lightbox-navigation-button-next):visible');
-	const rootRadius = await page.evaluate(() => Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-radius')));
+	const controlTokens = await page.evaluate(() => {
+		const root = getComputedStyle(document.documentElement);
+		const probe = document.createElement('span');
+		probe.style.color = 'var(--slateframe-media-chrome-text)';
+		document.body.append(probe);
+		const chromeText = getComputedStyle(probe).color;
+		probe.remove();
+		return {
+			radius: Number.parseFloat(root.getPropertyValue('--slateframe-radius')),
+			chromeText,
+		};
+	});
 	const count = await controls.count();
 	expect(count).toBeGreaterThanOrEqual(1);
 
@@ -220,6 +231,7 @@ test('native lightbox controls inherit Slateframe control geometry and interacti
 				viewportHeight: window.innerHeight,
 				radius: Number.parseFloat(style.borderRadius),
 				background: style.backgroundColor,
+				fill: style.fill,
 				touchAction: style.touchAction,
 			};
 		});
@@ -229,8 +241,9 @@ test('native lightbox controls inherit Slateframe control geometry and interacti
 		expect(geometry.top).toBeGreaterThanOrEqual(-1);
 		expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
 		expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
-		expect(Math.abs(geometry.radius - rootRadius)).toBeLessThanOrEqual(1);
+		expect(Math.abs(geometry.radius - controlTokens.radius)).toBeLessThanOrEqual(1);
 		expect(geometry.background).not.toBe('rgba(0, 0, 0, 0)');
+		expect(geometry.fill).toBe(controlTokens.chromeText);
 		expect(geometry.touchAction).toContain('manipulation');
 	}
 
