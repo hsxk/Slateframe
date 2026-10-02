@@ -68,7 +68,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
-- Brought WordPress Core lightbox controls fully into Slateframe's control family with shared radius/contrast/touch behavior and safe-area-aware viewport containment while leaving interaction ownership in Core.
+- Brought WordPress Core lightbox controls fully into Slateframe's control family with shared radius/contrast/touch behavior and safe-area-aware dynamic-viewport containment while leaving interaction ownership in Core; the shared global focus ring remains the single focus language.
 - Expanded focused Photography runtime evidence from two representative widths to mobile, tablet, desktop, and wide-desktop captures without increasing frontend JavaScript.
 - Unified index, archive, search, and author empty states with contextual recovery guidance, contextual styling, and no empty pagination chrome.
 
