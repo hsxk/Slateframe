@@ -68,6 +68,11 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Split Photography/lightbox presentation into a dedicated contextual stylesheet so Portfolio/Knowledge routes no longer pay for image-viewer CSS; editor parity is preserved.
+- Detect Core image/gallery blocks with native lightbox enabled so ordinary WordPress lightboxes receive Slateframe presentation without requiring a theme-specific class.
+- Added the narrow `slateframe_photography_markers` extension point while bridging additions from the existing broad content-mode filter for compatibility.
+- Capped enlarged lightbox media itself under 200% text enlargement so a constrained container cannot hide child overflow.
+- Tightened shared content-mode and Portfolio aggregate budgets after the asset split and introduced explicit Photography route budgets.
 - Brought WordPress Core lightbox controls fully into Slateframe's control family with shared radius/contrast/touch behavior and safe-area-aware dynamic-viewport containment while leaving interaction ownership in Core; the shared global focus ring remains the single focus language.
 - Expanded focused Photography runtime evidence from two representative widths to mobile, tablet, desktop, and wide-desktop captures without increasing frontend JavaScript.
 - Unified index, archive, search, and author empty states with contextual recovery guidance, contextual styling, and no empty pagination chrome.

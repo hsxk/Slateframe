@@ -803,7 +803,7 @@ test('reading stylesheet is requested only for singular documents', async ({ pag
 	}
 });
 
-test('content-mode stylesheet is requested only when specialized styles are present', async ({ page }) => {
+test('content-mode stylesheet stays off Photography-only and ordinary documents', async ({ page }) => {
 	const requests = [];
 	page.on('request', (request) => {
 		if (request.url().includes('/assets/css/content-modes.css')) {
@@ -811,13 +811,37 @@ test('content-mode stylesheet is requested only when specialized styles are pres
 		}
 	});
 
-	await page.goto(postPath, { waitUntil: 'networkidle' });
-	expect(requests, 'ordinary post should keep the contextual stylesheet unloaded').toHaveLength(0);
+	for (const route of [postPath, photoPath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `shared content-mode stylesheet should stay unloaded on ${route}`).toHaveLength(0);
+	}
 
-	for (const route of [photoPath, projectPath, knowledgePath, showcasePath]) {
+	for (const route of [projectPath, knowledgePath, showcasePath]) {
 		requests.length = 0;
 		await page.goto(route, { waitUntil: 'networkidle' });
 		expect(requests, `content-mode stylesheet should load on ${route}`).toHaveLength(1);
+	}
+});
+
+test('Photography stylesheet is requested only for Photography content', async ({ page }) => {
+	const requests = [];
+	page.on('request', (request) => {
+		if (request.url().includes('/assets/css/photography.css')) {
+			requests.push(request.url());
+		}
+	});
+
+	for (const route of [postPath, projectPath, knowledgePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `Photography stylesheet should stay unloaded on ${route}`).toHaveLength(0);
+	}
+
+	for (const route of [photoPath, showcasePath]) {
+		requests.length = 0;
+		await page.goto(route, { waitUntil: 'networkidle' });
+		expect(requests, `Photography stylesheet should load on ${route}`).toHaveLength(1);
 	}
 });
 
