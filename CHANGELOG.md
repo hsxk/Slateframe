@@ -68,6 +68,13 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Split Photography/lightbox presentation into a dedicated contextual stylesheet so Portfolio/Knowledge routes no longer pay for image-viewer CSS; editor parity is preserved.
+- Detect Core image/gallery blocks with native lightbox enabled so ordinary WordPress lightboxes receive Slateframe presentation without requiring a theme-specific class.
+- Added the narrow `slateframe_photography_markers` extension point while bridging additions from the existing broad content-mode filter for compatibility.
+- Capped enlarged lightbox media itself under 200% text enlargement so a constrained container cannot hide child overflow.
+- Tightened shared content-mode and Portfolio aggregate budgets after the asset split and introduced explicit Photography route budgets.
+- Brought WordPress Core lightbox controls fully into Slateframe's control family with shared radius/contrast/touch behavior and safe-area-aware dynamic-viewport containment while leaving interaction ownership in Core; the shared global focus ring remains the single focus language.
+- Expanded focused Photography runtime evidence from two representative widths to mobile, tablet, desktop, and wide-desktop captures without increasing frontend JavaScript.
 - Unified index, archive, search, and author empty states with contextual recovery guidance, contextual styling, and no empty pagination chrome.
 
 - Centralized global navigation/footer stylesheet enqueueing and kept both inside the existing aggregate base-runtime ceilings.
@@ -98,6 +105,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Keep native lightbox SVG controls on Slateframe's media-chrome text token even when WordPress Core injects its own inline `fill`, including forced-colors mode.
 - Keep translated primary and language-adapter navigation in the desktop row only when intrinsic labels actually fit; otherwise enter the accessible compact menu without exposing `nowrap` during rendering or 200% text enlargement.
 - Make contextual asset detection class-aware so marker names in prose or code do not trigger Photography/Portfolio/Knowledge CSS.
 - Let integrations extend Portfolio Query Loop detection through `slateframe_query_loop_markers` without page IDs, slugs, post types, or locale assumptions.
@@ -141,6 +149,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Accessibility
 
+- Validate native lightbox control geometry, visible focus, forced-colors borders, RTL containment, and 200% text enlargement in real WordPress + Chromium.
 - Keep comment consent labels, reply-cancel actions, comment navigation, Core Search/Buttons, and Query Pagination on the shared accessible target baseline, including bounded Appearance profiles.
 - Keep Core table scroll regions keyboard-focusable with Slateframe's shared focus ring, while preserving an author-supplied tabindex.
 - Keep normal data tables on the centered reading measure instead of stretching their scroll wrapper to the viewport.

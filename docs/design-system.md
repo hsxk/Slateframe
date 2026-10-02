@@ -48,7 +48,7 @@ Featured media is presentation, not content ownership. Posts and Pages share one
 
 Photography uses the same spatial language instead of maintaining a parallel set of gallery numbers. Contact sheets, diptychs, and sequences consume `--slateframe-media-gap`; captions consume `--slateframe-caption-gap`; feature media enters the document using stack/component rhythm. Images preserve their intrinsic ratio and use dynamic viewport caps rather than fixed crops.
 
-WordPress Core's native lightbox remains the interaction owner. Slateframe only supplies presentation safeguards: the shared control target, dynamic-viewport containment, scroll/overscroll locking, safe-area-aware close placement, focus visibility, and reduced-motion handling. The theme does not fork Core's lightbox JavaScript.
+Photography frontend rules are isolated in `assets/css/photography.css`; WordPress Core's native lightbox remains the interaction owner. Slateframe only supplies presentation safeguards: the shared control target and radius family, deliberate control contrast, manipulation-safe touch behavior, dynamic-viewport containment, notch/safe-area-aware media and close placement, focus visibility, forced-colors resilience, scroll/overscroll locking, and reduced-motion handling. These guarantees must survive RTL and 200% text enlargement without widening the root document. The theme does not fork Core's lightbox JavaScript.
 
 Reduced motion is a system-wide presentation contract: decorative hover transforms and transitions must settle immediately when `prefers-reduced-motion: reduce` is active, including portfolio media outside the lightbox.
 

@@ -26,7 +26,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/reading.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -112,11 +112,40 @@ function slateframe_content_has_class_marker( $content, $markers ) {
 }
 
 /**
- * Determine whether the current singular document needs content-mode styles.
+ * Determine whether a parsed block tree enables WordPress Core's native lightbox.
+ *
+ * @param array[] $blocks Parsed blocks.
+ * @return bool
+ */
+function slateframe_blocks_have_lightbox( $blocks ) {
+	foreach ( $blocks as $block ) {
+		$block_name = isset( $block['blockName'] ) ? $block['blockName'] : '';
+
+		if (
+			in_array( $block_name, array( 'core/image', 'core/gallery' ), true ) &&
+			! empty( $block['attrs']['lightbox']['enabled'] )
+		) {
+			return true;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) && slateframe_blocks_have_lightbox( $block['innerBlocks'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Determine whether the current singular document needs Photography styles.
+ *
+ * New integrations should use the narrow Photography filter. Markers added
+ * through the older broad content-mode filter are also honored so documented
+ * extension callbacks keep their pre-split behavior.
  *
  * @return bool
  */
-function slateframe_content_modes_needed() {
+function slateframe_photography_styles_needed() {
 	if ( ! is_singular() ) {
 		return false;
 	}
@@ -132,9 +161,51 @@ function slateframe_content_modes_needed() {
 		'is-style-slateframe-diptych',
 		'is-style-slateframe-photo-feature',
 		'is-style-slateframe-photo-sequence',
+		'slateframe-photography-sequence',
+	);
+
+	$legacy_markers = apply_filters( 'slateframe_content_mode_markers', array() );
+
+	if ( is_array( $legacy_markers ) ) {
+		$markers = array_merge( $markers, $legacy_markers );
+	}
+
+	/**
+	 * Filters class markers that opt a document into Slateframe Photography presentation.
+	 *
+	 * @param string[] $markers Photography presentation markers.
+	 */
+	$markers = apply_filters( 'slateframe_photography_markers', $markers );
+
+	if (
+		is_array( $markers ) &&
+		slateframe_content_has_class_marker( $post->post_content, array_unique( $markers ) )
+	) {
+		return true;
+	}
+
+	return slateframe_blocks_have_lightbox( parse_blocks( $post->post_content ) );
+}
+
+/**
+ * Determine whether the current singular document needs Portfolio/Knowledge styles.
+ *
+ * @return bool
+ */
+function slateframe_content_modes_needed() {
+	if ( ! is_singular() ) {
+		return false;
+	}
+
+	$post = get_post();
+
+	if ( ! $post instanceof WP_Post ) {
+		return false;
+	}
+
+	$markers = array(
 		'is-style-slateframe-project-feature',
 		'is-style-slateframe-learning-path',
-		'slateframe-photography-sequence',
 		'slateframe-project-grid',
 		'slateframe-knowledge-checklist',
 		'is-style-slateframe-steps',
@@ -148,10 +219,10 @@ function slateframe_content_modes_needed() {
 	);
 
 	/**
-	 * Filters the content markers that trigger Slateframe's contextual styles.
+	 * Filters the content markers that trigger Slateframe's shared contextual styles.
 	 *
 	 * Integrations may append site-neutral markers for content that reuses the
-	 * theme's photography, portfolio, or knowledge presentation layer.
+	 * theme's Portfolio or Knowledge presentation layer.
 	 *
 	 * @param string[] $markers Content markers to scan for.
 	 */
@@ -198,6 +269,7 @@ function slateframe_query_loop_styles_needed() {
  */
 function slateframe_assets() {
 	$version              = wp_get_theme()->get( 'Version' );
+	$photography_needed   = slateframe_photography_styles_needed();
 	$content_modes_needed = slateframe_content_modes_needed();
 	$query_loop_needed    = slateframe_query_loop_styles_needed();
 
@@ -243,6 +315,15 @@ function slateframe_assets() {
 			'slateframe-publishing',
 			get_template_directory_uri() . '/assets/css/publishing.css',
 			$publishing_dependencies,
+			$version
+		);
+	}
+
+	if ( $photography_needed ) {
+		wp_enqueue_style(
+			'slateframe-photography',
+			get_template_directory_uri() . '/assets/css/photography.css',
+			array( 'slateframe-reading' ),
 			$version
 		);
 	}

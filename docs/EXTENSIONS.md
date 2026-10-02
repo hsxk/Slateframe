@@ -17,9 +17,21 @@ The filter must return safe HTML. Slateframe sanitizes the returned markup with 
 
 Core does not infer languages, construct translated URLs, or emit a fixed locale list.
 
-## Contextual content-mode markers
+## Contextual presentation markers
 
-Slateframe keeps Photography, Portfolio, and Knowledge presentation out of the base stylesheet. Integrations that reuse those visual modes may append a stable class or block-style marker:
+Slateframe keeps optional presentation out of the base stylesheet and separates Photography from the shared Portfolio/Knowledge layer. Core image or gallery blocks that enable WordPress's native lightbox automatically opt into the Photography layer. New Photography integrations can also append a site-neutral marker:
+
+```php
+add_filter(
+	'slateframe_photography_markers',
+	function ( $markers ) {
+		$markers[] = 'is-style-example-photo-sequence';
+		return $markers;
+	}
+);
+```
+
+Portfolio/Knowledge integrations can continue to use `slateframe_content_mode_markers`:
 
 ```php
 add_filter(
@@ -31,7 +43,7 @@ add_filter(
 );
 ```
 
-Markers are scanned only on singular post content to decide whether the contextual stylesheet is needed. Use a site-neutral class token; do not add locale paths, page IDs, plugin-specific routing assumptions, or user data. The filter must return an array.
+For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned only on singular post content. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. Both filters must return arrays.
 
 ## Compatibility policy
 

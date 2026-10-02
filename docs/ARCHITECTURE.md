@@ -28,7 +28,7 @@ Content inserted through patterns remains ordinary WordPress block content and s
 
 Long-form post/Page presentation lives in `assets/css/reading.css` and is requested only for singular frontend documents. The block editor always receives the same reading layer so authored hierarchy matches the published view.
 
-Photography, portfolio, and knowledge block-style CSS lives in `assets/css/content-modes.css` and is layered on only when singular content contains relevant core blocks. This keeps home, archive, search, and navigation routes on the smaller base stylesheet without hiding pattern functionality behind JavaScript. Photography presentation deliberately reuses the shared media/caption/stack tokens and enhances WordPress Core's native lightbox rather than replacing its interaction model. Dynamic viewport containment, safe-area-aware close placement, scroll locking, reduced motion, and the shared control-size baseline are presentation safeguards only. The public `slateframe_content_mode_markers` filter allows integrations to append stable, site-neutral content markers without making a plugin or locale scheme part of core.
+Photography block/lightbox CSS lives in `assets/css/photography.css`; Portfolio and Knowledge presentation lives in `assets/css/content-modes.css`. Each frontend layer is requested only when singular content needs it, while the editor receives both for authoring parity. Photography detection recognizes both Slateframe's portable style markers and Core image/gallery blocks with native lightbox enabled. This keeps home, archive, search, ordinary reading, and unrelated specialized routes from paying for Photography presentation. Photography reuses shared media/caption/stack/control tokens and enhances WordPress Core's native lightbox rather than replacing its interaction model. Dynamic viewport containment, safe-area-aware placement, scroll locking, reduced motion, and Core-state presentation overrides remain CSS-only safeguards. `slateframe_photography_markers` is the narrow extension point; `slateframe_content_mode_markers` remains the Portfolio/Knowledge extension point and is bridged into Photography detection for compatibility with existing broad callbacks.
 
 ### 5. Progressive enhancement
 
@@ -55,7 +55,7 @@ Plugins/services should own SEO metadata/schema, analytics, caching/CDN, custom 
 
 ## Performance model
 
-Slateframe prefers system fonts, contextual CSS, native browser behavior, explicit asset budgets, and minimal DOM wrappers. CI budgets the base route, singular reading layer, discussions, specialized content modes, and their combined worst case separately so optional presentation cannot silently inflate every page. New runtime dependencies require a measurable product benefit and should not be added merely for visual decoration.
+Slateframe prefers system fonts, contextual CSS, native browser behavior, explicit asset budgets, and minimal DOM wrappers. CI budgets the base route, singular reading layer, discussions, Photography, shared content modes, Portfolio Query Loop composition, and their combined worst cases separately so optional presentation cannot silently inflate every page. New runtime dependencies require a measurable product benefit and should not be added merely for visual decoration.
 
 ## Accessibility model
 
