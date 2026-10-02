@@ -50,7 +50,6 @@
 	line-height: 1.5;
 }
 
-
 .editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
 	height: auto;
 	aspect-ratio: auto;
@@ -64,7 +63,6 @@
 .editor-styles-wrapper .is-style-slateframe-ledger {
 	max-width: var(--slateframe-wide);
 }
-
 
 /* Reading rhythm parity for the post/page editor canvas. */
 .editor-styles-wrapper :is(h2, h3, h4) {
@@ -141,4 +139,49 @@
 .editor-styles-wrapper .wp-block-table th {
 	background: var(--slateframe-surface-soft);
 	font-weight: 700;
+}
+
+.editor-styles-wrapper :is(.wp-block-code, .wp-block-preformatted) {
+	max-inline-size: 100%;
+	overflow: auto;
+	padding: var(--slateframe-stack-gap) var(--slateframe-prose-gap);
+	border-radius: var(--slateframe-radius);
+	background: #111715;
+	color: #eef4f1;
+	font-family: var(--slateframe-mono);
+	line-height: 1.6;
+	scrollbar-gutter: stable;
+	overscroll-behavior-inline: contain;
+}
+
+.editor-styles-wrapper .wp-block-pullquote {
+	padding-block: clamp(1.4rem, 3vw, 2.4rem);
+	border-block: 1px solid var(--slateframe-border);
+	text-align: start;
+}
+
+.editor-styles-wrapper .wp-block-pullquote blockquote {
+	padding-inline-start: 0;
+	border-inline-start: 0;
+	color: var(--slateframe-text);
+	line-height: 1.45;
+}
+
+.editor-styles-wrapper .wp-block-details {
+	padding-block: 0.9rem;
+	border-block: 1px solid var(--slateframe-border);
+}
+
+.editor-styles-wrapper .wp-block-details summary {
+	display: flex;
+	align-items: center;
+	min-block-size: var(--slateframe-control);
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.editor-styles-wrapper .wp-block-footnotes {
+	padding-inline-start: 1.35rem;
+	color: var(--slateframe-muted);
+	font-size: 0.9rem;
 }

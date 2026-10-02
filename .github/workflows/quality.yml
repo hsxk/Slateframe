@@ -64,7 +64,7 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/fixtures/showcase.html phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
@@ -273,7 +273,7 @@ jobs:
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-site
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
-          wp eval '$patterns=WP_Block_Patterns_Registry::get_instance(); foreach (["slateframe/photo-essay","slateframe/photography-contact-sheet","slateframe/photography-feature","slateframe/photography-sequence","slateframe/project-case-study","slateframe/portfolio-index","slateframe/project-brief","slateframe/project-outcomes","slateframe/portfolio-project-grid","slateframe/project-decision-log","slateframe/learning-path","slateframe/knowledge-outline","slateframe/lesson-chapter","slateframe/knowledge-definition","slateframe/knowledge-checklist","slateframe/knowledge-procedure","slateframe/knowledge-comparison","slateframe/editorial-opening","slateframe/photography-diptych","slateframe/editorial-note","slateframe/reading-list"] as $name) { if (!$patterns->is_registered($name)) { throw new RuntimeException($name); } }' --path=/tmp/wp-site
+          wp eval-file "$GITHUB_WORKSPACE/bin/check-pattern-runtime.php" --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
           wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/reading.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
       - name: Validate bounded Appearance settings
@@ -497,6 +497,32 @@ jobs:
             --post_content="$(cat /tmp/slateframe-browser-page.html)" \
             --porcelain)
 
+          EDITOR_ID=$(wp eval '
+          $registry = WP_Block_Patterns_Registry::get_instance();
+          $content = file_get_contents("/tmp/slateframe-browser-page.html");
+          $content .= "\n<!-- wp:pullquote --><figure class=\"wp-block-pullquote\"><blockquote><p>Editorial emphasis stays calm inside the authoring canvas.</p></blockquote></figure><!-- /wp:pullquote -->";
+          foreach (array("slateframe/editorial-opening","slateframe/photography-diptych","slateframe/portfolio-project-grid","slateframe/knowledge-procedure") as $slug) {
+              $pattern = $registry->get_registered($slug);
+              if (!$pattern || empty($pattern["content"])) {
+                  throw new RuntimeException("Missing editor fixture pattern: " . $slug);
+              }
+              $content .= "\n" . $pattern["content"];
+          }
+          $id = wp_insert_post(
+              array(
+                  "post_type" => "page",
+                  "post_status" => "draft",
+                  "post_title" => "Slateframe 编辑器 — محرر Gutenberg — außergewöhnlich long authoring validation",
+                  "post_content" => $content,
+              ),
+              true
+          );
+          if (is_wp_error($id)) {
+              throw new RuntimeException($id->get_error_message());
+          }
+          echo $id;
+          ' --path=/tmp/wp-browser)
+
           CHILD_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \
@@ -599,6 +625,7 @@ jobs:
           echo "SLATEFRAME_PROJECT_PATH=/?page_id=$PROJECT_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_KNOWLEDGE_PATH=/?page_id=$KNOWLEDGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_EDITOR_POST_ID=$EDITOR_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EMPTY_AUTHOR_PATH=/?author=$EMPTY_AUTHOR_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress
