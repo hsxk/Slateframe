@@ -139,6 +139,84 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
+
+test('site identity reflows without truncating multilingual text', async ({ page }, testInfo) => {
+	test.skip(![320, 390, 1440, 1920].includes(projectWidth(testInfo)), 'Site-identity reflow uses representative narrow and wide viewports.');
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	const title = page.locator('.slateframe-brand-title');
+	const tagline = page.locator('.slateframe-brand-tagline');
+	await title.evaluate((node) => {
+		node.textContent = 'Slateframe 可迁移的发布框架 日本語の長いサイト名 العربية ' + 'portable-site-identity-'.repeat(4);
+	});
+	if (await tagline.count()) {
+		await tagline.evaluate((node) => {
+			node.textContent = 'Publishing / 摄影 / 写真 / المعرفة — ' + 'portable-tagline-context-'.repeat(4);
+		});
+	}
+	await page.locator('html').evaluate((node) => { node.style.fontSize = '200%'; });
+
+	const titleMetrics = await title.evaluate((node) => {
+		const style = getComputedStyle(node);
+		const box = node.getBoundingClientRect();
+		return {
+			whiteSpace: style.whiteSpace,
+			textOverflow: style.textOverflow,
+			overflow: style.overflow,
+			scrollWidth: node.scrollWidth,
+			clientWidth: node.clientWidth,
+			scrollHeight: node.scrollHeight,
+			clientHeight: node.clientHeight,
+			left: box.left,
+			right: box.right,
+			viewport: document.documentElement.clientWidth,
+		};
+	});
+	expect(titleMetrics.whiteSpace).not.toBe('nowrap');
+	expect(titleMetrics.textOverflow).not.toBe('ellipsis');
+	expect(titleMetrics.overflow).not.toBe('hidden');
+	expect(titleMetrics.scrollWidth).toBeLessThanOrEqual(titleMetrics.clientWidth + 1);
+	expect(titleMetrics.scrollHeight).toBeLessThanOrEqual(titleMetrics.clientHeight + 1);
+	expect(titleMetrics.left).toBeGreaterThanOrEqual(-1);
+	expect(titleMetrics.right).toBeLessThanOrEqual(titleMetrics.viewport + 1);
+
+	if (await tagline.isVisible()) {
+		const taglineMetrics = await tagline.evaluate((node) => {
+			const style = getComputedStyle(node);
+			return {
+				whiteSpace: style.whiteSpace,
+				textOverflow: style.textOverflow,
+				overflow: style.overflow,
+				scrollWidth: node.scrollWidth,
+				clientWidth: node.clientWidth,
+				scrollHeight: node.scrollHeight,
+				clientHeight: node.clientHeight,
+			};
+		});
+		expect(taglineMetrics.whiteSpace).not.toBe('nowrap');
+		expect(taglineMetrics.textOverflow).not.toBe('ellipsis');
+		expect(taglineMetrics.overflow).not.toBe('hidden');
+		expect(taglineMetrics.scrollWidth).toBeLessThanOrEqual(taglineMetrics.clientWidth + 1);
+		expect(taglineMetrics.scrollHeight).toBeLessThanOrEqual(taglineMetrics.clientHeight + 1);
+	}
+
+	for (const control of [page.locator('[data-color-toggle]'), page.locator('[data-menu-toggle]')]) {
+		await expect(control).toBeVisible();
+		const box = await control.boundingBox();
+		expect(box?.left ?? -1).toBeGreaterThanOrEqual(-1);
+		expect(box?.right ?? Infinity).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
+	}
+	await expectNoHorizontalOverflow(page, '/?site-identity-reflow=200-percent');
+
+	if ([390, 1440].includes(projectWidth(testInfo))) {
+		const screenshotDir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(screenshotDir, { recursive: true });
+		await page.locator('[data-site-header]').screenshot({
+			path: path.join(screenshotDir, testInfo.project.name + '-site-identity-reflow.png'),
+		});
+	}
+});
+
 test('adaptive desktop navigation responds to translated label growth and recovery', async ({ page }, testInfo) => {
 	test.skip(projectWidth(testInfo) !== 1920, 'Translated growth/recovery is sampled on the widest desktop fixture; narrower desktops may already need compact navigation.');
 
