@@ -129,7 +129,7 @@
 	min-inline-size: min(9rem, 68vw);
 	max-inline-size: 100%;
 	padding: var(--slateframe-space-3);
-	border-block-end: var(--slateframe-border-width) solid var(--slateframe-border);
+	border-block-end: var(--slateframe-rule);
 	overflow-wrap: anywhere;
 	white-space: normal;
 	text-align: start;

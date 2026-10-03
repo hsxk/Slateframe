@@ -26,7 +26,7 @@ Native Portfolio Query Pagination uses the same control radius, touch target, in
 
 Long-form hierarchy extends through H6: H2–H6 share the same section-entry rhythm, while lower heading sizes stay at a readable text baseline. Native definition lists remove browser-specific inline indentation and use the component gap to expose term/description relationships; thematic separators reuse heading rhythm and the shared border token. Threaded comments use a logical inline-start guide and bounded indentation so hierarchy remains legible in both LTR and RTL without consuming the mobile reading width.
 
-The accessible control baseline is 44px. Customizer settings may increase it, but must not reduce it.
+The accessible control baseline is 44px on both axes. Customizer settings may increase it, but must not reduce it. Short translated navigation, footer, reply/cancel, pagination, and button labels therefore keep a complete minimum target instead of satisfying the baseline on height alone.
 
 Primary navigation has a hard compact baseline at 1280px and below, then remains content-aware above that breakpoint: if the site identity, translated menu labels, optional language adapter, and header controls cannot coexist without overflow, the same keyboard-accessible compact menu is used. When space returns, the wide row is restored. No-JavaScript navigation remains visible and wrapping rather than being hidden behind the enhancement layer.
 
@@ -36,7 +36,7 @@ Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Site
 
 ## Controls
 
-Buttons, text inputs, selects, pagination targets, menu controls, language integrations, comment controls, and lightbox controls should share the same minimum target, focus language, radius family, and text baseline. This includes Core Search, Core Buttons, Query Pagination, comment consent labels, reply-cancel links, and comment navigation. Visual compactness should come from border and typography choices, not inaccessible hit areas. Disabled controls use the same restrained opacity/cursor language instead of component-specific treatments.
+Buttons, text inputs, selects, pagination targets, menu controls, language integrations, footer actions, comment controls, and lightbox controls should share the same minimum target, focus language, radius family, and text baseline. This includes Core Search, Core Buttons, native archive pagination, Query Pagination, comment consent labels, reply-cancel links, and comment navigation. Long translated action labels must wrap inside the viewport rather than widen the document. The shared `--slateframe-rule` token owns the ordinary one-pixel semantic border so control and divider surfaces do not duplicate border composition across assets. Visual compactness should come from border and typography choices, not inaccessible hit areas. Disabled controls use the same restrained opacity/cursor language instead of component-specific treatments.
 
 ## Contextual assets
 

@@ -79,7 +79,9 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	if (width(testInfo) <= 1280) expect(compactNavigation).toBe(true);
 	const target = compactNavigation ? page.locator('[data-menu-toggle]') : page.locator('[data-primary-nav] a').first();
 	await expect(target).toBeVisible();
-	expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	const targetBox = await target.boundingBox();
+	expect(targetBox?.width || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(targetBox?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	await page.goto('/?s=Slateframe', { waitUntil: 'networkidle' });
 	for (const locator of [page.locator('.slateframe-search-form input[type="search"]'), page.locator('.slateframe-search-form button')]) {
 		await expect(locator).toBeVisible();
@@ -129,7 +131,34 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	near(footerGap, 32 * profile.spacing, 1);
 	const footerLink = page.locator('.browser-footer-link');
 	await expect(footerLink).toBeVisible();
-	expect((await footerLink.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	const footerLinkBox = await footerLink.boundingBox();
+	expect(footerLinkBox?.width || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(footerLinkBox?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	const replyAction = page.locator('.slateframe-comment-list .reply a').first();
+	await expect(replyAction).toBeVisible();
+	const replyBox = await replyAction.boundingBox();
+	expect(replyBox?.width || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(replyBox?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const nativePagination = page.locator('.slateframe-pagination .page-numbers').first();
+	await expect(nativePagination).toBeVisible();
+	const nativePaginationGeometry = await nativePagination.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		const style = getComputedStyle(node);
+		return {
+			width: box.width,
+			height: box.height,
+			radius: Number.parseFloat(style.borderRadius),
+			paddingBlock: Number.parseFloat(style.paddingBlockStart),
+			paddingInline: Number.parseFloat(style.paddingInlineStart),
+		};
+	});
+	expect(nativePaginationGeometry.width).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(nativePaginationGeometry.height).toBeGreaterThanOrEqual(profile.control - 1);
+	near(nativePaginationGeometry.radius, profile.radius, 1);
+	near(nativePaginationGeometry.paddingBlock, 8 * profile.spacing, 1);
+	near(nativePaginationGeometry.paddingInline, 12 * profile.spacing, 1);
 
 	await page.goto(showcasePath, { waitUntil: 'networkidle' });
 	const projectPagination = page.locator('.slateframe-project-grid .wp-block-query-pagination a').first();
@@ -243,7 +272,7 @@ test('appearance profile keeps native Photography lightbox inside the same contr
 });
 
 test('appearance profile stays contained across content modes and captures review evidence', async ({ page }, testInfo) => {
-	const routes = [['page', pagePath], ['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
+	const routes = [['home-controls', '/'], ['search-controls', '/?s=Portable'], ['page', pagePath], ['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
 		['portfolio', process.env.SLATEFRAME_PROJECT_PATH], ['knowledge', process.env.SLATEFRAME_KNOWLEDGE_PATH]].filter(([, route]) => route);
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });

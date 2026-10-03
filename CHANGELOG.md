@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Native archive pagination, translated search/footer actions, and comment reply/cancel controls now have browser contracts for complete target geometry, wrapping, RTL containment, and bounded Appearance behavior.
+- Appearance screenshot evidence now includes home pagination and search/control surfaces at representative mobile and desktop widths for default, compact, and spacious profiles.
 - Appearance default/compact/spacious browser evidence now opens the real WordPress Core Photography lightbox at 390px and 1440px, validating token-driven controls, long multilingual captions, focus restoration, containment, and screenshot artifacts.
 - Photography runtime contracts now verify scroll-lock restoration, normalized lightbox control geometry, RTL/200% close-control containment, and caption/root overflow together with the existing responsive-raster checks.
 - CI now guards the dedicated Photography workflow/test files, asserts Photography editor-style parity in a real WordPress activation, and adds latest WordPress + PHP 8.3 to the compatibility matrix.
@@ -74,6 +76,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Completed the shared control family across primary/language navigation, search/buttons, native pagination, footer links, and comment auxiliary actions with minimum target width as well as height.
+- Centralized ordinary semantic borders on `--slateframe-rule`, removing duplicated border composition across frontend/editor assets while keeping existing runtime budgets unchanged.
 - Native lightbox presentation now clips overlay overflow, normalizes control box geometry without extra JavaScript, and hardens gallery-item intrinsic-width containment while staying inside the existing Photography runtime budget.
 - Split Photography/lightbox presentation into a dedicated contextual stylesheet so Portfolio/Knowledge routes no longer pay for image-viewer CSS; editor parity is preserved.
 - Detect Core image/gallery blocks with native lightbox enabled so ordinary WordPress lightboxes receive Slateframe presentation without requiring a theme-specific class.

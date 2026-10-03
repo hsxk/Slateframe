@@ -34,7 +34,7 @@
 .slateframe-not-found-recent {
 	margin-block-end: var(--slateframe-section);
 	padding-block-start: var(--slateframe-stack-gap);
-	border-block-start: var(--slateframe-border-width) solid var(--slateframe-border);
+	border-block-start: var(--slateframe-rule);
 }
 
 .slateframe-related-heading {
@@ -70,7 +70,7 @@
 
 .slateframe-related-item {
 	min-inline-size: 0;
-	border-block-start: var(--slateframe-border-width) solid var(--slateframe-border);
+	border-block-start: var(--slateframe-rule);
 }
 
 .slateframe-related-item a {
@@ -126,7 +126,7 @@
 	align-items: center;
 	min-block-size: var(--slateframe-control);
 	padding: var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);
-	border: var(--slateframe-border-width) solid var(--slateframe-border);
+	border: var(--slateframe-rule);
 	border-radius: var(--slateframe-radius);
 	color: var(--slateframe-text);
 	text-decoration: none;
@@ -140,7 +140,7 @@
 .slateframe-prose :where(#ez-toc-container, .ez-toc-container) {
 	max-inline-size: 100%;
 	padding: var(--slateframe-stack-gap);
-	border: var(--slateframe-border-width) solid var(--slateframe-border);
+	border: var(--slateframe-rule);
 	border-radius: var(--slateframe-radius);
 	background: var(--slateframe-surface-soft);
 }
