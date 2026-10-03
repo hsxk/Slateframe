@@ -118,6 +118,15 @@ test('native lightbox exposes an accessible close target and prevents background
 	await page.mouse.wheel(0, 600);
 	await page.waitForTimeout(100);
 	expect(await page.evaluate(() => window.scrollY)).toBe(locked.scrollY);
+
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	const restored = await page.evaluate(() => ({
+		overflow: getComputedStyle(document.documentElement).overflow,
+		overscroll: getComputedStyle(document.documentElement).overscrollBehavior,
+	}));
+	expect(restored.overflow).not.toBe('hidden');
+	expect(restored.overscroll).not.toBe('none');
 });
 
 test('native lightbox close control restores focus to its trigger', async ({ page }) => {
@@ -176,12 +185,20 @@ test('photography caption presentation is resilient to long translated content',
 	const metrics = await caption.evaluate((node) => {
 		const box = node.getBoundingClientRect();
 		const style = getComputedStyle(node);
-		return { left: box.left, right: box.right, viewport: document.documentElement.clientWidth, wrap: style.overflowWrap, align: style.textAlign };
+		return {
+			left: box.left,
+			right: box.right,
+			viewport: document.documentElement.clientWidth,
+			wrap: style.overflowWrap,
+			align: style.textAlign,
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
 	});
 	expect(metrics.left).toBeGreaterThanOrEqual(-1);
 	expect(metrics.right).toBeLessThanOrEqual(metrics.viewport + 1);
 	expect(metrics.wrap).toBe('anywhere');
 	expect(['start', 'left', 'right']).toContain(metrics.align);
+	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
 });
 
 test('native lightbox controls keep the shared touch-target baseline', async ({ page }) => {
@@ -233,7 +250,11 @@ test('native lightbox controls inherit Slateframe control geometry and interacti
 				background: style.backgroundColor,
 				fill: style.fill,
 				touchAction: style.touchAction,
+				boxSizing: style.boxSizing,
+				display: style.display,
+				paddingBlockStart: Number.parseFloat(style.paddingBlockStart),
 			};
+
 		});
 		expect(geometry.width).toBeGreaterThanOrEqual(44);
 		expect(geometry.height).toBeGreaterThanOrEqual(44);
@@ -245,6 +266,9 @@ test('native lightbox controls inherit Slateframe control geometry and interacti
 		expect(geometry.background).not.toBe('rgba(0, 0, 0, 0)');
 		expect(geometry.fill).toBe(controlTokens.chromeText);
 		expect(geometry.touchAction).toContain('manipulation');
+		expect(geometry.boxSizing).toBe('border-box');
+		expect(geometry.display).toBe('grid');
+		expect(geometry.paddingBlockStart).toBe(0);
 	}
 
 	await close.focus();
@@ -262,7 +286,7 @@ test('native lightbox remains contained in RTL and at 200 percent text size', as
 		document.documentElement.dir = 'rtl';
 		document.documentElement.style.fontSize = '200%';
 	});
-	const { dialog, enlarged } = await openLightbox(page, 'keyboard');
+	const { dialog, enlarged, close } = await openLightbox(page, 'keyboard');
 	await expect(enlarged).toBeVisible();
 
 	await expect.poll(async () => dialog.evaluate((node) => {
@@ -287,6 +311,25 @@ test('native lightbox remains contained in RTL and at 200 percent text size', as
 	}));
 	expect(metrics.direction).toBe('rtl');
 	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
+	const closeGeometry = await close.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		return {
+			left: box.left,
+			right: box.right,
+			top: box.top,
+			bottom: box.bottom,
+			width: box.width,
+			height: box.height,
+			viewportWidth: document.documentElement.clientWidth,
+			viewportHeight: innerHeight,
+		};
+	});
+	expect(closeGeometry.width).toBeGreaterThanOrEqual(44);
+	expect(closeGeometry.height).toBeGreaterThanOrEqual(44);
+	expect(closeGeometry.left).toBeGreaterThanOrEqual(-1);
+	expect(closeGeometry.top).toBeGreaterThanOrEqual(-1);
+	expect(closeGeometry.right).toBeLessThanOrEqual(closeGeometry.viewportWidth + 1);
+	expect(closeGeometry.bottom).toBeLessThanOrEqual(closeGeometry.viewportHeight + 1);
 });
 
 test('native lightbox controls remain discernible in forced colors', async ({ page }) => {
@@ -318,7 +361,7 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	}));
 	expect(lightboxSurface.background).toBe(lightboxSurface.pageBackground);
 	expect(lightboxSurface.background).not.toBe('rgba(0, 0, 0, 0)');
-	const screenshotDir = path.resolve('test-results/lightbox-evidence');
+	const screenshotDir = path.resolve('test-artifacts/photography-lightbox');
 	await fs.mkdir(screenshotDir, { recursive: true });
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-${testInfo.project.name}.png`), fullPage: false });
 });

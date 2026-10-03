@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Appearance default/compact/spacious browser evidence now opens the real WordPress Core Photography lightbox at 390px and 1440px, validating token-driven controls, long multilingual captions, focus restoration, containment, and screenshot artifacts.
+- Photography runtime contracts now verify scroll-lock restoration, normalized lightbox control geometry, RTL/200% close-control containment, and caption/root overflow together with the existing responsive-raster checks.
+- CI now guards the dedicated Photography workflow/test files, asserts Photography editor-style parity in a real WordPress activation, and adds latest WordPress + PHP 8.3 to the compatibility matrix.
 - Full H2–H6 editorial rhythm, native definition-list treatment, and token-driven thematic separators for long-form publishing and editor parity.
 - Logical threaded-comment hierarchy with RTL-safe indentation and real parent/child WordPress fixture coverage.
 - Portfolio cards now share one vertical flow, semantic media spacing, and row-aligned dates across mixed image/no-image Query Loop results.
@@ -71,6 +74,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Native lightbox presentation now clips overlay overflow, normalizes control box geometry without extra JavaScript, and hardens gallery-item intrinsic-width containment while staying inside the existing Photography runtime budget.
 - Split Photography/lightbox presentation into a dedicated contextual stylesheet so Portfolio/Knowledge routes no longer pay for image-viewer CSS; editor parity is preserved.
 - Detect Core image/gallery blocks with native lightbox enabled so ordinary WordPress lightboxes receive Slateframe presentation without requiring a theme-specific class.
 - Added the narrow `slateframe_photography_markers` extension point while bridging additions from the existing broad content-mode filter for compatibility.

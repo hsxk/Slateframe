@@ -85,6 +85,7 @@ jobs:
         with:
           name: slateframe-photography-runtime
           path: |
+            test-artifacts/photography-lightbox/
             playwright-report/
             test-results/
             /tmp/slateframe-photo-server.log
