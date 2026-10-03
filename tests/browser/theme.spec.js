@@ -203,8 +203,8 @@ test('site identity reflows without truncating multilingual text', async ({ page
 	for (const control of [page.locator('[data-color-toggle]'), page.locator('[data-menu-toggle]')]) {
 		await expect(control).toBeVisible();
 		const box = await control.boundingBox();
-		expect(box?.left ?? -1).toBeGreaterThanOrEqual(-1);
-		expect(box?.right ?? Infinity).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
+		expect(box?.x ?? -1).toBeGreaterThanOrEqual(-1);
+		expect((box?.x ?? Infinity) + (box?.width ?? 0)).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
 	}
 	await expectNoHorizontalOverflow(page, '/?site-identity-reflow=200-percent');
 
