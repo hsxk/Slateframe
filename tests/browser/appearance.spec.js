@@ -151,6 +151,97 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	}
 });
 
+
+test('appearance profile keeps native Photography lightbox inside the same control system', async ({ page }, testInfo) => {
+	const photoPath = process.env.SLATEFRAME_PHOTO_PATH;
+	test.skip(!photoPath, 'Photography fixture is required for Appearance lightbox coverage.');
+
+	await page.goto(photoPath, { waitUntil: 'networkidle' });
+	const caption = page.locator('.browser-photo-feature figcaption').first();
+	await expect(caption).toBeVisible();
+	await caption.evaluate((node) => {
+		node.textContent = '中文摄影说明 日本語の長いキャプション العربية ' + 'portable-long-reference-token-'.repeat(10);
+	});
+	const captionMetrics = await caption.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		const style = getComputedStyle(node);
+		return {
+			left: box.left,
+			right: box.right,
+			viewport: document.documentElement.clientWidth,
+			wrap: style.overflowWrap,
+		};
+	});
+	expect(captionMetrics.left).toBeGreaterThanOrEqual(-1);
+	expect(captionMetrics.right).toBeLessThanOrEqual(captionMetrics.viewport + 1);
+	expect(captionMetrics.wrap).toBe('anywhere');
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+
+	const trigger = page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
+	await expect(trigger).toBeVisible();
+	await trigger.focus();
+	await page.keyboard.press('Enter');
+	const dialog = page.locator('[role="dialog"]').last();
+	await expect(dialog).toBeVisible();
+	const close = dialog.getByRole('button', { name: /close/i });
+	await expect(close).toBeVisible();
+
+	const geometry = await close.evaluate((node) => {
+		const rect = node.getBoundingClientRect();
+		const style = getComputedStyle(node);
+		const root = getComputedStyle(document.documentElement);
+		const probe = document.createElement('i');
+		probe.style.cssText = 'position:absolute;visibility:hidden;inline-size:var(--slateframe-component-gap)';
+		document.body.append(probe);
+		const componentGap = Number.parseFloat(getComputedStyle(probe).inlineSize);
+		probe.remove();
+		return {
+			width: rect.width,
+			height: rect.height,
+			left: rect.left,
+			right: rect.right,
+			top: rect.top,
+			bottom: rect.bottom,
+			viewportWidth: document.documentElement.clientWidth,
+			viewportHeight: innerHeight,
+			radius: Number.parseFloat(style.borderRadius),
+			boxSizing: style.boxSizing,
+			display: style.display,
+			paddingBlockStart: Number.parseFloat(style.paddingBlockStart),
+			marginBlockStart: Number.parseFloat(style.marginBlockStart),
+			marginInlineEnd: Number.parseFloat(style.marginInlineEnd),
+			componentGap,
+			control: Number.parseFloat(root.getPropertyValue('--slateframe-control')),
+		};
+	});
+	expect(geometry.width).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(geometry.height).toBeGreaterThanOrEqual(profile.control - 1);
+	near(geometry.control, profile.control, 1);
+	near(geometry.radius, profile.radius, 1);
+	expect(geometry.boxSizing).toBe('border-box');
+	expect(geometry.display).toBe('grid');
+	expect(geometry.paddingBlockStart).toBe(0);
+	expect(geometry.marginBlockStart).toBeGreaterThanOrEqual(geometry.componentGap - 1);
+	expect(geometry.marginInlineEnd).toBeGreaterThanOrEqual(geometry.componentGap - 1);
+	expect(geometry.left).toBeGreaterThanOrEqual(-1);
+	expect(geometry.top).toBeGreaterThanOrEqual(-1);
+	expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+	expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await page.screenshot({
+		path: path.join(screenshotDir, 'appearance-' + profileName + '-' + testInfo.project.name + '-photography-lightbox.png'),
+		fullPage: false,
+	});
+
+	await page.keyboard.press('Escape');
+	await expect(dialog).toBeHidden();
+	await expect(trigger).toBeFocused();
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
 test('appearance profile stays contained across content modes and captures review evidence', async ({ page }, testInfo) => {
 	const routes = [['page', pagePath], ['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
 		['portfolio', process.env.SLATEFRAME_PROJECT_PATH], ['knowledge', process.env.SLATEFRAME_KNOWLEDGE_PATH]].filter(([, route]) => route);
