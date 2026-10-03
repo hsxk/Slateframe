@@ -756,6 +756,11 @@ jobs:
           set -euo pipefail
           php bin/check-release-metadata.php
           ./bin/build-theme-zip.sh
+          first_sha="$(sha256sum dist/slateframe.zip | cut -d' ' -f1)"
+          ./bin/build-theme-zip.sh /tmp/slateframe-reproducible
+          second_sha="$(sha256sum /tmp/slateframe-reproducible/slateframe.zip | cut -d' ' -f1)"
+          test "$first_sha" = "$second_sha"
+          echo "Reproducible ZIP SHA256: $first_sha"
           unzip -Z1 dist/slateframe.zip > /tmp/package.txt
           grep -qx 'slateframe/style.css' /tmp/package.txt
           grep -qx 'slateframe/functions.php' /tmp/package.txt
