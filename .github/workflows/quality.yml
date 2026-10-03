@@ -413,6 +413,7 @@ jobs:
           PHP
           wp widget add block footer-content 1 --content='<p class="browser-footer-content">Portable footer content fixture. <a class="browser-footer-link" href="/?s=Slateframe">Browse archive / 归档 / アーカイブ</a></p>' --path=/tmp/wp-browser
           wp option update thread_comments 1 --path=/tmp/wp-browser
+          wp option update posts_per_page 4 --path=/tmp/wp-browser
           mkdir -p /tmp/wp-browser/wp-content/uploads/slateframe-fixtures
           cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg <<'SVG'
           <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900"><rect width="1600" height="900" fill="#dfe6df"/><path d="M0 650L500 260l330 250 230-180 540 420v150H0z" fill="#63756c"/><circle cx="1250" cy="220" r="88" fill="#f7f7f4"/></svg>
