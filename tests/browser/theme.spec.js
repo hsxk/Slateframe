@@ -242,8 +242,118 @@ test('spatial tokens keep interactive controls coherent and accessible', async (
 	const targets = page.locator('.slateframe-primary-nav a:visible, [data-menu-toggle]:visible');
 	for (let index = 0; index < await targets.count(); index += 1) {
 		const box = await targets.nth(index).boundingBox();
+		expect(box?.width || 0).toBeGreaterThanOrEqual(44);
 		expect(box?.height || 0).toBeGreaterThanOrEqual(44);
 	}
+});
+
+
+test('native archive pagination inherits the shared control family', async ({ page }) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const pagination = page.locator('.slateframe-pagination');
+	await expect(pagination).toBeVisible();
+	const controls = pagination.locator('.page-numbers');
+	expect(await controls.count()).toBeGreaterThan(1);
+
+	const tokens = await page.evaluate(() => {
+		const root = getComputedStyle(document.documentElement);
+		const probe = document.createElement('i');
+		probe.style.cssText = 'position:absolute;visibility:hidden;padding-inline-start:var(--slateframe-control-padding-inline)';
+		document.body.append(probe);
+		const paddingInline = Number.parseFloat(getComputedStyle(probe).paddingInlineStart);
+		probe.remove();
+		return {
+			control: Number.parseFloat(root.getPropertyValue('--slateframe-control')),
+			radius: Number.parseFloat(root.getPropertyValue('--slateframe-radius')),
+			paddingInline,
+		};
+	});
+
+	for (let index = 0; index < await controls.count(); index += 1) {
+		const control = controls.nth(index);
+		if (!await control.isVisible()) continue;
+		const geometry = await control.evaluate((node) => {
+			const box = node.getBoundingClientRect();
+			const style = getComputedStyle(node);
+			return {
+				width: box.width,
+				height: box.height,
+				radius: Number.parseFloat(style.borderRadius),
+				paddingInline: Number.parseFloat(style.paddingInlineStart),
+				wrap: style.overflowWrap,
+			};
+		});
+		expect(geometry.width).toBeGreaterThanOrEqual(tokens.control - 1);
+		expect(geometry.height).toBeGreaterThanOrEqual(tokens.control - 1);
+		expect(Math.abs(geometry.radius - tokens.radius)).toBeLessThanOrEqual(1);
+		expect(Math.abs(geometry.paddingInline - tokens.paddingInline)).toBeLessThanOrEqual(1);
+		expect(geometry.wrap).toBe('anywhere');
+	}
+
+	const next = pagination.locator('.next.page-numbers').first();
+	if (await next.count()) {
+		await next.evaluate((node) => {
+			node.textContent = '下一页 日本語 العربية ' + 'portable-pagination-token-'.repeat(10);
+		});
+	}
+	await expectNoHorizontalOverflow(page, '/');
+
+	await page.locator('html').evaluate((node) => { node.dir = 'rtl'; });
+	await expectNoHorizontalOverflow(page, '/?rtl-pagination-fixture=1');
+});
+
+test('translated search and footer actions stay contained inside shared controls', async ({ page }) => {
+	await page.goto('/?s=Portable', { waitUntil: 'networkidle' });
+	const searchButton = page.locator('.slateframe-search-form button').first();
+	await expect(searchButton).toBeVisible();
+	await searchButton.evaluate((node) => {
+		node.textContent = '搜索 搜尋 検索 العربية ' + 'portable-search-action-'.repeat(10);
+	});
+	const searchGeometry = await searchButton.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		return {
+			width: box.width,
+			height: box.height,
+			viewport: document.documentElement.clientWidth,
+			right: box.right,
+			wrap: getComputedStyle(node).overflowWrap,
+		};
+	});
+	expect(searchGeometry.width).toBeGreaterThanOrEqual(44);
+	expect(searchGeometry.height).toBeGreaterThanOrEqual(44);
+	expect(searchGeometry.right).toBeLessThanOrEqual(searchGeometry.viewport + 1);
+	expect(searchGeometry.wrap).toBe('anywhere');
+	await expectNoHorizontalOverflow(page, '/?s=Portable');
+
+	const footerLink = page.locator('.browser-footer-link').first();
+	await expect(footerLink).toBeVisible();
+	await footerLink.evaluate((node) => {
+		node.textContent = 'Browse archive / 归档 / アーカイブ / الأرشيف ' + 'portable-footer-link-'.repeat(10);
+	});
+	const footerBox = await footerLink.boundingBox();
+	expect(footerBox?.width || 0).toBeGreaterThanOrEqual(44);
+	expect(footerBox?.height || 0).toBeGreaterThanOrEqual(44);
+	await expectNoHorizontalOverflow(page, '/?s=Portable#footer-control-fixture');
+});
+
+test('comment reply and cancel actions keep complete touch targets', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const reply = page.locator('.slateframe-comment-list .reply a').first();
+	await expect(reply).toBeVisible();
+	const replyBox = await reply.boundingBox();
+	expect(replyBox?.width || 0).toBeGreaterThanOrEqual(44);
+	expect(replyBox?.height || 0).toBeGreaterThanOrEqual(44);
+
+	await reply.click();
+	const cancel = page.locator('#cancel-comment-reply-link');
+	await expect(cancel).toBeVisible();
+	const cancelBox = await cancel.boundingBox();
+	expect(cancelBox?.width || 0).toBeGreaterThanOrEqual(44);
+	expect(cancelBox?.height || 0).toBeGreaterThanOrEqual(44);
+	await cancel.evaluate((node) => {
+		node.textContent = '取消回复 返信をキャンセル إلغاء الرد ' + 'portable-comment-action-'.repeat(8);
+	});
+	await expectNoHorizontalOverflow(page, pagePath + '#respond');
 });
 
 test('threaded comment replies load only on singular discussions', async ({ page }) => {
