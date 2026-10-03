@@ -361,7 +361,7 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	}));
 	expect(lightboxSurface.background).toBe(lightboxSurface.pageBackground);
 	expect(lightboxSurface.background).not.toBe('rgba(0, 0, 0, 0)');
-	const screenshotDir = path.resolve('test-results/lightbox-evidence');
+	const screenshotDir = path.resolve('test-artifacts/photography-lightbox');
 	await fs.mkdir(screenshotDir, { recursive: true });
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-${testInfo.project.name}.png`), fullPage: false });
 });
