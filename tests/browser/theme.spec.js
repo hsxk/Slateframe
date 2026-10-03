@@ -208,11 +208,41 @@ test('site identity reflows without truncating multilingual text', async ({ page
 	}
 	await expectNoHorizontalOverflow(page, '/?site-identity-reflow=200-percent');
 
-	if ([390, 1440].includes(projectWidth(testInfo))) {
-		const screenshotDir = path.resolve('test-artifacts/screenshots');
-		await fs.mkdir(screenshotDir, { recursive: true });
-		await page.locator('[data-site-header]').screenshot({
-			path: path.join(screenshotDir, testInfo.project.name + '-site-identity-reflow.png'),
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await page.locator('[data-site-header]').screenshot({
+		path: path.join(screenshotDir, testInfo.project.name + '-site-identity-reflow.png'),
+	});
+});
+
+test('200% text enlargement keeps core content modes contained', async ({ page }, testInfo) => {
+	test.skip(projectWidth(testInfo) !== 320, 'The narrowest viewport is the strongest text-resize containment fixture.');
+	const routes = ['/', '/?s=Portable', pagePath, photoPath, projectPath, knowledgePath, showcasePath];
+
+	for (const route of routes) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.locator('html').evaluate((node) => { node.style.fontSize = '200%'; });
+		await expectNoHorizontalOverflow(page, route + '#text-resize-200');
+	}
+
+	await page.goto(knowledgePath, { waitUntil: 'networkidle' });
+	await page.locator('html').evaluate((node) => {
+		node.style.fontSize = '200%';
+		node.dir = 'rtl';
+	});
+	await expectNoHorizontalOverflow(page, knowledgePath + '#rtl-text-resize-200');
+
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	for (const [name, route] of [['home', '/'], ['portfolio', projectPath], ['knowledge-rtl', knowledgePath]]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.locator('html').evaluate((node, rtl) => {
+			node.style.fontSize = '200%';
+			if (rtl) node.dir = 'rtl';
+		}, name === 'knowledge-rtl');
+		await page.screenshot({
+			path: path.join(screenshotDir, `viewport-320-text-resize-${name}.png`),
+			fullPage: true,
 		});
 	}
 });
