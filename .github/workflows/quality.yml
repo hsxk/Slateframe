@@ -32,6 +32,8 @@ jobs:
           node --check assets/js/theme.js
           node --check playwright.config.js
           find tests/browser -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Validate build script syntax
+        run: bash -n bin/build-theme-zip.sh
       - name: Guard public namespace and language-agnostic runtime
         shell: bash
         run: |
