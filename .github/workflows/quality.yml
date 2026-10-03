@@ -68,6 +68,11 @@ jobs:
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
+          test "$(grep -Fo 'var(--slateframe-border-width) solid var(--slateframe-border)' style.css | wc -l | tr -d ' ')" -eq 1
+          if grep -FRq 'var(--slateframe-border-width) solid var(--slateframe-border)' assets/css; then
+            echo 'Component styles must consume --slateframe-rule instead of rebuilding the semantic border.' >&2
+            exit 1
+          fi
           test $(wc -c < style.css) -le 16000
           test $(wc -c < assets/css/navigation.css) -le 4000
           test $(wc -c < assets/css/footer.css) -le 2000
