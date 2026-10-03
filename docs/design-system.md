@@ -28,7 +28,7 @@ Long-form hierarchy extends through H6: H2–H6 share the same section-entry rhy
 
 The accessible control baseline is 44px on both axes. Customizer settings may increase it, but must not reduce it. Short translated navigation, footer, reply/cancel, pagination, and button labels therefore keep a complete minimum target instead of satisfying the baseline on height alone.
 
-Primary navigation has a hard compact baseline at 1280px and below, then remains content-aware above that breakpoint: if the site identity, translated menu labels, optional language adapter, and header controls cannot coexist without overflow, the same keyboard-accessible compact menu is used. When space returns, the wide row is restored. No-JavaScript navigation remains visible and wrapping rather than being hidden behind the enhancement layer.
+Primary navigation has a hard compact baseline at 1280px and below, then remains content-aware above that breakpoint: if the site identity, translated menu labels, optional language adapter, and header controls cannot coexist without overflow, the same keyboard-accessible compact menu is used. The site title and visible tagline are content, not disposable chrome: long multilingual identity text wraps instead of being ellipsized, and the header may grow in the block axis under translation or 200% text enlargement while its controls remain in the viewport. When space returns, the wide row is restored. No-JavaScript navigation remains visible and wrapping rather than being hidden behind the enhancement layer.
 
 ## Widths
 
