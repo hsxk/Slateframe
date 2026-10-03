@@ -56,7 +56,7 @@ Reduced motion is a system-wide presentation contract: decorative hover transfor
 
 ## Appearance bounds
 
-Customizer ranges are product guardrails, not arbitrary CSS editors. Minimum/default/maximum states must remain visually balanced across header, search, article, galleries, portfolio patterns, knowledge patterns, pagination, comments, and footer. Page, showcase, photography, portfolio, and knowledge evidence is captured at representative mobile and desktop widths for all three spatial profiles so layout changes are reviewed rather than inferred from token values alone.
+Customizer ranges are product guardrails, not arbitrary CSS editors. Minimum/default/maximum states must remain visually balanced across header, search, article, galleries, portfolio patterns, knowledge patterns, pagination, comments, and footer. Page, showcase, photography, portfolio, and knowledge evidence is captured at representative mobile and desktop widths for all three spatial profiles so layout changes are reviewed rather than inferred from token values alone. Photography profile evidence must also open the real Core lightbox: its close target follows the active control-size/radius tokens, long multilingual captions stay contained, keyboard focus returns after Escape, and focused overlay screenshots are retained for both representative widths.
 
 ## Direction and language
 
