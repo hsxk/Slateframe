@@ -440,6 +440,24 @@ jobs:
           <h3 class="wp-block-heading browser-reading-h3">Details remain subordinate</h3>
           <!-- /wp:heading -->
 
+          <!-- wp:heading {"level":4,"className":"browser-reading-h4"} -->
+          <h4 class="wp-block-heading browser-reading-h4">Operational detail stays in the hierarchy</h4>
+          <!-- /wp:heading -->
+          <!-- wp:heading {"level":5,"className":"browser-reading-h5"} -->
+          <h5 class="wp-block-heading browser-reading-h5">Supporting note remains readable</h5>
+          <!-- /wp:heading -->
+          <!-- wp:heading {"level":6,"className":"browser-reading-h6"} -->
+          <h6 class="wp-block-heading browser-reading-h6">Smallest heading keeps the text baseline</h6>
+          <!-- /wp:heading -->
+
+          <!-- wp:html -->
+          <dl class="browser-definition-list"><dt>Constraint</dt><dd>Keep portable content readable without widening the document.</dd><dt>Evidence</dt><dd>Use the rendered document and its browser contract.</dd></dl>
+          <!-- /wp:html -->
+
+          <!-- wp:separator {"className":"browser-reading-separator"} -->
+          <hr class="wp-block-separator has-alpha-channel-opacity browser-reading-separator"/>
+          <!-- /wp:separator -->
+
           <!-- wp:list {"className":"browser-nested-list"} -->
           <ul class="browser-nested-list"><li>Primary reading point<ul><li>Nested supporting detail</li><li>Second supporting detail</li></ul></li><li>Following reading point</li></ul>
           <!-- /wp:list -->
@@ -596,12 +614,21 @@ jobs:
             --post_content='<p>slateframe-untitled-fixture-token keeps untitled content discoverable.</p>' \
             --porcelain)
 
-          wp comment create \
+          PARENT_COMMENT_ID=$(wp comment create \
             --path=/tmp/wp-browser \
             --comment_post_ID="$PAGE_ID" \
             --comment_author='CI Reader' \
             --comment_author_email='ci-reader@example.com' \
             --comment_content='Page comment fixture.' \
+            --comment_approved=1 \
+            --porcelain)
+          wp comment create \
+            --path=/tmp/wp-browser \
+            --comment_post_ID="$PAGE_ID" \
+            --comment_parent="$PARENT_COMMENT_ID" \
+            --comment_author='Nested Reader' \
+            --comment_author_email='nested-reader@example.com' \
+            --comment_content='Nested reply fixture — 中文 العربية.' \
             --comment_approved=1
 
           PHOTO_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Photography Fixture' --post_content='<!-- wp:group {"align":"wide","className":"slateframe-pattern slateframe-photography-feature","layout":{"type":"constrained"}} --><div class="wp-block-group alignwide slateframe-pattern slateframe-photography-feature"><!-- wp:image {"align":"wide","className":"browser-photo-feature is-style-slateframe-photo-feature"} --><figure class="wp-block-image alignwide browser-photo-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Landscape fixture"><figcaption>Landscape fixture caption</figcaption></figure><!-- /wp:image --><!-- wp:gallery {"align":"wide","className":"browser-photo-gallery is-style-slateframe-contact-sheet"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-gallery is-style-slateframe-contact-sheet"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide landscape fixture"><figcaption>Wide frame</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Tall portrait fixture"><figcaption>Portrait frame</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery --></div><!-- /wp:group --><!-- wp:gallery {"align":"wide","className":"browser-photo-diptych is-style-slateframe-diptych"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-diptych is-style-slateframe-diptych"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Diptych landscape"></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Diptych portrait"></figure><!-- /wp:image --></figure><!-- /wp:gallery -->' --porcelain)

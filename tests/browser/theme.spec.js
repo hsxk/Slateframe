@@ -354,6 +354,13 @@ test('editorial reading rhythm distinguishes headings, nested lists, code, table
 		const root = getComputedStyle(document.documentElement);
 		const h2 = document.querySelector('.browser-reading-h2');
 		const h3 = document.querySelector('.browser-reading-h3');
+		const h4 = document.querySelector('.browser-reading-h4');
+		const h5 = document.querySelector('.browser-reading-h5');
+		const h6 = document.querySelector('.browser-reading-h6');
+		const definition = document.querySelector('.browser-definition-list');
+		const term = definition.querySelector('dt');
+		const description = definition.querySelector('dd');
+		const separator = document.querySelector('.browser-reading-separator');
 		const nested = document.querySelector('.browser-nested-list li > ul');
 		const code = document.querySelector('.wp-block-code');
 		const th = document.querySelector('.browser-data-table th');
@@ -377,6 +384,18 @@ test('editorial reading rhythm distinguishes headings, nested lists, code, table
 			space3: tokenPixels('--slateframe-space-3'),
 			h2Size: Number.parseFloat(h2Styles.fontSize),
 			h3Size: Number.parseFloat(getComputedStyle(h3).fontSize),
+			h4Size: Number.parseFloat(getComputedStyle(h4).fontSize),
+			h5Size: Number.parseFloat(getComputedStyle(h5).fontSize),
+			h6Size: Number.parseFloat(getComputedStyle(h6).fontSize),
+			h4MarginStart: Number.parseFloat(getComputedStyle(h4).marginBlockStart),
+			h5MarginStart: Number.parseFloat(getComputedStyle(h5).marginBlockStart),
+			h6MarginStart: Number.parseFloat(getComputedStyle(h6).marginBlockStart),
+			definitionDisplay: getComputedStyle(definition).display,
+			definitionGap: Number.parseFloat(getComputedStyle(definition).gap),
+			termWeight: Number.parseFloat(getComputedStyle(term).fontWeight),
+			descriptionInset: Number.parseFloat(getComputedStyle(description).marginInlineStart),
+			separatorMargin: Number.parseFloat(getComputedStyle(separator).marginBlockStart),
+			separatorBorder: Number.parseFloat(getComputedStyle(separator).borderBlockStartWidth),
 			h2MarginStart: Number.parseFloat(h2Styles.marginBlockStart),
 			h2MarginEnd: Number.parseFloat(h2Styles.marginBlockEnd),
 			nestedGap: Number.parseFloat(getComputedStyle(nested).marginBlockStart),
@@ -392,6 +411,19 @@ test('editorial reading rhythm distinguishes headings, nested lists, code, table
 	expect(rhythm.headingGap).toBeGreaterThan(rhythm.proseGap);
 	expect(rhythm.listGap).toBeGreaterThan(0);
 	expect(rhythm.h2Size).toBeGreaterThan(rhythm.h3Size);
+	expect(rhythm.h3Size).toBeGreaterThan(rhythm.h4Size);
+	expect(rhythm.h4Size).toBeGreaterThan(rhythm.h5Size);
+	expect(rhythm.h5Size).toBeGreaterThanOrEqual(16);
+	expect(rhythm.h6Size).toBeGreaterThanOrEqual(16);
+	for (const margin of [rhythm.h4MarginStart, rhythm.h5MarginStart, rhythm.h6MarginStart]) {
+		expect(Math.abs(margin - rhythm.headingGap)).toBeLessThanOrEqual(1);
+	}
+	expect(rhythm.definitionDisplay).toBe('grid');
+	expect(rhythm.definitionGap).toBeGreaterThan(0);
+	expect(rhythm.termWeight).toBeGreaterThanOrEqual(700);
+	expect(rhythm.descriptionInset).toBe(0);
+	expect(Math.abs(rhythm.separatorMargin - rhythm.headingGap)).toBeLessThanOrEqual(1);
+	expect(rhythm.separatorBorder).toBeGreaterThanOrEqual(1);
 	expect(Math.abs(rhythm.h2MarginStart - rhythm.headingGap)).toBeLessThanOrEqual(1);
 	expect(Math.abs(rhythm.h2MarginEnd - rhythm.headingAfter)).toBeLessThanOrEqual(1);
 	expect(rhythm.nestedGap).toBeGreaterThanOrEqual(rhythm.listGap - 1);
@@ -480,6 +512,31 @@ test('comment thread remains on the prose reading axis', async ({ page }) => {
 	});
 
 	expect(Math.abs(axes.headingLeft - axes.listLeft)).toBeLessThanOrEqual(1);
+
+	const children = page.locator('.slateframe-comment-list .children').first();
+	await expect(children).toBeVisible();
+	const hierarchy = await children.evaluate((element) => {
+		const styles = getComputedStyle(element);
+		return {
+			padding: Number.parseFloat(styles.paddingInlineStart),
+			border: Number.parseFloat(styles.borderInlineStartWidth),
+		};
+	});
+	expect(hierarchy.padding).toBeGreaterThan(0);
+	expect(hierarchy.border).toBeGreaterThanOrEqual(1);
+
+	await page.locator('html').evaluate((element) => { element.dir = 'rtl'; });
+	const rtlBorders = await children.evaluate((element) => {
+		const styles = getComputedStyle(element);
+		return {
+			direction: styles.direction,
+			left: Number.parseFloat(styles.borderLeftWidth),
+			right: Number.parseFloat(styles.borderRightWidth),
+		};
+	});
+	expect(rtlBorders.direction).toBe('rtl');
+	expect(rtlBorders.right).toBeGreaterThan(rtlBorders.left);
+	await expectNoHorizontalOverflow(page, pagePath);
 });
 
 test('blockquote remains on the prose reading axis', async ({ page }) => {
@@ -883,6 +940,31 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 		expect(tracks).toBe(2);
 	} else {
 		expect(tracks).toBe(3);
+	}
+
+	const featuredImage = page.locator('.browser-project-grid .wp-block-post-featured-image').first();
+	if (await featuredImage.count()) {
+		const mediaRhythm = await featuredImage.evaluate((element) => {
+			const probe = document.createElement('i');
+			probe.style.cssText = 'position:absolute;visibility:hidden;inline-size:var(--slateframe-media-gap)';
+			document.body.append(probe);
+			const mediaGap = Number.parseFloat(getComputedStyle(probe).inlineSize);
+			probe.remove();
+			return { mediaGap, margin: Number.parseFloat(getComputedStyle(element).marginBlockEnd) };
+		});
+		expect(Math.abs(mediaRhythm.margin - mediaRhythm.mediaGap)).toBeLessThanOrEqual(1);
+	}
+
+	if (projectWidth(testInfo) > 900) {
+		const firstRow = await page.locator('.browser-project-grid .slateframe-project-card').evaluateAll((cards) =>
+			cards.slice(0, 3).map((card) => {
+				const cardBox = card.getBoundingClientRect();
+				const dateBox = card.querySelector('.wp-block-post-date').getBoundingClientRect();
+				return { height: cardBox.height, dateBottom: dateBox.bottom };
+			})
+		);
+		expect(Math.max(...firstRow.map((item) => item.height)) - Math.min(...firstRow.map((item) => item.height))).toBeLessThanOrEqual(2);
+		expect(Math.max(...firstRow.map((item) => item.dateBottom)) - Math.min(...firstRow.map((item) => item.dateBottom))).toBeLessThanOrEqual(2);
 	}
 
 	const titles = page.locator('.browser-project-grid .wp-block-post-title');

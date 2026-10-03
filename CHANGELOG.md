@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Full H2–H6 editorial rhythm, native definition-list treatment, and token-driven thematic separators for long-form publishing and editor parity.
+- Logical threaded-comment hierarchy with RTL-safe indentation and real parent/child WordPress fixture coverage.
+- Portfolio cards now share one vertical flow, semantic media spacing, and row-aligned dates across mixed image/no-image Query Loop results.
 - Self-updating shipped-pattern runtime validation derived from pattern headers, with exact registry parity, duplicate/mismatched slug detection, and parseability coverage for future patterns.
 - Gutenberg visual fixtures now dismiss the Core welcome guide before screenshot capture so editor artifacts remain directly reviewable.
 - Gutenberg visual evidence is split into editor-top and representative Editorial, Photography, Portfolio, and Knowledge pattern captures at mobile and desktop widths so Core's long editor canvas cannot hide the surfaces under review.
