@@ -22,7 +22,9 @@ The six editor spacing presets (`XS` through `2XL`) resolve from `--slateframe-s
 
 Footer columns and optional footer-widget content are sibling components, so their internal separation derives from stack rhythm; section whitespace remains reserved for the footer's relationship to the page above. Footer widgets render in a responsive auto-fit grid, reset list chrome, and keep links on the shared control-height baseline; the brand/navigation/copyright row becomes a single logical column on narrow screens. The footer stylesheet is a global shell asset alongside navigation and remains inside the unchanged aggregate base-runtime budget.
 
-Native Portfolio Query Pagination uses the same control radius, touch target, inline/component gaps, and current-state surface hierarchy as archive pagination. Project cards must remain coherent when a post has no featured image; absence of media never creates a fake placeholder or content-model dependency.
+Native Portfolio Query Pagination uses the same control radius, touch target, inline/component gaps, and current-state surface hierarchy as archive pagination. Project cards must remain coherent when a post has no featured image; absence of media never creates a fake placeholder or content-model dependency. Cards use one vertical flow, media consumes the shared media gap, and dates settle to the row baseline so mixed image/no-image items remain comparable without manufacturing empty media.
+
+Long-form hierarchy extends through H6: H2–H6 share the same section-entry rhythm, while lower heading sizes stay at a readable text baseline. Native definition lists remove browser-specific inline indentation and use the component gap to expose term/description relationships; thematic separators reuse heading rhythm and the shared border token. Threaded comments use a logical inline-start guide and bounded indentation so hierarchy remains legible in both LTR and RTL without consuming the mobile reading width.
 
 The accessible control baseline is 44px. Customizer settings may increase it, but must not reduce it.
 
