@@ -17,6 +17,7 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 - Optional multilingual adapter examples for common plugins, kept outside core dependency paths.
 - Additional editorial patterns based on core blocks.
+- Continue mobile Photography contact-sheet rhythm review with real mixed-orientation raster evidence at 320–412px.
 - Performance regression tracking as fixtures become more representative.
 - Release/versioning policy once a stable compatibility surface exists.
 
