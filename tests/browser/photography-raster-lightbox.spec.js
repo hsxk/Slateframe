@@ -1,3 +1,4 @@
+const AxeBuilder = require('@axe-core/playwright').default;
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const path = require('node:path');
@@ -13,8 +14,8 @@ async function openRasterPhotography(page) {
 	await expect(page.locator('#main-content')).toBeVisible();
 }
 
-async function openLightbox(page, activation = 'click') {
-	const trigger = page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
+async function openLightbox(page, activation = 'click', triggerOverride = null) {
+	const trigger = triggerOverride || page.locator('#main-content button.wp-lightbox-container, #main-content .wp-lightbox-container button').first();
 	await expect(trigger).toBeVisible();
 	if (activation === 'keyboard') {
 		await trigger.focus();
@@ -61,6 +62,70 @@ test('raster candidate selection remains appropriate for the rendered viewport',
 	expect(data.renderedWidth).toBeLessThanOrEqual(data.viewportWidth + 1);
 	expect(data.overflow).toBeLessThanOrEqual(1);
 	expect(data.currentSrc).toContain('slateframe-raster');
+});
+
+test('mixed raster gallery preserves responsive portrait and square media without cropping', async ({ page }) => {
+	await openRasterPhotography(page);
+	const gallery = page.locator('.browser-raster-gallery');
+	await expect(gallery).toBeVisible();
+	const images = gallery.locator('img');
+	await expect(images).toHaveCount(2);
+	const metrics = await images.evaluateAll((nodes) => nodes.map((node) => {
+		const box = node.getBoundingClientRect();
+		return {
+			naturalWidth: node.naturalWidth,
+			naturalHeight: node.naturalHeight,
+			renderedWidth: box.width,
+			renderedHeight: box.height,
+			srcset: node.getAttribute('srcset') || '',
+			sizes: node.getAttribute('sizes') || '',
+		};
+	}));
+	expect(metrics[0].naturalHeight).toBeGreaterThan(metrics[0].naturalWidth);
+	expect(Math.abs(metrics[1].naturalWidth - metrics[1].naturalHeight)).toBeLessThanOrEqual(2);
+	for (const item of metrics) {
+		expect(item.renderedWidth).toBeGreaterThan(0);
+		expect(item.renderedHeight).toBeGreaterThan(0);
+		expect(item.srcset.split(',').length).toBeGreaterThanOrEqual(2);
+		expect(item.sizes).not.toBe('');
+	}
+	const captions = gallery.locator('figcaption');
+	await expect(captions).toHaveCount(2);
+	for (let index = 0; index < await captions.count(); index += 1) {
+		const style = await captions.nth(index).evaluate((node) => ({
+			position: getComputedStyle(node).position,
+			wrap: getComputedStyle(node).overflowWrap,
+		}));
+		expect(style.position).toBe('static');
+		expect(style.wrap).toBe('anywhere');
+	}
+	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
+test('native lightbox contains a portrait raster at its intrinsic orientation', async ({ page }) => {
+	await openRasterPhotography(page);
+	const trigger = page.locator('.browser-raster-gallery button.wp-lightbox-container, .browser-raster-gallery .wp-lightbox-container button').first();
+	const { dialog, enlarged } = await openLightbox(page, 'keyboard', trigger);
+	await expect(dialog).toHaveAccessibleName(/Raster portrait fixture/i);
+	await expect(enlarged).toBeVisible();
+	const geometry = await enlarged.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		return {
+			naturalWidth: node.naturalWidth,
+			naturalHeight: node.naturalHeight,
+			left: box.left,
+			right: box.right,
+			top: box.top,
+			bottom: box.bottom,
+			viewportWidth: document.documentElement.clientWidth,
+			viewportHeight: innerHeight,
+		};
+	});
+	expect(geometry.naturalHeight).toBeGreaterThan(geometry.naturalWidth);
+	expect(geometry.left).toBeGreaterThanOrEqual(-1);
+	expect(geometry.top).toBeGreaterThanOrEqual(-1);
+	expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+	expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
 });
 
 test('native lightbox opens from keyboard and exposes responsive enlarged media', async ({ page }) => {
@@ -127,6 +192,20 @@ test('native lightbox exposes an accessible close target and prevents background
 	}));
 	expect(restored.overflow).not.toBe('hidden');
 	expect(restored.overscroll).not.toBe('none');
+});
+
+test('native lightbox dialog has no automated WCAG A or AA violations', async ({ page }) => {
+	await openRasterPhotography(page);
+	await openLightbox(page, 'keyboard');
+	const results = await new AxeBuilder({ page })
+		.include('[role="dialog"]')
+		.withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+		.analyze();
+	expect(results.violations.map((violation) => ({
+		id: violation.id,
+		impact: violation.impact,
+		targets: violation.nodes.map((node) => node.target),
+	}))).toEqual([]);
 });
 
 test('native lightbox close control restores focus to its trigger', async ({ page }) => {
@@ -354,14 +433,23 @@ test('native lightbox controls remain discernible in forced colors', async ({ pa
 test('native lightbox captures representative mobile and desktop evidence', async ({ page }, testInfo) => {
 	test.skip(!representativeWidths.includes(projectWidth(testInfo)), 'Focused visual evidence uses representative mobile and desktop widths.');
 	await openRasterPhotography(page);
-	await openLightbox(page, 'keyboard');
+	const screenshotDir = path.resolve('test-artifacts/photography-lightbox');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await page.screenshot({ path: path.join(screenshotDir, `photography-page-${testInfo.project.name}.png`), fullPage: true });
+
+	const feature = await openLightbox(page, 'keyboard');
 	const lightboxSurface = await page.locator('.wp-lightbox-overlay').evaluate((node) => ({
 		background: getComputedStyle(node).backgroundColor,
 		pageBackground: getComputedStyle(document.body).backgroundColor,
 	}));
 	expect(lightboxSurface.background).toBe(lightboxSurface.pageBackground);
 	expect(lightboxSurface.background).not.toBe('rgba(0, 0, 0, 0)');
-	const screenshotDir = path.resolve('test-artifacts/photography-lightbox');
-	await fs.mkdir(screenshotDir, { recursive: true });
-	await page.screenshot({ path: path.join(screenshotDir, `lightbox-${testInfo.project.name}.png`), fullPage: false });
+	await page.screenshot({ path: path.join(screenshotDir, `lightbox-landscape-${testInfo.project.name}.png`), fullPage: false });
+	await page.keyboard.press('Escape');
+	await expect(feature.dialog).toBeHidden();
+
+	const portraitTrigger = page.locator('.browser-raster-gallery button.wp-lightbox-container, .browser-raster-gallery .wp-lightbox-container button').first();
+	const portrait = await openLightbox(page, 'keyboard', portraitTrigger);
+	await expect(portrait.enlarged).toBeVisible();
+	await page.screenshot({ path: path.join(screenshotDir, `lightbox-portrait-${testInfo.project.name}.png`), fullPage: false });
 });
