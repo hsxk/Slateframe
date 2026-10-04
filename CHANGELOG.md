@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
-- Browser regression and screenshot evidence for long mixed-script site identity at 200% text enlargement across representative 320/390/1440/1920 viewports.
+- Browser regression and screenshot evidence for long mixed-script site identity at 200% text enlargement across 320/375/390/412/768/1440/1920 viewports, including narrow-header row separation, non-sticky zoom fallback, compact-menu focus reachability, and vertical flow containment.
 - Release CI now performs two independent builds of the same revision and requires byte-identical SHA256 output.
 - Native archive pagination, translated search/footer actions, and comment reply/cancel controls now have browser contracts for complete target geometry, wrapping, RTL containment, and bounded Appearance behavior.
 - Appearance screenshot evidence now includes home pagination and search/control surfaces at representative mobile and desktop widths for default, compact, and spacious profiles.
