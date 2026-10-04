@@ -108,24 +108,21 @@ test('native lightbox contains a portrait raster at its intrinsic orientation', 
 	const { dialog, enlarged } = await openLightbox(page, 'keyboard', trigger);
 	await expect(dialog).toHaveAccessibleName(/Raster portrait fixture/i);
 	await expect(enlarged).toBeVisible();
-	const geometry = await enlarged.evaluate((node) => {
+	const orientation = await enlarged.evaluate((node) => ({
+		naturalWidth: node.naturalWidth,
+		naturalHeight: node.naturalHeight,
+	}));
+	expect(orientation.naturalHeight).toBeGreaterThan(orientation.naturalWidth);
+	await expect.poll(async () => enlarged.evaluate((node) => {
 		const box = node.getBoundingClientRect();
-		return {
-			naturalWidth: node.naturalWidth,
-			naturalHeight: node.naturalHeight,
-			left: box.left,
-			right: box.right,
-			top: box.top,
-			bottom: box.bottom,
-			viewportWidth: document.documentElement.clientWidth,
-			viewportHeight: innerHeight,
-		};
-	});
-	expect(geometry.naturalHeight).toBeGreaterThan(geometry.naturalWidth);
-	expect(geometry.left).toBeGreaterThanOrEqual(-1);
-	expect(geometry.top).toBeGreaterThanOrEqual(-1);
-	expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
-	expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+		return Math.max(
+			0,
+			-box.left,
+			box.right - document.documentElement.clientWidth,
+			-box.top,
+			box.bottom - innerHeight
+		);
+	}), { message: 'portrait lightbox should settle fully inside the dynamic viewport' }).toBeLessThanOrEqual(1);
 });
 
 test('native lightbox opens from keyboard and exposes responsive enlarged media', async ({ page }) => {
@@ -447,7 +444,11 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-landscape-${testInfo.project.name}.png`), fullPage: false });
 	await page.keyboard.press('Escape');
 	await expect(feature.dialog).toBeHidden();
+	await expect(feature.trigger).toBeFocused();
 
+	// Re-enter the fixture after Core's closing transition so portrait evidence
+	// starts from a fresh, keyboard-reachable document state.
+	await openRasterPhotography(page);
 	const portraitTrigger = page.locator('.browser-raster-gallery button.wp-lightbox-container, .browser-raster-gallery .wp-lightbox-container button').first();
 	const portrait = await openLightbox(page, 'keyboard', portraitTrigger);
 	await expect(portrait.enlarged).toBeVisible();
