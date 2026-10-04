@@ -1258,6 +1258,20 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 	expect(currentStyle.background).not.toBe('rgba(0, 0, 0, 0)');
 	expect(currentStyle.radius).toBeGreaterThanOrEqual(0);
 	await expectNoHorizontalOverflow(page, projectPath);
+
+	const firstPageTitles = await page.locator('.browser-project-grid .wp-block-post-title a').allTextContents();
+	expect(firstPageTitles).toHaveLength(6);
+	expect(firstPageTitles[0]).toContain('可迁移的项目案例');
+	expect(firstPageTitles[5]).toContain('Portable project fixture 2');
+
+	await next.click();
+	await page.waitForLoadState('networkidle');
+	await expect(page.locator('.browser-project-grid .slateframe-project-card')).toHaveCount(1);
+	await expect(page.locator('.browser-project-grid .wp-block-post-title a').first()).toContainText('Portable project fixture 1');
+	const previous = page.locator('.browser-project-grid .wp-block-query-pagination-previous:visible');
+	await expect(previous).toHaveCount(1);
+	expect((await previous.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	await expectNoHorizontalOverflow(page, projectPath + '#portfolio-page-two');
 });
 
 

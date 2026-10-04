@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Portfolio browser fixtures now use a deterministic, isolated native Query Loop dataset and exercise the real second pagination page instead of relying on same-second post ordering.
+- Focused Photography CI now creates real landscape, portrait, and square JPEG attachments, checks responsive candidates and intrinsic orientation, opens portrait media in Core lightbox, runs dialog-scoped Axe WCAG A/AA regression, and retains page/landscape/portrait screenshot evidence across representative widths.
+- Photography gallery and caption containment now explicitly shrink inside the wide canvas so mixed orientations and long multilingual captions cannot establish document-level horizontal overflow.
 - Browser regression and screenshot evidence for long mixed-script site identity at 200% text enlargement across 320/375/390/412/768/1440/1920 viewports, including narrow-header row separation, non-sticky zoom fallback, compact-menu focus reachability, and vertical flow containment.
 - Release CI now performs two independent builds of the same revision and requires byte-identical SHA256 output.
 - Native archive pagination, translated search/footer actions, and comment reply/cancel controls now have browser contracts for complete target geometry, wrapping, RTL containment, and bounded Appearance behavior.

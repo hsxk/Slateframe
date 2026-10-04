@@ -51,22 +51,42 @@ jobs:
           wp theme activate slateframe --path=/tmp/wp-photo
 
           php -r '
-            $image = imagecreatetruecolor(2400, 1600);
-            $sky = imagecolorallocate($image, 226, 232, 229);
-            $ground = imagecolorallocate($image, 92, 112, 103);
-            $light = imagecolorallocate($image, 248, 248, 244);
-            imagefill($image, 0, 0, $sky);
-            imagefilledpolygon($image, [0,1600,0,1180,560,620,980,1030,1420,520,2400,1300,2400,1600], 7, $ground);
-            imagefilledellipse($image, 1900, 360, 220, 220, $light);
-            imagejpeg($image, "/tmp/slateframe-raster.jpg", 88);
-            imagedestroy($image);
+            $fixtures = array(
+              array("/tmp/slateframe-raster-landscape.jpg", 2400, 1600, array(226,232,229), array(92,112,103), array(248,248,244)),
+              array("/tmp/slateframe-raster-portrait.jpg", 1600, 2400, array(232,226,229), array(112,92,103), array(248,244,248)),
+              array("/tmp/slateframe-raster-square.jpg", 1800, 1800, array(229,232,226), array(103,112,92), array(244,248,244))
+            );
+            foreach ($fixtures as $fixture) {
+              list($path, $width, $height, $sky_rgb, $ground_rgb, $light_rgb) = $fixture;
+              $image = imagecreatetruecolor($width, $height);
+              $sky = imagecolorallocate($image, $sky_rgb[0], $sky_rgb[1], $sky_rgb[2]);
+              $ground = imagecolorallocate($image, $ground_rgb[0], $ground_rgb[1], $ground_rgb[2]);
+              $light = imagecolorallocate($image, $light_rgb[0], $light_rgb[1], $light_rgb[2]);
+              imagefill($image, 0, 0, $sky);
+              imagefilledrectangle($image, 0, (int) ($height * 0.68), $width, $height, $ground);
+              imagefilledellipse($image, (int) ($width * 0.78), (int) ($height * 0.22), (int) ($width * 0.12), (int) ($width * 0.12), $light);
+              imagejpeg($image, $path, 88);
+              imagedestroy($image);
+            }
           '
-          ATTACHMENT_ID=$(wp media import /tmp/slateframe-raster.jpg --path=/tmp/wp-photo --title='Raster photography fixture' --alt='Raster landscape fixture' --porcelain)
-          wp media regenerate "$ATTACHMENT_ID" --yes --path=/tmp/wp-photo
-          SRC=$(wp eval "echo wp_get_attachment_image_url($ATTACHMENT_ID, 'large');" --path=/tmp/wp-photo)
-          WIDTH=$(wp eval "\$m=wp_get_attachment_metadata($ATTACHMENT_ID); echo \$m['width'];" --path=/tmp/wp-photo)
-          HEIGHT=$(wp eval "\$m=wp_get_attachment_metadata($ATTACHMENT_ID); echo \$m['height'];" --path=/tmp/wp-photo)
-          CONTENT="<!-- wp:image {\"id\":${ATTACHMENT_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true},\"className\":\"is-style-slateframe-photo-feature\"} --><figure class=\"wp-block-image size-large is-style-slateframe-photo-feature\"><img src=\"${SRC}\" alt=\"Raster landscape fixture\" class=\"wp-image-${ATTACHMENT_ID} wp-image-raster\" width=\"${WIDTH}\" height=\"${HEIGHT}\"/><figcaption class=\"wp-element-caption\">Responsive raster photography fixture</figcaption></figure><!-- /wp:image -->"
+          LANDSCAPE_ID=$(wp media import /tmp/slateframe-raster-landscape.jpg --path=/tmp/wp-photo --title='Raster landscape photography fixture' --alt='Raster landscape fixture' --porcelain)
+          PORTRAIT_ID=$(wp media import /tmp/slateframe-raster-portrait.jpg --path=/tmp/wp-photo --title='Raster portrait photography fixture' --alt='Raster portrait fixture' --porcelain)
+          SQUARE_ID=$(wp media import /tmp/slateframe-raster-square.jpg --path=/tmp/wp-photo --title='Raster square photography fixture' --alt='Raster square fixture' --porcelain)
+          for attachment_id in "$LANDSCAPE_ID" "$PORTRAIT_ID" "$SQUARE_ID"; do
+            wp media regenerate "$attachment_id" --yes --path=/tmp/wp-photo
+          done
+
+          LANDSCAPE_SRC=$(wp eval "echo wp_get_attachment_image_url($LANDSCAPE_ID, 'large');" --path=/tmp/wp-photo)
+          LANDSCAPE_WIDTH=$(wp eval "\$m=wp_get_attachment_metadata($LANDSCAPE_ID); echo \$m['width'];" --path=/tmp/wp-photo)
+          LANDSCAPE_HEIGHT=$(wp eval "\$m=wp_get_attachment_metadata($LANDSCAPE_ID); echo \$m['height'];" --path=/tmp/wp-photo)
+          PORTRAIT_SRC=$(wp eval "echo wp_get_attachment_image_url($PORTRAIT_ID, 'large');" --path=/tmp/wp-photo)
+          PORTRAIT_WIDTH=$(wp eval "\$m=wp_get_attachment_metadata($PORTRAIT_ID); echo \$m['width'];" --path=/tmp/wp-photo)
+          PORTRAIT_HEIGHT=$(wp eval "\$m=wp_get_attachment_metadata($PORTRAIT_ID); echo \$m['height'];" --path=/tmp/wp-photo)
+          SQUARE_SRC=$(wp eval "echo wp_get_attachment_image_url($SQUARE_ID, 'large');" --path=/tmp/wp-photo)
+          SQUARE_WIDTH=$(wp eval "\$m=wp_get_attachment_metadata($SQUARE_ID); echo \$m['width'];" --path=/tmp/wp-photo)
+          SQUARE_HEIGHT=$(wp eval "\$m=wp_get_attachment_metadata($SQUARE_ID); echo \$m['height'];" --path=/tmp/wp-photo)
+
+          CONTENT="<!-- wp:image {\"id\":${LANDSCAPE_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true},\"className\":\"is-style-slateframe-photo-feature\"} --><figure class=\"wp-block-image size-large is-style-slateframe-photo-feature\"><img src=\"${LANDSCAPE_SRC}\" alt=\"Raster landscape fixture\" class=\"wp-image-${LANDSCAPE_ID} wp-image-raster wp-image-raster-landscape\" width=\"${LANDSCAPE_WIDTH}\" height=\"${LANDSCAPE_HEIGHT}\"/><figcaption class=\"wp-element-caption\">Responsive raster photography fixture</figcaption></figure><!-- /wp:image --><!-- wp:gallery {\"align\":\"wide\",\"linkTo\":\"none\",\"columns\":2,\"imageCrop\":false,\"className\":\"browser-raster-gallery is-style-slateframe-contact-sheet\"} --><figure class=\"wp-block-gallery alignwide has-nested-images columns-2 browser-raster-gallery is-style-slateframe-contact-sheet\"><!-- wp:image {\"id\":${PORTRAIT_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true}} --><figure class=\"wp-block-image size-large\"><img src=\"${PORTRAIT_SRC}\" alt=\"Raster portrait fixture\" class=\"wp-image-${PORTRAIT_ID} wp-image-raster-portrait\" width=\"${PORTRAIT_WIDTH}\" height=\"${PORTRAIT_HEIGHT}\"/><figcaption class=\"wp-element-caption\">Portrait frame — 日本語 العربية</figcaption></figure><!-- /wp:image --><!-- wp:image {\"id\":${SQUARE_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true}} --><figure class=\"wp-block-image size-large\"><img src=\"${SQUARE_SRC}\" alt=\"Raster square fixture\" class=\"wp-image-${SQUARE_ID} wp-image-raster-square\" width=\"${SQUARE_WIDTH}\" height=\"${SQUARE_HEIGHT}\"/><figcaption class=\"wp-element-caption\">Square frame — 中文 multilingual caption</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery -->"
           PAGE_ID=$(wp post create --path=/tmp/wp-photo --post_type=page --post_status=publish --post_title='Raster Photography Fixture' --post_content="$CONTENT" --porcelain)
           echo "SLATEFRAME_RASTER_PHOTO_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress
