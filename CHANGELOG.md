@@ -123,6 +123,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Photography diptych captions now share the same below-image, non-gradient, multilingual wrapping contract as contact sheets and sequences on both the frontend and Gutenberg canvas.
 - Let long site titles and visible taglines reflow instead of truncating multilingual identity text with `nowrap`/ellipsis in the sticky header.
 - Keep native lightbox SVG controls on Slateframe's media-chrome text token even when WordPress Core injects its own inline `fill`, including forced-colors mode.
 - Keep translated primary and language-adapter navigation in the desktop row only when intrinsic labels actually fit; otherwise enter the accessible compact menu without exposing `nowrap` during rendering or 200% text enlargement.
