@@ -38,7 +38,7 @@
 	<!-- /wp:columns -->
 
 	<!-- wp:gallery {"align":"wide","linkTo":"none","sizeSlug":"large","imageCrop":false,"className":"is-style-slateframe-photo-sequence"} -->
-	<figure class="wp-block-gallery alignwide has-nested-images columns-default is-cropped-false is-style-slateframe-photo-sequence"></figure>
+	<figure class="wp-block-gallery alignwide has-nested-images columns-default is-cropped-false is-style-slateframe-photo-sequence">\n\t\t<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->\n\t\t<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->\n\t\t<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->\n\t</figure>
 	<!-- /wp:gallery -->
 
 	<!-- wp:paragraph {"className":"slateframe-pattern-caption"} -->
