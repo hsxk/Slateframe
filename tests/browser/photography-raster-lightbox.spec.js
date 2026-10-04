@@ -36,6 +36,19 @@ function seconds(value) {
 	}).filter(Number.isFinite);
 }
 
+async function expectMediaContained(locator, message) {
+	await expect.poll(async () => locator.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		return Math.max(
+			0,
+			-box.left,
+			box.right - document.documentElement.clientWidth,
+			-box.top,
+			box.bottom - innerHeight
+		);
+	}), { message }).toBeLessThanOrEqual(1);
+}
+
 test('raster photography exposes responsive candidates and stable intrinsic geometry', async ({ page }) => {
 	await openRasterPhotography(page);
 	const image = page.locator('#main-content img.wp-image-raster').first();
@@ -113,16 +126,7 @@ test('native lightbox contains a portrait raster at its intrinsic orientation', 
 		naturalHeight: node.naturalHeight,
 	}));
 	expect(orientation.naturalHeight).toBeGreaterThan(orientation.naturalWidth);
-	await expect.poll(async () => enlarged.evaluate((node) => {
-		const box = node.getBoundingClientRect();
-		return Math.max(
-			0,
-			-box.left,
-			box.right - document.documentElement.clientWidth,
-			-box.top,
-			box.bottom - innerHeight
-		);
-	}), { message: 'portrait lightbox should settle fully inside the dynamic viewport' }).toBeLessThanOrEqual(1);
+	await expectMediaContained(enlarged, 'portrait lightbox should settle fully inside the dynamic viewport');
 });
 
 test('native lightbox opens from keyboard and exposes responsive enlarged media', async ({ page }) => {
@@ -435,6 +439,7 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	await page.screenshot({ path: path.join(screenshotDir, `photography-page-${testInfo.project.name}.png`), fullPage: true });
 
 	const feature = await openLightbox(page, 'keyboard');
+	await expectMediaContained(feature.enlarged, 'landscape screenshot evidence should capture the settled lightbox');
 	const lightboxSurface = await page.locator('.wp-lightbox-overlay').evaluate((node) => ({
 		background: getComputedStyle(node).backgroundColor,
 		pageBackground: getComputedStyle(document.body).backgroundColor,
@@ -452,5 +457,6 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	const portraitTrigger = page.locator('.browser-raster-gallery button.wp-lightbox-container, .browser-raster-gallery .wp-lightbox-container button').first();
 	const portrait = await openLightbox(page, 'keyboard', portraitTrigger);
 	await expect(portrait.enlarged).toBeVisible();
+	await expectMediaContained(portrait.enlarged, 'portrait screenshot evidence should capture the settled lightbox');
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-portrait-${testInfo.project.name}.png`), fullPage: false });
 });
