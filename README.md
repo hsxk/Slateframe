@@ -20,7 +20,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
-- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404/TOC publishing extras are isolated from base routes; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear, with native Portfolio Query Loop grid rules isolated to project-grid documents.
+- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404 publishing extras are isolated from base routes, while common TOC interaction geometry stays with the singular reading layer; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear, with native Portfolio Query Loop grid rules isolated to project-grid documents.
 - **Small global shell:** navigation and footer presentation are explicit always-loaded shell assets, both counted in the unchanged aggregate base-runtime budget; footer widgets use a responsive grid and the same control/touch system as the rest of Slateframe.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
@@ -48,7 +48,7 @@ CI renders the designed default plus the minimum/compact and maximum/spacious sp
 
 Slateframe treats the first activation as a product surface rather than a blank styling layer. Core page, search, archive, author, missing-content, post, comment, and footer surfaces share the same tokenized page-start rhythm and content measures. Controls keep an accessible minimum target, while headings, prose, code, tables, captions, navigation, and media reuse the same bounded spatial system.
 
-Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu when translated labels need more intrinsic inline space than the rendered row can provide. Slateframe measures that row-level intrinsic demand synchronously, restores normal navigation wrapping before paint, and then applies compact mode when required; this keeps 200% text enlargement and long CJK/RTL labels contained without leaving `nowrap` in the rendered UI. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
+Desktop navigation remains visible when the available row can contain it and moves to the compact, keyboard-operable menu when translated labels need more intrinsic inline space than the rendered row can provide. Slateframe measures that row-level intrinsic demand synchronously, restores normal navigation wrapping before paint, and then applies compact mode when required; this keeps 200% text enlargement and long CJK/RTL labels contained without leaving `nowrap` in the rendered UI. On the narrowest mobile widths, long site identity text receives its own row and the header yields sticky positioning so enlarged text can scroll normally instead of occupying the viewport indefinitely; compact navigation remains focus-reachable below it. Content changes are remeasured after layout, which matters for translated menus and plugin-provided language controls.
 
 ## Current feature set
 
@@ -149,7 +149,7 @@ Public GitHub Actions currently enforce:
 - Playwright/Chromium browser regression at **320, 375, 390, 412, 768, 1440, and 1920 px**, plus compact/default/spacious spatial profiles and system/light/dark color-mode profiles at representative mobile and desktop widths; Photography is also captured in each spatial profile and Core lightbox behavior is exercised in the focused raster runtime.
 - Keyboard navigation, threaded comments, core routes, classic alignment/caption compatibility, 200% text-enlargement containment, adaptive desktop navigation, overflow, wide/full blocks, long mixed-script titles, reduced motion, Photography/Portfolio/Knowledge responsive layouts, intrinsic image sizing, Query Loop pagination, and reference screenshots.
 - Automated Axe WCAG A/AA regression on representative mobile/desktop routes, plus explicit visible-focus, accessible-name, and 44 px touch-target checks.
-- Reproducible release ZIP creation with development-only files excluded, required WordPress.org metadata, and a validated 1200×900 theme screenshot.
+- Reproducible release ZIP creation with normalized archive order/timestamps/permissions, development-only files excluded, required WordPress.org metadata, a validated 1200×900 theme screenshot, and CI verification that two builds of the same commit have an identical SHA256.
 - Browser runs publish reviewable screenshot artifacts for core Page/Post surfaces, Photography, Portfolio, Knowledge, color modes, Appearance profiles, and adaptive translated-navigation states; visual evidence is reviewed alongside automated geometry checks rather than treated as a substitute for them.
 
 A failed gate is treated as a defect; tests are not removed merely to make CI green.
@@ -158,11 +158,13 @@ A failed gate is treated as a defect; tests are not removed merely to make CI gr
 
 The long-lived integration branch is `automation/continuous-development`. Validated batches are periodically merged into `main`.
 
-Build the distributable archive:
+Build the distributable archive (requires PHP, Python 3, and rsync):
 
 ```bash
 ./bin/build-theme-zip.sh
 ```
+
+The builder sorts archive entries and normalizes ZIP timestamps/permissions from the source commit so repeated builds of the same revision are byte-for-byte reproducible.
 
 Run browser tests against a local WordPress installation using Slateframe:
 

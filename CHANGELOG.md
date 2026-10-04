@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Browser regression and screenshot evidence for long mixed-script site identity at 200% text enlargement across 320/375/390/412/768/1440/1920 viewports, including narrow-header row separation, non-sticky zoom fallback, compact-menu focus reachability, and vertical flow containment.
+- Release CI now performs two independent builds of the same revision and requires byte-identical SHA256 output.
 - Native archive pagination, translated search/footer actions, and comment reply/cancel controls now have browser contracts for complete target geometry, wrapping, RTL containment, and bounded Appearance behavior.
 - Appearance screenshot evidence now includes home pagination and search/control surfaces at representative mobile and desktop widths for default, compact, and spacious profiles.
 - Appearance default/compact/spacious browser evidence now opens the real WordPress Core Photography lightbox at 390px and 1440px, validating token-driven controls, long multilingual captions, focus restoration, containment, and screenshot artifacts.
@@ -76,6 +78,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- The release builder now emits deterministic ZIP archives with sorted entries and normalized commit-derived timestamps and permissions while preserving the existing distribution exclusions.
 - Completed the shared control family across primary/language navigation, search/buttons, native pagination, footer links, and comment auxiliary actions with minimum target width as well as height.
 - Centralized ordinary semantic borders on `--slateframe-rule`, removing duplicated border composition across frontend/editor assets while keeping existing runtime budgets unchanged.
 - Native lightbox presentation now clips overlay overflow, normalizes control box geometry without extra JavaScript, and hardens gallery-item intrinsic-width containment while staying inside the existing Photography runtime budget.
@@ -116,6 +119,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Let long site titles and visible taglines reflow instead of truncating multilingual identity text with `nowrap`/ellipsis in the sticky header.
 - Keep native lightbox SVG controls on Slateframe's media-chrome text token even when WordPress Core injects its own inline `fill`, including forced-colors mode.
 - Keep translated primary and language-adapter navigation in the desktop row only when intrinsic labels actually fit; otherwise enter the accessible compact menu without exposing `nowrap` during rendering or 200% text enlargement.
 - Make contextual asset detection class-aware so marker names in prose or code do not trigger Photography/Portfolio/Knowledge CSS.
