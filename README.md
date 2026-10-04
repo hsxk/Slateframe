@@ -20,7 +20,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
 - **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
-- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404/TOC publishing extras are isolated from base routes; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear, with native Portfolio Query Loop grid rules isolated to project-grid documents.
+- **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404 publishing extras are isolated from base routes, while common TOC interaction geometry stays with the singular reading layer; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear, with native Portfolio Query Loop grid rules isolated to project-grid documents.
 - **Small global shell:** navigation and footer presentation are explicit always-loaded shell assets, both counted in the unchanged aggregate base-runtime budget; footer widgets use a responsive grid and the same control/touch system as the rest of Slateframe.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
 
