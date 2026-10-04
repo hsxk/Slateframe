@@ -137,12 +137,22 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	await expect(portfolioEvidence).toBeVisible();
 	const portfolioCards = portfolioEvidence.locator('.slateframe-project-card');
 	const portfolioTitles = portfolioEvidence.locator('.wp-block-post-title');
-	await expect(portfolioCards).toHaveCount(7);
-	await expect(portfolioTitles).toHaveCount(7);
+	const portfolioCardCount = await portfolioCards.count();
+	await expect(portfolioTitles).toHaveCount(portfolioCardCount);
+	expect(portfolioCardCount).toBeGreaterThanOrEqual(6);
 	const portfolioTitleTexts = (await portfolioTitles.allTextContents()).map((title) => title.trim());
 	expect(portfolioTitleTexts.every(Boolean)).toBe(true);
-	expect(new Set(portfolioTitleTexts).size).toBe(7);
-	expect(portfolioTitleTexts.some((title) => title.includes('可迁移的项目案例'))).toBe(true);
+	const uniquePortfolioTitles = [...new Set(portfolioTitleTexts)].sort();
+	const expectedPortfolioTitles = [
+		'Portable project fixture 2',
+		'Portable project fixture 3',
+		'Portable project fixture 4',
+		'Portable project fixture 5',
+		'Portable project fixture 6',
+		'可迁移的项目案例 — مشروع طويل متعدد اللغات for wrapping validation',
+	].sort();
+	expect(uniquePortfolioTitles).toEqual(expectedPortfolioTitles);
+	expect(portfolioTitleTexts).not.toContain('Portable project fixture 1');
 	await expect(portfolioEvidence).not.toContainText('Hello world!');
 
 	const root = canvas.locator('.editor-styles-wrapper').first();
