@@ -92,6 +92,53 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 		await expect(canvas.locator(selector).first()).toBeVisible();
 	}
 
+	const photographyMedia = canvas.locator('.browser-editor-photography-gallery').first();
+	await expect(photographyMedia).toBeVisible();
+	await expect(photographyMedia.locator('img')).toHaveCount(2);
+	await expect(photographyMedia.locator('figcaption')).toHaveCount(2);
+
+	const photographyGeometry = await photographyMedia.evaluate((gallery) => {
+		const images = [...gallery.querySelectorAll('img')];
+		const captions = [...gallery.querySelectorAll('figcaption')];
+		return {
+			tracks: getComputedStyle(gallery).gridTemplateColumns.split(' ').filter(Boolean).length,
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			images: images.map((image) => {
+				const box = image.getBoundingClientRect();
+				return {
+					width: box.width,
+					height: box.height,
+					naturalWidth: image.naturalWidth,
+					naturalHeight: image.naturalHeight,
+					objectFit: getComputedStyle(image).objectFit,
+				};
+			}),
+			captions: captions.map((caption) => ({
+				position: getComputedStyle(caption).position,
+				wrap: getComputedStyle(caption).overflowWrap,
+			})),
+		};
+	});
+	expect(photographyGeometry.images[0].naturalWidth).toBeGreaterThan(photographyGeometry.images[0].naturalHeight);
+	expect(photographyGeometry.images[1].naturalHeight).toBeGreaterThan(photographyGeometry.images[1].naturalWidth);
+	for (const image of photographyGeometry.images) {
+		expect(image.width).toBeGreaterThan(0);
+		expect(image.height).toBeGreaterThan(0);
+		expect(['contain', 'fill']).toContain(image.objectFit);
+	}
+	expect(photographyGeometry.captions).toEqual([
+		{ position: 'static', wrap: 'anywhere' },
+		{ position: 'static', wrap: 'anywhere' },
+	]);
+	expect(photographyGeometry.rootOverflow).toBeLessThanOrEqual(1);
+	expect(photographyGeometry.tracks).toBe(projectWidth(testInfo) === 390 ? 1 : 2);
+
+	const portfolioEvidence = canvas.locator('.browser-project-grid').first();
+	await expect(portfolioEvidence).toBeVisible();
+	await expect(portfolioEvidence.locator('.slateframe-project-card')).toHaveCount(6);
+	await expect(portfolioEvidence).toContainText('可迁移的项目案例');
+	await expect(portfolioEvidence).not.toContainText('Hello world!');
+
 	const root = canvas.locator('.editor-styles-wrapper').first();
 	const title = canvas.locator('.wp-block-post-title').first();
 	await expect(title).toBeVisible();
@@ -190,8 +237,9 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 		['reading-disclosure', details],
 		['reading-footnotes', canvas.locator('.browser-footnotes').first()],
 		['reading-pullquote', pullquote],
-		['photography', canvas.locator('.slateframe-photography-diptych').first()],
-		['portfolio', canvas.locator('.slateframe-project-grid').first()],
+		['photography-starter', canvas.locator('.slateframe-photography-diptych').first()],
+		['photography-media', photographyMedia],
+		['portfolio', portfolioEvidence],
 		['knowledge', canvas.locator('.slateframe-knowledge-procedure').first()],
 	];
 
