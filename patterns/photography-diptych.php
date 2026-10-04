@@ -15,7 +15,10 @@
 <div class="wp-block-group alignwide slateframe-pattern slateframe-photography-diptych">
 	<!-- wp:paragraph {"className":"slateframe-pattern-kicker"} --><p class="slateframe-pattern-kicker"><?php echo esc_html_x( 'Diptych', 'Pattern content', 'slateframe' ); ?></p><!-- /wp:paragraph -->
 	<!-- wp:gallery {"align":"wide","columns":2,"linkTo":"none","sizeSlug":"large","imageCrop":false,"className":"is-style-slateframe-diptych"} -->
-	<figure class="wp-block-gallery alignwide has-nested-images columns-2 is-style-slateframe-diptych">\n\t\t<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->\n\t\t<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->\n\t</figure>
+	<figure class="wp-block-gallery alignwide has-nested-images columns-2 is-style-slateframe-diptych">
+		<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
+		<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
+	</figure>
 	<!-- /wp:gallery -->
 </div>
 <!-- /wp:group -->
