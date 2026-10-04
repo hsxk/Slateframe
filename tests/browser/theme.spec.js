@@ -141,7 +141,7 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 
 
 test('site identity reflows without truncating multilingual text', async ({ page }, testInfo) => {
-	test.skip(![320, 390, 1440, 1920].includes(projectWidth(testInfo)), 'Site-identity reflow uses representative narrow and wide viewports.');
+	test.skip(![320, 375, 390, 412, 768, 1440, 1920].includes(projectWidth(testInfo)), 'Site-identity reflow covers every responsive evidence viewport.');
 	await page.goto('/', { waitUntil: 'networkidle' });
 
 	const title = page.locator('.slateframe-brand-title');
@@ -205,6 +205,55 @@ test('site identity reflows without truncating multilingual text', async ({ page
 		const box = await control.boundingBox();
 		expect(box?.x ?? -1).toBeGreaterThanOrEqual(-1);
 		expect((box?.x ?? Infinity) + (box?.width ?? 0)).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
+	}
+
+	if (projectWidth(testInfo) <= 480) {
+		const geometry = await page.evaluate(() => {
+			const header = document.querySelector('[data-site-header]');
+			const brand = document.querySelector('.slateframe-brand');
+			const color = document.querySelector('[data-color-toggle]');
+			const menu = document.querySelector('[data-menu-toggle]');
+			const main = document.querySelector('#main-content');
+			const headerBox = header.getBoundingClientRect();
+			const brandBox = brand.getBoundingClientRect();
+			const colorBox = color.getBoundingClientRect();
+			const menuBox = menu.getBoundingClientRect();
+			const mainBox = main.getBoundingClientRect();
+			return {
+				position: getComputedStyle(header).position,
+				headerBottom: headerBox.bottom,
+				brandBottom: brandBox.bottom,
+				controlsTop: Math.min(colorBox.top, menuBox.top),
+				mainTop: mainBox.top,
+				viewportHeight: innerHeight,
+			};
+		});
+		expect(geometry.position).toBe('relative');
+		expect(geometry.brandBottom).toBeLessThanOrEqual(geometry.controlsTop + 1);
+		expect(geometry.mainTop).toBeGreaterThanOrEqual(geometry.headerBottom - 1);
+		expect(geometry.viewportHeight).toBeGreaterThan(0);
+
+		const toggle = page.locator('[data-menu-toggle]');
+		const nav = page.locator('[data-primary-nav]');
+		await toggle.click();
+		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+		await expect(nav).toBeVisible();
+		await expect(nav).not.toHaveAttribute('inert', '');
+		await expect(nav.locator('a:visible').first()).toBeFocused();
+		const navGeometry = await nav.evaluate((node) => {
+			const rect = node.getBoundingClientRect();
+			return { top: rect.top, height: rect.height, viewportHeight: innerHeight };
+		});
+		expect(navGeometry.height).toBeGreaterThan(0);
+		expect(navGeometry.top).toBeGreaterThanOrEqual(-1);
+		const screenshotDir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(screenshotDir, { recursive: true });
+		await page.screenshot({
+			path: path.join(screenshotDir, testInfo.project.name + '-site-identity-menu-reflow.png'),
+			fullPage: false,
+		});
+		await page.keyboard.press('Escape');
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 	}
 	await expectNoHorizontalOverflow(page, '/?site-identity-reflow=200-percent');
 
