@@ -607,6 +607,7 @@ jobs:
 
           for project_index in 1 2 3 4 5 6 7; do
             project_title="Portable project fixture ${project_index}"
+            project_date=$(printf '2020-01-%02d 12:00:00' "$project_index")
             if [ "$project_index" -eq 7 ]; then
               project_title='可迁移的项目案例 — مشروع طويل متعدد اللغات for wrapping validation'
             fi
@@ -614,9 +615,11 @@ jobs:
               --path=/tmp/wp-browser \
               --post_type=post \
               --post_status=publish \
+              --post_date="$project_date" \
+              --post_date_gmt="$project_date" \
               --post_title="$project_title" \
-              --post_excerpt="A site-neutral project summary for responsive Query Loop coverage." \
-              --post_content="<p>Project fixture ${project_index} keeps the theme independent from custom content models.</p>" \
+              --post_excerpt="slateframe-project-fixture-token A site-neutral project summary for responsive Query Loop coverage." \
+              --post_content="<p>slateframe-project-fixture-token Project fixture ${project_index} keeps the theme independent from custom content models.</p>" \
               --porcelain)
             if [ "$project_index" -ne 7 ]; then
               wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
