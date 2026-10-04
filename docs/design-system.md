@@ -40,6 +40,9 @@ Buttons, text inputs, selects, pagination targets, menu controls, language integ
 
 ## Contextual assets
 
+Common TOC compatibility is split by responsibility: the singular reading layer guarantees shared touch-target/link geometry, while contextual publishing styles own optional TOC surface decoration. This keeps interaction accessibility present on every readable singular document without pushing decorative compatibility into the global shell.
+
+
 Slateframe loads specialized presentation only when the current singular document actually uses it. Context detection matches exact CSS class tokens in stored markup rather than raw substrings, so prose or code samples that merely mention a class name cannot opt a page into extra CSS. Portfolio Query Loop presentation uses the public `slateframe_query_loop_markers` filter and automatically brings the shared content-mode layer with it; integrations therefore do not need a page ID, slug, post type, taxonomy, locale route, or multilingual plugin assumption.
 
 ## Core media surfaces
