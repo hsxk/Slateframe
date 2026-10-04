@@ -7,6 +7,24 @@
  * @package Slateframe
  */
 
+
+/**
+ * Flatten parsed blocks so nested Gallery image slots can be validated.
+ *
+ * @param array $blocks Parsed blocks.
+ * @return array
+ */
+function slateframe_ci_flatten_blocks( $blocks ) {
+	$flat = array();
+	foreach ( $blocks as $block ) {
+		$flat[] = $block;
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$flat = array_merge( $flat, slateframe_ci_flatten_blocks( $block['innerBlocks'] ) );
+		}
+	}
+	return $flat;
+}
+
 /**
  * Validate shipped pattern files against the live WordPress registry.
  *
@@ -109,6 +127,34 @@ function slateframe_ci_validate_pattern_runtime() {
 				return ! empty( $block['blockName'] );
 			}
 		);
+
+		$photography_slots = array(
+			'slateframe/photography-diptych'       => 2,
+			'slateframe/photography-contact-sheet' => 4,
+			'slateframe/photo-essay'                => 3,
+		);
+
+		if ( isset( $photography_slots[ $name ] ) ) {
+			if ( false !== strpos( $content, '\\\\n' ) || false !== strpos( $content, '\\\\t' ) ) {
+				throw new RuntimeException( esc_html( sprintf( 'Photography pattern contains escaped whitespace: %s', $name ) ) );
+			}
+			$flat_blocks = slateframe_ci_flatten_blocks( $blocks );
+			$images      = array_values( array_filter( $flat_blocks, static function ( $block ) { return 'core/image' === ( $block['blockName'] ?? '' ); } ) );
+			$galleries   = array_values( array_filter( $flat_blocks, static function ( $block ) { return 'core/gallery' === ( $block['blockName'] ?? '' ); } ) );
+			if ( 1 !== count( $galleries ) || $photography_slots[ $name ] !== count( $images ) ) {
+				throw new RuntimeException( esc_html( sprintf( 'Photography starter slot contract failed: %s', $name ) ) );
+			}
+			$gallery_attrs = $galleries[0]['attrs'] ?? array();
+			if ( false !== ( $gallery_attrs['imageCrop'] ?? null ) || 'none' !== ( $gallery_attrs['linkTo'] ?? '' ) ) {
+				throw new RuntimeException( esc_html( sprintf( 'Photography Gallery attributes are unsafe: %s', $name ) ) );
+			}
+			foreach ( $images as $image ) {
+				$attrs = $image['attrs'] ?? array();
+				if ( 'large' !== ( $attrs['sizeSlug'] ?? '' ) || 'none' !== ( $attrs['linkDestination'] ?? '' ) || true !== ( $attrs['lightbox']['enabled'] ?? false ) ) {
+					throw new RuntimeException( esc_html( sprintf( 'Photography image slot attributes are incomplete: %s', $name ) ) );
+				}
+			}
+		}
 
 		if ( '' === trim( $content ) || false === strpos( $content, '<!-- wp:' ) || empty( $named ) ) {
 			throw new RuntimeException(
