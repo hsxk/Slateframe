@@ -38,9 +38,9 @@ jobs:
         shell: bash
         run: |
           grep -Fq '.slateframe-prose :where(#ez-toc-container,.ez-toc-container)' assets/css/publishing.css
-          grep -Fq '.slateframe-prose :where(#ez-toc-container,.ez-toc-container) :where(a,button,.ez-toc-toggle)' assets/css/publishing.css
-          if grep -Fq '.slateframe-prose:where(#ez-toc-container' assets/css/publishing.css; then
-            echo 'Publishing CSS must preserve the descendant combinator before TOC compatibility selectors.' >&2
+          grep -Fq '.slateframe-prose :where(#ez-toc-container,.ez-toc-container) :where(a,button,.ez-toc-toggle)' assets/css/reading.css
+          if grep -Fq '.slateframe-prose:where(#ez-toc-container' assets/css/publishing.css assets/css/reading.css; then
+            echo 'Contextual CSS must preserve the descendant combinator before TOC compatibility selectors.' >&2
             exit 1
           fi
       - name: Guard public namespace and language-agnostic runtime
