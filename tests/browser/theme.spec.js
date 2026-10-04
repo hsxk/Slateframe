@@ -139,6 +139,163 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	expect(failures).toEqual([]);
 });
 
+
+test('site identity reflows without truncating multilingual text', async ({ page }, testInfo) => {
+	test.skip(![320, 375, 390, 412, 768, 1440, 1920].includes(projectWidth(testInfo)), 'Site-identity reflow covers every responsive evidence viewport.');
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	const title = page.locator('.slateframe-brand-title');
+	const tagline = page.locator('.slateframe-brand-tagline');
+	await title.evaluate((node) => {
+		node.textContent = 'Slateframe 可迁移的发布框架 日本語の長いサイト名 العربية ' + 'portable-site-identity-'.repeat(4);
+	});
+	if (await tagline.count()) {
+		await tagline.evaluate((node) => {
+			node.textContent = 'Publishing / 摄影 / 写真 / المعرفة — ' + 'portable-tagline-context-'.repeat(4);
+		});
+	}
+	await page.locator('html').evaluate((node) => { node.style.fontSize = '200%'; });
+
+	const titleMetrics = await title.evaluate((node) => {
+		const style = getComputedStyle(node);
+		const box = node.getBoundingClientRect();
+		return {
+			whiteSpace: style.whiteSpace,
+			textOverflow: style.textOverflow,
+			overflow: style.overflow,
+			scrollWidth: node.scrollWidth,
+			clientWidth: node.clientWidth,
+			scrollHeight: node.scrollHeight,
+			clientHeight: node.clientHeight,
+			left: box.left,
+			right: box.right,
+			viewport: document.documentElement.clientWidth,
+		};
+	});
+	expect(titleMetrics.whiteSpace).not.toBe('nowrap');
+	expect(titleMetrics.textOverflow).not.toBe('ellipsis');
+	expect(titleMetrics.overflow).not.toBe('hidden');
+	expect(titleMetrics.scrollWidth).toBeLessThanOrEqual(titleMetrics.clientWidth + 1);
+	expect(titleMetrics.scrollHeight).toBeLessThanOrEqual(titleMetrics.clientHeight + 1);
+	expect(titleMetrics.left).toBeGreaterThanOrEqual(-1);
+	expect(titleMetrics.right).toBeLessThanOrEqual(titleMetrics.viewport + 1);
+
+	if (await tagline.isVisible()) {
+		const taglineMetrics = await tagline.evaluate((node) => {
+			const style = getComputedStyle(node);
+			return {
+				whiteSpace: style.whiteSpace,
+				textOverflow: style.textOverflow,
+				overflow: style.overflow,
+				scrollWidth: node.scrollWidth,
+				clientWidth: node.clientWidth,
+				scrollHeight: node.scrollHeight,
+				clientHeight: node.clientHeight,
+			};
+		});
+		expect(taglineMetrics.whiteSpace).not.toBe('nowrap');
+		expect(taglineMetrics.textOverflow).not.toBe('ellipsis');
+		expect(taglineMetrics.overflow).not.toBe('hidden');
+		expect(taglineMetrics.scrollWidth).toBeLessThanOrEqual(taglineMetrics.clientWidth + 1);
+		expect(taglineMetrics.scrollHeight).toBeLessThanOrEqual(taglineMetrics.clientHeight + 1);
+	}
+
+	for (const control of [page.locator('[data-color-toggle]'), page.locator('[data-menu-toggle]')]) {
+		await expect(control).toBeVisible();
+		const box = await control.boundingBox();
+		expect(box?.x ?? -1).toBeGreaterThanOrEqual(-1);
+		expect((box?.x ?? Infinity) + (box?.width ?? 0)).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
+	}
+
+	if (projectWidth(testInfo) <= 480) {
+		const geometry = await page.evaluate(() => {
+			const header = document.querySelector('[data-site-header]');
+			const brand = document.querySelector('.slateframe-brand');
+			const color = document.querySelector('[data-color-toggle]');
+			const menu = document.querySelector('[data-menu-toggle]');
+			const main = document.querySelector('#main-content');
+			const headerBox = header.getBoundingClientRect();
+			const brandBox = brand.getBoundingClientRect();
+			const colorBox = color.getBoundingClientRect();
+			const menuBox = menu.getBoundingClientRect();
+			const mainBox = main.getBoundingClientRect();
+			return {
+				position: getComputedStyle(header).position,
+				headerBottom: headerBox.bottom,
+				brandBottom: brandBox.bottom,
+				controlsTop: Math.min(colorBox.top, menuBox.top),
+				mainTop: mainBox.top,
+				viewportHeight: innerHeight,
+			};
+		});
+		expect(geometry.position).toBe('relative');
+		expect(geometry.brandBottom).toBeLessThanOrEqual(geometry.controlsTop + 1);
+		expect(geometry.mainTop).toBeGreaterThanOrEqual(geometry.headerBottom - 1);
+		expect(geometry.viewportHeight).toBeGreaterThan(0);
+
+		const toggle = page.locator('[data-menu-toggle]');
+		const nav = page.locator('[data-primary-nav]');
+		await toggle.click();
+		await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+		await expect(nav).toBeVisible();
+		await expect(nav).not.toHaveAttribute('inert', '');
+		await expect(nav.locator('a:visible').first()).toBeFocused();
+		const navGeometry = await nav.evaluate((node) => {
+			const rect = node.getBoundingClientRect();
+			return { top: rect.top, height: rect.height, viewportHeight: innerHeight };
+		});
+		expect(navGeometry.height).toBeGreaterThan(0);
+		expect(navGeometry.top).toBeGreaterThanOrEqual(-1);
+		const screenshotDir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(screenshotDir, { recursive: true });
+		await page.screenshot({
+			path: path.join(screenshotDir, testInfo.project.name + '-site-identity-menu-reflow.png'),
+			fullPage: false,
+		});
+		await page.keyboard.press('Escape');
+		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+	}
+	await expectNoHorizontalOverflow(page, '/?site-identity-reflow=200-percent');
+
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await page.locator('[data-site-header]').screenshot({
+		path: path.join(screenshotDir, testInfo.project.name + '-site-identity-reflow.png'),
+	});
+});
+
+test('200% text enlargement keeps core content modes contained', async ({ page }, testInfo) => {
+	test.skip(projectWidth(testInfo) !== 320, 'The narrowest viewport is the strongest text-resize containment fixture.');
+	const routes = ['/', '/?s=Portable', pagePath, photoPath, projectPath, knowledgePath, showcasePath];
+
+	for (const route of routes) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.locator('html').evaluate((node) => { node.style.fontSize = '200%'; });
+		await expectNoHorizontalOverflow(page, route + '#text-resize-200');
+	}
+
+	await page.goto(knowledgePath, { waitUntil: 'networkidle' });
+	await page.locator('html').evaluate((node) => {
+		node.style.fontSize = '200%';
+		node.dir = 'rtl';
+	});
+	await expectNoHorizontalOverflow(page, knowledgePath + '#rtl-text-resize-200');
+
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	for (const [name, route] of [['home', '/'], ['portfolio', projectPath], ['knowledge-rtl', knowledgePath]]) {
+		await page.goto(route, { waitUntil: 'networkidle' });
+		await page.locator('html').evaluate((node, rtl) => {
+			node.style.fontSize = '200%';
+			if (rtl) node.dir = 'rtl';
+		}, name === 'knowledge-rtl');
+		await page.screenshot({
+			path: path.join(screenshotDir, `viewport-320-text-resize-${name}.png`),
+			fullPage: true,
+		});
+	}
+});
+
 test('adaptive desktop navigation responds to translated label growth and recovery', async ({ page }, testInfo) => {
 	test.skip(projectWidth(testInfo) !== 1920, 'Translated growth/recovery is sampled on the widest desktop fixture; narrower desktops may already need compact navigation.');
 

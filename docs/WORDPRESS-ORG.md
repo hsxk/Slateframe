@@ -15,7 +15,7 @@ The public quality workflow currently requires:
 - every shipped `patterns/*.php` file has a valid `slateframe/` slug matching its filename, exactly matches the live WordPress pattern registry, parses as block content, and embeds no remote media URLs;
 - responsive browser regression, including real Gutenberg authoring evidence, core attachment/media templates, untitled/sticky/search discovery states, content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
 - separate base, singular-reading, discussion, specialized content-mode, and combined contextual-runtime ceilings so optional presentation does not silently inflate ordinary routes;
-- package-content and 1200×900 screenshot validation.
+- package-content and 1200×900 screenshot validation, plus a byte-for-byte reproducibility gate that builds the same revision twice and requires identical SHA256 output.
 
 Theme Check advisory findings remain visible in CI rather than being hidden. Color-mode CI also validates the 44px toggle target, accessible pressed state/name, server-resolved site defaults, visitor-cookie persistence, semantic dark surfaces, and representative mobile/desktop screenshots.
 
@@ -29,6 +29,6 @@ These are reviewed as product decisions, not ignored errors. If Slateframe's lay
 
 ## Submission artifact
 
-`./bin/build-theme-zip.sh` creates `dist/slateframe.zip`. Development-only files are excluded. The archive must contain the public theme metadata, runtime assets, patterns, templates, `readme.txt`, and `screenshot.png`.
+`./bin/build-theme-zip.sh` creates `dist/slateframe.zip`. Development-only files are excluded. The archive must contain the public theme metadata, runtime assets, patterns, templates, `readme.txt`, `LICENSE`, and `screenshot.png`. Entries are sorted and ZIP timestamps/permissions are normalized from the source commit; CI builds the same revision twice and rejects the package if the SHA256 values differ.
 
 The current screenshot is a real WordPress browser-fixture capture used for pre-release compliance. Replace it with the final polished public showcase before the first stable WordPress.org submission.

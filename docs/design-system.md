@@ -28,7 +28,7 @@ Long-form hierarchy extends through H6: H2–H6 share the same section-entry rhy
 
 The accessible control baseline is 44px on both axes. Customizer settings may increase it, but must not reduce it. Short translated navigation, footer, reply/cancel, pagination, and button labels therefore keep a complete minimum target instead of satisfying the baseline on height alone.
 
-Primary navigation has a hard compact baseline at 1280px and below, then remains content-aware above that breakpoint: if the site identity, translated menu labels, optional language adapter, and header controls cannot coexist without overflow, the same keyboard-accessible compact menu is used. When space returns, the wide row is restored. No-JavaScript navigation remains visible and wrapping rather than being hidden behind the enhancement layer.
+Primary navigation has a hard compact baseline at 1280px and below, then remains content-aware above that breakpoint: if the site identity, translated menu labels, optional language adapter, and header controls cannot coexist without overflow, the same keyboard-accessible compact menu is used. The site title and visible tagline are content, not disposable chrome: long multilingual identity text wraps instead of being ellipsized. At the narrowest mobile widths the identity owns the first flex row and controls move below it; the header deliberately becomes flow-relative instead of sticky so 200% text enlargement cannot pin an oversized identity over the viewport. Compact navigation remains keyboard reachable below that expanded header, and normal sticky behavior resumes above the narrow-mobile threshold. When inline space returns, the wide row is restored. No-JavaScript navigation remains visible and wrapping rather than being hidden behind the enhancement layer.
 
 ## Widths
 
@@ -39,6 +39,9 @@ Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Site
 Buttons, text inputs, selects, pagination targets, menu controls, language integrations, footer actions, comment controls, and lightbox controls should share the same minimum target, focus language, radius family, and text baseline. This includes Core Search, Core Buttons, native archive pagination, Query Pagination, comment consent labels, reply-cancel links, and comment navigation. Long translated action labels must wrap inside the viewport rather than widen the document. The shared `--slateframe-rule` token owns the ordinary one-pixel semantic border so control and divider surfaces do not duplicate border composition across assets. Visual compactness should come from border and typography choices, not inaccessible hit areas. Disabled controls use the same restrained opacity/cursor language instead of component-specific treatments.
 
 ## Contextual assets
+
+Common TOC compatibility is split by responsibility: the singular reading layer guarantees shared touch-target/link geometry, while contextual publishing styles own optional TOC surface decoration. This keeps interaction accessibility present on every readable singular document without pushing decorative compatibility into the global shell.
+
 
 Slateframe loads specialized presentation only when the current singular document actually uses it. Context detection matches exact CSS class tokens in stored markup rather than raw substrings, so prose or code samples that merely mention a class name cannot opt a page into extra CSS. Portfolio Query Loop presentation uses the public `slateframe_query_loop_markers` filter and automatically brings the shared content-mode layer with it; integrations therefore do not need a page ID, slug, post type, taxonomy, locale route, or multilingual plugin assumption.
 

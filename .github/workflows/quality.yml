@@ -32,6 +32,17 @@ jobs:
           node --check assets/js/theme.js
           node --check playwright.config.js
           find tests/browser -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+      - name: Validate build script syntax
+        run: bash -n bin/build-theme-zip.sh
+      - name: Guard contextual selector contracts
+        shell: bash
+        run: |
+          grep -Fq '.slateframe-prose :where(#ez-toc-container,.ez-toc-container)' assets/css/publishing.css
+          grep -Fq '.slateframe-prose :where(#ez-toc-container,.ez-toc-container) :where(a,button,.ez-toc-toggle)' assets/css/reading.css
+          if grep -Fq '.slateframe-prose:where(#ez-toc-container' assets/css/publishing.css assets/css/reading.css; then
+            echo 'Contextual CSS must preserve the descendant combinator before TOC compatibility selectors.' >&2
+            exit 1
+          fi
       - name: Guard public namespace and language-agnostic runtime
         shell: bash
         run: |
@@ -64,7 +75,7 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css readme.txt LICENSE .distignore assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
@@ -756,6 +767,11 @@ jobs:
           set -euo pipefail
           php bin/check-release-metadata.php
           ./bin/build-theme-zip.sh
+          first_sha="$(sha256sum dist/slateframe.zip | cut -d' ' -f1)"
+          ./bin/build-theme-zip.sh /tmp/slateframe-reproducible
+          second_sha="$(sha256sum /tmp/slateframe-reproducible/slateframe.zip | cut -d' ' -f1)"
+          test "$first_sha" = "$second_sha"
+          echo "Reproducible ZIP SHA256: $first_sha"
           unzip -Z1 dist/slateframe.zip > /tmp/package.txt
           grep -qx 'slateframe/style.css' /tmp/package.txt
           grep -qx 'slateframe/functions.php' /tmp/package.txt
