@@ -6,6 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Gutenberg CI now separates shipped starter-pattern validity from deterministic visual evidence: real landscape/portrait Core Gallery media exercises Photography editor parity, while a fixture-owned filtered native Query Loop keeps Portfolio authoring screenshots free from unrelated default content.
 - Portfolio browser fixtures now use a deterministic, isolated native Query Loop dataset and exercise the real second pagination page instead of relying on same-second post ordering.
 - Focused Photography CI now creates real landscape, portrait, and square JPEG attachments, checks responsive candidates and intrinsic orientation, opens portrait media in Core lightbox, runs dialog-scoped Axe WCAG A/AA regression, and retains page/landscape/portrait screenshot evidence across representative widths.
 - Photography gallery and caption containment now explicitly shrink inside the wide canvas so mixed orientations and long multilingual captions cannot establish document-level horizontal overflow.
@@ -122,6 +123,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Photography diptych captions now share the same below-image, non-gradient, multilingual wrapping contract as contact sheets and sequences on both the frontend and Gutenberg canvas.
 - Let long site titles and visible taglines reflow instead of truncating multilingual identity text with `nowrap`/ellipsis in the sticky header.
 - Keep native lightbox SVG controls on Slateframe's media-chrome text token even when WordPress Core injects its own inline `fill`, including forced-colors mode.
 - Keep translated primary and language-adapter navigation in the desktop row only when intrinsic labels actually fit; otherwise enter the accessible compact menu without exposing `nowrap` during rendering or 200% text enlargement.

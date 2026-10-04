@@ -1022,6 +1022,21 @@ test('photography diptych switches from one to two columns without cropping', as
 	for (const height of presentation.heights) {
 		expect(height).toBeLessThanOrEqual((presentation.viewportHeight * 0.62) + 2);
 	}
+
+	const captions = page.locator('.browser-photo-diptych figcaption');
+	await expect(captions).toHaveCount(2);
+	const captionStyles = await captions.evaluateAll((nodes) => nodes.map((caption) => {
+		const styles = getComputedStyle(caption);
+		return {
+			position: styles.position,
+			backgroundImage: styles.backgroundImage,
+			wrap: styles.overflowWrap,
+		};
+	}));
+	expect(captionStyles).toEqual([
+		{ position: 'static', backgroundImage: 'none', wrap: 'anywhere' },
+		{ position: 'static', backgroundImage: 'none', wrap: 'anywhere' },
+	]);
 	await expectNoHorizontalOverflow(page, photoPath);
 });
 

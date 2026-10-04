@@ -405,6 +405,7 @@ jobs:
           wp core download --path=/tmp/wp-browser --version=latest
           wp config create --path=/tmp/wp-browser --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
+          wp post delete 1 --force --path=/tmp/wp-browser >/dev/null
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-browser/wp-content/themes/slateframe
           wp theme activate slateframe --path=/tmp/wp-browser
           wp rewrite structure '/%postname%/' --path=/tmp/wp-browser
@@ -437,6 +438,23 @@ jobs:
           cat > /tmp/wp-browser/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg <<'SVG'
           <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1350" viewBox="0 0 900 1350"><rect width="900" height="1350" fill="#e6e2d8"/><path d="M0 1030L260 530l170 240 180-360 290 520v420H0z" fill="#6e675d"/><circle cx="245" cy="260" r="72" fill="#f7f7f4"/></svg>
           SVG
+
+          cat > /tmp/slateframe-editor-photography.html <<'HTML'
+          <!-- wp:group {"align":"wide","className":"browser-editor-photography-media","layout":{"type":"constrained"}} -->
+          <div class="wp-block-group alignwide browser-editor-photography-media">
+          <!-- wp:heading {"level":2} --><h2 class="wp-block-heading">Real media authoring fixture</h2><!-- /wp:heading -->
+          <!-- wp:gallery {"align":"wide","linkTo":"none","columns":2,"imageCrop":false,"className":"browser-editor-photography-gallery is-style-slateframe-diptych"} -->
+          <figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-editor-photography-gallery is-style-slateframe-diptych">
+          <!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+          <figure class="wp-block-image size-large"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" alt="Landscape editor fixture"/><figcaption class="wp-element-caption">Landscape editor frame</figcaption></figure>
+          <!-- /wp:image -->
+          <!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+          <figure class="wp-block-image size-large"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" alt="Portrait editor fixture"/><figcaption class="wp-element-caption">Portrait editor frame — 中文 日本語 العربية</figcaption></figure>
+          <!-- /wp:image -->
+          </figure><!-- /wp:gallery -->
+          </div><!-- /wp:group -->
+          HTML
+          cp "$GITHUB_WORKSPACE/tests/fixtures/portfolio-query.html" /tmp/slateframe-editor-portfolio.html
 
           cat > /tmp/slateframe-browser-page.html <<'HTML'
           <!-- wp:paragraph {"className":"browser-default-prose"} -->
@@ -552,6 +570,13 @@ jobs:
               }
               $content .= "\n" . $pattern["content"];
           }
+          foreach (array("/tmp/slateframe-editor-photography.html","/tmp/slateframe-editor-portfolio.html") as $fixture_file) {
+              $fixture = file_get_contents($fixture_file);
+              if (false === $fixture || "" === trim($fixture)) {
+                  throw new RuntimeException("Missing editor evidence fixture: " . $fixture_file);
+              }
+              $content .= "\n" . $fixture;
+          }
           $id = wp_insert_post(
               array(
                   "post_type" => "page",
@@ -653,7 +678,7 @@ jobs:
             --comment_content='Nested reply fixture — 中文 العربية.' \
             --comment_approved=1
 
-          PHOTO_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Photography Fixture' --post_content='<!-- wp:group {"align":"wide","className":"slateframe-pattern slateframe-photography-feature","layout":{"type":"constrained"}} --><div class="wp-block-group alignwide slateframe-pattern slateframe-photography-feature"><!-- wp:image {"align":"wide","lightbox":{"enabled":true},"className":"browser-photo-feature is-style-slateframe-photo-feature"} --><figure class="wp-block-image alignwide browser-photo-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Landscape fixture"><figcaption>Landscape fixture caption</figcaption></figure><!-- /wp:image --><!-- wp:gallery {"align":"wide","className":"browser-photo-gallery is-style-slateframe-contact-sheet"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-gallery is-style-slateframe-contact-sheet"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide landscape fixture"><figcaption>Wide frame</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Tall portrait fixture"><figcaption>Portrait frame</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery --></div><!-- /wp:group --><!-- wp:gallery {"align":"wide","className":"browser-photo-diptych is-style-slateframe-diptych"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-diptych is-style-slateframe-diptych"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Diptych landscape"></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Diptych portrait"></figure><!-- /wp:image --></figure><!-- /wp:gallery -->' --porcelain)
+          PHOTO_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Photography Fixture' --post_content='<!-- wp:group {"align":"wide","className":"slateframe-pattern slateframe-photography-feature","layout":{"type":"constrained"}} --><div class="wp-block-group alignwide slateframe-pattern slateframe-photography-feature"><!-- wp:image {"align":"wide","lightbox":{"enabled":true},"className":"browser-photo-feature is-style-slateframe-photo-feature"} --><figure class="wp-block-image alignwide browser-photo-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Landscape fixture"><figcaption>Landscape fixture caption</figcaption></figure><!-- /wp:image --><!-- wp:gallery {"align":"wide","className":"browser-photo-gallery is-style-slateframe-contact-sheet"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-gallery is-style-slateframe-contact-sheet"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide landscape fixture"><figcaption>Wide frame</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Tall portrait fixture"><figcaption>Portrait frame</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery --></div><!-- /wp:group --><!-- wp:gallery {"align":"wide","className":"browser-photo-diptych is-style-slateframe-diptych"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-diptych is-style-slateframe-diptych"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Diptych landscape"><figcaption>Diptych landscape caption</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Diptych portrait"><figcaption>Diptych portrait caption — 中文 日本語 العربية</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery -->' --porcelain)
           PROJECT_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \
