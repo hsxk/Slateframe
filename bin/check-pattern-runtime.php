@@ -128,7 +128,7 @@ function slateframe_ci_validate_pattern_runtime() {
 			}
 		);
 
-		$photography_slots = array(
+		$photography_slots        = array(
 			'slateframe/photography-diptych'       => 2,
 			'slateframe/photography-contact-sheet' => 4,
 			'slateframe/photo-essay'               => 3,
@@ -150,7 +150,7 @@ function slateframe_ci_validate_pattern_runtime() {
 				'pattern-placeholder-square.svg',
 			),
 		);
-		$photography_styles = array(
+		$photography_styles       = array(
 			'slateframe/photography-diptych'       => 'is-style-slateframe-diptych',
 			'slateframe/photography-contact-sheet' => 'is-style-slateframe-contact-sheet',
 			'slateframe/photo-essay'               => 'is-style-slateframe-photo-sequence',
@@ -186,7 +186,7 @@ function slateframe_ci_validate_pattern_runtime() {
 				'none' !== ( $gallery_attrs['linkTo'] ?? '' ) ||
 				'wide' !== ( $gallery_attrs['align'] ?? '' ) ||
 				'large' !== ( $gallery_attrs['sizeSlug'] ?? '' ) ||
-				$photography_styles[ $name ] !== ( $gallery_attrs['className'] ?? '' )
+				( $gallery_attrs['className'] ?? '' ) !== $photography_styles[ $name ]
 			) {
 				throw new RuntimeException( esc_html( sprintf( 'Photography Gallery attributes are unsafe: %s', $name ) ) );
 			}
@@ -207,7 +207,7 @@ function slateframe_ci_validate_pattern_runtime() {
 					'none' !== ( $attrs['linkDestination'] ?? '' ) ||
 					true !== ( $attrs['lightbox']['enabled'] ?? false ) ||
 					'' !== (string) ( $attrs['alt'] ?? '' ) ||
-					$expected_url !== ( $attrs['url'] ?? '' ) ||
+					( $attrs['url'] ?? '' ) !== $expected_url ||
 					isset( $attrs['id'] ) ||
 					! is_readable( $placeholder_file ) ||
 					false === strpos( $inner_html, '<img' ) ||
