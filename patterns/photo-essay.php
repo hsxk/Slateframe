@@ -39,9 +39,15 @@
 
 	<!-- wp:gallery {"align":"wide","linkTo":"none","sizeSlug":"large","imageCrop":false,"className":"is-style-slateframe-photo-sequence"} -->
 	<figure class="wp-block-gallery alignwide has-nested-images columns-default is-cropped-false is-style-slateframe-photo-sequence">
-		<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
-		<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
-		<!-- wp:image {"sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} /-->
+		<!-- wp:image {"url":"<?php echo esc_url( get_theme_file_uri( '/assets/images/pattern-placeholder-landscape.svg' ) ); ?>","alt":"","sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} -->
+		<figure class="wp-block-image size-large"><img src="<?php echo esc_url( get_theme_file_uri( '/assets/images/pattern-placeholder-landscape.svg' ) ); ?>" alt=""/></figure>
+		<!-- /wp:image -->
+		<!-- wp:image {"url":"<?php echo esc_url( get_theme_file_uri( '/assets/images/pattern-placeholder-portrait.svg' ) ); ?>","alt":"","sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} -->
+		<figure class="wp-block-image size-large"><img src="<?php echo esc_url( get_theme_file_uri( '/assets/images/pattern-placeholder-portrait.svg' ) ); ?>" alt=""/></figure>
+		<!-- /wp:image -->
+		<!-- wp:image {"url":"<?php echo esc_url( get_theme_file_uri( '/assets/images/pattern-placeholder-square.svg' ) ); ?>","alt":"","sizeSlug":"large","linkDestination":"none","lightbox":{"enabled":true}} -->
+		<figure class="wp-block-image size-large"><img src="<?php echo esc_url( get_theme_file_uri( '/assets/images/pattern-placeholder-square.svg' ) ); ?>" alt=""/></figure>
+		<!-- /wp:image -->
 	</figure>
 	<!-- /wp:gallery -->
 

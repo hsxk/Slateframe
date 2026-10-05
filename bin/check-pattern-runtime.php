@@ -133,6 +133,28 @@ function slateframe_ci_validate_pattern_runtime() {
 			'slateframe/photography-contact-sheet' => 4,
 			'slateframe/photo-essay'               => 3,
 		);
+		$photography_placeholders = array(
+			'slateframe/photography-diptych'       => array(
+				'pattern-placeholder-landscape.svg',
+				'pattern-placeholder-portrait.svg',
+			),
+			'slateframe/photography-contact-sheet' => array(
+				'pattern-placeholder-portrait.svg',
+				'pattern-placeholder-landscape.svg',
+				'pattern-placeholder-square.svg',
+				'pattern-placeholder-landscape.svg',
+			),
+			'slateframe/photo-essay'               => array(
+				'pattern-placeholder-landscape.svg',
+				'pattern-placeholder-portrait.svg',
+				'pattern-placeholder-square.svg',
+			),
+		);
+		$photography_styles = array(
+			'slateframe/photography-diptych'       => 'is-style-slateframe-diptych',
+			'slateframe/photography-contact-sheet' => 'is-style-slateframe-contact-sheet',
+			'slateframe/photo-essay'               => 'is-style-slateframe-photo-sequence',
+		);
 
 		if ( isset( $photography_slots[ $name ] ) ) {
 			if ( false !== strpos( $content, '\\\\n' ) || false !== strpos( $content, '\\\\t' ) ) {
@@ -159,12 +181,38 @@ function slateframe_ci_validate_pattern_runtime() {
 				throw new RuntimeException( esc_html( sprintf( 'Photography starter slot contract failed: %s', $name ) ) );
 			}
 			$gallery_attrs = $galleries[0]['attrs'] ?? array();
-			if ( false !== ( $gallery_attrs['imageCrop'] ?? null ) || 'none' !== ( $gallery_attrs['linkTo'] ?? '' ) ) {
+			if (
+				false !== ( $gallery_attrs['imageCrop'] ?? null ) ||
+				'none' !== ( $gallery_attrs['linkTo'] ?? '' ) ||
+				'wide' !== ( $gallery_attrs['align'] ?? '' ) ||
+				'large' !== ( $gallery_attrs['sizeSlug'] ?? '' ) ||
+				$photography_styles[ $name ] !== ( $gallery_attrs['className'] ?? '' )
+			) {
 				throw new RuntimeException( esc_html( sprintf( 'Photography Gallery attributes are unsafe: %s', $name ) ) );
 			}
-			foreach ( $images as $image ) {
-				$attrs = $image['attrs'] ?? array();
-				if ( 'large' !== ( $attrs['sizeSlug'] ?? '' ) || 'none' !== ( $attrs['linkDestination'] ?? '' ) || true !== ( $attrs['lightbox']['enabled'] ?? false ) ) {
+			if ( 'slateframe/photography-diptych' === $name && 2 !== ( $gallery_attrs['columns'] ?? null ) ) {
+				throw new RuntimeException( esc_html( sprintf( 'Photography diptych column contract failed: %s', $name ) ) );
+			}
+
+			$placeholder_base_url = trailingslashit( get_theme_file_uri( '/assets/images' ) );
+			foreach ( $images as $index => $image ) {
+				$attrs                = $image['attrs'] ?? array();
+				$placeholder_filename = $photography_placeholders[ $name ][ $index ];
+				$expected_url         = $placeholder_base_url . $placeholder_filename;
+				$placeholder_file     = get_template_directory() . '/assets/images/' . $placeholder_filename;
+				$inner_html           = (string) ( $image['innerHTML'] ?? '' );
+
+				if (
+					'large' !== ( $attrs['sizeSlug'] ?? '' ) ||
+					'none' !== ( $attrs['linkDestination'] ?? '' ) ||
+					true !== ( $attrs['lightbox']['enabled'] ?? false ) ||
+					'' !== (string) ( $attrs['alt'] ?? '' ) ||
+					$expected_url !== ( $attrs['url'] ?? '' ) ||
+					isset( $attrs['id'] ) ||
+					! is_readable( $placeholder_file ) ||
+					false === strpos( $inner_html, '<img' ) ||
+					false === strpos( $inner_html, $expected_url )
+				) {
 					throw new RuntimeException( esc_html( sprintf( 'Photography image slot attributes are incomplete: %s', $name ) ) );
 				}
 			}
