@@ -49,6 +49,21 @@ async function expectMediaContained(locator, message) {
 	}), { message }).toBeLessThanOrEqual(1);
 }
 
+async function expectLightboxSettled(dialog, enlarged, message) {
+	await expect.poll(async () => dialog.evaluate((node) =>
+		node.getAnimations({ subtree: true }).filter((animation) => animation.playState === 'running').length
+	), { message: `${message}: animations should finish`, timeout: 5_000 }).toBe(0);
+
+	await expectMediaContained(enlarged, message);
+
+	const first = await enlarged.boundingBox();
+	await enlarged.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+	const second = await enlarged.boundingBox();
+	for (const key of ['x', 'y', 'width', 'height']) {
+		expect(Math.abs((second?.[key] || 0) - (first?.[key] || 0)), `${message}: ${key} should settle between animation frames`).toBeLessThanOrEqual(1);
+	}
+}
+
 test('raster photography exposes responsive candidates and stable intrinsic geometry', async ({ page }) => {
 	await openRasterPhotography(page);
 	const image = page.locator('#main-content img.wp-image-raster').first();
@@ -439,7 +454,7 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	await page.screenshot({ path: path.join(screenshotDir, `photography-page-${testInfo.project.name}.png`), fullPage: true });
 
 	const feature = await openLightbox(page, 'keyboard');
-	await expectMediaContained(feature.enlarged, 'landscape screenshot evidence should capture the settled lightbox');
+	await expectLightboxSettled(feature.dialog, feature.enlarged, 'landscape screenshot evidence should capture the settled lightbox');
 	const lightboxSurface = await page.locator('.wp-lightbox-overlay').evaluate((node) => ({
 		background: getComputedStyle(node).backgroundColor,
 		pageBackground: getComputedStyle(document.body).backgroundColor,
@@ -457,6 +472,6 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	const portraitTrigger = page.locator('.browser-raster-gallery button.wp-lightbox-container, .browser-raster-gallery .wp-lightbox-container button').first();
 	const portrait = await openLightbox(page, 'keyboard', portraitTrigger);
 	await expect(portrait.enlarged).toBeVisible();
-	await expectMediaContained(portrait.enlarged, 'portrait screenshot evidence should capture the settled lightbox');
+	await expectLightboxSettled(portrait.dialog, portrait.enlarged, 'portrait screenshot evidence should capture the settled lightbox');
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-portrait-${testInfo.project.name}.png`), fullPage: false });
 });
