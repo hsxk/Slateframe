@@ -128,14 +128,11 @@ function slateframe_content_has_form( $content ) {
 }
 
 /**
- * Determine whether the current request needs the shared form-control layer.
- *
- * Search, recovery, empty-state, comments, Core Search, and author-owned forms
- * all use the same geometry without making form CSS a global request cost.
+ * Determine whether the current request renders Slateframe's theme search form.
  *
  * @return bool
  */
-function slateframe_forms_styles_needed() {
+function slateframe_search_form_styles_needed() {
 	$needed = is_search() || is_404();
 
 	global $wp_query;
@@ -148,6 +145,20 @@ function slateframe_forms_styles_needed() {
 	) {
 		$needed = true;
 	}
+
+	return $needed;
+}
+
+/**
+ * Determine whether the current request needs the shared form-control layer.
+ *
+ * Search, recovery, empty-state, comments, Core Search, and author-owned forms
+ * all use the same geometry without making form CSS a global request cost.
+ *
+ * @return bool
+ */
+function slateframe_forms_styles_needed() {
+	$needed = slateframe_search_form_styles_needed();
 
 	if ( ! $needed && is_singular() ) {
 		$needed = comments_open() || (bool) get_comments_number();
@@ -356,6 +367,7 @@ function slateframe_assets() {
 	$query_loop_needed    = slateframe_query_loop_styles_needed();
 	$forms_needed         = slateframe_forms_styles_needed();
 	$form_content_needed  = slateframe_form_content_styles_needed();
+	$search_form_needed    = slateframe_search_form_styles_needed();
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 	wp_enqueue_style(
@@ -376,6 +388,15 @@ function slateframe_assets() {
 			'slateframe-forms',
 			get_template_directory_uri() . '/assets/css/forms.css',
 			array( 'slateframe-style' ),
+			$version
+		);
+	}
+
+	if ( $search_form_needed ) {
+		wp_enqueue_style(
+			'slateframe-search-form',
+			get_template_directory_uri() . '/assets/css/search-form.css',
+			array( 'slateframe-forms' ),
 			$version
 		);
 	}
