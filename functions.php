@@ -367,7 +367,7 @@ function slateframe_assets() {
 	$query_loop_needed    = slateframe_query_loop_styles_needed();
 	$forms_needed         = slateframe_forms_styles_needed();
 	$form_content_needed  = slateframe_form_content_styles_needed();
-	$search_form_needed    = slateframe_search_form_styles_needed();
+	$search_form_needed   = slateframe_search_form_styles_needed();
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 	wp_enqueue_style(
