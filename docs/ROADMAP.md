@@ -4,7 +4,7 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
-- Continue refining Photography/Gallery visual language after shipping mixed-orientation fixtures, natural-ratio features, responsive diptychs, editorial sequences, and native WordPress Core immersive viewing; next focus is final visual polish, manual accessibility review, and release-grade screenshot selection.
+- Continue refining Photography/Gallery visual language after shipping mixed-orientation fixtures, natural-ratio features, responsive diptychs, replaceable theme-local starter media, editorial sequences, and native WordPress Core immersive viewing; next focus is final visual polish, manual accessibility review, and release-grade screenshot selection.
 - Continue expanding Portfolio and Knowledge composition coverage after adding portable project metrics, Query Loop grids, decision trails, evidence prompts, lesson verification, procedures, comparisons, definitions, checkpoints, and authenticated Gutenberg rendering checks; next focus is deeper realistic empty/long authoring states and plugin coexistence without introducing custom content ownership.
 - Expand WordPress.org readiness from the current required-check baseline to final submission review.
 - Extend browser fixtures beyond the current CJK/RTL/long-string/table/gallery/comment/content-mode and real Gutenberg coverage, especially plugin coexistence and more destructive authoring edge cases.
@@ -17,6 +17,7 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 - Optional multilingual adapter examples for common plugins, kept outside core dependency paths.
 - Additional editorial patterns based on core blocks.
+- Continue mobile Photography contact-sheet rhythm review with real mixed-orientation raster evidence at 320–412px.
 - Performance regression tracking as fixtures become more representative.
 - Release/versioning policy once a stable compatibility surface exists.
 

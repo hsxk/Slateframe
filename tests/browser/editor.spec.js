@@ -92,6 +92,35 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 		await expect(canvas.locator(selector).first()).toBeVisible();
 	}
 
+	const photographyStarter = canvas.locator('.slateframe-photography-diptych').first();
+	const starterImages = photographyStarter.locator('img');
+	await expect(starterImages).toHaveCount(2);
+	// Gutenberg renders a localized accessibility hint for decorative images.
+	// Check the saved block attributes, which determine the public markup.
+	const starterAltAttributes = await page.evaluate(() => {
+		const walk = (blocks) => blocks.flatMap((block) => [block, ...walk(block.innerBlocks || [])]);
+		return walk(window.wp.data.select('core/block-editor').getBlocks())
+			.filter((block) => block.name === 'core/image'
+				&& /\/assets\/images\/pattern-placeholder-(landscape|portrait)\.svg$/.test(block.attributes.url || ''))
+			.map((block) => block.attributes.alt);
+	});
+	expect(starterAltAttributes).toEqual(['', '']);
+	expect(await photographyStarter.locator('a').count()).toBe(0);
+	const starterGeometry = await photographyStarter.evaluate((root) => ({
+		rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		images: [...root.querySelectorAll('img')].map((image) => ({
+			src: image.currentSrc || image.src,
+			width: image.getBoundingClientRect().width,
+			height: image.getBoundingClientRect().height,
+		})),
+	}));
+	expect(starterGeometry.rootOverflow).toBeLessThanOrEqual(1);
+	for (const image of starterGeometry.images) {
+		expect(image.src).toContain('/wp-content/themes/slateframe/assets/images/pattern-placeholder-');
+		expect(image.width).toBeGreaterThan(0);
+		expect(image.height).toBeGreaterThan(0);
+	}
+
 	const photographyMedia = canvas.locator('.browser-editor-photography-gallery').first();
 	await expect(photographyMedia).toBeVisible();
 	await expect(photographyMedia.locator('img')).toHaveCount(2);
