@@ -92,6 +92,17 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 		await expect(canvas.locator(selector).first()).toBeVisible();
 	}
 
+	const editorSearch = canvas.locator('.browser-editor-search').first();
+	await expect(editorSearch).toBeVisible();
+	const editorSearchInput = editorSearch.locator('input[type="search"]').first();
+	const editorSearchButton = editorSearch.locator('button').first();
+	for (const control of [editorSearchInput, editorSearchButton]) {
+		await expect(control).toBeVisible();
+		const box = await control.boundingBox();
+		expect(box?.height || 0).toBeGreaterThanOrEqual(43);
+	}
+	expect(await editorSearch.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+
 	const photographyStarter = canvas.locator('.slateframe-photography-diptych').first();
 	const starterImages = photographyStarter.locator('img');
 	await expect(starterImages).toHaveCount(2);
