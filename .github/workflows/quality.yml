@@ -495,6 +495,25 @@ jobs:
           <hr class="wp-block-separator has-alpha-channel-opacity browser-reading-separator"/>
           <!-- /wp:separator -->
 
+          <!-- wp:html -->
+          <form class="browser-semantic-form" action="#" method="get">
+            <fieldset>
+              <legend>Publishing preferences / 发布设置 / إعدادات النشر</legend>
+              <p><label for="browser-display-name">Display name / 显示名称</label><input id="browser-display-name" name="display-name" type="text" placeholder="A long translated placeholder should remain readable inside the field"></p>
+              <p><label for="browser-email">Contact email</label><input id="browser-email" name="email" type="email" value="not-an-email" aria-invalid="true" aria-describedby="browser-form-help"></p>
+              <p><label for="browser-format">Preferred reading format</label><select id="browser-format" name="format"><option>Standard editorial layout</option><option>日本語の長い選択肢</option><option>خيار عربي طويل للاختبار</option></select></p>
+              <p><label for="browser-notes" dir="rtl">ملاحظات متعددة اللغات</label><textarea id="browser-notes" name="notes" dir="rtl">هذا نص عربي للتحقق من التخطيط المنطقي واتجاه الكتابة.</textarea></p>
+              <p><label for="browser-reference">Reference ID</label><input id="browser-reference" name="reference" type="text" value="portable-readonly-reference" readonly></p>
+              <small id="browser-form-help">Fields keep the shared touch target, focus language, and bounded spatial rhythm.</small>
+              <p><button id="browser-form-action" type="button">Preview settings / 预览 / معاينة</button></p>
+            </fieldset>
+          </form>
+          <!-- /wp:html -->
+
+          <!-- wp:paragraph {"className":"browser-editorial-primitives"} -->
+          <p class="browser-editorial-primitives">Press <kbd>Tab</kbd> to move through controls, review <mark>highlighted evidence</mark>, and expand <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> terminology without leaving the reading flow.</p>
+          <!-- /wp:paragraph -->
+
           <!-- wp:list {"className":"browser-nested-list"} -->
           <ul class="browser-nested-list"><li>Primary reading point<ul><li>Nested supporting detail</li><li>Second supporting detail</li></ul></li><li>Following reading point</li></ul>
           <!-- /wp:list -->
