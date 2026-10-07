@@ -85,6 +85,30 @@ test('core routes render without theme runtime failures', async ({ page }) => {
 	}
 });
 
+test('form presentation stays contextual instead of leaking into form-free routes', async ({ page }) => {
+	const assetCount = async (name) => page.locator(`link[rel="stylesheet"][href*="/assets/css/${name}.css"]`).count();
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(0);
+	expect(await assetCount('form-content')).toBe(0);
+	expect(await assetCount('search-form')).toBe(0);
+
+	await page.goto('/?s=Slateframe', { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(1);
+	expect(await assetCount('search-form')).toBe(1);
+	expect(await assetCount('form-content')).toBe(0);
+
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(1);
+	expect(await assetCount('form-content')).toBe(1);
+	expect(await assetCount('search-form')).toBe(0);
+
+	await page.goto(photoPath, { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(0);
+	expect(await assetCount('form-content')).toBe(0);
+	expect(await assetCount('search-form')).toBe(0);
+});
+
 test('semantic forms and editorial primitives stay usable across responsive viewports', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const form = page.locator('.browser-semantic-form');
