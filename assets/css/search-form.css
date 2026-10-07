@@ -1,0 +1,1 @@
+.slateframe-search-form{display:flex;gap:var(--slateframe-component-gap);max-width:36rem;margin-block-start:var(--slateframe-stack-gap)}.slateframe-search-form label{flex:1;min-inline-size:0}@media (max-width:640px){.slateframe-search-form{display:grid}}
