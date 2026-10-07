@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Shared semantic form primitives now cover text-like inputs, selects, textareas, fieldsets, legends, placeholders, readonly/invalid states, and ordinary form buttons with the same bounded Slateframe control system used by Search and comments.
+- Browser CI now exercises the real multilingual/RTL semantic-form fixture, keyboard order, forced-colors invalid state, editorial `kbd`/`mark`/`abbr` primitives, and compact/default/spacious Appearance geometry in the existing screenshot pages.
+
 - Gutenberg CI now separates shipped starter-pattern validity from deterministic visual evidence: real landscape/portrait Core Gallery media exercises Photography editor parity, while a fixture-owned filtered native Query Loop keeps Portfolio authoring screenshots free from unrelated default content.
 - Portfolio browser fixtures now use a deterministic, isolated native Query Loop dataset and exercise the real second pagination page instead of relying on same-second post ordering.
 - Focused Photography CI now creates real landscape, portrait, and square JPEG attachments, checks responsive candidates and intrinsic orientation, opens portrait media in Core lightbox, runs dialog-scoped Axe WCAG A/AA regression, and retains page/landscape/portrait screenshot evidence across representative widths.
