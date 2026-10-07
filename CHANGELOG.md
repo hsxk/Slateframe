@@ -85,6 +85,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Changed
 
+- Split generic form controls, authored form states, and theme-owned search layout into contextual assets with route-specific CI budgets; form-free routes no longer pay for form presentation, while comments and Core Search keep the shared control contract without raising existing aggregate ceilings.
+
 - The release builder now emits deterministic ZIP archives with sorted entries and normalized commit-derived timestamps and permissions while preserving the existing distribution exclusions.
 - Completed the shared control family across primary/language navigation, search/buttons, native pagination, footer links, and comment auxiliary actions with minimum target width as well as height.
 - Centralized ordinary semantic borders on `--slateframe-rule`, removing duplicated border composition across frontend/editor assets while keeping existing runtime budgets unchanged.
