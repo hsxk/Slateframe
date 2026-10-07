@@ -85,6 +85,31 @@ test('core routes render without theme runtime failures', async ({ page }) => {
 	}
 });
 
+test('semantic forms and editorial primitives stay usable across responsive viewports', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const form = page.locator('.browser-semantic-form');
+	await expect(form).toBeVisible();
+	const name = page.locator('#browser-display-name');
+	const email = page.locator('#browser-email');
+	await name.focus();
+	await expect(name).toBeFocused();
+	await page.keyboard.press('Tab');
+	await expect(email).toBeFocused();
+	await expect(email).toHaveAttribute('aria-invalid', 'true');
+	await expect(page.locator('#browser-notes')).toHaveAttribute('dir', 'rtl');
+	const action = page.locator('#browser-form-action');
+	const actionBox = await action.boundingBox();
+	expect(actionBox?.width || 0).toBeGreaterThanOrEqual(44);
+	expect(actionBox?.height || 0).toBeGreaterThanOrEqual(44);
+	for (const primitive of ['kbd', 'mark', 'abbr[title]']) {
+		await expect(page.locator('.browser-editorial-primitives').locator(primitive)).toBeVisible();
+	}
+	await expectNoHorizontalOverflow(page, 'semantic form fixture');
+	await page.emulateMedia({ forcedColors: 'active' });
+	expect(await email.evaluate((node) => getComputedStyle(node).borderStyle)).toBe('double');
+	await expectNoHorizontalOverflow(page, 'semantic form fixture in forced colors');
+});
+
 test('skip link moves keyboard users to the main landmark', async ({ page }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 	await page.keyboard.press('Tab');
