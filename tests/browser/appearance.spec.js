@@ -107,6 +107,51 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	}
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const semanticForm = page.locator('.browser-semantic-form');
+	await expect(semanticForm).toBeVisible();
+	const semanticFields = [
+		page.locator('#browser-display-name'),
+		page.locator('#browser-email'),
+		page.locator('#browser-format'),
+		page.locator('#browser-notes'),
+		page.locator('#browser-reference'),
+	];
+	for (const field of semanticFields) {
+		await expect(field).toBeVisible();
+		expect((await field.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+	}
+	const semanticButton = page.locator('#browser-form-action');
+	await expect(semanticButton).toBeVisible();
+	expect((await semanticButton.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	near(await semanticButton.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	const semanticState = await semanticForm.evaluate((form) => {
+		const invalid = form.querySelector('[aria-invalid="true"]');
+		const normal = form.querySelector('#browser-display-name');
+		const readonly = form.querySelector('[readonly]');
+		const placeholder = getComputedStyle(normal, '::placeholder').color;
+		const probe = document.createElement('i');
+		probe.style.cssText = 'position:absolute;visibility:hidden;color:var(--slateframe-danger)';
+		document.body.append(probe);
+		const danger = getComputedStyle(probe).color;
+		probe.remove();
+		return {
+			invalidBorder: getComputedStyle(invalid).borderTopColor,
+			danger,
+			placeholder,
+			muted: getComputedStyle(document.querySelector('.slateframe-entry-meta')).color,
+			readonlyBackground: getComputedStyle(readonly).backgroundColor,
+			normalBackground: getComputedStyle(normal).backgroundColor,
+			fieldsetRadius: Number.parseFloat(getComputedStyle(form.querySelector('fieldset')).borderRadius),
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	});
+	expect(semanticState.invalidBorder).toBe(semanticState.danger);
+	expect(semanticState.placeholder).toBe(semanticState.muted);
+	expect(semanticState.readonlyBackground).not.toBe(semanticState.normalBackground);
+	near(semanticState.fieldsetRadius, profile.radius, 1);
+	expect(semanticState.rootOverflow).toBeLessThanOrEqual(1);
 	const commentInput = page.locator('.slateframe-comments .comment-form-author input').first();
 	const commentTextarea = page.locator('.slateframe-comments textarea').first();
 	const commentSubmit = page.locator('.slateframe-comments .submit').first();
