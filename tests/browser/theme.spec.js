@@ -1320,7 +1320,14 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 			return {
 				naturalWidth: node.naturalWidth,
 				naturalHeight: node.naturalHeight,
+				intrinsicWidth: Number(node.getAttribute('width')),
+				intrinsicHeight: Number(node.getAttribute('height')),
+				renderedWidth: node.getBoundingClientRect().width,
 				renderedHeight: node.getBoundingClientRect().height,
+				currentPath: new URL(node.currentSrc, document.baseURI).pathname,
+				candidatePaths: (node.getAttribute('srcset') || '').split(',').map((candidate) =>
+					new URL(candidate.trim().split(/\s+/)[0], document.baseURI).pathname
+				).filter(Boolean),
 				alt: node.alt,
 				postTitle: node.closest('.slateframe-project-card')?.querySelector('.wp-block-post-title')?.textContent?.trim() || '',
 				srcset: node.getAttribute('srcset') || '',
@@ -1328,8 +1335,14 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 				figureRatio: box.width / box.height,
 			};
 		});
-		expect(media.naturalWidth).toBeGreaterThanOrEqual(300);
-		expect(media.naturalHeight, 'decoded srcset candidate must cover the visible crop height').toBeGreaterThanOrEqual(Math.floor(media.renderedHeight));
+		expect(media.intrinsicWidth, 'Core must retain source width metadata').toBeGreaterThan(0);
+		expect(media.intrinsicHeight, 'Core must retain source height metadata').toBeGreaterThan(0);
+		expect(media.renderedWidth).toBeGreaterThan(0);
+		expect(media.renderedHeight).toBeGreaterThan(0);
+		expect(media.naturalWidth, 'selected source must cover rendered width').toBeGreaterThanOrEqual(Math.floor(media.renderedWidth));
+		expect(media.naturalHeight, 'selected source must cover rendered crop height').toBeGreaterThanOrEqual(Math.floor(media.renderedHeight));
+		expect(media.candidatePaths.length, 'Core should offer multiple responsive sources').toBeGreaterThanOrEqual(2);
+		expect(media.candidatePaths, 'the decoded image must be a declared srcset candidate').toContain(media.currentPath);
 		expect(media.postTitle).toMatch(/^Portable project fixture [1-6]$/);
 		expect(media.alt, 'Core may use the post title or attachment alternative text').toBeTruthy();
 		expect([media.postTitle, 'Landscape project illustration', 'Portrait project illustration']).toContain(media.alt);

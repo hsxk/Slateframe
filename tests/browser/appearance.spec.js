@@ -13,6 +13,28 @@ const profile = profiles[profileName];
 const width = (testInfo) => Number(testInfo.project.name.replace('viewport-', ''));
 const near = (received, expected, tolerance = 1) => expect(Math.abs(received - expected)).toBeLessThanOrEqual(tolerance);
 
+/**
+ * Capture the final native Core lightbox frame, not its opening transform.
+ * The focused raster suite uses the same geometry and animation contract.
+ */
+async function expectLightboxSettled(dialog) {
+	const image = dialog.locator('img[sizes="100vw"]').last();
+	await expect(image).toBeVisible();
+	await expect.poll(() => dialog.evaluate((node) =>
+		node.getAnimations({ subtree: true }).filter((animation) => animation.playState === 'running').length
+	), { message: 'native lightbox animations must finish before visual evidence', timeout: 5_000 }).toBe(0);
+	await expect.poll(() => image.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		return Math.max(0, -box.left, box.right - document.documentElement.clientWidth, -box.top, box.bottom - innerHeight);
+	}), { message: 'settled lightbox image must fit inside the viewport', timeout: 5_000 }).toBeLessThanOrEqual(1);
+	const before = await image.boundingBox();
+	await image.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+	const after = await image.boundingBox();
+	for (const key of ['x', 'y', 'width', 'height']) {
+		expect(Math.abs((after?.[key] || 0) - (before?.[key] || 0)), 'lightbox image geometry must settle before screenshot').toBeLessThanOrEqual(1);
+	}
+}
+
 test.beforeEach(({}, testInfo) => {
 	test.skip(![390, 1440].includes(width(testInfo)), 'Appearance profiles use representative mobile and desktop widths.');
 	if (!profile) throw new Error(`Unknown appearance profile: ${profileName}`);
@@ -296,6 +318,7 @@ test('appearance profile keeps native Photography lightbox inside the same contr
 	await expect(dialog).toBeVisible();
 	const close = dialog.getByRole('button', { name: /close/i });
 	await expect(close).toBeVisible();
+	await expectLightboxSettled(dialog);
 
 	const geometry = await close.evaluate((node) => {
 		const rect = node.getBoundingClientRect();
@@ -354,12 +377,19 @@ test('appearance profile keeps native Photography lightbox inside the same contr
 });
 
 test('appearance profile stays contained across content modes and captures review evidence', async ({ page }, testInfo) => {
-	const routes = [['home-controls', '/'], ['search-controls', '/?s=Portable'], ['page', pagePath], ['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
-		['portfolio', process.env.SLATEFRAME_PROJECT_PATH], ['knowledge', process.env.SLATEFRAME_KNOWLEDGE_PATH]].filter(([, route]) => route);
+	const routes = [
+		['home-controls', '/'], ['search-controls', '/?s=Portable'], ['empty-search', '/?s=slateframe-appearance-no-results-2026'],
+		['page', pagePath], ['post', process.env.SLATEFRAME_POST_PATH], ['attachment', process.env.SLATEFRAME_ATTACHMENT_PATH],
+		['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
+		['portfolio', process.env.SLATEFRAME_PROJECT_PATH], ['knowledge', process.env.SLATEFRAME_KNOWLEDGE_PATH],
+		['empty-author', process.env.SLATEFRAME_EMPTY_AUTHOR_PATH], ['not-found', '/slateframe-appearance-missing/'],
+	].filter(([, route]) => route);
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
 	for (const [name, route] of routes) {
-		await page.goto(route, { waitUntil: 'networkidle' });
+		const response = await page.goto(route, { waitUntil: 'networkidle' });
+		expect(response?.status(), `unexpected HTTP status for ${name}`).toBe(name === 'not-found' ? 404 : 200);
+		await expect(page.locator('#main-content')).toBeVisible();
 		expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
 			`${profileName} profile overflow on ${name}`).toBeLessThanOrEqual(1);
 		if (name === 'photography') {

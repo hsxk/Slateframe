@@ -75,7 +75,7 @@ theme.json spacing, typography, content width, wide width, and semantic colors s
 
 ## Review checklist
 
-For any visual-system change, inspect mobile and desktop, long Latin strings, CJK, RTL, keyboard focus, reduced motion, 200% text resizing, minimum/default/maximum Appearance profiles, horizontal overflow, table containment, and image/caption rhythm. Screenshot evidence is required for important visual changes before merge.
+For any visual-system change, inspect mobile and desktop, long Latin strings, CJK, RTL, keyboard focus, reduced motion, 200% text resizing, minimum/default/maximum Appearance profiles, horizontal overflow, table containment, and image/caption rhythm. Screenshot evidence is required for important visual changes before merge. Profile runs should include ordinary posts, attachment media, empty search and author archives, and real 404 recovery in addition to Photography/Portfolio/Knowledge. The native Core lightbox must finish its opening animation and remain fully viewport-contained before screenshot capture; a transitional frame is not valid visual evidence. Compact and spacious profile steps should still attempt to produce artifacts when the general browser suite reports a failure.
 
 
 ## Migration-hardening baseline

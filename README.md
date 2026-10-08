@@ -42,7 +42,7 @@ Site owners can tune eight bounded settings in **Appearance → Customize → Sl
 
 The light and dark palettes share the same semantic surface hierarchy, text, border, accent, focus, selection, and media-chrome tokens. System mode requires no JavaScript, while explicit site defaults are present in server-rendered HTML to avoid a theme flash. Block authors get the matching semantic color presets, XS–2XL spacing presets, and Small/Body/Lead/Heading/Display typography presets in the editor. Changed spatial settings and explicit site color defaults are mirrored into the block-editor canvas.
 
-CI renders the designed default plus the minimum/compact and maximum/spacious spatial profiles at representative mobile and desktop widths, and separately exercises system, explicit-light, and explicit-dark color modes. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, color persistence, accessible toggle state, and screenshot evidence.
+CI renders the designed default plus the minimum/compact and maximum/spacious spatial profiles at representative mobile and desktop widths, and separately exercises system, explicit-light, and explicit-dark color modes. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, color persistence, accessible toggle state, and screenshot evidence. Appearance visual evidence also covers single posts, attachment media, empty search/author states, and genuine 404 responses, and waits for the native lightbox to settle before checking enlarged-image viewport containment and saving screenshots.
 
 ## Default experience
 

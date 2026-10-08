@@ -6,13 +6,15 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Make Portfolio responsive-image smoke compare decoded pixels with the actual rendered crop, preserving genuine 4:3 WordPress srcset behavior at narrow widths instead of a fixed 300px raster-height assumption.
+- Expand default/compact/spacious real-WordPress visual evidence to single posts, attachments, empty search, empty author, and 404 recovery; require actual HTTP status, main landmark, and root containment on each route.
+- Wait for Core lightbox animations and stable image geometry before Appearance screenshots; assert enlarged media remains fully inside the viewport.
+- Preserve compact Appearance screenshots even when the preceding general browser smoke fails, so the visual failure can be diagnosed alongside spacious evidence.
 - Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
 
 ### Fixed
 
 - Keep mobile color and navigation controls vertically aligned under long multilingual site identities at 200% text zoom by sharing a compact control line-height; retain real-browser alignment and equal-height assertions at 320–412px.
-
-### Fixed
 
 - At narrow mobile widths, long CJK/RTL/mixed-script site identities and 200% zoom now move color and navigation controls to a separate row instead of vertically centering them against an oversized brand. Short names still share one row; contextual Search CSS no longer duplicates the global mobile rule.
 

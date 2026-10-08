@@ -782,6 +782,7 @@ jobs:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
         run: npm run test:browser
       - name: Verify compact Appearance bounds
+        if: ${{ always() }}
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
           SLATEFRAME_APPEARANCE_PROFILE: compact
@@ -832,6 +833,22 @@ jobs:
       - name: Reset color-mode fixture
         if: ${{ always() }}
         run: wp theme mod remove slateframe_color_mode --path=/tmp/wp-browser
+      - name: Require complete visual evidence
+        run: |
+          for profile in default compact spacious; do
+            for viewport in 390 1440; do
+              for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge empty-author not-found photography-lightbox content-pagination; do
+                screenshot="test-artifacts/screenshots/appearance-${profile}-viewport-${viewport}-${surface}.png"
+                test -s "$screenshot" || { echo "Missing visual evidence: $screenshot" >&2; exit 1; }
+              done
+            done
+          done
+          for viewport in 390 1440; do
+            for surface in core-search portfolio knowledge photography-media reading-table; do
+              screenshot="test-artifacts/screenshots/gutenberg-viewport-${viewport}-${surface}.png"
+              test -s "$screenshot" || { echo "Missing editor evidence: $screenshot" >&2; exit 1; }
+            done
+          done
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
