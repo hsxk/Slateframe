@@ -1320,6 +1320,7 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 			return {
 				naturalWidth: node.naturalWidth,
 				naturalHeight: node.naturalHeight,
+				renderedHeight: node.getBoundingClientRect().height,
 				alt: node.alt,
 				postTitle: node.closest('.slateframe-project-card')?.querySelector('.wp-block-post-title')?.textContent?.trim() || '',
 				srcset: node.getAttribute('srcset') || '',
@@ -1328,7 +1329,7 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 			};
 		});
 		expect(media.naturalWidth).toBeGreaterThanOrEqual(300);
-		expect(media.naturalHeight).toBeGreaterThanOrEqual(300);
+		expect(media.naturalHeight, 'decoded srcset candidate must cover the visible crop height').toBeGreaterThanOrEqual(Math.floor(media.renderedHeight));
 		expect(media.postTitle).toMatch(/^Portable project fixture [1-6]$/);
 		expect(media.alt, 'Core may use the post title or attachment alternative text').toBeTruthy();
 		expect([media.postTitle, 'Landscape project illustration', 'Portrait project illustration']).toContain(media.alt);
