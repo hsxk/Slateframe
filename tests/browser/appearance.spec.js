@@ -126,6 +126,16 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	await expect(semanticButton).toBeVisible();
 	expect((await semanticButton.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	near(await semanticButton.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	const imageSubmit = page.locator('#browser-image-submit');
+	await expect(imageSubmit).toBeVisible();
+	const imageSubmitMetrics = await imageSubmit.evaluate((node) => ({
+		width: node.getBoundingClientRect().width,
+		height: node.getBoundingClientRect().height,
+		padding: Number.parseFloat(getComputedStyle(node).paddingInlineStart),
+	}));
+	near(imageSubmitMetrics.width, 64);
+	near(imageSubmitMetrics.height, 44);
+	expect(imageSubmitMetrics.padding).toBeLessThanOrEqual(1);
 	const semanticState = await semanticForm.evaluate((form) => {
 		const invalid = form.querySelector('[aria-invalid="true"]');
 		const normal = form.querySelector('#browser-display-name');
