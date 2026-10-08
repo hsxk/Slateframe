@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Reject malformed PNG chunk ordering, invalid indexed palettes/bit depths, unknown critical chunks, and trailing compressed bytes; guard release-builder executable permissions in static CI.
+
 - Decode the complete 1200×900 release PNG stream in static quality, the ZIP builder, and package CI; add corruption regressions for truncation, CRC, dimensions, and trailing data instead of trusting header-only image metadata.
 - Replace virtualized full-height Gutenberg Portfolio screenshots with first/middle/last real card captures at 390/1440px, retain a focused viewport overview, and require those artifacts in Actions.
 
