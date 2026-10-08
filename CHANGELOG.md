@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Assert native Gutenberg content/wide layout variables follow bounded Appearance widths at default, compact and spacious settings; retain mobile/desktop screenshots and verify opaque sticky-header rendering.
+- Verify 320/390px real-raster Photography contact sheets switch to a readable single-column layout with portrait/square image containment.
+
 - Guard deterministic release ZIP timestamps across synthetic PR and push Git histories, with explicit SOURCE_DATE_EPOCH support and archive integrity regressions.
 - Refuse external, internal, and dangling symbolic links before creating a public ZIP to prevent file dereferencing and leakage.
 
@@ -21,6 +24,10 @@ All notable changes to Slateframe will be documented here.
 - Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
 
 ### Fixed
+
+- Synchronize WordPress constrained/wide block layout variables with Slateframe reading/canvas Appearance settings on the front end and in the block editor.
+- Replace the translucent blurred sticky header with a quiet opaque surface, reducing compositing work while keeping light/dark contrast.
+- Give narrow Photography contact sheets full-width media and multilingual captions instead of cramped two-column thumbnails.
 
 - Replace the truncated WordPress.org screenshot with an authentic 1200×900 WordPress Chromium showcase capture, using an indexed PNG to keep the source asset compact without third-party image dependencies.
 
