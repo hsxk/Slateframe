@@ -4,6 +4,10 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+### Fixed
+
+- At narrow mobile widths, long CJK/RTL/mixed-script site identities and 200% zoom now move color and navigation controls to a separate row instead of vertically centering them against an oversized brand. Short names still share one row; contextual Search CSS no longer duplicates the global mobile rule.
+
 ### Added
 
 - Native multipage post and Page navigation now has a labelled landmark, shared touch-sized controls, RTL-safe wrapping, and compact/default/spacious browser screenshot coverage.

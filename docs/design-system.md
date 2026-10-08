@@ -99,6 +99,6 @@ Browser coverage should reproduce the failure modes behind these rules: long CJK
 
 ## Mobile identity and native content pagination
 
-At phone widths, an ordinary short site identity shares the header row with the color and menu controls. The brand owns the remaining flexible space and wraps translated or zoomed text instead of clipping it or pushing the 44px controls outside the viewport.
+At phone widths, an ordinary short site identity shares the header row with the color and menu controls. The brand owns the remaining flexible space. On exceptionally long translated names or 200% text zoom, the header flex line wraps and moves color/navigation controls below the complete brand, without clipping the name or pushing 44px controls outside the viewport. Short names retain the single-row arrangement. The mobile Search layout belongs to its contextual stylesheet, not the global shell.
 
 Native WordPress `<!--nextpage-->` breaks in posts and Pages render inside a labelled `slateframe-content-pages` navigation landmark. Core owns current-page semantics; each number uses shared control height, spacing, radius, and logical wrapping. Appearance compact/default/spacious must preserve keyboard reachability and responsive containment without a pagination plugin.

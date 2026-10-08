@@ -311,12 +311,18 @@ test('site identity reflows without truncating multilingual text', async ({ page
 				headerBottom: headerBox.bottom,
 				brandBottom: brandBox.bottom,
 				controlsTop: Math.min(colorBox.top, menuBox.top),
+				controlsAlignment: Math.abs(colorBox.top - menuBox.top),
+				controlsOrder: menuBox.left - colorBox.right,
+				controlsGap: Math.min(colorBox.top, menuBox.top) - brandBox.bottom,
 				mainTop: mainBox.top,
 				viewportHeight: innerHeight,
 			};
 		});
 		expect(geometry.position).toBe('relative');
 		expect(geometry.brandBottom).toBeLessThanOrEqual(geometry.controlsTop + 1);
+		expect(geometry.controlsAlignment).toBeLessThanOrEqual(1);
+		expect(geometry.controlsOrder).toBeGreaterThanOrEqual(-1);
+		expect(geometry.controlsGap).toBeLessThanOrEqual(48);
 		expect(geometry.mainTop).toBeGreaterThanOrEqual(geometry.headerBottom - 1);
 		expect(geometry.viewportHeight).toBeGreaterThan(0);
 
