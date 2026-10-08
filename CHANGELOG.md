@@ -6,6 +6,10 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Keep mobile color and navigation controls vertically aligned under long multilingual site identities at 200% text zoom by sharing a compact control line-height; retain real-browser alignment and equal-height assertions at 320–412px.
+
+### Fixed
+
 - At narrow mobile widths, long CJK/RTL/mixed-script site identities and 200% zoom now move color and navigation controls to a separate row instead of vertically centering them against an oversized brand. Short names still share one row; contextual Search CSS no longer duplicates the global mobile rule.
 
 ### Added

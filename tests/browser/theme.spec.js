@@ -312,6 +312,7 @@ test('site identity reflows without truncating multilingual text', async ({ page
 				brandBottom: brandBox.bottom,
 				controlsTop: Math.min(colorBox.top, menuBox.top),
 				controlsAlignment: Math.abs(colorBox.top - menuBox.top),
+				controlsHeightDifference: Math.abs(colorBox.height - menuBox.height),
 				controlsOrder: menuBox.left - colorBox.right,
 				controlsGap: Math.min(colorBox.top, menuBox.top) - brandBox.bottom,
 				mainTop: mainBox.top,
@@ -321,6 +322,7 @@ test('site identity reflows without truncating multilingual text', async ({ page
 		expect(geometry.position).toBe('relative');
 		expect(geometry.brandBottom).toBeLessThanOrEqual(geometry.controlsTop + 1);
 		expect(geometry.controlsAlignment).toBeLessThanOrEqual(1);
+		expect(geometry.controlsHeightDifference, 'color and menu controls share the same 200%-zoom control height').toBeLessThanOrEqual(1);
 		expect(geometry.controlsOrder).toBeGreaterThanOrEqual(-1);
 		expect(geometry.controlsGap).toBeLessThanOrEqual(48);
 		expect(geometry.mainTop).toBeGreaterThanOrEqual(geometry.headerBottom - 1);
