@@ -19,7 +19,7 @@ test -f "$THEME_DIR/readme.txt"
 test -f "$THEME_DIR/LICENSE"
 test -f "$THEME_DIR/screenshot.png"
 
-php -r '$size=getimagesize($argv[1]); if (!$size || $size[0] !== 1200 || $size[1] !== 900) { throw new RuntimeException("screenshot.png must be 1200x900"); }' "$THEME_DIR/screenshot.png"
+python3 "$ROOT/bin/check-screenshot.py" "$THEME_DIR/screenshot.png"
 
 SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" python3 - "$DIST_DIR" "$THEME_DIR" "$ZIP_FILE" <<'PY'
 import os

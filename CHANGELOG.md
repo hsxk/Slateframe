@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Decode the complete 1200×900 release PNG stream in static quality, the ZIP builder, and package CI; add corruption regressions for truncation, CRC, dimensions, and trailing data instead of trusting header-only image metadata.
+- Replace virtualized full-height Gutenberg Portfolio screenshots with first/middle/last real card captures at 390/1440px, retain a focused viewport overview, and require those artifacts in Actions.
+
 - Make Portfolio responsive-image smoke compare decoded pixels with the actual rendered crop, preserving genuine 4:3 WordPress srcset behavior at narrow widths instead of a fixed 300px raster-height assumption.
 - Expand default/compact/spacious real-WordPress visual evidence to single posts, attachments, empty search, empty author, and 404 recovery; require actual HTTP status, main landmark, and root containment on each route.
 - Wait for Core lightbox animations and stable image geometry before Appearance screenshots; assert enlarged media remains fully inside the viewport.
@@ -13,6 +16,8 @@ All notable changes to Slateframe will be documented here.
 - Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
 
 ### Fixed
+
+- Replace the truncated WordPress.org screenshot with an authentic 1200×900 WordPress Chromium showcase capture, using an indexed PNG to keep the source asset compact without third-party image dependencies.
 
 - Keep mobile color and navigation controls vertically aligned under long multilingual site identities at 200% text zoom by sharing a compact control line-height; retain real-browser alignment and equal-height assertions at 320–412px.
 

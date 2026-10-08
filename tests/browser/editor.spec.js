@@ -310,6 +310,39 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 			expect(box?.width || 0).toBeGreaterThan(0);
 			expect(box?.height || 0).toBeGreaterThan(0);
 
+			if (name === 'portfolio') {
+				// A full Query Loop screenshot captures Gutenberg's virtualized blank
+				// offscreen area rather than evidence of each rendered project card.
+				const cards = region.locator('.slateframe-project-card');
+				const count = await cards.count();
+				expect(count).toBeGreaterThanOrEqual(6);
+				for (const [position, index] of [
+					['first', 0],
+					['middle', Math.floor(count / 2)],
+					['last', count - 1],
+				]) {
+					const card = cards.nth(index);
+					await card.scrollIntoViewIfNeeded();
+					await expect(card).toBeVisible();
+					const geometry = await card.evaluate((node) => ({
+						width: node.getBoundingClientRect().width,
+						height: node.getBoundingClientRect().height,
+						rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+					}));
+					expect(geometry.width).toBeGreaterThan(180);
+					expect(geometry.height).toBeGreaterThan(120);
+					expect(geometry.rootOverflow).toBeLessThanOrEqual(1);
+					await card.screenshot({
+						path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-portfolio-${position}.png`),
+					});
+				}
+				await cards.first().scrollIntoViewIfNeeded();
+				await page.screenshot({
+					path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-portfolio.png`),
+					fullPage: false,
+				});
+				continue;
+			}
 			await region.screenshot({
 				path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-${name}.png`),
 			});
