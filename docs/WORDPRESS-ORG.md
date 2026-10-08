@@ -29,6 +29,6 @@ These are reviewed as product decisions, not ignored errors. If Slateframe's lay
 
 ## Submission artifact
 
-`./bin/build-theme-zip.sh` creates `dist/slateframe.zip`. Development-only files are excluded. The archive must contain the public theme metadata, runtime assets, patterns, templates, `readme.txt`, `LICENSE`, and `screenshot.png`. Entries are sorted and ZIP timestamps/permissions are normalized from the source commit; CI builds the same revision twice and rejects the package if the SHA256 values differ.
+`./bin/build-theme-zip.sh` creates `dist/slateframe.zip`. Development-only files are excluded. The archive must contain the public theme metadata, runtime assets, patterns, templates, `readme.txt`, `LICENSE`, and `screenshot.png`. Entries are sorted and ZIP timestamps/permissions use a fixed default source epoch (2000-01-01 UTC), independent of synthetic PR merge commit times. Release tooling can override SOURCE_DATE_EPOCH explicitly. CI rejects differing SHA256 values and checks cross-event reproducibility. The builder refuses symbolic links before opening the archive, preventing accidental inclusion of files outside the repository.
 
 The current screenshot is a real WordPress Chromium capture of the generic Slateframe showcase, not personal or production-site content. The static gate and package builder reject truncated PNG data even when the IHDR dimensions look correct. Gutenberg Portfolio visual evidence captures individual first/middle/last cards to avoid treating virtualized editor whitespace as a complete screenshot.

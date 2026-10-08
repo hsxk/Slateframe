@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Guard deterministic release ZIP timestamps across synthetic PR and push Git histories, with explicit SOURCE_DATE_EPOCH support and archive integrity regressions.
+- Refuse external, internal, and dangling symbolic links before creating a public ZIP to prevent file dereferencing and leakage.
+
 - Reject malformed PNG chunk ordering, invalid indexed palettes/bit depths, unknown critical chunks, and trailing compressed bytes; guard release-builder executable permissions in static CI.
 
 - Decode the complete 1200×900 release PNG stream in static quality, the ZIP builder, and package CI; add corruption regressions for truncation, CRC, dimensions, and trailing data instead of trusting header-only image metadata.

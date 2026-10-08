@@ -37,7 +37,7 @@ jobs:
       - name: Validate screenshot PNG and corruption regression
         run: |
           python3 bin/check-screenshot.py screenshot.png
-          python3 -m unittest discover -s tests -p "test_screenshot.py"
+          python3 -m unittest discover -s tests -p "test_*.py"
       - name: Guard contextual selector contracts
         shell: bash
         run: |
