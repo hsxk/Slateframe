@@ -25,7 +25,7 @@ get_header();
 			<div class="slateframe-prose">
 				<?php
 				the_content();
-				wp_link_pages();
+				slateframe_content_pagination();
 				?>
 			</div>
 

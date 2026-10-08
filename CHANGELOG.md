@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Native multipage post and Page navigation now has a labelled landmark, shared touch-sized controls, RTL-safe wrapping, and compact/default/spacious browser screenshot coverage.
+- Mobile site identity and header controls now stay in one aligned row for ordinary titles while preserving translated-title wrapping and keyboard access.
+
 - Portfolio Query Loop titles now use the existing Lead typography preset; Gutenberg no longer promotes nested Query Loop titles to display headings, and browser tests assert the native preset and responsive containment.
 - The distributed theme metadata now includes an explicit copyright notice for WordPress.org Theme Check readiness.
 

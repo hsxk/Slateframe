@@ -647,6 +647,21 @@ jobs:
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)
 
+          MULTIPAGE_POST_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=post \
+            --post_status=publish \
+            --post_title='Paginated article — 中文 العربية' \
+            --post_content='<p class="browser-chapter-one">First chapter: portable editorial reading.</p><!--nextpage--><p class="browser-chapter-two" dir="rtl">الفصل الثاني — 第二章</p><!--nextpage--><p class="browser-chapter-three">Third chapter: an accessible conclusion.</p>' \
+            --porcelain)
+          MULTIPAGE_PAGE_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_title='Paginated reference page' \
+            --post_content='<p class="browser-page-one">Reference page introduction.</p><!--nextpage--><p class="browser-page-two">Reference page continuation.</p>' \
+            --porcelain)
+
           wp eval "stick_post( $POST_ID );" --path=/tmp/wp-browser
 
           PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/tests/fixtures/slateframe-media-fixture.png" --porcelain --path=/tmp/wp-browser)
@@ -744,6 +759,8 @@ jobs:
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EDITOR_POST_ID=$EDITOR_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_MULTIPAGE_POST_PATH=/?p=$MULTIPAGE_POST_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_MULTIPAGE_PAGE_PATH=/?page_id=$MULTIPAGE_PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EMPTY_AUTHOR_PATH=/?author=$EMPTY_AUTHOR_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress
         run: |

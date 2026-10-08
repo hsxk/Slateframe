@@ -96,3 +96,9 @@ Slateframe treats recurring fixes found in long-lived child themes as design-sys
 - **Site identity stays editable:** no fallback logo mark, footer copy, project taxonomy, analytics identifier, personal URL, or fixed publishing content is embedded in runtime.
 
 Browser coverage should reproduce the failure modes behind these rules: long CJK/mixed-script titles, long translated navigation, plain plugin-style tables, 200% text resizing, default/wide/full reading blocks, real 404 routing, and the minimum/default/maximum Appearance profiles.
+
+## Mobile identity and native content pagination
+
+At phone widths, an ordinary short site identity shares the header row with the color and menu controls. The brand owns the remaining flexible space and wraps translated or zoomed text instead of clipping it or pushing the 44px controls outside the viewport.
+
+Native WordPress `<!--nextpage-->` breaks in posts and Pages render inside a labelled `slateframe-content-pages` navigation landmark. Core owns current-page semantics; each number uses shared control height, spacing, radius, and logical wrapping. Appearance compact/default/spacious must preserve keyboard reachability and responsive containment without a pagination plugin.

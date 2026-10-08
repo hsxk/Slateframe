@@ -242,6 +242,27 @@ test('bounded appearance profile drives semantic design tokens and real controls
 });
 
 
+test('appearance profile preserves accessible native content pagination', async ({ page }, testInfo) => {
+	const multiPath = process.env.SLATEFRAME_MULTIPAGE_POST_PATH;
+	test.skip(!multiPath, 'WordPress multipage fixture is required.');
+	await page.goto(multiPath, { waitUntil: 'networkidle' });
+	const nav = page.getByRole('navigation', { name: 'Content pages' });
+	await expect(nav).toBeVisible();
+	const pages = nav.locator('.post-page-numbers');
+	await expect(pages).toHaveCount(3);
+	for (const item of await pages.all()) {
+		const box = await item.boundingBox();
+		expect(box?.width || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		expect(box?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		near(await item.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	}
+	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+	expect(overflow).toBeLessThanOrEqual(1);
+	const dir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(dir, { recursive: true });
+	await nav.screenshot({ path: path.join(dir, `appearance-${profileName}-${testInfo.project.name}-content-pagination.png`) });
+});
+
 test('appearance profile keeps native Photography lightbox inside the same control system', async ({ page }, testInfo) => {
 	const photoPath = process.env.SLATEFRAME_PHOTO_PATH;
 	test.skip(!photoPath, 'Photography fixture is required for Appearance lightbox coverage.');

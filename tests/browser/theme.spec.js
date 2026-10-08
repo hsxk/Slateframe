@@ -162,6 +162,27 @@ test('skip link moves keyboard users to the main landmark', async ({ page }) => 
 	await expect(page).toHaveURL(/#main-content$/);
 });
 
+test('short mobile site identity and header controls share one aligned row', async ({ page }, testInfo) => {
+	test.skip(![320, 375, 390, 412].includes(projectWidth(testInfo)), 'Mobile identity is checked at each phone viewport.');
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const brand = page.locator('.slateframe-brand');
+	const color = page.locator('[data-color-toggle]');
+	const menu = page.locator('[data-menu-toggle]');
+	for (const control of [brand, color, menu]) await expect(control).toBeVisible();
+	const [brandBox, colorBox, menuBox] = await Promise.all([brand.boundingBox(), color.boundingBox(), menu.boundingBox()]);
+	const center = (box) => box.y + box.height / 2;
+	expect(Math.abs(center(brandBox) - center(colorBox))).toBeLessThanOrEqual(5);
+	expect(Math.abs(center(menuBox) - center(colorBox))).toBeLessThanOrEqual(5);
+	expect(brandBox.x + brandBox.width).toBeLessThanOrEqual(colorBox.x + 1);
+	expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
+	await expectNoHorizontalOverflow(page, 'mobile inline header');
+	if ([320, 390].includes(projectWidth(testInfo))) {
+		const dir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(dir, { recursive: true });
+		await page.locator('[data-site-header]').screenshot({ path: path.join(dir, `mobile-header-inline-${testInfo.project.name}.png`) });
+	}
+});
+
 test('responsive navigation remains operable', async ({ page }, testInfo) => {
 	const failures = watchRuntime(page);
 	await page.goto('/', { waitUntil: 'networkidle' });

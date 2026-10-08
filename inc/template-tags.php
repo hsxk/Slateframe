@@ -228,6 +228,20 @@ function slateframe_entry_footer() {
 }
 
 /**
+ * Print accessible, touch-sized navigation for WordPress native page breaks.
+ *
+ * Core owns current-page semantics; single-page documents emit no navigation.
+ */
+function slateframe_content_pagination() {
+	wp_link_pages(
+		array(
+			'before' => '<nav class="slateframe-content-pages" aria-label="' . esc_attr__( 'Content pages', 'slateframe' ) . '">',
+			'after'  => '</nav>',
+		)
+	);
+}
+
+/**
  * Print posts pagination.
  */
 function slateframe_pagination() {
