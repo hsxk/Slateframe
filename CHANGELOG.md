@@ -27,7 +27,7 @@ All notable changes to Slateframe will be documented here.
 
 - Synchronize WordPress constrained/wide block layout variables with Slateframe reading/canvas Appearance settings on the front end and in the block editor.
 - Replace the translucent blurred sticky header with a quiet opaque surface, reducing compositing work while keeping light/dark contrast.
-- Give narrow Photography contact sheets full-width media and multilingual captions instead of cramped two-column thumbnails.
+- Give narrow Photography contact sheets full-width media and multilingual captions instead of cramped two-column thumbnails, while removing redundant physical image-sizing declarations in favor of equivalent logical properties to preserve the original runtime asset budget.
 
 - Replace the truncated WordPress.org screenshot with an authentic 1200×900 WordPress Chromium showcase capture, using an indexed PNG to keep the source asset compact without third-party image dependencies.
 
