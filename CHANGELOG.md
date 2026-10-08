@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Portfolio Query Loop titles now use the existing Lead typography preset; Gutenberg no longer promotes nested Query Loop titles to display headings, and browser tests assert the native preset and responsive containment.
+- The distributed theme metadata now includes an explicit copyright notice for WordPress.org Theme Check readiness.
+
 - Browser coverage now preserves native image-submit geometry and keyboard order at mobile and desktop widths across Appearance profiles, while Gutenberg Core Search is located by block control class and captured in its own editor screenshot evidence.
 - Shared form selectors explicitly exclude image-based submit inputs without increasing the existing 1300-byte form asset ceiling.
 - Shared semantic form primitives now cover text-like inputs, selects, textareas, fieldsets, legends, placeholders, readonly/invalid states, and ordinary form buttons with the same bounded Slateframe control system used by Search and comments.

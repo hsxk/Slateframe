@@ -22,7 +22,7 @@ The six editor spacing presets (`XS` through `2XL`) resolve from `--slateframe-s
 
 Footer columns and optional footer-widget content are sibling components, so their internal separation derives from stack rhythm; section whitespace remains reserved for the footer's relationship to the page above. Footer widgets render in a responsive auto-fit grid, reset list chrome, and keep links on the shared control-height baseline; the brand/navigation/copyright row becomes a single logical column on narrow screens. The footer stylesheet is a global shell asset alongside navigation and remains inside the unchanged aggregate base-runtime budget.
 
-Native Portfolio Query Pagination uses the same control radius, touch target, inline/component gaps, and current-state surface hierarchy as archive pagination. Project cards must remain coherent when a post has no featured image; absence of media never creates a fake placeholder or content-model dependency. Cards use one vertical flow, media consumes the shared media gap, and dates settle to the row baseline so mixed image/no-image items remain comparable without manufacturing empty media.
+Native Portfolio Query Pagination uses the same control radius, touch target, inline/component gaps, and current-state surface hierarchy as archive pagination. Project cards must remain coherent when a post has no featured image; absence of media never creates a fake placeholder or content-model dependency. Cards use one vertical flow, media consumes the shared media gap, and dates settle to the row baseline so mixed image/no-image items remain comparable without manufacturing empty media. The starter Query Loop uses the existing Lead typography preset for project titles rather than an undefined Large preset.
 
 Long-form hierarchy extends through H6: H2–H6 share the same section-entry rhythm, while lower heading sizes stay at a readable text baseline. Native definition lists remove browser-specific inline indentation and use the component gap to expose term/description relationships; thematic separators reuse heading rhythm and the shared border token. Threaded comments use a logical inline-start guide and bounded indentation so hierarchy remains legible in both LTR and RTL without consuming the mobile reading width.
 
@@ -32,7 +32,7 @@ Primary navigation has a hard compact baseline at 1280px and below, then remains
 
 ## Widths
 
-Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Site chrome uses a separate 92rem ceiling so navigation can use large displays without widening article content. Wide media must not force ordinary prose to grow beyond the reading measure. Long translated strings and CJK titles must wrap without horizontal overflow. Intrinsic sizing is part of that contract: emergency wrapping must also reduce min-content width so 200% text resizing cannot silently widen the root document.
+Reading content defaults to 46rem. Wide editorial layouts default to 74rem. Site chrome uses a separate 108rem ceiling so navigation can use large displays without widening article content. Wide media must not force ordinary prose to grow beyond the reading measure. Long translated strings and CJK titles must wrap without horizontal overflow. Intrinsic sizing is part of that contract: emergency wrapping must also reduce min-content width so 200% text resizing cannot silently widen the root document.
 
 ## Controls
 
