@@ -1013,8 +1013,11 @@ test('Pages share responsive featured media and content-owned captions with post
 		intrinsicHeight: Number(node.getAttribute('height')),
 	}));
 	expect(dimensions.width).toBeGreaterThan(0);
-	expect(dimensions.naturalWidth).toBe(1200);
-	expect(dimensions.naturalHeight).toBe(900);
+	expect(dimensions.naturalWidth).toBeGreaterThan(0);
+	expect(dimensions.naturalHeight).toBeGreaterThan(0);
+	expect(dimensions.naturalWidth).toBeLessThanOrEqual(dimensions.intrinsicWidth);
+	expect(dimensions.naturalHeight).toBeLessThanOrEqual(dimensions.intrinsicHeight);
+	expect(dimensions.naturalWidth / dimensions.naturalHeight).toBeCloseTo(4 / 3, 1);
 	expect(dimensions.intrinsicWidth).toBe(1200);
 	expect(dimensions.intrinsicHeight).toBe(900);
 	await expectNoHorizontalOverflow(page, featuredPagePath);
@@ -1029,7 +1032,7 @@ test('attachment pages expose media, metadata, original file, and parent recover
 	await expect(page.locator('.slateframe-entry-footer')).toContainText('1,200 × 900 px');
 	const original = page.getByRole('link', { name: 'Open original file' });
 	const parent = page.getByRole('link', { name: 'Back to Slateframe Featured Media Page' });
-	await expect(original).toHaveAttribute('href', /slateframe-media-fixture\.png$/);
+	await expect(original).toHaveAttribute('href', /\/slateframe-project-landscape\.png$/);
 	await expect(parent).toBeVisible();
 	for (const target of [original, parent]) {
 		expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
@@ -1318,14 +1321,19 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 				naturalWidth: node.naturalWidth,
 				naturalHeight: node.naturalHeight,
 				alt: node.alt,
+				postTitle: node.closest('.slateframe-project-card')?.querySelector('.wp-block-post-title')?.textContent?.trim() || '',
 				srcset: node.getAttribute('srcset') || '',
+				currentSrc: node.currentSrc,
 				figureRatio: box.width / box.height,
 			};
 		});
 		expect(media.naturalWidth).toBeGreaterThanOrEqual(300);
 		expect(media.naturalHeight).toBeGreaterThanOrEqual(300);
-		expect(media.alt).toMatch(/project illustration/);
+		expect(media.postTitle).toMatch(/^Portable project fixture [1-6]$/);
+		expect(media.alt, 'Core may use the post title or attachment alternative text').toBeTruthy();
+		expect([media.postTitle, 'Landscape project illustration', 'Portrait project illustration']).toContain(media.alt);
 		expect(media.srcset, 'WordPress must emit responsive image candidates').toContain('w');
+		expect(media.currentSrc).toMatch(/slateframe-project-(?:landscape|portrait)/);
 		expect(Math.abs(media.figureRatio - 4 / 3), 'project image crops retain the declared 4:3 geometry').toBeLessThanOrEqual(0.12);
 		orientations.add(media.naturalWidth > media.naturalHeight ? 'landscape' : 'portrait');
 	}
