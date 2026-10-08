@@ -13,6 +13,28 @@ const profile = profiles[profileName];
 const width = (testInfo) => Number(testInfo.project.name.replace('viewport-', ''));
 const near = (received, expected, tolerance = 1) => expect(Math.abs(received - expected)).toBeLessThanOrEqual(tolerance);
 
+/**
+ * Capture the final native Core lightbox frame, not its opening transform.
+ * The focused raster suite uses the same geometry and animation contract.
+ */
+async function expectLightboxSettled(dialog) {
+	const image = dialog.locator('img[sizes="100vw"]').last();
+	await expect(image).toBeVisible();
+	await expect.poll(() => dialog.evaluate((node) =>
+		node.getAnimations({ subtree: true }).filter((animation) => animation.playState === 'running').length
+	), { message: 'native lightbox animations must finish before visual evidence', timeout: 5_000 }).toBe(0);
+	await expect.poll(() => image.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		return Math.max(0, -box.left, box.right - document.documentElement.clientWidth, -box.top, box.bottom - innerHeight);
+	}), { message: 'settled lightbox image must fit inside the viewport', timeout: 5_000 }).toBeLessThanOrEqual(1);
+	const before = await image.boundingBox();
+	await image.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+	const after = await image.boundingBox();
+	for (const key of ['x', 'y', 'width', 'height']) {
+		expect(Math.abs((after?.[key] || 0) - (before?.[key] || 0)), 'lightbox image geometry must settle before screenshot').toBeLessThanOrEqual(1);
+	}
+}
+
 test.beforeEach(({}, testInfo) => {
 	test.skip(![390, 1440].includes(width(testInfo)), 'Appearance profiles use representative mobile and desktop widths.');
 	if (!profile) throw new Error(`Unknown appearance profile: ${profileName}`);
@@ -43,7 +65,10 @@ test('bounded appearance profile drives semantic design tokens and real controls
 			control: px('--slateframe-control'), spacing: Number.parseFloat(root.getPropertyValue('--slateframe-space-scale')),
 			gutter: px('--slateframe-gutter-min'), section: Number.parseFloat(root.getPropertyValue('--slateframe-section-scale')),
 			sectionMin: px('--slateframe-section-min'), sectionMax: px('--slateframe-section-max'), radius: px('--slateframe-radius'),
-			content: px('--slateframe-content'), wide: px('--slateframe-wide'), chrome: px('--slateframe-chrome'), inlineGap: px('--slateframe-inline-gap'),
+			content: px('--slateframe-content'), wide: px('--slateframe-wide'),
+			globalContent: resolvedPx('--wp--style--global--content-size'),
+			globalWide: resolvedPx('--wp--style--global--wide-size'),
+			chrome: px('--slateframe-chrome'), inlineGap: px('--slateframe-inline-gap'),
 			space2: px('--slateframe-space-2'), space3: px('--slateframe-space-3'), space4: px('--slateframe-space-4'),
 			presetXs: resolvedPx('--wp--preset--spacing--xs'), presetSm: resolvedPx('--wp--preset--spacing--sm'),
 			presetMd: resolvedPx('--wp--preset--spacing--md'), presetLg: resolvedPx('--wp--preset--spacing--lg'),
@@ -55,11 +80,17 @@ test('bounded appearance profile drives semantic design tokens and real controls
 			normalWidth: normal?.getBoundingClientRect().width || 0,
 			wideWidth: wide?.getBoundingClientRect().width || 0, shellInset: shell?.getBoundingClientRect().left || 0,
 			summaryHeight: summary?.getBoundingClientRect().height || 0, viewport: document.documentElement.clientWidth,
+			headerBackdrop: getComputedStyle(document.querySelector('.slateframe-site-header')).backdropFilter,
+			headerBackground: getComputedStyle(document.querySelector('.slateframe-site-header')).backgroundColor,
+			bodyBackground: getComputedStyle(document.body).backgroundColor,
 		};
 	});
 	near(metrics.control, profile.control); near(metrics.spacing, profile.spacing, 0.01); near(metrics.gutter, profile.gutter);
 	near(metrics.section, profile.section, 0.01); near(metrics.sectionMin, 44 * profile.section); near(metrics.sectionMax, 72 * profile.section);
 	near(metrics.radius, profile.radius); near(metrics.content, profile.content); near(metrics.wide, profile.wide); near(metrics.chrome, 1728);
+	near(metrics.globalContent, profile.content); near(metrics.globalWide, profile.wide);
+	expect(metrics.headerBackdrop).toBe('none');
+	expect(metrics.headerBackground).toBe(metrics.bodyBackground);
 	near(metrics.inlineGap, 4 * profile.spacing); near(metrics.componentGap, 12 * profile.spacing);
 	near(metrics.space2, 8 * profile.spacing); near(metrics.space3, 12 * profile.spacing); near(metrics.space4, 16 * profile.spacing);
 	near(metrics.presetXs, metrics.space2); near(metrics.presetSm, metrics.space3); near(metrics.presetMd, metrics.space4);
@@ -107,6 +138,67 @@ test('bounded appearance profile drives semantic design tokens and real controls
 	}
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const semanticForm = page.locator('.browser-semantic-form');
+	await expect(semanticForm).toBeVisible();
+	const semanticFields = [
+		page.locator('#browser-display-name'),
+		page.locator('#browser-email'),
+		page.locator('#browser-format'),
+		page.locator('#browser-notes'),
+		page.locator('#browser-reference'),
+	];
+	for (const field of semanticFields) {
+		await expect(field).toBeVisible();
+		expect((await field.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+	}
+	const semanticButton = page.locator('#browser-form-action');
+	await expect(semanticButton).toBeVisible();
+	expect((await semanticButton.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+	near(await semanticButton.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	const imageSubmit = page.locator('#browser-image-submit');
+	await expect(imageSubmit).toBeVisible();
+	const imageSubmitMetrics = await imageSubmit.evaluate((node) => ({
+		width: node.getBoundingClientRect().width,
+		height: node.getBoundingClientRect().height,
+		padding: Number.parseFloat(getComputedStyle(node).paddingInlineStart),
+	}));
+	near(imageSubmitMetrics.width, 64);
+	near(imageSubmitMetrics.height, 44);
+	expect(imageSubmitMetrics.padding).toBeLessThanOrEqual(1);
+	const semanticState = await semanticForm.evaluate((form) => {
+		const invalid = form.querySelector('[aria-invalid="true"]');
+		const normal = form.querySelector('#browser-display-name');
+		const readonly = form.querySelector('[readonly]');
+		const fieldset = form.querySelector('fieldset');
+		if (!invalid || !normal || !readonly || !fieldset) {
+			throw new Error('Semantic form fixture is missing a required state or control.');
+		}
+		const placeholder = getComputedStyle(normal, '::placeholder').color;
+		const probe = document.createElement('i');
+		probe.style.cssText = 'position:absolute;visibility:hidden;color:var(--slateframe-danger)';
+		document.body.append(probe);
+		const danger = getComputedStyle(probe).color;
+		probe.style.color = 'var(--slateframe-muted)';
+		const muted = getComputedStyle(probe).color;
+		probe.remove();
+		return {
+			invalidBorder: getComputedStyle(invalid).borderTopColor,
+			danger,
+			placeholder,
+			muted,
+			readonlyBackground: getComputedStyle(readonly).backgroundColor,
+			normalBackground: getComputedStyle(normal).backgroundColor,
+			fieldsetRadius: Number.parseFloat(getComputedStyle(fieldset).borderRadius),
+			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	});
+	expect(semanticState.invalidBorder).toBe(semanticState.danger);
+	expect(semanticState.placeholder).toBe(semanticState.muted);
+	expect(semanticState.readonlyBackground).not.toBe(semanticState.normalBackground);
+	near(semanticState.fieldsetRadius, profile.radius, 1);
+	expect(semanticState.rootOverflow).toBeLessThanOrEqual(1);
 	const commentInput = page.locator('.slateframe-comments .comment-form-author input').first();
 	const commentTextarea = page.locator('.slateframe-comments textarea').first();
 	const commentSubmit = page.locator('.slateframe-comments .submit').first();
@@ -181,6 +273,27 @@ test('bounded appearance profile drives semantic design tokens and real controls
 });
 
 
+test('appearance profile preserves accessible native content pagination', async ({ page }, testInfo) => {
+	const multiPath = process.env.SLATEFRAME_MULTIPAGE_POST_PATH;
+	test.skip(!multiPath, 'WordPress multipage fixture is required.');
+	await page.goto(multiPath, { waitUntil: 'networkidle' });
+	const nav = page.getByRole('navigation', { name: 'Content pages' });
+	await expect(nav).toBeVisible();
+	const pages = nav.locator('.post-page-numbers');
+	await expect(pages).toHaveCount(3);
+	for (const item of await pages.all()) {
+		const box = await item.boundingBox();
+		expect(box?.width || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		expect(box?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
+		near(await item.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	}
+	const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+	expect(overflow).toBeLessThanOrEqual(1);
+	const dir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(dir, { recursive: true });
+	await nav.screenshot({ path: path.join(dir, `appearance-${profileName}-${testInfo.project.name}-content-pagination.png`) });
+});
+
 test('appearance profile keeps native Photography lightbox inside the same control system', async ({ page }, testInfo) => {
 	const photoPath = process.env.SLATEFRAME_PHOTO_PATH;
 	test.skip(!photoPath, 'Photography fixture is required for Appearance lightbox coverage.');
@@ -214,6 +327,7 @@ test('appearance profile keeps native Photography lightbox inside the same contr
 	await expect(dialog).toBeVisible();
 	const close = dialog.getByRole('button', { name: /close/i });
 	await expect(close).toBeVisible();
+	await expectLightboxSettled(dialog);
 
 	const geometry = await close.evaluate((node) => {
 		const rect = node.getBoundingClientRect();
@@ -272,12 +386,19 @@ test('appearance profile keeps native Photography lightbox inside the same contr
 });
 
 test('appearance profile stays contained across content modes and captures review evidence', async ({ page }, testInfo) => {
-	const routes = [['home-controls', '/'], ['search-controls', '/?s=Portable'], ['page', pagePath], ['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
-		['portfolio', process.env.SLATEFRAME_PROJECT_PATH], ['knowledge', process.env.SLATEFRAME_KNOWLEDGE_PATH]].filter(([, route]) => route);
+	const routes = [
+		['home-controls', '/'], ['search-controls', '/?s=Portable'], ['empty-search', '/?s=slateframe-appearance-no-results-2026'],
+		['page', pagePath], ['post', process.env.SLATEFRAME_POST_PATH], ['attachment', process.env.SLATEFRAME_ATTACHMENT_PATH],
+		['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
+		['portfolio', process.env.SLATEFRAME_PROJECT_PATH], ['knowledge', process.env.SLATEFRAME_KNOWLEDGE_PATH],
+		['empty-author', process.env.SLATEFRAME_EMPTY_AUTHOR_PATH], ['not-found', '/slateframe-appearance-missing/'],
+	].filter(([, route]) => route);
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
 	for (const [name, route] of routes) {
-		await page.goto(route, { waitUntil: 'networkidle' });
+		const response = await page.goto(route, { waitUntil: 'networkidle' });
+		expect(response?.status(), `unexpected HTTP status for ${name}`).toBe(name === 'not-found' ? 404 : 200);
+		await expect(page.locator('#main-content')).toBeVisible();
 		expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
 			`${profileName} profile overflow on ${name}`).toBeLessThanOrEqual(1);
 		if (name === 'photography') {

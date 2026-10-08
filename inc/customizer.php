@@ -341,6 +341,16 @@ function slateframe_customizer_spatial_css() {
 		}
 	}
 
+	// Keep native constrained and wide Gutenberg layouts aligned with bounded
+	// reading/canvas widths, both on the front end and in the editor iframe.
+	if (
+		abs( slateframe_layout_value( 'slateframe_content_width' ) - (float) $controls['slateframe_content_width']['default'] ) > 0.0001 ||
+		abs( slateframe_layout_value( 'slateframe_wide_width' ) - (float) $controls['slateframe_wide_width']['default'] ) > 0.0001
+	) {
+		$rules[] = '--wp--style--global--content-size:var(--slateframe-content)';
+		$rules[] = '--wp--style--global--wide-size:var(--slateframe-wide)';
+	}
+
 	$spacing_scale = slateframe_layout_value( 'slateframe_spacing_scale' );
 
 	if ( abs( $spacing_scale - 1 ) > 0.0001 ) {

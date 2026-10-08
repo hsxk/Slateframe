@@ -92,12 +92,23 @@ test('raster candidate selection remains appropriate for the rendered viewport',
 	expect(data.currentSrc).toContain('slateframe-raster');
 });
 
-test('mixed raster gallery preserves responsive portrait and square media without cropping', async ({ page }) => {
+test('mixed raster gallery preserves responsive portrait and square media without cropping', async ({ page }, testInfo) => {
 	await openRasterPhotography(page);
 	const gallery = page.locator('.browser-raster-gallery');
 	await expect(gallery).toBeVisible();
 	const images = gallery.locator('img');
 	await expect(images).toHaveCount(2);
+	if (projectWidth(testInfo) <= 420) {
+		const layout = await gallery.evaluate((node) => ({
+			display: getComputedStyle(node).display,
+			columns: getComputedStyle(node).gridTemplateColumns.trim().split(/\s+/).length,
+			widths: [...node.querySelectorAll(':scope > figure')].map((figure) => figure.getBoundingClientRect().width),
+		}));
+		expect(layout.display).toBe('grid');
+		expect(layout.columns).toBe(1);
+		expect(layout.widths).toHaveLength(2);
+		for (const width of layout.widths) expect(width).toBeGreaterThan(240);
+	}
 	const metrics = await images.evaluateAll((nodes) => nodes.map((node) => {
 		const box = node.getBoundingClientRect();
 		return {

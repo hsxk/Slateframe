@@ -4,7 +4,49 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+### Testing
+
+- Assert native Gutenberg content/wide layout variables follow bounded Appearance widths at default, compact and spacious settings; retain mobile/desktop screenshots and verify opaque sticky-header rendering.
+- Verify 320/390px real-raster Photography contact sheets switch to a readable single-column layout with portrait/square image containment.
+
+- Guard deterministic release ZIP timestamps across synthetic PR and push Git histories, with explicit SOURCE_DATE_EPOCH support and archive integrity regressions.
+- Refuse external, internal, and dangling symbolic links before creating a public ZIP to prevent file dereferencing and leakage.
+
+- Reject malformed PNG chunk ordering, invalid indexed palettes/bit depths, unknown critical chunks, and trailing compressed bytes; guard release-builder executable permissions in static CI.
+
+- Decode the complete 1200×900 release PNG stream in static quality, the ZIP builder, and package CI; add corruption regressions for truncation, CRC, dimensions, and trailing data instead of trusting header-only image metadata.
+- Replace virtualized full-height Gutenberg Portfolio screenshots with first/middle/last real card captures at 390/1440px, retain a focused viewport overview, and require those artifacts in Actions.
+
+- Make Portfolio responsive-image smoke compare decoded pixels with the actual rendered crop, preserving genuine 4:3 WordPress srcset behavior at narrow widths instead of a fixed 300px raster-height assumption.
+- Expand default/compact/spacious real-WordPress visual evidence to single posts, attachments, empty search, empty author, and 404 recovery; require actual HTTP status, main landmark, and root containment on each route.
+- Wait for Core lightbox animations and stable image geometry before Appearance screenshots; assert enlarged media remains fully inside the viewport.
+- Preserve compact Appearance screenshots even when the preceding general browser smoke fails, so the visual failure can be diagnosed alongside spacious evidence.
+- Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
+
+### Fixed
+
+- Synchronize WordPress constrained/wide block layout variables with Slateframe reading/canvas Appearance settings on the front end and in the block editor.
+- Replace the translucent blurred sticky header with a quiet opaque surface, reducing compositing work while keeping light/dark contrast.
+- Give narrow Photography contact sheets full-width media and multilingual captions instead of cramped two-column thumbnails, while removing redundant physical image-sizing declarations in favor of equivalent logical properties to preserve the original runtime asset budget.
+
+- Replace the truncated WordPress.org screenshot with an authentic 1200×900 WordPress Chromium showcase capture, using an indexed PNG to keep the source asset compact without third-party image dependencies.
+
+- Keep mobile color and navigation controls vertically aligned under long multilingual site identities at 200% text zoom by sharing a compact control line-height; retain real-browser alignment and equal-height assertions at 320–412px.
+
+- At narrow mobile widths, long CJK/RTL/mixed-script site identities and 200% zoom now move color and navigation controls to a separate row instead of vertically centering them against an oversized brand. Short names still share one row; contextual Search CSS no longer duplicates the global mobile rule.
+
 ### Added
+
+- Native multipage post and Page navigation now has a labelled landmark, shared touch-sized controls, RTL-safe wrapping, and compact/default/spacious browser screenshot coverage.
+- Mobile site identity and header controls now stay in one aligned row for ordinary titles while preserving translated-title wrapping and keyboard access.
+
+- Portfolio Query Loop titles now use the existing Lead typography preset; Gutenberg no longer promotes nested Query Loop titles to display headings, and browser tests assert the native preset and responsive containment.
+- The distributed theme metadata now includes an explicit copyright notice for WordPress.org Theme Check readiness.
+
+- Browser coverage now preserves native image-submit geometry and keyboard order at mobile and desktop widths across Appearance profiles, while Gutenberg Core Search is located by block control class and captured in its own editor screenshot evidence.
+- Shared form selectors explicitly exclude image-based submit inputs without increasing the existing 1300-byte form asset ceiling.
+- Shared semantic form primitives now cover text-like inputs, selects, textareas, fieldsets, legends, placeholders, readonly/invalid states, and ordinary form buttons with the same bounded Slateframe control system used by Search and comments.
+- Browser CI now exercises the real multilingual/RTL semantic-form fixture, keyboard order, forced-colors invalid state, editorial `kbd`/`mark`/`abbr` primitives, and compact/default/spacious Appearance geometry in the existing screenshot pages.
 
 - Gutenberg CI now separates shipped starter-pattern validity from deterministic visual evidence: real landscape/portrait Core Gallery media exercises Photography editor parity, while a fixture-owned filtered native Query Loop keeps Portfolio authoring screenshots free from unrelated default content.
 - Portfolio browser fixtures now use a deterministic, isolated native Query Loop dataset and exercise the real second pagination page instead of relying on same-second post ordering.
@@ -81,6 +123,8 @@ All notable changes to Slateframe will be documented here.
 - Added Photography Appearance evidence for compact/default/spacious profiles and focused native-lightbox screenshots at representative mobile and desktop widths.
 
 ### Changed
+
+- Split generic form controls, authored form states, and theme-owned search layout into contextual assets with route-specific CI budgets; form-free routes no longer pay for form presentation, while comments and Core Search keep the shared control contract without raising existing aggregate ceilings.
 
 - The release builder now emits deterministic ZIP archives with sorted entries and normalized commit-derived timestamps and permissions while preserving the existing distribution exclusions.
 - Completed the shared control family across primary/language navigation, search/buttons, native pagination, footer links, and comment auxiliary actions with minimum target width as well as height.

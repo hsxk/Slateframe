@@ -17,3 +17,6 @@ package.json
 package-lock.json
 playwright.config.js
 phpcs.xml.dist
+
+# Exclude the packaging manifest itself from published themes.
+.distignore

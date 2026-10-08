@@ -85,6 +85,72 @@ test('core routes render without theme runtime failures', async ({ page }) => {
 	}
 });
 
+test('form presentation stays contextual instead of leaking into form-free routes', async ({ page }) => {
+	const assetCount = async (name) => page.locator(`link[rel="stylesheet"][href*="/assets/css/${name}.css"]`).count();
+
+	await page.goto('/', { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(0);
+	expect(await assetCount('form-content')).toBe(0);
+	expect(await assetCount('search-form')).toBe(0);
+
+	await page.goto('/?s=Slateframe', { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(1);
+	expect(await assetCount('search-form')).toBe(1);
+	expect(await assetCount('form-content')).toBe(0);
+
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(1);
+	expect(await assetCount('form-content')).toBe(1);
+	expect(await assetCount('search-form')).toBe(0);
+
+	await page.goto(photoPath, { waitUntil: 'networkidle' });
+	expect(await assetCount('forms')).toBe(0);
+	expect(await assetCount('form-content')).toBe(0);
+	expect(await assetCount('search-form')).toBe(0);
+});
+
+test('semantic forms and editorial primitives stay usable across responsive viewports', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const form = page.locator('.browser-semantic-form');
+	await expect(form).toBeVisible();
+	const name = page.locator('#browser-display-name');
+	const email = page.locator('#browser-email');
+	await name.focus();
+	await expect(name).toBeFocused();
+	await page.keyboard.press('Tab');
+	await expect(email).toBeFocused();
+	await expect(email).toHaveAttribute('aria-invalid', 'true');
+	const imageSubmit = page.locator('#browser-image-submit');
+	await expect(imageSubmit).toHaveAttribute('type', 'image');
+	await expect(imageSubmit).toHaveAttribute('alt', 'Submit image');
+	const imageButtonGeometry = await imageSubmit.evaluate((node) => {
+		const box = node.getBoundingClientRect();
+		const style = getComputedStyle(node);
+		return { width: box.width, height: box.height, padding: Number.parseFloat(style.paddingInlineStart) };
+	});
+	expect(imageButtonGeometry.width).toBeGreaterThanOrEqual(44);
+	expect(imageButtonGeometry.width).toBeLessThanOrEqual(72);
+	expect(imageButtonGeometry.height).toBeGreaterThanOrEqual(44);
+	expect(imageButtonGeometry.height).toBeLessThanOrEqual(60);
+	expect(imageButtonGeometry.padding).toBeLessThanOrEqual(1);
+	await imageSubmit.focus();
+	await expect(imageSubmit).toBeFocused();
+	await page.keyboard.press('Tab');
+	await expect(page.locator('#browser-form-action')).toBeFocused();
+	await expect(page.locator('#browser-notes')).toHaveAttribute('dir', 'rtl');
+	const action = page.locator('#browser-form-action');
+	const actionBox = await action.boundingBox();
+	expect(actionBox?.width || 0).toBeGreaterThanOrEqual(44);
+	expect(actionBox?.height || 0).toBeGreaterThanOrEqual(44);
+	for (const primitive of ['kbd', 'mark', 'abbr[title]']) {
+		await expect(page.locator('.browser-editorial-primitives').locator(primitive)).toBeVisible();
+	}
+	await expectNoHorizontalOverflow(page, 'semantic form fixture');
+	await page.emulateMedia({ forcedColors: 'active' });
+	expect(await email.evaluate((node) => getComputedStyle(node).borderStyle)).toBe('double');
+	await expectNoHorizontalOverflow(page, 'semantic form fixture in forced colors');
+});
+
 test('skip link moves keyboard users to the main landmark', async ({ page }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 	await page.keyboard.press('Tab');
@@ -94,6 +160,27 @@ test('skip link moves keyboard users to the main landmark', async ({ page }) => 
 	await expect(skipLink).toBeVisible();
 	await page.keyboard.press('Enter');
 	await expect(page).toHaveURL(/#main-content$/);
+});
+
+test('short mobile site identity and header controls share one aligned row', async ({ page }, testInfo) => {
+	test.skip(![320, 375, 390, 412].includes(projectWidth(testInfo)), 'Mobile identity is checked at each phone viewport.');
+	await page.goto('/', { waitUntil: 'networkidle' });
+	const brand = page.locator('.slateframe-brand');
+	const color = page.locator('[data-color-toggle]');
+	const menu = page.locator('[data-menu-toggle]');
+	for (const control of [brand, color, menu]) await expect(control).toBeVisible();
+	const [brandBox, colorBox, menuBox] = await Promise.all([brand.boundingBox(), color.boundingBox(), menu.boundingBox()]);
+	const center = (box) => box.y + box.height / 2;
+	expect(Math.abs(center(brandBox) - center(colorBox))).toBeLessThanOrEqual(5);
+	expect(Math.abs(center(menuBox) - center(colorBox))).toBeLessThanOrEqual(5);
+	expect(brandBox.x + brandBox.width).toBeLessThanOrEqual(colorBox.x + 1);
+	expect(menuBox.x + menuBox.width).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
+	await expectNoHorizontalOverflow(page, 'mobile inline header');
+	if ([320, 390].includes(projectWidth(testInfo))) {
+		const dir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(dir, { recursive: true });
+		await page.locator('[data-site-header]').screenshot({ path: path.join(dir, `mobile-header-inline-${testInfo.project.name}.png`) });
+	}
 });
 
 test('responsive navigation remains operable', async ({ page }, testInfo) => {
@@ -224,12 +311,20 @@ test('site identity reflows without truncating multilingual text', async ({ page
 				headerBottom: headerBox.bottom,
 				brandBottom: brandBox.bottom,
 				controlsTop: Math.min(colorBox.top, menuBox.top),
+				controlsAlignment: Math.abs(colorBox.top - menuBox.top),
+				controlsHeightDifference: Math.abs(colorBox.height - menuBox.height),
+				controlsOrder: menuBox.left - colorBox.right,
+				controlsGap: Math.min(colorBox.top, menuBox.top) - brandBox.bottom,
 				mainTop: mainBox.top,
 				viewportHeight: innerHeight,
 			};
 		});
 		expect(geometry.position).toBe('relative');
 		expect(geometry.brandBottom).toBeLessThanOrEqual(geometry.controlsTop + 1);
+		expect(geometry.controlsAlignment).toBeLessThanOrEqual(1);
+		expect(geometry.controlsHeightDifference, 'color and menu controls share the same 200%-zoom control height').toBeLessThanOrEqual(1);
+		expect(geometry.controlsOrder).toBeGreaterThanOrEqual(-1);
+		expect(geometry.controlsGap).toBeLessThanOrEqual(48);
 		expect(geometry.mainTop).toBeGreaterThanOrEqual(geometry.headerBottom - 1);
 		expect(geometry.viewportHeight).toBeGreaterThan(0);
 
@@ -918,8 +1013,11 @@ test('Pages share responsive featured media and content-owned captions with post
 		intrinsicHeight: Number(node.getAttribute('height')),
 	}));
 	expect(dimensions.width).toBeGreaterThan(0);
-	expect(dimensions.naturalWidth).toBe(1200);
-	expect(dimensions.naturalHeight).toBe(900);
+	expect(dimensions.naturalWidth).toBeGreaterThan(0);
+	expect(dimensions.naturalHeight).toBeGreaterThan(0);
+	expect(dimensions.naturalWidth).toBeLessThanOrEqual(dimensions.intrinsicWidth);
+	expect(dimensions.naturalHeight).toBeLessThanOrEqual(dimensions.intrinsicHeight);
+	expect(dimensions.naturalWidth / dimensions.naturalHeight).toBeCloseTo(4 / 3, 1);
 	expect(dimensions.intrinsicWidth).toBe(1200);
 	expect(dimensions.intrinsicHeight).toBe(900);
 	await expectNoHorizontalOverflow(page, featuredPagePath);
@@ -934,7 +1032,7 @@ test('attachment pages expose media, metadata, original file, and parent recover
 	await expect(page.locator('.slateframe-entry-footer')).toContainText('1,200 × 900 px');
 	const original = page.getByRole('link', { name: 'Open original file' });
 	const parent = page.getByRole('link', { name: 'Back to Slateframe Featured Media Page' });
-	await expect(original).toHaveAttribute('href', /slateframe-media-fixture\.png$/);
+	await expect(original).toHaveAttribute('href', /\/slateframe-project-landscape\.png$/);
 	await expect(parent).toBeVisible();
 	for (const target of [original, parent]) {
 		expect((await target.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
@@ -1211,6 +1309,49 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 	await expect(grid).toBeVisible();
 	await expect(page.locator('.browser-project-grid .slateframe-project-card')).toHaveCount(6);
 	await expect(page.locator('.browser-project-grid .wp-block-post-featured-image img')).toHaveCount(5);
+	const mediaImages = page.locator('.browser-project-grid .wp-block-post-featured-image img');
+	const orientations = new Set();
+	for (const image of await mediaImages.all()) {
+		await image.scrollIntoViewIfNeeded();
+		await expect.poll(() => image.evaluate((node) => node.complete && node.naturalWidth > 0)).toBe(true);
+		const media = await image.evaluate((node) => {
+			const figure = node.closest('.wp-block-post-featured-image');
+			const box = figure.getBoundingClientRect();
+			return {
+				naturalWidth: node.naturalWidth,
+				naturalHeight: node.naturalHeight,
+				intrinsicWidth: Number(node.getAttribute('width')),
+				intrinsicHeight: Number(node.getAttribute('height')),
+				renderedWidth: node.getBoundingClientRect().width,
+				renderedHeight: node.getBoundingClientRect().height,
+				currentPath: new URL(node.currentSrc, document.baseURI).pathname,
+				candidatePaths: (node.getAttribute('srcset') || '').split(',').map((candidate) =>
+					new URL(candidate.trim().split(/\s+/)[0], document.baseURI).pathname
+				).filter(Boolean),
+				alt: node.alt,
+				postTitle: node.closest('.slateframe-project-card')?.querySelector('.wp-block-post-title')?.textContent?.trim() || '',
+				srcset: node.getAttribute('srcset') || '',
+				currentSrc: node.currentSrc,
+				figureRatio: box.width / box.height,
+			};
+		});
+		expect(media.intrinsicWidth, 'Core must retain source width metadata').toBeGreaterThan(0);
+		expect(media.intrinsicHeight, 'Core must retain source height metadata').toBeGreaterThan(0);
+		expect(media.renderedWidth).toBeGreaterThan(0);
+		expect(media.renderedHeight).toBeGreaterThan(0);
+		expect(media.naturalWidth, 'selected source must cover rendered width').toBeGreaterThanOrEqual(Math.floor(media.renderedWidth));
+		expect(media.naturalHeight, 'selected source must cover rendered crop height').toBeGreaterThanOrEqual(Math.floor(media.renderedHeight));
+		expect(media.candidatePaths.length, 'Core should offer multiple responsive sources').toBeGreaterThanOrEqual(2);
+		expect(media.candidatePaths, 'the decoded image must be a declared srcset candidate').toContain(media.currentPath);
+		expect(media.postTitle).toMatch(/^Portable project fixture [1-6]$/);
+		expect(media.alt, 'Core may use the post title or attachment alternative text').toBeTruthy();
+		expect([media.postTitle, 'Landscape project illustration', 'Portrait project illustration']).toContain(media.alt);
+		expect(media.srcset, 'WordPress must emit responsive image candidates').toContain('w');
+		expect(media.currentSrc).toMatch(/slateframe-project-(?:landscape|portrait)/);
+		expect(Math.abs(media.figureRatio - 4 / 3), 'project image crops retain the declared 4:3 geometry').toBeLessThanOrEqual(0.12);
+		orientations.add(media.naturalWidth > media.naturalHeight ? 'landscape' : 'portrait');
+	}
+	expect([...orientations].sort()).toEqual(['landscape', 'portrait']);
 	const firstCard = page.locator('.browser-project-grid .slateframe-project-card').first();
 	await expect(firstCard.locator('.wp-block-post-featured-image')).toHaveCount(0);
 	await expect(firstCard.locator('.wp-block-post-title a')).toContainText('可迁移的项目案例');

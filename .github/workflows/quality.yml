@@ -34,6 +34,10 @@ jobs:
           find tests/browser -type f -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Validate build script syntax
         run: bash -n bin/build-theme-zip.sh
+      - name: Validate screenshot PNG and corruption regression
+        run: |
+          python3 bin/check-screenshot.py screenshot.png
+          python3 -m unittest discover -s tests -p "test_*.py"
       - name: Guard contextual selector contracts
         shell: bash
         run: |
@@ -75,10 +79,10 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css readme.txt LICENSE .distignore assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css readme.txt LICENSE .distignore assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
+          wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
           test "$(grep -Fo 'var(--slateframe-border-width) solid var(--slateframe-border)' style.css | wc -l | tr -d ' ')" -eq 1
           if grep -FRq 'var(--slateframe-border-width) solid var(--slateframe-border)' assets/css; then
             echo 'Component styles must consume --slateframe-rule instead of rebuilding the semantic border.' >&2
@@ -87,6 +91,9 @@ jobs:
           test $(wc -c < style.css) -le 16000
           test $(wc -c < assets/css/navigation.css) -le 4000
           test $(wc -c < assets/css/footer.css) -le 2000
+          test $(wc -c < assets/css/forms.css) -le 1300
+          test $(wc -c < assets/css/form-content.css) -le 750
+          test $(wc -c < assets/css/search-form.css) -le 300
           test $(wc -c < assets/css/comments.css) -le 3000
           test $(wc -c < assets/css/reading.css) -le 7000
           test $(wc -c < assets/css/publishing.css) -le 4500
@@ -101,21 +108,29 @@ jobs:
             exit 1
           fi
           base_runtime_bytes=$(( $(wc -c < style.css) + $(wc -c < assets/css/navigation.css) + $(wc -c < assets/css/footer.css) + $(wc -c < assets/js/theme.js) ))
-          empty_state_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/empty-state.css) ))
+          forms_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/forms.css) ))
+          search_runtime_bytes=$(( forms_runtime_bytes + $(wc -c < assets/css/search-form.css) ))
+          empty_state_runtime_bytes=$(( search_runtime_bytes + $(wc -c < assets/css/empty-state.css) ))
           core_reading_runtime_bytes=$(( base_runtime_bytes + $(wc -c < assets/css/reading.css) ))
           publishing_runtime_bytes=$(( core_reading_runtime_bytes + $(wc -c < assets/css/publishing.css) ))
-          discussion_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          authored_form_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/forms.css) + $(wc -c < assets/css/form-content.css) ))
+          discussion_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/forms.css) + $(wc -c < assets/css/comments.css) ))
+          authored_form_discussion_bytes=$(( discussion_runtime_bytes + $(wc -c < assets/css/form-content.css) ))
           photography_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/photography.css) ))
-          photography_discussion_bytes=$(( photography_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          photography_discussion_bytes=$(( photography_runtime_bytes + $(wc -c < assets/css/forms.css) + $(wc -c < assets/css/comments.css) ))
           contextual_runtime_bytes=$(( publishing_runtime_bytes + $(wc -c < assets/css/content-modes.css) ))
-          contextual_discussion_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          contextual_discussion_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/forms.css) + $(wc -c < assets/css/comments.css) ))
           portfolio_runtime_bytes=$(( contextual_runtime_bytes + $(wc -c < assets/css/query-loop.css) ))
-          portfolio_discussion_bytes=$(( portfolio_runtime_bytes + $(wc -c < assets/css/comments.css) ))
+          portfolio_discussion_bytes=$(( portfolio_runtime_bytes + $(wc -c < assets/css/forms.css) + $(wc -c < assets/css/comments.css) ))
           echo "Base CSS+navigation+JS: ${base_runtime_bytes} bytes"
-          echo "Empty-state route runtime: ${empty_state_runtime_bytes} bytes"
+          echo "Base+shared forms runtime: ${forms_runtime_bytes} bytes"
+          echo "Search form runtime: ${search_runtime_bytes} bytes"
+          echo "Empty-state search runtime: ${empty_state_runtime_bytes} bytes"
           echo "Base+core reading runtime: ${core_reading_runtime_bytes} bytes"
           echo "Base+reading+publishing runtime: ${publishing_runtime_bytes} bytes"
+          echo "Authored form runtime: ${authored_form_runtime_bytes} bytes"
           echo "Base+reading+publishing+discussion runtime: ${discussion_runtime_bytes} bytes"
+          echo "Authored form+discussion runtime: ${authored_form_discussion_bytes} bytes"
           echo "Photography runtime: ${photography_runtime_bytes} bytes"
           echo "Photography runtime+discussion: ${photography_discussion_bytes} bytes"
           echo "Base+reading+publishing+content-mode runtime: ${contextual_runtime_bytes} bytes"
@@ -123,10 +138,14 @@ jobs:
           echo "Portfolio runtime with Query Loop layer: ${portfolio_runtime_bytes} bytes"
           echo "Portfolio runtime with Query Loop layer+discussion: ${portfolio_discussion_bytes} bytes"
           test "$base_runtime_bytes" -le 25000
+          test "$forms_runtime_bytes" -le 24500
+          test "$search_runtime_bytes" -le 24800
           test "$empty_state_runtime_bytes" -le 25000
           test "$core_reading_runtime_bytes" -le 30000
           test "$publishing_runtime_bytes" -le 34500
+          test "$authored_form_runtime_bytes" -le 35500
           test "$discussion_runtime_bytes" -le 37500
+          test "$authored_form_discussion_bytes" -le 38000
           test "$photography_runtime_bytes" -le 40000
           test "$photography_discussion_bytes" -le 43000
           test "$contextual_runtime_bytes" -le 42000
@@ -300,7 +319,7 @@ jobs:
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
           wp eval-file "$GITHUB_WORKSPACE/bin/check-pattern-runtime.php" --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
-          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/reading.css","assets/css/photography.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
+          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/forms.css","assets/css/form-content.css","assets/css/reading.css","assets/css/photography.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
       - name: Validate bounded Appearance settings
         shell: bash
         run: |
@@ -495,6 +514,26 @@ jobs:
           <hr class="wp-block-separator has-alpha-channel-opacity browser-reading-separator"/>
           <!-- /wp:separator -->
 
+          <!-- wp:html -->
+          <form class="browser-semantic-form" action="#" method="get">
+            <fieldset>
+              <legend>Publishing preferences / 发布设置 / إعدادات النشر</legend>
+              <p><label for="browser-display-name">Display name / 显示名称</label><input id="browser-display-name" name="display-name" type="text" placeholder="A long translated placeholder should remain readable inside the field"></p>
+              <p><label for="browser-email">Contact email</label><input id="browser-email" name="email" type="email" value="not-an-email" aria-invalid="true" aria-describedby="browser-form-help"></p>
+              <p><label for="browser-format">Preferred reading format</label><select id="browser-format" name="format"><option>Standard editorial layout</option><option>日本語の長い選択肢</option><option>خيار عربي طويل للاختبار</option></select></p>
+              <p><label for="browser-notes" dir="rtl">ملاحظات متعددة اللغات</label><textarea id="browser-notes" name="notes" dir="rtl">هذا نص عربي للتحقق من التخطيط المنطقي واتجاه الكتابة.</textarea></p>
+              <p><label for="browser-reference">Reference ID</label><input id="browser-reference" name="reference" type="text" value="portable-readonly-reference" readonly></p>
+              <small id="browser-form-help">Fields keep the shared touch target, focus language, and bounded spatial rhythm.</small>
+              <p><label for="browser-image-submit">Image submit control</label><input id="browser-image-submit" name="image-submit" type="image" alt="Submit image" width="64" height="44" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw=="></p>
+              <p><button id="browser-form-action" type="button">Preview settings / 预览 / معاينة</button></p>
+            </fieldset>
+          </form>
+          <!-- /wp:html -->
+
+          <!-- wp:paragraph {"className":"browser-editorial-primitives"} -->
+          <p class="browser-editorial-primitives">Press <kbd>Tab</kbd> to move through controls, review <mark>highlighted evidence</mark>, and expand <abbr title="Web Content Accessibility Guidelines">WCAG</abbr> terminology without leaving the reading flow.</p>
+          <!-- /wp:paragraph -->
+
           <!-- wp:list {"className":"browser-nested-list"} -->
           <ul class="browser-nested-list"><li>Primary reading point<ul><li>Nested supporting detail</li><li>Second supporting detail</li></ul></li><li>Following reading point</li></ul>
           <!-- /wp:list -->
@@ -562,6 +601,7 @@ jobs:
           EDITOR_ID=$(wp eval '
           $registry = WP_Block_Patterns_Registry::get_instance();
           $content = file_get_contents("/tmp/slateframe-browser-page.html");
+          $content .= "\n<!-- wp:search {\"label\":\"Search the publishing fixture\",\"showLabel\":true,\"buttonText\":\"Search / 搜索 / بحث\",\"className\":\"browser-editor-search\"} /-->";
           $content .= "\n<!-- wp:pullquote --><figure class=\"wp-block-pullquote\"><blockquote><p>Editorial emphasis stays calm inside the authoring canvas.</p></blockquote></figure><!-- /wp:pullquote -->";
           foreach (array("slateframe/editorial-opening","slateframe/photography-diptych","slateframe/portfolio-project-grid","slateframe/knowledge-procedure") as $slug) {
               $pattern = $registry->get_registered($slug);
@@ -611,9 +651,28 @@ jobs:
             --post_content='<p>Browser smoke content.</p><blockquote><p>Editorial quote.</p><cite class="browser-quote-source">Source note</cite></blockquote>' \
             --porcelain)
 
+          MULTIPAGE_POST_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=post \
+            --post_status=publish \
+            --post_title='Paginated article — 中文 العربية' \
+            --post_content='<p class="browser-chapter-one">First chapter: portable editorial reading.</p><!--nextpage--><p class="browser-chapter-two" dir="rtl">الفصل الثاني — 第二章</p><!--nextpage--><p class="browser-chapter-three">Third chapter: an accessible conclusion.</p>' \
+            --porcelain)
+          MULTIPAGE_PAGE_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=page \
+            --post_status=publish \
+            --post_title='Paginated reference page' \
+            --post_content='<p class="browser-page-one">Reference page introduction.</p><!--nextpage--><p class="browser-page-two">Reference page continuation.</p>' \
+            --porcelain)
+
           wp eval "stick_post( $POST_ID );" --path=/tmp/wp-browser
 
-          PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/tests/fixtures/slateframe-media-fixture.png" --porcelain --path=/tmp/wp-browser)
+          python3 "$GITHUB_WORKSPACE/tests/fixtures/generate-project-media.py" /tmp
+          PROJECT_THUMBNAIL_ID=$(wp media import /tmp/slateframe-project-landscape.png --porcelain --path=/tmp/wp-browser)
+          PROJECT_PORTRAIT_ID=$(wp media import /tmp/slateframe-project-portrait.png --porcelain --path=/tmp/wp-browser)
+          wp post meta update "$PROJECT_THUMBNAIL_ID" _wp_attachment_image_alt 'Landscape project illustration' --path=/tmp/wp-browser >/dev/null
+          wp post meta update "$PROJECT_PORTRAIT_ID" _wp_attachment_image_alt 'Portrait project illustration' --path=/tmp/wp-browser >/dev/null
           FEATURED_PAGE_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \
@@ -647,7 +706,12 @@ jobs:
               --post_content="<p>slateframe-project-fixture-token Project fixture ${project_index} keeps the theme independent from custom content models.</p>" \
               --porcelain)
             if [ "$project_index" -ne 7 ]; then
-              wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
+              if [ "$((project_index % 2))" -eq 0 ]; then
+                project_media_id="$PROJECT_PORTRAIT_ID"
+              else
+                project_media_id="$PROJECT_THUMBNAIL_ID"
+              fi
+              wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$project_media_id" --path=/tmp/wp-browser >/dev/null
             fi
           done
 
@@ -708,6 +772,8 @@ jobs:
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EDITOR_POST_ID=$EDITOR_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_MULTIPAGE_POST_PATH=/?p=$MULTIPAGE_POST_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_MULTIPAGE_PAGE_PATH=/?page_id=$MULTIPAGE_PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EMPTY_AUTHOR_PATH=/?author=$EMPTY_AUTHOR_ID" >> "$GITHUB_ENV"
       - name: Install Playwright and start WordPress
         run: |
@@ -720,6 +786,7 @@ jobs:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
         run: npm run test:browser
       - name: Verify compact Appearance bounds
+        if: ${{ always() }}
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
           SLATEFRAME_APPEARANCE_PROFILE: compact
@@ -770,6 +837,27 @@ jobs:
       - name: Reset color-mode fixture
         if: ${{ always() }}
         run: wp theme mod remove slateframe_color_mode --path=/tmp/wp-browser
+      - name: Require complete visual evidence
+        run: |
+          for profile in default compact spacious; do
+            for viewport in 390 1440; do
+              for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge empty-author not-found photography-lightbox content-pagination; do
+                screenshot="test-artifacts/screenshots/appearance-${profile}-viewport-${viewport}-${surface}.png"
+                test -s "$screenshot" || { echo "Missing visual evidence: $screenshot" >&2; exit 1; }
+              done
+            done
+          done
+          for viewport in 390 1440; do
+            for surface in core-search portfolio knowledge photography-media reading-table; do
+              screenshot="test-artifacts/screenshots/gutenberg-viewport-${viewport}-${surface}.png"
+              test -s "$screenshot" || { echo "Missing editor evidence: $screenshot" >&2; exit 1; }
+            done
+            for position in first middle last; do
+              screenshot="test-artifacts/screenshots/gutenberg-viewport-${viewport}-portfolio-${position}.png"
+              test -s "$screenshot" || { echo "Missing Portfolio card evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -805,7 +893,8 @@ jobs:
           grep -qx 'slateframe/functions.php' /tmp/package.txt
           grep -qx 'slateframe/theme.json' /tmp/package.txt
           grep -qx 'slateframe/screenshot.png' /tmp/package.txt
-          php -r '$size=getimagesize("dist/slateframe/screenshot.png"); if (!$size || $size[0] !== 1200 || $size[1] !== 900) { throw new RuntimeException("screenshot.png must be 1200x900"); }'
+          python3 bin/check-screenshot.py dist/slateframe/screenshot.png
+          if grep -qx "slateframe/.distignore" /tmp/package.txt; then echo "Packaging manifest leaked into theme ZIP" >&2; exit 1; fi
           if grep -Eq '^slateframe/(README\.md|package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)$' /tmp/package.txt; then exit 1; fi
           if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/package.txt; then exit 1; fi
       - uses: actions/upload-artifact@v4

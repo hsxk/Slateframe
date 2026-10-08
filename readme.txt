@@ -10,6 +10,9 @@ Tags: blog, photography, portfolio, translation-ready, rtl-language-support, blo
 
 A fast, accessible, multilingual-ready WordPress theme for publishing, photography, blogs, portfolios, and personal websites.
 
+Slateframe WordPress Theme, Copyright (C) 2026 Hao Kexin.
+Distributed under the terms of the GNU General Public License, version 3 or later.
+
 == Description ==
 
 Slateframe is a content-first hybrid WordPress theme built around WordPress core rather than a page-builder runtime.

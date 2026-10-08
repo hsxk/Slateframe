@@ -15,7 +15,7 @@ The public quality workflow currently requires:
 - every shipped `patterns/*.php` file has a valid `slateframe/` slug matching its filename, exactly matches the live WordPress pattern registry, parses as block content, and embeds no remote media URLs;
 - responsive browser regression, including real Gutenberg authoring evidence, core attachment/media templates, untitled/sticky/search discovery states, content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
 - separate base, singular-reading, discussion, specialized content-mode, and combined contextual-runtime ceilings so optional presentation does not silently inflate ordinary routes;
-- package-content and 1200×900 screenshot validation, plus a byte-for-byte reproducibility gate that builds the same revision twice and requires identical SHA256 output.
+- package-content and complete 1200×900 PNG decoding (chunk lengths, CRC, zlib stream, row filters, dimensions, and IEND), plus a byte-for-byte reproducibility gate that builds the same revision twice and requires identical SHA256 output.
 
 Theme Check advisory findings remain visible in CI rather than being hidden. Color-mode CI also validates the 44px toggle target, accessible pressed state/name, server-resolved site defaults, visitor-cookie persistence, semantic dark surfaces, and representative mobile/desktop screenshots.
 
@@ -29,6 +29,6 @@ These are reviewed as product decisions, not ignored errors. If Slateframe's lay
 
 ## Submission artifact
 
-`./bin/build-theme-zip.sh` creates `dist/slateframe.zip`. Development-only files are excluded. The archive must contain the public theme metadata, runtime assets, patterns, templates, `readme.txt`, `LICENSE`, and `screenshot.png`. Entries are sorted and ZIP timestamps/permissions are normalized from the source commit; CI builds the same revision twice and rejects the package if the SHA256 values differ.
+`./bin/build-theme-zip.sh` creates `dist/slateframe.zip`. Development-only files are excluded. The archive must contain the public theme metadata, runtime assets, patterns, templates, `readme.txt`, `LICENSE`, and `screenshot.png`. Entries are sorted and ZIP timestamps/permissions use a fixed default source epoch (2000-01-01 UTC), independent of synthetic PR merge commit times. Release tooling can override SOURCE_DATE_EPOCH explicitly. CI rejects differing SHA256 values and checks cross-event reproducibility. The builder refuses symbolic links before opening the archive, preventing accidental inclusion of files outside the repository.
 
-The current screenshot is a real WordPress browser-fixture capture used for pre-release compliance. Replace it with the final polished public showcase before the first stable WordPress.org submission.
+The current screenshot is a real WordPress Chromium capture of the generic Slateframe showcase, not personal or production-site content. The static gate and package builder reject truncated PNG data even when the IHDR dimensions look correct. Gutenberg Portfolio visual evidence captures individual first/middle/last cards to avoid treating virtualized editor whitespace as a complete screenshot.

@@ -27,6 +27,8 @@ Prefer WordPress core APIs, semantic HTML, logical CSS properties, lightweight p
 
 Validated development batches are periodically merged into `main`; do not assume an unvalidated development SHA is release-ready.
 
+For acceptance, use successful GitHub Actions runs attached to the exact PR HEAD SHA. Visual changes also require inspecting real WordPress/Chromium screenshot artifacts for desktop/mobile and bounded Appearance profiles. Local tests remain diagnostics, not merge approval.
+
 ## Quality checks
 
 Public CI covers PHP syntax, WPCS/PHPCS, theme metadata, `theme.json`, namespace/i18n guards, asset budgets, real WordPress + MariaDB activation, pattern registration, responsive Chromium regression, and distributable ZIP contents.

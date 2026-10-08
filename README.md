@@ -19,7 +19,7 @@ Slateframe is designed for people who want editorial polish without inheriting a
 - **WordPress first:** core templates, blocks, patterns, menus, comments, and theme APIs remain the foundation.
 - **Multilingual by default:** no fixed locale list, URL convention, or multilingual plugin is required.
 - **Accessible by design:** keyboard behavior, visible focus, semantic landmarks, reduced motion, resilient fallbacks, and touch targets are part of the product.
-- **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets.
+- **Performance by architecture:** system fonts, contextual assets, small native JavaScript, and explicit asset budgets. The sticky header uses an opaque surface rather than GPU-heavy background blur.
 - **Contextual assets:** long-form reading presentation is loaded only on singular documents; author/related/404 publishing extras are isolated from base routes, while common TOC interaction geometry stays with the singular reading layer; photography, portfolio, and knowledge presentation is layered on only when relevant blocks appear, with native Portfolio Query Loop grid rules isolated to project-grid documents.
 - **Small global shell:** navigation and footer presentation are explicit always-loaded shell assets, both counted in the unchanged aggregate base-runtime budget; footer widgets use a responsive grid and the same control/touch system as the rest of Slateframe.
 - **Portable content:** Slateframe owns presentation, not site business logic or content storage.
@@ -42,7 +42,7 @@ Site owners can tune eight bounded settings in **Appearance → Customize → Sl
 
 The light and dark palettes share the same semantic surface hierarchy, text, border, accent, focus, selection, and media-chrome tokens. System mode requires no JavaScript, while explicit site defaults are present in server-rendered HTML to avoid a theme flash. Block authors get the matching semantic color presets, XS–2XL spacing presets, and Small/Body/Lead/Heading/Display typography presets in the editor. Changed spatial settings and explicit site color defaults are mirrored into the block-editor canvas.
 
-CI renders the designed default plus the minimum/compact and maximum/spacious spatial profiles at representative mobile and desktop widths, and separately exercises system, explicit-light, and explicit-dark color modes. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, color persistence, accessible toggle state, and screenshot evidence.
+CI renders the designed default plus the minimum/compact and maximum/spacious spatial profiles at representative mobile and desktop widths, and separately exercises system, explicit-light, and explicit-dark color modes. The profiles are checked for control targets, real content/wide measures, gutters, radius, component and reading-rhythm tokens, content-mode overflow, color persistence, accessible toggle state, and screenshot evidence. Appearance visual evidence also covers single posts, attachment media, empty search/author states, and genuine 404 responses, and waits for the native lightbox to settle before checking enlarged-image viewport containment and saving screenshots.
 
 ## Default experience
 
