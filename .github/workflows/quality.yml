@@ -664,7 +664,11 @@ jobs:
 
           wp eval "stick_post( $POST_ID );" --path=/tmp/wp-browser
 
-          PROJECT_THUMBNAIL_ID=$(wp media import "$GITHUB_WORKSPACE/tests/fixtures/slateframe-media-fixture.png" --porcelain --path=/tmp/wp-browser)
+          python3 "$GITHUB_WORKSPACE/tests/fixtures/generate-project-media.py" /tmp
+          PROJECT_THUMBNAIL_ID=$(wp media import /tmp/slateframe-project-landscape.png --porcelain --path=/tmp/wp-browser)
+          PROJECT_PORTRAIT_ID=$(wp media import /tmp/slateframe-project-portrait.png --porcelain --path=/tmp/wp-browser)
+          wp post meta update "$PROJECT_THUMBNAIL_ID" _wp_attachment_image_alt 'Landscape project illustration' --path=/tmp/wp-browser >/dev/null
+          wp post meta update "$PROJECT_PORTRAIT_ID" _wp_attachment_image_alt 'Portrait project illustration' --path=/tmp/wp-browser >/dev/null
           FEATURED_PAGE_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \
@@ -698,7 +702,12 @@ jobs:
               --post_content="<p>slateframe-project-fixture-token Project fixture ${project_index} keeps the theme independent from custom content models.</p>" \
               --porcelain)
             if [ "$project_index" -ne 7 ]; then
-              wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$PROJECT_THUMBNAIL_ID" --path=/tmp/wp-browser >/dev/null
+              if [ "$((project_index % 2))" -eq 0 ]; then
+                project_media_id="$PROJECT_PORTRAIT_ID"
+              else
+                project_media_id="$PROJECT_THUMBNAIL_ID"
+              fi
+              wp post meta update "$PROJECT_POST_ID" _thumbnail_id "$project_media_id" --path=/tmp/wp-browser >/dev/null
             fi
           done
 

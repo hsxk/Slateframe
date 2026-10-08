@@ -4,6 +4,10 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+### Testing
+
+- Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
+
 ### Fixed
 
 - Keep mobile color and navigation controls vertically aligned under long multilingual site identities at 200% text zoom by sharing a compact control line-height; retain real-browser alignment and equal-height assertions at 320–412px.

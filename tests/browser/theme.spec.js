@@ -1306,6 +1306,30 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 	await expect(grid).toBeVisible();
 	await expect(page.locator('.browser-project-grid .slateframe-project-card')).toHaveCount(6);
 	await expect(page.locator('.browser-project-grid .wp-block-post-featured-image img')).toHaveCount(5);
+	const mediaImages = page.locator('.browser-project-grid .wp-block-post-featured-image img');
+	const orientations = new Set();
+	for (const image of await mediaImages.all()) {
+		await image.scrollIntoViewIfNeeded();
+		await expect.poll(() => image.evaluate((node) => node.complete && node.naturalWidth > 0)).toBe(true);
+		const media = await image.evaluate((node) => {
+			const figure = node.closest('.wp-block-post-featured-image');
+			const box = figure.getBoundingClientRect();
+			return {
+				naturalWidth: node.naturalWidth,
+				naturalHeight: node.naturalHeight,
+				alt: node.alt,
+				srcset: node.getAttribute('srcset') || '',
+				figureRatio: box.width / box.height,
+			};
+		});
+		expect(media.naturalWidth).toBeGreaterThanOrEqual(300);
+		expect(media.naturalHeight).toBeGreaterThanOrEqual(300);
+		expect(media.alt).toMatch(/project illustration/);
+		expect(media.srcset, 'WordPress must emit responsive image candidates').toContain('w');
+		expect(Math.abs(media.figureRatio - 4 / 3), 'project image crops retain the declared 4:3 geometry').toBeLessThanOrEqual(0.12);
+		orientations.add(media.naturalWidth > media.naturalHeight ? 'landscape' : 'portrait');
+	}
+	expect([...orientations].sort()).toEqual(['landscape', 'portrait']);
 	const firstCard = page.locator('.browser-project-grid .slateframe-project-card').first();
 	await expect(firstCard.locator('.wp-block-post-featured-image')).toHaveCount(0);
 	await expect(firstCard.locator('.wp-block-post-title a')).toContainText('可迁移的项目案例');

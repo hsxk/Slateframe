@@ -97,6 +97,10 @@ Slateframe treats recurring fixes found in long-lived child themes as design-sys
 
 Browser coverage should reproduce the failure modes behind these rules: long CJK/mixed-script titles, long translated navigation, plain plugin-style tables, 200% text resizing, default/wide/full reading blocks, real 404 routing, and the minimum/default/maximum Appearance profiles.
 
+## Reproducible Portfolio media coverage
+
+The WordPress browser workflow creates generic 1200 × 900 landscape and 900 × 1200 portrait PNG fixtures using Python's standard library, then imports them through WP-CLI so WordPress generates real attachment metadata and responsive image candidates. Alternating image orientations and a deliberately image-free first project exercise the native Query Loop without a project content model. Browser checks require decoded images, meaningful alternative text, srcset candidates, a 4:3 featured-image crop, and one/two/three responsive columns. The generated images are test-only; the distributable theme contains no personal or fixture media.
+
 ## Mobile identity and native content pagination
 
 At phone widths, an ordinary short site identity shares the header row with the color and menu controls. The brand owns the remaining flexible space. On exceptionally long translated names or 200% text zoom, the header flex line wraps and moves color/navigation controls below the complete brand, without clipping the name or pushing 44px controls outside the viewport. Short names retain the single-row arrangement. Color and menu toggles share a unitless line-height and equal minimum touch dimensions so a 200% text resize cannot stretch the hamburger's inherited body line-height relative to the color toggle. The mobile Search layout belongs to its contextual stylesheet, not the global shell.
