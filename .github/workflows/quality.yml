@@ -520,6 +520,7 @@ jobs:
               <p><label for="browser-notes" dir="rtl">ملاحظات متعددة اللغات</label><textarea id="browser-notes" name="notes" dir="rtl">هذا نص عربي للتحقق من التخطيط المنطقي واتجاه الكتابة.</textarea></p>
               <p><label for="browser-reference">Reference ID</label><input id="browser-reference" name="reference" type="text" value="portable-readonly-reference" readonly></p>
               <small id="browser-form-help">Fields keep the shared touch target, focus language, and bounded spatial rhythm.</small>
+              <p><label for="browser-image-submit">Image submit control</label><input id="browser-image-submit" name="image-submit" type="image" alt="Submit image" width="64" height="44" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACAUwAOw=="></p>
               <p><button id="browser-form-action" type="button">Preview settings / 预览 / معاينة</button></p>
             </fieldset>
           </form>
