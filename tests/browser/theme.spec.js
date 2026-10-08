@@ -133,6 +133,10 @@ test('semantic forms and editorial primitives stay usable across responsive view
 	expect(imageButtonGeometry.height).toBeGreaterThanOrEqual(44);
 	expect(imageButtonGeometry.height).toBeLessThanOrEqual(60);
 	expect(imageButtonGeometry.padding).toBeLessThanOrEqual(1);
+	await imageSubmit.focus();
+	await expect(imageSubmit).toBeFocused();
+	await page.keyboard.press('Tab');
+	await expect(page.locator('#browser-form-action')).toBeFocused();
 	await expect(page.locator('#browser-notes')).toHaveAttribute('dir', 'rtl');
 	const action = page.locator('#browser-form-action');
 	const actionBox = await action.boundingBox();
