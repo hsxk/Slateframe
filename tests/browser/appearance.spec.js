@@ -140,20 +140,26 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		const invalid = form.querySelector('[aria-invalid="true"]');
 		const normal = form.querySelector('#browser-display-name');
 		const readonly = form.querySelector('[readonly]');
+		const fieldset = form.querySelector('fieldset');
+		if (!invalid || !normal || !readonly || !fieldset) {
+			throw new Error('Semantic form fixture is missing a required state or control.');
+		}
 		const placeholder = getComputedStyle(normal, '::placeholder').color;
 		const probe = document.createElement('i');
 		probe.style.cssText = 'position:absolute;visibility:hidden;color:var(--slateframe-danger)';
 		document.body.append(probe);
 		const danger = getComputedStyle(probe).color;
+		probe.style.color = 'var(--slateframe-muted)';
+		const muted = getComputedStyle(probe).color;
 		probe.remove();
 		return {
 			invalidBorder: getComputedStyle(invalid).borderTopColor,
 			danger,
 			placeholder,
-			muted: getComputedStyle(document.querySelector('.slateframe-entry-meta')).color,
+			muted,
 			readonlyBackground: getComputedStyle(readonly).backgroundColor,
 			normalBackground: getComputedStyle(normal).backgroundColor,
-			fieldsetRadius: Number.parseFloat(getComputedStyle(form.querySelector('fieldset')).borderRadius),
+			fieldsetRadius: Number.parseFloat(getComputedStyle(fieldset).borderRadius),
 			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
 		};
 	});
