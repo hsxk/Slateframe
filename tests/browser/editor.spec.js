@@ -95,7 +95,7 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	const editorSearch = canvas.locator('.browser-editor-search').first();
 	await expect(editorSearch).toBeVisible();
 	const editorSearchInput = editorSearch.locator('input[type="search"]').first();
-	const editorSearchButton = editorSearch.locator('button').first();
+	const editorSearchButton = editorSearch.locator('.wp-block-search__button').first();
 	for (const control of [editorSearchInput, editorSearchButton]) {
 		await expect(control).toBeVisible();
 		const box = await control.boundingBox();
