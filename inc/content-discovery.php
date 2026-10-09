@@ -51,7 +51,7 @@ function slateframe_discovery_constrain_post_in( $args, $excluded_post_id = 0 ) 
 			$ids[] = $id;
 		}
 	}
-	$ids = array_values( array_unique( $ids ) );
+	$ids             = array_values( array_unique( $ids ) );
 	$args['post__in'] = $ids ? $ids : array( 0 );
 	return $args;
 }
