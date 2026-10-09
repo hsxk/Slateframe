@@ -2,6 +2,7 @@
 """Reject private, uncommitted and linked files from Slateframe release staging."""
 
 import subprocess
+import unicodedata
 import sys
 from pathlib import Path
 
@@ -40,18 +41,51 @@ def validate(root, theme_dir):
     """Validate staged files against HEAD, not the index or local files."""
     committed = committed_blobs(root)
     modified = git_paths(root, "diff", "--name-only", "-z", "HEAD", "--")
+    # Only directories containing actual packaged files are reproducible.
+    # Paths excluded by .distignore must not contribute empty directories.
+    staged_items = list(theme_dir.rglob("*"))
+    packaged_directories = set()
+    for staged_file in staged_items:
+        if not staged_file.is_file() or staged_file.is_symlink():
+            continue
+        parent = staged_file.relative_to(theme_dir).parent
+        while parent != Path("."):
+            packaged_directories.add(parent.as_posix())
+            parent = parent.parent
     blocked_extensions = (".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp")
     blocked_names = {"id_rsa", "id_ed25519", "credentials", "credentials.json"}
 
-    for item in theme_dir.rglob("*"):
+    reserved_stems = {"con", "prn", "aux", "nul"}
+    reserved_stems.update(f"com{index}" for index in range(1, 10))
+    reserved_stems.update(f"lpt{index}" for index in range(1, 10))
+    portable_names = {}
+
+    for item in staged_items:
         relative = item.relative_to(theme_dir)
         name = relative.as_posix()
+        # Windows/macOS filesystems may normalize case and Unicode spelling.
+        # Reject ambiguous archive entries before writing the ZIP.
+        for component in relative.parts:
+            if (
+                "\\" in component
+                or ":" in component
+                or component.rstrip(" .") != component
+                or any(ord(character) < 32 or ord(character) == 127 for character in component)
+                or component.split(".", 1)[0].casefold() in reserved_stems
+            ):
+                raise ValueError(f"Refusing nonportable package path: {name!r}")
+        portable_name = unicodedata.normalize("NFC", name).casefold()
+        if portable_name in portable_names and portable_names[portable_name] != name:
+            raise ValueError(f"Refusing colliding package paths: {portable_names[portable_name]!r} and {name!r}")
+        portable_names[portable_name] = name
         if item.is_symlink():
             raise ValueError(f"Refusing symbolic link in theme package: {name}")
         if not item.is_file() and not item.is_dir():
             raise ValueError(f"Refusing special file in theme package: {name}")
         if any(part.startswith(".") for part in relative.parts):
             raise ValueError(f"Refusing hidden path in theme package: {name}")
+        if item.is_dir() and name not in packaged_directories:
+            raise ValueError(f"Refusing uncommitted directory in theme package: {name}")
         if item.is_file():
             if name not in committed:
                 raise ValueError(f"Refusing uncommitted file in theme package: {name}")

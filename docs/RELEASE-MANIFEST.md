@@ -5,7 +5,13 @@ Slateframe's release ZIP is built only from files committed to the current Git
 the staged tree against `git ls-tree -r HEAD`, including exact Git blob IDs.
 Untracked or staged-only files, modified-but-uncommitted tracked files, staged
 bytes differing from HEAD, hidden paths, private-key/backup file extensions,
-symlinks and special files are rejected before any helper opens a staged file. The manifest is validated again after screenshot validation.
+symlinks, special files, and directories without packaged files (including empty
+directories from excluded source paths) are rejected before any helper opens
+a staged file. Nonportable path components (Windows device names, backslashes,
+colons, control characters, trailing dots/spaces) and case-insensitive or
+Unicode-normalization filename collisions are rejected. The manifest is
+validated again after screenshot validation, so helpers cannot inject extra
+files or directories.
 
 The normal `dist/` folder is excluded from staging. Custom output directories
 must be outside the repository and cannot be the filesystem root, to

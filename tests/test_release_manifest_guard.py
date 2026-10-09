@@ -32,6 +32,10 @@ class ReleaseManifestGuardTests(unittest.TestCase):
             "import os\n"
             "import sys\n"
             "Path(os.environ['SLATEFRAME_TEST_CHECK_MARKER']).write_text('read')\n"
+            "if os.environ.get('SLATEFRAME_TEST_INJECT_EMPTY_DIR') == '1':\n"
+            "    (Path(sys.argv[1]).parent / 'injected-empty').mkdir()\n"
+            "if os.environ.get('SLATEFRAME_TEST_INJECT_EXCLUDED_DIR'):\n"
+            "    (Path(sys.argv[1]).parent / os.environ['SLATEFRAME_TEST_INJECT_EXCLUDED_DIR']).mkdir(parents=True)\n"
             "if os.environ.get('SLATEFRAME_TEST_INJECT') == '1':\n"
             "    Path(sys.argv[1] + '.injected').write_text('unexpected')\n"
             "if os.environ.get('SLATEFRAME_TEST_MUTATE_STYLE') == '1':\n"
@@ -122,6 +126,88 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         )
         self.assertNotEqual(0, guard.returncode)
         self.assertIn("staged content differing from HEAD: style.css", guard.stderr)
+
+    def test_untracked_empty_directory_is_rejected(self):
+        (self.root / "uncommitted-empty").mkdir()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("uncommitted directory", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_untracked_nested_empty_directory_is_rejected(self):
+        (self.root / "assets").mkdir()
+        (self.root / "assets" / "asset.txt").write_text("tracked\n")
+        self.commit()
+        (self.root / "assets" / "empty").mkdir()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("uncommitted directory", result.stderr)
+
+    def test_screenshot_checker_cannot_inject_empty_directory(self):
+        result = self.build(extra_env={"SLATEFRAME_TEST_INJECT_EMPTY_DIR": "1"})
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("uncommitted directory", result.stderr)
+        self.assertTrue((Path(self.temp.name) / "screenshot-checked").exists())
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_excluded_tracked_directory_cannot_reappear_empty(self):
+        (self.root / "docs").mkdir()
+        (self.root / "docs" / "guide.md").write_text("development only\n")
+        (self.root / ".distignore").write_text(".git/\nbin/\ndist/\ndocs/\n.distignore\n")
+        self.commit()
+        result = self.build(extra_env={"SLATEFRAME_TEST_INJECT_EXCLUDED_DIR": "docs"})
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("uncommitted directory", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_excluded_nested_directory_cannot_reappear_empty(self):
+        (self.root / "docs" / "private").mkdir(parents=True)
+        (self.root / "docs" / "private" / "guide.md").write_text("development only\n")
+        (self.root / ".distignore").write_text(".git/\nbin/\ndist/\ndocs/\n.distignore\n")
+        self.commit()
+        result = self.build(extra_env={"SLATEFRAME_TEST_INJECT_EXCLUDED_DIR": "docs/private"})
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("uncommitted directory", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_committed_backslash_filename_is_rejected(self):
+        (self.root / "bad\\path.css").write_text("unsafe\n")
+        self.commit()
+        result = self.build()
+        self.assertIn("nonportable package path", result.stderr)
+        self.assertNotEqual(0, result.returncode)
+
+    def test_committed_control_character_filename_is_rejected(self):
+        (self.root / "bad\nname.css").write_text("unsafe\n")
+        self.commit()
+        self.assertIn("nonportable package path", self.build().stderr)
+
+    def test_committed_colon_filename_is_rejected(self):
+        (self.root / "C:asset.css").write_text("unsafe\n")
+        self.commit()
+        self.assertIn("nonportable package path", self.build().stderr)
+
+    def test_committed_trailing_dot_filename_is_rejected(self):
+        (self.root / "bad.").write_text("unsafe\n")
+        self.commit()
+        self.assertIn("nonportable package path", self.build().stderr)
+
+    def test_committed_windows_device_filename_is_rejected(self):
+        (self.root / "CON.txt").write_text("unsafe\n")
+        self.commit()
+        self.assertIn("nonportable package path", self.build().stderr)
+
+    def test_casefold_colliding_committed_filenames_are_rejected(self):
+        (self.root / "ReadMe.CSS").write_text("one\n")
+        (self.root / "readme.css").write_text("two\n")
+        self.commit()
+        self.assertIn("colliding package paths", self.build().stderr)
+
+    def test_unicode_normalization_colliding_filenames_are_rejected(self):
+        (self.root / "caf\u00e9.css").write_text("one\n")
+        (self.root / "cafe\u0301.css").write_text("two\n")
+        self.commit()
+        self.assertIn("colliding package paths", self.build().stderr)
 
     def test_untracked_file_is_rejected(self):
         (self.root / "notes-secret.txt").write_text("local token")
