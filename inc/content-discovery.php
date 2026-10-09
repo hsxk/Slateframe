@@ -32,7 +32,7 @@ function slateframe_discovery_constrain_post_in( $args, $excluded_post_id = 0 ) 
 		foreach ( $args['post__not_in'] as $candidate ) {
 			if ( ( is_int( $candidate ) || is_string( $candidate ) ) && preg_match( '/^[0-9]+$/D', (string) $candidate ) ) {
 				$id = (int) $candidate;
-				if ( 0 < $id && (string) $id === ltrim( (string) $candidate, '0' ) ) {
+				if ( 0 < $id && ltrim( (string) $candidate, '0' ) === (string) $id ) {
 					$excluded[] = $id;
 				}
 			}
@@ -47,7 +47,7 @@ function slateframe_discovery_constrain_post_in( $args, $excluded_post_id = 0 ) 
 			continue;
 		}
 		$id = (int) $candidate;
-		if ( 0 < $id && (string) $id === ltrim( (string) $candidate, '0' ) && ! in_array( $id, $excluded, true ) ) {
+		if ( 0 < $id && ltrim( (string) $candidate, '0' ) === (string) $id && ! in_array( $id, $excluded, true ) ) {
 			$ids[] = $id;
 		}
 	}
