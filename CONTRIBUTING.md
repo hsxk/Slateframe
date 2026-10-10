@@ -62,6 +62,26 @@ Prefer clear, scoped Conventional-Commit style messages:
 
 Avoid `update`, `misc changes`, `continue`, `fix stuff`, timestamps, empty commits, or formatting-only churn presented as product progress.
 
+## Collaboration and co-author attribution
+
+Slateframe welcomes pair programming and substantive contributions from multiple people on the same change. Agree on scope, divide implementation and review responsibilities, and record the validation performed in the PR.
+
+When someone else meaningfully contributes to a **commit**, GitHub supports crediting them with a `Co-authored-by` trailer. Ask each contributor which GitHub-linked email address they want to use; prefer their GitHub-provided `noreply` address if they keep their email private.
+
+```text
+docs(contributing): clarify collaborative contribution guidelines
+
+Co-authored-by: Contributor Name <github-linked-email@example.com>
+```
+
+- Leave a blank line before the trailer, and add one trailer per genuine co-author.
+- The co-author email must belong to their GitHub account for GitHub to link the contribution. Never guess or publish someone's private email.
+- Preserve co-author trailers when squashing or editing commits during a merge; do not rely on PR body mentions alone for commit attribution.
+- Only credit people who actually participated in the work. Automated or AI-assisted drafting can be acknowledged in the PR description, but is not a substitute for an identifiable GitHub co-author.
+- Keep the usual quality gates: a collaborative PR still needs relevant regression coverage, passing checks on the final PR head, and review of the merged diff.
+
+See [GitHub's co-authored commit documentation](https://docs.github.com/en/pull-requests/how-tos/commit-changes/creating-a-commit-with-multiple-authors) for the supported syntax and account attribution rules.
+
 ## Internationalization
 
 All user-visible PHP strings must use the `slateframe` text domain. Do not hard-code locale lists, language URL prefixes, or multilingual-plugin behavior into core.
