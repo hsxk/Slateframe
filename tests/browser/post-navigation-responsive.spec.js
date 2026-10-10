@@ -26,7 +26,7 @@ test('native article navigation preserves intrinsic columns, RTL, zoom and touch
       if (width <= 640) {
         expect(columns, width + 'px ' + dir + ' ' + zoom + '%').toBe(1);
         if (await next.count()) {
-          await expect(next).toHaveCSS('text-align', dir === 'rtl' ? 'right' : 'left');
+          await expect(next).toHaveCSS('text-align', 'start');
           const cell = await next.evaluate((node) => getComputedStyle(node).gridColumnStart);
           if (await grid.locator('.nav-previous').count() === 0) {
             expect(cell).toBe('auto');
