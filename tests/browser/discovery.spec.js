@@ -128,16 +128,52 @@ test('native footer content uses the shared responsive control and spatial syste
 		const link = document.querySelector('.browser-footer-link');
 		if (!region || !inner || !link) throw new Error('Footer fixture is incomplete.');
 		const linkRect = link.getBoundingClientRect();
+		const container = inner.getBoundingClientRect();
+		const styles = getComputedStyle(inner);
+		const gap = parseFloat(styles.columnGap) || 0;
+		const minimumTrack = Math.min(container.width, 15 * parseFloat(getComputedStyle(document.documentElement).fontSize));
+		const children = [...inner.children].filter((item) => getComputedStyle(item).display !== 'none');
+		const rectangles = children.map((item) => {
+			const rect = item.getBoundingClientRect();
+			return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom, width: rect.width };
+		});
+		const occupiedColumns = new Set(rectangles.map((rect) => Math.round(rect.left))).size;
+		const capacity = Math.max(1, Math.floor((container.width + gap + 0.5) / (minimumTrack + gap)));
 		return {
 			regionDisplay: getComputedStyle(region).display,
-			innerColumns: getComputedStyle(inner).gridTemplateColumns.split(' ').filter(Boolean).length,
+			innerDisplay: styles.display,
+			minimumTrack,
+			childCount: children.length,
+			occupiedColumns,
+			capacity,
+			rectangles,
 			linkLeft: linkRect.left,
 			linkRight: linkRect.right,
+			linkWidth: linkRect.width,
 			viewport: document.documentElement.clientWidth,
 		};
 	});
 	expect(metrics.regionDisplay).toBe('grid');
-	expect(metrics.innerColumns).toBe((testInfo.project.use.viewport?.width || 1440) <= 640 ? 1 : 3);
+	expect(metrics.innerDisplay).toBe('grid');
+	// CSS auto-fit may serialize empty tracks. Check occupied tracks and their geometry.
+	const width = testInfo.project.use.viewport?.width || 1440;
+	const expectedColumns = width <= 640 ? 1 : Math.min(metrics.childCount, metrics.capacity);
+	expect(metrics.occupiedColumns, JSON.stringify(metrics)).toBe(expectedColumns);
+	for (const rect of metrics.rectangles) {
+		expect(rect.width, 'Footer item must preserve its intrinsic track minimum').toBeGreaterThanOrEqual(metrics.minimumTrack - 1);
+		expect(rect.left, 'Footer item must remain inside viewport').toBeGreaterThanOrEqual(-1);
+		expect(rect.right, 'Footer item must remain inside viewport').toBeLessThanOrEqual(metrics.viewport + 1);
+	}
+	for (let i = 0; i < metrics.rectangles.length; i += 1) {
+		for (let j = i + 1; j < metrics.rectangles.length; j += 1) {
+			const a = metrics.rectangles[i];
+			const b = metrics.rectangles[j];
+			const overlapWidth = Math.min(a.right, b.right) - Math.max(a.left, b.left);
+			const overlapHeight = Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top);
+			expect(overlapWidth <= 1 || overlapHeight <= 1, 'Footer items must never overlap').toBe(true);
+		}
+	}
+	expect(metrics.linkWidth).toBeGreaterThanOrEqual(44);
 	expect(metrics.linkLeft).toBeGreaterThanOrEqual(-1);
 	expect(metrics.linkRight).toBeLessThanOrEqual(metrics.viewport + 1);
 	await expectNoRootOverflow(page);
