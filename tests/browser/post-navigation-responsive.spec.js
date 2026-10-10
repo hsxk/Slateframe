@@ -2,10 +2,9 @@ const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 
-const postPath = process.env.SLATEFRAME_POST_PATH;
+const postPath = process.env.SLATEFRAME_POST_PATH || '/';
 
 test('native article navigation preserves intrinsic columns, RTL, zoom and touch targets', async ({ page }, info) => {
-  test.skip(!postPath, 'Requires real WordPress post fixture');
   await page.goto(postPath, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   const grid = page.locator('.slateframe-post-navigation .nav-links');
