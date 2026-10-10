@@ -4,7 +4,7 @@
  * Not a replacement for a real WordPress integration or GitHub Actions test.
  */
 define( 'ABSPATH', __DIR__ );
-$GLOBALS['theme_path'] = is_file( dirname( __DIR__ ) . '/functions.php' ) ? dirname( __DIR__ ) : dirname( __DIR__ ) . '/work/slateframe';
+$GLOBALS['theme_path'] = getcwd();
 $GLOBALS['fixtures'] = array();
 $GLOBALS['current']  = null;
 $GLOBALS['lookups']  = array();

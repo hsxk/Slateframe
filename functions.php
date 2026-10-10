@@ -299,7 +299,7 @@ function slateframe_footer_form_assets() {
 		return $cache;
 	}
 
-	$needed = array(
+	$needed   = array(
 		'forms'        => false,
 		'search_form'  => false,
 		'form_content' => false,

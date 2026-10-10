@@ -21,7 +21,7 @@ The shared resolver `slateframe_synced_pattern_contents()` accepts parsed Core b
 
 ## Local checks (not CI acceptance)
 
-The isolated PHP harness in `tests/synced-presentation.php` verifies 51 assertions, including CSS enqueue handles/dependencies, published-only resolution, cycles, repeated refs, depth, and no form-style leakage. It uses test stubs and is **not** a real WordPress test. New code must pass PHP 7.4/8.3, WPCS, Theme Check, WordPress browser tests, package reproducibility, and screenshot review at the exact new SHA before release.
+The isolated PHP harness in `tests/test_synced_presentation.py` (using the PHP fixture in `tests/fixtures/`) verifies 51 assertions, including CSS enqueue handles/dependencies, published-only resolution, cycles, repeated refs, depth, and no form-style leakage. It uses test stubs and is **not** a real WordPress test. New code must pass PHP 7.4/8.3, WPCS, Theme Check, WordPress browser tests, package reproducibility, and screenshot review at the exact new SHA before release.
 
 ## Boundaries
 
