@@ -34,6 +34,9 @@ test('native article navigation preserves intrinsic columns, RTL, zoom and touch
         }
       } else {
         expect(columns).toBe(2);
+        if (await next.count() && await grid.locator('.nav-previous').count() === 0) {
+          await expect(next).toHaveCSS('grid-column-start', '2');
+        }
       }
       for (const link of await links.all()) {
         const rect = await link.boundingBox();
