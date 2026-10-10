@@ -204,9 +204,16 @@ test('responsive navigation remains operable', async ({ page }, testInfo) => {
 		await expect(page.locator('[data-primary-nav]')).not.toHaveAttribute('inert', '');
 
 		const lastNavigationLink = page.locator('[data-primary-nav] a:visible').last();
+		const colorToggle = page.locator('[data-color-toggle]');
 		await lastNavigationLink.focus();
 		await page.keyboard.press('Tab');
+		await expect(colorToggle).toBeFocused();
+		await page.keyboard.press('Tab');
 		await expect(toggle).toBeFocused();
+		await page.keyboard.press('Shift+Tab');
+		await expect(colorToggle).toBeFocused();
+		await page.keyboard.press('Shift+Tab');
+		await expect(lastNavigationLink).toBeFocused();
 
 		await page.keyboard.press('Escape');
 		await expect(toggle).toHaveAttribute('aria-expanded', 'false');
