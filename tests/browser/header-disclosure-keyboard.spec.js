@@ -52,6 +52,13 @@ test('resizing into compact mode restores focus from newly inert navigation',asy
  test.skip(width(info)!==1920);
  await page.goto('/',{waitUntil:'networkidle'});
  const menu=page.locator('[data-menu-toggle]'),nav=page.locator('[data-primary-nav]');
+ // The real fixture intentionally has long multilingual labels and may be compact
+ // even at 1920px. Shorten only the test fixture labels so the transition
+ // starts from an unquestionably expanded desktop navigation state.
+ await nav.locator('a[href]').evaluateAll((links)=>{
+  links.forEach((link,index)=>{link.textContent=`Nav ${index+1}`;});
+ });
+ await expect(page.locator('[data-site-header]')).not.toHaveClass(/is-compact/);
  await expect(menu).toBeHidden();
  await nav.locator('a[href]:visible').last().focus();
  await page.setViewportSize({width:390,height:844});
