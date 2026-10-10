@@ -118,7 +118,8 @@ function slateframe_content_has_class_marker( $content, $markers ) {
  * @return bool
  */
 function slateframe_content_has_form( $content ) {
-	if ( '' === trim( (string) $content ) ) {
+	// Avoid constructing the HTML processor for ordinary text and block markup.
+	if ( false === stripos( (string) $content, '<form' ) ) {
 		return false;
 	}
 
@@ -128,12 +129,281 @@ function slateframe_content_has_form( $content ) {
 }
 
 /**
+ * Recognize Core's legacy Search block without depending on its widget ID.
+ *
+ * @param array[] $blocks Parsed blocks, including nested groups.
+ * @return bool
+ */
+function slateframe_blocks_have_legacy_search( $blocks ) {
+	foreach ( $blocks as $block ) {
+		if (
+			'core/legacy-widget' === ( isset( $block['blockName'] ) ? $block['blockName'] : '' ) &&
+			'search' === ( isset( $block['attrs']['idBase'] ) ? $block['attrs']['idBase'] : '' )
+		) {
+			return true;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) && slateframe_blocks_have_legacy_search( $block['innerBlocks'] ) ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Collect published Core synced-pattern content without rendering blocks.
+ *
+ * Only core/block references are followed. Ordinary Group/Columns nesting
+ * does not consume the eight-reference depth budget. Track the shallowest depth
+ * across sibling branches so a repeated reference is fetched only when a
+ * shorter path can reveal descendants beyond the original depth budget.
+ *
+ * @param array[] $blocks Parsed blocks, including nested containers.
+ * @param int[]   $seen   Shallowest reference depth per ID, by reference.
+ * @param int     $depth Current synced-reference depth.
+ * @return string[] Published pattern contents in discovery order.
+ */
+function slateframe_synced_pattern_contents( $blocks, &$seen, $depth = 0 ) {
+	$contents = array();
+
+	if ( ! is_array( $blocks ) || $depth >= 8 ) {
+		return $contents;
+	}
+
+	foreach ( $blocks as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
+
+		if ( ! empty( $block['innerBlocks'] ) ) {
+			$contents = array_merge( $contents, slateframe_synced_pattern_contents( $block['innerBlocks'], $seen, $depth ) );
+		}
+
+		if ( 'core/block' !== ( isset( $block['blockName'] ) ? $block['blockName'] : '' ) ) {
+			continue;
+		}
+
+		$raw_ref = isset( $block['attrs']['ref'] ) ? $block['attrs']['ref'] : null;
+		$ref     = ( is_int( $raw_ref ) || ( is_string( $raw_ref ) && ctype_digit( $raw_ref ) ) ) ? (int) $raw_ref : 0;
+		if ( $ref <= 0 || ( isset( $seen[ $ref ] ) && $seen[ $ref ] <= $depth ) ) {
+			continue;
+		}
+
+		$seen[ $ref ] = $depth;
+		$post         = get_post( $ref );
+		if ( ! $post instanceof WP_Post || 'wp_block' !== $post->post_type || 'publish' !== $post->post_status ) {
+			continue;
+		}
+
+		$contents[] = $post->post_content;
+		if ( has_block( 'core/block', $post->post_content ) ) {
+			$contents = array_merge(
+				$contents,
+				slateframe_synced_pattern_contents( parse_blocks( $post->post_content ), $seen, $depth + 1 )
+			);
+		}
+	}
+
+	return $contents;
+}
+
+/**
+ * Derive form stylesheet flags from resolved published pattern content.
+ *
+ * @param string[] $contents Published pattern contents.
+ * @return array<string,bool> Required form stylesheet flags.
+ */
+function slateframe_pattern_form_assets( $contents ) {
+	$needed = array(
+		'forms'        => false,
+		'search_form'  => false,
+		'form_content' => false,
+	);
+
+	foreach ( $contents as $content ) {
+		if ( has_block( 'core/search', $content ) ) {
+			$needed['forms'] = true;
+		}
+		if (
+			has_block( 'core/legacy-widget', $content ) &&
+			slateframe_blocks_have_legacy_search( parse_blocks( $content ) )
+		) {
+			$needed['forms']       = true;
+			$needed['search_form'] = true;
+		}
+		if ( slateframe_content_has_form( $content ) ) {
+			$needed['forms']        = true;
+			$needed['form_content'] = true;
+		}
+	}
+
+	return $needed;
+}
+
+/**
+ * Discover form assets in published Core synced patterns.
+ *
+ * @param array[] $blocks Parsed blocks containing Core pattern references.
+ * @param bool[]  $seen   Already visited pattern IDs.
+ * @param int     $depth Current synced-reference depth.
+ * @return array<string,bool> Required form stylesheet flags.
+ */
+function slateframe_synced_form_assets( $blocks, $seen = array(), $depth = 0 ) {
+	return slateframe_pattern_form_assets( slateframe_synced_pattern_contents( $blocks, $seen, $depth ) );
+}
+
+/**
+ * Resolve patterns in the current singular post once per request.
+ *
+ * Shared by form, Photography, Portfolio, Knowledge, and Query Loop asset
+ * detection. Does not render arbitrary blocks or execute shortcodes.
+ *
+ * @return string[] Published synced-pattern content.
+ */
+function slateframe_singular_synced_pattern_contents() {
+	static $cache = array();
+
+	if ( ! is_singular() ) {
+		return array();
+	}
+
+	$post = get_post();
+	if ( ! $post instanceof WP_Post || ! has_block( 'core/block', $post->post_content ) ) {
+		return array();
+	}
+
+	$key = (int) $post->ID . ':' . md5( $post->post_content );
+	if ( ! isset( $cache[ $key ] ) ) {
+		$seen          = array();
+		$cache[ $key ] = slateframe_synced_pattern_contents( parse_blocks( $post->post_content ), $seen );
+	}
+
+	return $cache[ $key ];
+}
+
+/**
+ * Discover forms in active Core/classic footer widgets before assets enqueue.
+ *
+ * The footer is content-owned, so checking only the current post misses Core
+ * Search blocks and classic Search widgets inserted through Appearance >
+ * Widgets. Inactive widgets must not load any CSS. Dynamic third-party forms
+ * may opt in through the existing stylesheet filters.
+ *
+ * @return array<string,bool> Flags for forms, the theme search form, and form states.
+ */
+function slateframe_footer_form_assets() {
+	static $cache = null;
+
+	if ( null !== $cache ) {
+		return $cache;
+	}
+
+	$needed = array(
+		'forms'        => false,
+		'search_form'  => false,
+		'form_content' => false,
+	);
+	$sidebars = wp_get_sidebars_widgets();
+
+	if ( ! is_array( $sidebars ) || empty( $sidebars['footer-content'] ) || ! is_array( $sidebars['footer-content'] ) ) {
+		$cache = $needed;
+		return $cache;
+	}
+
+	$block_widgets = get_option( 'widget_block', array() );
+	$block_widgets = is_array( $block_widgets ) ? $block_widgets : array();
+
+	foreach ( $sidebars['footer-content'] as $widget_id ) {
+		if ( ! is_string( $widget_id ) ) {
+			continue;
+		}
+
+		if ( preg_match( '/^search-[1-9][0-9]*$/', $widget_id ) ) {
+			$needed['forms']       = true;
+			$needed['search_form'] = true;
+			continue;
+		}
+
+		if ( preg_match( '/^block-([1-9][0-9]*)$/', $widget_id, $matches ) ) {
+			$number  = (int) $matches[1];
+			$content = isset( $block_widgets[ $number ]['content'] ) ? $block_widgets[ $number ]['content'] : '';
+
+			if ( ! is_string( $content ) || '' === trim( $content ) ) {
+				continue;
+			}
+
+			if ( has_block( 'core/search', $content ) ) {
+				$needed['forms'] = true;
+			}
+
+			if (
+				has_block( 'core/legacy-widget', $content ) &&
+				slateframe_blocks_have_legacy_search( parse_blocks( $content ) )
+			) {
+				$needed['forms']       = true;
+				$needed['search_form'] = true;
+			}
+
+			// Core synced patterns store their actual markup in separate wp_block posts.
+			if ( has_block( 'core/block', $content ) ) {
+				$synced = slateframe_synced_form_assets( parse_blocks( $content ) );
+				foreach ( $needed as $key => $value ) {
+					$needed[ $key ] = $value || $synced[ $key ];
+				}
+			}
+		} elseif ( preg_match( '/^(custom_html|text)-([1-9][0-9]*)$/', $widget_id, $matches ) ) {
+			$option  = get_option( 'widget_' . $matches[1], array() );
+			$number  = (int) $matches[2];
+			$field   = 'text' === $matches[1] ? 'text' : 'content';
+			$content = is_array( $option ) && isset( $option[ $number ][ $field ] ) ? $option[ $number ][ $field ] : '';
+		} else {
+			continue;
+		}
+
+		if ( is_string( $content ) && slateframe_content_has_form( $content ) ) {
+			$needed['forms']        = true;
+			$needed['form_content'] = true;
+		}
+	}
+
+	$cache = $needed;
+	return $cache;
+}
+
+/**
+ * Discover synced-pattern forms referenced by the current singular post.
+ *
+ * @return array<string,bool> Required form stylesheet flags.
+ */
+function slateframe_singular_synced_form_assets() {
+	static $cache = array();
+
+	if ( ! is_singular() ) {
+		return slateframe_pattern_form_assets( array() );
+	}
+
+	$post = get_post();
+	if ( ! $post instanceof WP_Post ) {
+		return slateframe_pattern_form_assets( array() );
+	}
+
+	$key = (int) $post->ID . ':' . md5( $post->post_content );
+	if ( ! isset( $cache[ $key ] ) ) {
+		$cache[ $key ] = slateframe_pattern_form_assets( slateframe_singular_synced_pattern_contents() );
+	}
+
+	return $cache[ $key ];
+}
+
+/**
  * Determine whether the current request renders Slateframe's theme search form.
  *
  * @return bool
  */
 function slateframe_search_form_styles_needed() {
-	$needed = is_search() || is_404();
+	$footer = slateframe_footer_form_assets();
+	$needed = is_search() || is_404() || $footer['search_form'] || slateframe_singular_synced_form_assets()['search_form'];
 
 	global $wp_query;
 
@@ -158,7 +428,8 @@ function slateframe_search_form_styles_needed() {
  * @return bool
  */
 function slateframe_forms_styles_needed() {
-	$needed = slateframe_search_form_styles_needed();
+	$footer = slateframe_footer_form_assets();
+	$needed = slateframe_search_form_styles_needed() || $footer['forms'] || slateframe_singular_synced_form_assets()['forms'];
 
 	if ( ! $needed && is_singular() ) {
 		$needed = comments_open() || (bool) get_comments_number();
@@ -186,13 +457,14 @@ function slateframe_forms_styles_needed() {
  * @return bool
  */
 function slateframe_form_content_styles_needed() {
-	$needed = false;
+	$footer = slateframe_footer_form_assets();
+	$needed = $footer['form_content'] || slateframe_singular_synced_form_assets()['form_content'];
 
 	if ( is_singular() ) {
 		$post = get_post();
 
 		if ( $post instanceof WP_Post ) {
-			$needed = slateframe_content_has_form( $post->post_content );
+			$needed = $needed || slateframe_content_has_form( $post->post_content );
 		}
 	}
 
@@ -270,14 +542,17 @@ function slateframe_photography_styles_needed() {
 	 */
 	$markers = apply_filters( 'slateframe_photography_markers', $markers );
 
-	if (
-		is_array( $markers ) &&
-		slateframe_content_has_class_marker( $post->post_content, array_unique( $markers ) )
-	) {
-		return true;
+	$contents = array_merge( array( $post->post_content ), slateframe_singular_synced_pattern_contents() );
+	foreach ( $contents as $content ) {
+		if ( is_array( $markers ) && slateframe_content_has_class_marker( $content, array_unique( $markers ) ) ) {
+			return true;
+		}
+		if ( slateframe_blocks_have_lightbox( parse_blocks( $content ) ) ) {
+			return true;
+		}
 	}
 
-	return slateframe_blocks_have_lightbox( parse_blocks( $post->post_content ) );
+	return false;
 }
 
 /**
@@ -325,7 +600,13 @@ function slateframe_content_modes_needed() {
 		return false;
 	}
 
-	return slateframe_content_has_class_marker( $post->post_content, $markers );
+	foreach ( array_merge( array( $post->post_content ), slateframe_singular_synced_pattern_contents() ) as $content ) {
+		if ( slateframe_content_has_class_marker( $content, $markers ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -354,7 +635,13 @@ function slateframe_query_loop_styles_needed() {
 	 */
 	$markers = apply_filters( 'slateframe_query_loop_markers', array( 'slateframe-project-grid' ) );
 
-	return slateframe_content_has_class_marker( $post->post_content, $markers );
+	foreach ( array_merge( array( $post->post_content ), slateframe_singular_synced_pattern_contents() ) as $content ) {
+		if ( slateframe_content_has_class_marker( $content, $markers ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
@@ -437,7 +724,7 @@ function slateframe_assets() {
 		wp_enqueue_style(
 			'slateframe-form-content',
 			get_template_directory_uri() . '/assets/css/form-content.css',
-			array( 'slateframe-forms', 'slateframe-reading' ),
+			array( 'slateframe-forms' ),
 			$version
 		);
 	}
