@@ -108,6 +108,50 @@ function slateframe_content_has_class_marker( $content, $markers ) {
 		}
 	}
 
+	// Dynamic Core blocks may store their className without HTML markup.
+	if ( false !== strpos( $content, '<!-- wp:' ) && false !== strpos( $content, '"className"' ) ) {
+		static $block_cache = array();
+		$key                = md5( $content );
+		if ( ! isset( $block_cache[ $key ] ) ) {
+			if ( 8 <= count( $block_cache ) ) {
+				array_shift( $block_cache );
+			}
+			$block_cache[ $key ] = parse_blocks( $content );
+		}
+		return slateframe_blocks_have_class_marker( $block_cache[ $key ], $markers );
+	}
+
+	return false;
+}
+
+/**
+ * Detect exact Core block className tokens, including nested blocks.
+ *
+ * @param array[]  $blocks  Parsed Core blocks.
+ * @param string[] $markers Requested markers.
+ * @return bool
+ */
+function slateframe_blocks_have_class_marker( $blocks, $markers ) {
+	if ( ! is_array( $blocks ) || ! is_array( $markers ) ) {
+		return false;
+	}
+	foreach ( $blocks as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
+		$class_name = isset( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
+		if ( is_string( $class_name ) && '' !== trim( $class_name ) ) {
+			$classes = preg_split( '/\\s+/', trim( $class_name ) );
+			foreach ( $markers as $marker ) {
+				if ( is_string( $marker ) && '' !== $marker && in_array( $marker, $classes, true ) ) {
+					return true;
+				}
+			}
+		}
+		if ( ! empty( $block['innerBlocks'] ) && slateframe_blocks_have_class_marker( $block['innerBlocks'], $markers ) ) {
+			return true;
+		}
+	}
 	return false;
 }
 
