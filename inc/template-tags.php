@@ -154,7 +154,8 @@ function slateframe_entry_meta() {
 	slateframe_posted_on();
 
 	if ( '' !== $author_name ) {
-		echo '<span aria-hidden="true"> · </span>';
+		// Keep punctuation and the author together when metadata wraps.
+		echo '<span class="slateframe-meta-byline"><span class="slateframe-meta-separator" aria-hidden="true">·</span>';
 
 		if ( $author_url ) {
 			printf(
@@ -170,6 +171,8 @@ function slateframe_entry_meta() {
 				esc_html( $author_name )
 			);
 		}
+
+		echo '</span>';
 	}
 
 	echo '</div>';

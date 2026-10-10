@@ -1,6 +1,7 @@
 """Regression contracts for portable, deterministic, non-leaking release ZIPs."""
 import hashlib
 import os
+import shlex
 import shutil
 import subprocess
 import tempfile
@@ -24,7 +25,13 @@ class PackageTests(unittest.TestCase):
                 fake_bin = Path(temporary) / "fake-bin"
                 fake_bin.mkdir()
                 fake_git = fake_bin / "git"
-                fake_git.write_text("#!/bin/sh\nprintf '%s\\n' '" + str(git_epoch) + "'\n")
+                real_git = shutil.which("git")
+                fake_git.write_text(
+                    "#!/bin/sh\n"
+                    "if [ \"$1\" = \"log\" ]; then printf '%s\\n' '"
+                    + str(git_epoch) + "'; exit 0; fi\n"
+                    "exec " + shlex.quote(real_git) + " \"$@\"\n"
+                )
                 fake_git.chmod(0o755)
                 env["PATH"] = str(fake_bin) + os.pathsep + env["PATH"]
             result = subprocess.run(["bash", str(BUILDER), str(out)], cwd=ROOT,
@@ -110,10 +117,20 @@ class PackageTests(unittest.TestCase):
                          "readme.txt", "LICENSE", "screenshot.png"):
                 shutil.copy2(ROOT / name, fixture / name)
             shutil.copy2(BUILDER, fixture / "bin" / "build-theme-zip.sh")
+            shutil.copy2(ROOT / "bin" / "check-package-manifest.py",
+                         fixture / "bin" / "check-package-manifest.py")
             (fixture / "bin" / "check-screenshot.py").write_text(
                 "import sys\nfrom pathlib import Path\n"
                 "assert Path(sys.argv[1]).read_bytes().startswith(bytes.fromhex('89504e470d0a1a0a'))\n")
-            (fixture / ".distignore").write_text("bin/\n.distignore\n")
+            (fixture / ".distignore").write_text(".git/\nbin/\n.distignore\n")
+            subprocess.run(["git", "init", "-q"], cwd=fixture, check=True)
+            subprocess.run(["git", "config", "user.name", "Slateframe Tests"],
+                           cwd=fixture, check=True)
+            subprocess.run(["git", "config", "user.email", "test@example.invalid"],
+                           cwd=fixture, check=True)
+            subprocess.run(["git", "add", "-A"], cwd=fixture, check=True)
+            subprocess.run(["git", "commit", "-qm", "test fixture"],
+                           cwd=fixture, check=True)
             if kind == "external":
                 target = base / "private.txt"
                 target.write_text("never include this in public archives")

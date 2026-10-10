@@ -9,6 +9,20 @@ ZIP_FILE="$DIST_DIR/slateframe.zip"
 # Use a stable default; release tooling can explicitly override it.
 SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-946684800}"
 
+# An arbitrary output folder under the source tree can recursively copy
+# itself with rsync. The default dist/ is explicitly excluded by .distignore.
+python3 - "$ROOT" "$DIST_DIR" <<'PY_OUTPUT_GUARD'
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1]).resolve()
+output = Path(sys.argv[2]).resolve()
+if output == Path(output.anchor):
+    raise SystemExit("Output directory must not be the filesystem root")
+if output == root or (root in output.parents and output != root / "dist"):
+    raise SystemExit("Output directory must be outside the repository or its default dist/ folder")
+PY_OUTPUT_GUARD
+
 rm -rf "$THEME_DIR" "$ZIP_FILE"
 mkdir -p "$THEME_DIR"
 
@@ -21,7 +35,11 @@ test -f "$THEME_DIR/readme.txt"
 test -f "$THEME_DIR/LICENSE"
 test -f "$THEME_DIR/screenshot.png"
 
+# Validate before the screenshot checker reads any staged path and again
+# after it runs, so a helper cannot accidentally add unchecked package files.
+python3 "$ROOT/bin/check-package-manifest.py" "$ROOT" "$THEME_DIR"
 python3 "$ROOT/bin/check-screenshot.py" "$THEME_DIR/screenshot.png"
+python3 "$ROOT/bin/check-package-manifest.py" "$ROOT" "$THEME_DIR"
 
 SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" python3 - "$DIST_DIR" "$THEME_DIR" "$ZIP_FILE" <<'PY'
 import os
