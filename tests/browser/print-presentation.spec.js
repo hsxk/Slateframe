@@ -70,6 +70,8 @@ test('Core print presentation preserves readable article content', async ({ page
       figureBreak: style('.print-figure').breakInside,
       tableHead: style('.print-table thead').display,
       tableScroll: style('.print-table').overflowX,
+      tableCellPadding: Number.parseFloat(style('.print-table td').paddingInlineStart),
+      tableLayout: style('.print-table table').tableLayout,
       tableWidth: box('.print-table table').width,
       tableContainerWidth: box('.print-table').width,
       rawTableWidth: box('.print-raw-table').width,
@@ -111,6 +113,8 @@ test('Core print presentation preserves readable article content', async ({ page
   expect(s.figureBreak).toBe('avoid');
   expect(s.tableHead).toBe('table-header-group');
   expect(s.tableScroll).toBe('visible');
+  expect(s.tableLayout).toBe('fixed');
+  expect(s.tableCellPadding).toBeLessThanOrEqual(8);
   expect(s.tableWidth).toBeLessThanOrEqual(s.tableContainerWidth + 1);
   expect(s.rawTableDisplay).toBe('table');
   expect(s.rawTableWidth).toBeLessThanOrEqual(info.project.use.viewport.width + 1);
