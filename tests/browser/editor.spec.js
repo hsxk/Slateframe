@@ -85,6 +85,7 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 
 	for (const selector of [
 		'.slateframe-editorial-opening',
+		'.slateframe-editorial-pathways',
 		'.slateframe-photography-diptych',
 		'.slateframe-project-grid',
 		'.slateframe-knowledge-procedure',
@@ -294,6 +295,7 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	});
 
 	const evidence = [
+		['editorial-pathways', canvas.locator('.slateframe-editorial-pathways').first()],
 		['core-search', editorSearch],
 		['editorial', canvas.locator('.slateframe-editorial-opening').first()],
 		['reading-table', table],

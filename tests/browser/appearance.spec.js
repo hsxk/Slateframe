@@ -391,6 +391,7 @@ test('appearance profile stays contained across content modes and captures revie
 		['page', pagePath], ['post', process.env.SLATEFRAME_POST_PATH], ['attachment', process.env.SLATEFRAME_ATTACHMENT_PATH],
 		['showcase', showcasePath], ['photography', process.env.SLATEFRAME_PHOTO_PATH],
 		['portfolio', process.env.SLATEFRAME_PROJECT_PATH], ['knowledge', process.env.SLATEFRAME_KNOWLEDGE_PATH],
+		['editorial-pathways', process.env.SLATEFRAME_EDITORIAL_PATHWAYS_PATH],
 		['empty-author', process.env.SLATEFRAME_EMPTY_AUTHOR_PATH], ['not-found', '/slateframe-appearance-missing/'],
 	].filter(([, route]) => route);
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
