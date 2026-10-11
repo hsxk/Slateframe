@@ -62,7 +62,7 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           patterns=(patterns/*.php)
-          test "${#patterns[@]}" -ge 21
+          test "${#patterns[@]}" -ge 22
           for file in "${patterns[@]}"; do
             grep -q '^ \* Title:' "$file"
             grep -q '^ \* Slug: slateframe/' "$file"
@@ -603,7 +603,7 @@ jobs:
           $content = file_get_contents("/tmp/slateframe-browser-page.html");
           $content .= "\n<!-- wp:search {\"label\":\"Search the publishing fixture\",\"showLabel\":true,\"buttonText\":\"Search / 搜索 / بحث\",\"className\":\"browser-editor-search\"} /-->";
           $content .= "\n<!-- wp:pullquote --><figure class=\"wp-block-pullquote\"><blockquote><p>Editorial emphasis stays calm inside the authoring canvas.</p></blockquote></figure><!-- /wp:pullquote -->";
-          foreach (array("slateframe/editorial-opening","slateframe/photography-diptych","slateframe/portfolio-project-grid","slateframe/knowledge-procedure") as $slug) {
+          foreach (array("slateframe/editorial-opening","slateframe/editorial-pathways","slateframe/photography-diptych","slateframe/portfolio-project-grid","slateframe/knowledge-procedure") as $slug) {
               $pattern = $registry->get_registered($slug);
               if (!$pattern || empty($pattern["content"])) {
                   throw new RuntimeException("Missing editor fixture pattern: " . $slug);
@@ -743,6 +743,13 @@ jobs:
             --comment_approved=1
 
           PHOTO_ID=$(wp post create --path=/tmp/wp-browser --post_type=page --post_status=publish --post_title='Photography Fixture' --post_content='<!-- wp:group {"align":"wide","className":"slateframe-pattern slateframe-photography-feature","layout":{"type":"constrained"}} --><div class="wp-block-group alignwide slateframe-pattern slateframe-photography-feature"><!-- wp:image {"align":"wide","lightbox":{"enabled":true},"className":"browser-photo-feature is-style-slateframe-photo-feature"} --><figure class="wp-block-image alignwide browser-photo-feature is-style-slateframe-photo-feature"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Landscape fixture"><figcaption>Landscape fixture caption</figcaption></figure><!-- /wp:image --><!-- wp:gallery {"align":"wide","className":"browser-photo-gallery is-style-slateframe-contact-sheet"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-gallery is-style-slateframe-contact-sheet"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Wide landscape fixture"><figcaption>Wide frame</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Tall portrait fixture"><figcaption>Portrait frame</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery --></div><!-- /wp:group --><!-- wp:gallery {"align":"wide","className":"browser-photo-diptych is-style-slateframe-diptych"} --><figure class="wp-block-gallery alignwide has-nested-images columns-2 browser-photo-diptych is-style-slateframe-diptych"><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-landscape.svg" width="1600" height="900" alt="Diptych landscape"><figcaption>Diptych landscape caption</figcaption></figure><!-- /wp:image --><!-- wp:image --><figure class="wp-block-image"><img src="/wp-content/uploads/slateframe-fixtures/slateframe-portrait.svg" width="900" height="1350" alt="Diptych portrait"><figcaption>Diptych portrait caption — 中文 日本語 العربية</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery -->' --porcelain)
+          EDITORIAL_PATHWAYS_ID=$(wp eval '
+          $pattern = WP_Block_Patterns_Registry::get_instance()->get_registered("slateframe/editorial-pathways");
+          if (!$pattern || empty($pattern["content"])) { throw new RuntimeException("Missing registered Editorial Pathways pattern"); }
+          $id = wp_insert_post(array("post_type" => "page", "post_status" => "publish", "post_title" => "Editorial pathways fixture", "post_content" => $pattern["content"]), true);
+          if (is_wp_error($id)) { throw new RuntimeException($id->get_error_message()); }
+          echo $id;
+          ' --path=/tmp/wp-browser)
           PROJECT_ID=$(wp post create \
             --path=/tmp/wp-browser \
             --post_type=page \
@@ -768,6 +775,7 @@ jobs:
           echo "SLATEFRAME_UNTITLED_POST_PATH=/?p=$UNTITLED_POST_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PHOTO_PATH=/?page_id=$PHOTO_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PROJECT_PATH=/?page_id=$PROJECT_ID" >> "$GITHUB_ENV"
+          echo "SLATEFRAME_EDITORIAL_PATHWAYS_PATH=/?page_id=$EDITORIAL_PATHWAYS_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_KNOWLEDGE_PATH=/?page_id=$KNOWLEDGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EDITOR_POST_ID=$EDITOR_ID" >> "$GITHUB_ENV"
@@ -841,7 +849,7 @@ jobs:
         run: |
           for profile in default compact spacious; do
             for viewport in 390 1440; do
-              for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge empty-author not-found photography-lightbox content-pagination; do
+              for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge editorial-pathways empty-author not-found photography-lightbox content-pagination; do
                 screenshot="test-artifacts/screenshots/appearance-${profile}-viewport-${viewport}-${surface}.png"
                 test -s "$screenshot" || { echo "Missing visual evidence: $screenshot" >&2; exit 1; }
               done
@@ -850,13 +858,18 @@ jobs:
           for viewport in 390 1440; do
             screenshot="test-artifacts/screenshots/details-disclosure-viewport-${viewport}-rtl-200-forced-colors.png"
             test -s "$screenshot" || { echo "Missing native Details evidence: $screenshot" >&2; exit 1; }
-            for surface in core-search portfolio knowledge photography-media reading-table; do
+            for surface in core-search portfolio knowledge photography-media reading-table editorial-pathways; do
               screenshot="test-artifacts/screenshots/gutenberg-viewport-${viewport}-${surface}.png"
               test -s "$screenshot" || { echo "Missing editor evidence: $screenshot" >&2; exit 1; }
             done
             for position in first middle last; do
               screenshot="test-artifacts/screenshots/gutenberg-viewport-${viewport}-portfolio-${position}.png"
               test -s "$screenshot" || { echo "Missing Portfolio card evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          for viewport in 390 1440; do
+            for filename in "editorial-pathways-viewport-${viewport}.png" "editorial-pathways-viewport-${viewport}-zoom-forced-colors.png"; do
+              test -s "test-artifacts/screenshots/${filename}" || { echo "Missing editorial evidence: ${filename}" >&2; exit 1; }
             done
           done
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
