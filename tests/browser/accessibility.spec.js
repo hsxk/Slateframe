@@ -1,5 +1,7 @@
 const AxeBuilder = require('@axe-core/playwright').default;
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 
 const postPath = process.env.SLATEFRAME_POST_PATH || '/';
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
@@ -60,6 +62,61 @@ test('keyboard focus remains visibly distinguishable', async ({ page }, testInfo
 	expect(focus.style).not.toBe('none');
 	expect(focus.width).toBeGreaterThanOrEqual(2);
 	expect(focus.offset).toBeGreaterThanOrEqual(2);
+});
+
+test('Core Details keeps a native marker, keyboard toggle, and RTL zoom affordance', async ({ page }, testInfo) => {
+	test.skip(!isRepresentativeWidth(testInfo), 'Details visual evidence uses representative widths.');
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const details = page.locator('.browser-details').first();
+	const summary = details.locator('summary');
+	await expect(summary).toBeVisible();
+	const native = await summary.evaluate((node) => ({
+		display: getComputedStyle(node).display,
+		marker: getComputedStyle(node, '::marker').content,
+		color: getComputedStyle(node).color,
+		markerColor: getComputedStyle(node, '::marker').color,
+	}));
+	expect(native.display).toBe('list-item');
+	expect(native.marker).not.toBe('none');
+	expect(native.markerColor).toBe(native.color);
+	await expect(details).not.toHaveAttribute('open', '');
+	await summary.focus();
+	await page.keyboard.press('Enter');
+	await expect(details).toHaveAttribute('open', '');
+	await page.keyboard.press('Space');
+	await expect(details).not.toHaveAttribute('open', '');
+	await page.evaluate(() => {
+		document.documentElement.dir = 'rtl';
+		document.documentElement.style.fontSize = '200%';
+	});
+	const geometry = await summary.evaluate((node) => {
+		const rect = node.getBoundingClientRect();
+		return {
+			height: rect.height,
+			left: rect.left,
+			right: rect.right,
+			viewport: document.documentElement.clientWidth,
+			overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	});
+	expect(geometry.height).toBeGreaterThanOrEqual(44);
+	expect(geometry.left).toBeGreaterThanOrEqual(-1);
+	expect(geometry.right).toBeLessThanOrEqual(geometry.viewport + 1);
+	expect(geometry.overflow).toBeLessThanOrEqual(1);
+	await page.emulateMedia({ forcedColors: 'active' });
+	const forcedColor = await summary.evaluate((node) => ({
+		text: getComputedStyle(node).color,
+		marker: getComputedStyle(node, '::marker').color,
+	}));
+	expect(forcedColor.marker).toBe(forcedColor.text);
+	await summary.focus();
+	const focus = await summary.evaluate((node) => getComputedStyle(node).outlineStyle);
+	expect(focus).not.toBe('none');
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await details.screenshot({
+		path: path.join(screenshotDir, `details-disclosure-viewport-${projectWidth(testInfo)}-rtl-200-forced-colors.png`),
+	});
 });
 
 test('primary mobile controls meet the 44px touch-target baseline', async ({ page }, testInfo) => {

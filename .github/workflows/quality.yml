@@ -848,6 +848,8 @@ jobs:
             done
           done
           for viewport in 390 1440; do
+            screenshot="test-artifacts/screenshots/details-disclosure-viewport-${viewport}-rtl-200-forced-colors.png"
+            test -s "$screenshot" || { echo "Missing native Details evidence: $screenshot" >&2; exit 1; }
             for surface in core-search portfolio knowledge photography-media reading-table; do
               screenshot="test-artifacts/screenshots/gutenberg-viewport-${viewport}-${surface}.png"
               test -s "$screenshot" || { echo "Missing editor evidence: $screenshot" >&2; exit 1; }

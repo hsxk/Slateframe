@@ -20,6 +20,15 @@ class SharedReadingCssTest(unittest.TestCase):
             with self.subTest(selector=selector):
                 self.assertIn(selector, css)
 
+    def test_core_details_keeps_native_disclosure_affordance(self):
+        css = READING.read_text(encoding="utf-8")
+        self.assertIn("& .wp-block-details summary{display:list-item;", css)
+        self.assertIn("min-block-size:var(--slateframe-control)", css)
+        self.assertIn("padding-block:.25em", css)
+        self.assertIn("list-style-position:inside;cursor:pointer", css)
+        self.assertNotIn(".wp-block-details summary::marker{", css)
+        self.assertNotIn("& .wp-block-details summary{min-block-size:var(--slateframe-control);display:flex;", css)
+
     def test_editor_has_no_competing_duplicate_typography(self):
         editor = EDITOR.read_text(encoding="utf-8")
         for selector in (
