@@ -43,7 +43,7 @@ add_filter(
 );
 ```
 
-For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned only on singular post content. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. Both filters must return arrays.
+For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned in singular post content and in active footer widgets, including published Core synced patterns, so footer presentation also works on archives and search results. Inactive widgets and unpublished pattern references do not opt in. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. All marker filters must return arrays.
 
 ## Compatibility policy
 
@@ -137,4 +137,4 @@ Slateframe provides restrained presentation for Core's Table of Contents block a
 
 Slateframe registers an optional `footer-content` widget area above the compact brand/navigation/copyright row. It accepts Core block widgets and normal WordPress widgets, so sites can build multi-column project links, subscriptions, or multilingual footer content without template overrides or WPCode.
 
-The region is empty by default and emits no wrapper when unused. Content ownership, language visibility, subscription behavior, and external links remain with WordPress/plugins rather than theme runtime.
+The region is empty by default and emits no wrapper when unused. Contextual Photography, Portfolio/Knowledge, and Query Loop styles load only when active widget content requires them, including native Core lightbox settings; see `docs/FOOTER-PRESENTATION.md`. Content ownership, language visibility, subscription behavior, and external links remain with WordPress/plugins rather than theme runtime.
