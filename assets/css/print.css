@@ -1,0 +1,34 @@
+@media print {
+  .slateframe-site-header,.slateframe-site-footer,.slateframe-comments,.slateframe-post-navigation,.slateframe-related,.wp-lightbox-overlay{display:none!important}
+  :root{color-scheme:light!important}
+  html,body{overflow:visible!important}
+  body{background:#fff!important;color:#000!important}
+  .slateframe-page-title,.slateframe-entry-title{max-inline-size:none;font-size:1.5rem;line-height:1.2}
+  .slateframe-entry-meta a{min-block-size:0}
+  .slateframe-prose :is(p,li){orphans:3;widows:3}
+  .slateframe-prose :is(figcaption,.wp-element-caption,table caption){break-before:avoid}
+  .slateframe-prose thead{display:table-header-group}
+  .slateframe-prose tfoot{display:table-footer-group}
+  .slateframe-prose .wp-block-cover__background{display:none!important}
+  .slateframe-prose .wp-block-cover__image-background{position:static!important;display:block;width:auto!important;max-width:100%;max-height:18cm!important;height:auto!important;object-fit:contain;margin-inline:auto}
+  .slateframe-prose .wp-block-cover{display:block;min-block-size:0!important;min-height:0!important;padding:0;background:transparent!important}
+  .slateframe-prose .wp-block-spacer{height:0!important;min-height:0!important}
+  .slateframe-prose details[open]>summary{break-after:avoid}
+  .slateframe-prose .wp-block-button__link{border:1px solid #000}
+  .slateframe-pagination,.slateframe-content-pages{display:none!important}
+  .slateframe-entry-hero-image{max-height:18cm!important;object-fit:contain}
+  .slateframe-main{min-height:0}
+  .slateframe-page-header{padding-block:0 1rem}
+  .slateframe-shell,.slateframe-prose>*{box-sizing:border-box!important;width:100%!important;max-width:none!important;margin-inline:auto}
+  .slateframe-prose{padding-block-end:0}
+  .slateframe-page-header *,.slateframe-entry-context *,.slateframe-prose,.slateframe-prose :is(p,li,dt,dd,h2,h3,h4,h5,h6,a,code,pre,mark,cite,figcaption,summary,blockquote,th,td,.has-text-color,.wp-block-pullquote){color:#000!important}
+  .slateframe-prose :is(pre,code,.has-background,.wp-block-quote,.wp-block-pullquote,.wp-block-group,.wp-block-table,.wp-block-details,.wp-block-button__link){background:transparent!important}
+  .slateframe-prose pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow:visible!important;max-height:none!important;border:1px solid #777}
+  .slateframe-prose :is(h2,h3,h4,h5,h6){break-after:avoid}
+  .slateframe-prose :is(figure,blockquote,tr){break-inside:avoid}
+  .slateframe-prose img{max-block-size:none!important;object-fit:contain}
+  .slateframe-prose a{color:#000!important;text-decoration:underline!important}
+  .slateframe-prose .wp-block-table{overflow:visible!important;contain:none}
+  .slateframe-prose>table,.slateframe-prose .wp-block-table table{display:table;width:100%!important;overflow:visible!important}
+  .slateframe-prose :is(th,td){min-inline-size:0!important;overflow-wrap:anywhere}
+}

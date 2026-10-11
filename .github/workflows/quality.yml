@@ -872,6 +872,10 @@ jobs:
               test -s "test-artifacts/screenshots/${filename}" || { echo "Missing editorial evidence: ${filename}" >&2; exit 1; }
             done
           done
+          for viewport in 390 1440; do
+            screenshot="test-artifacts/screenshots/print-article-viewport-${viewport}.png"
+            test -s "$screenshot" || { echo "Missing print evidence: $screenshot" >&2; exit 1; }
+          done
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
       - name: Upload browser artifacts
         if: ${{ always() }}
