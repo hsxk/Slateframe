@@ -35,6 +35,8 @@ class PrintPresentationContractTest(unittest.TestCase):
             "table-header-group", "table-footer-group",
             "orphans:3", "widows:3", "color:#000!important",
             "padding-inline:0.5rem",
+            "padding-inline:.2em!important",
+            "table-layout:fixed",
         ):
             with self.subTest(term=term):
                 self.assertIn(term, css)
