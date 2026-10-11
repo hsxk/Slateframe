@@ -44,6 +44,15 @@ class SharedReadingCssTest(unittest.TestCase):
         self.assertLessEqual(READING.stat().st_size, 7000)
         self.assertLessEqual(EDITOR.stat().st_size, 5000)
 
+    def test_portfolio_metrics_follow_core_columns(self):
+        css = (ROOT / "assets/css/content-modes.css").read_text(encoding="utf-8")
+        self.assertIn("@media (max-width:781px){", css)
+        self.assertIn("is-style-slateframe-metrics:not(.is-not-stacked-on-mobile)", css)
+        self.assertIn("min-inline-size:0;padding:var(--slateframe-stack-gap)", css)
+        self.assertIn("overflow-wrap:anywhere;", css)
+        self.assertIn("border-inline-start:0;border-block-start:var(--slateframe-rule)", css)
+        self.assertLessEqual(len(css.encode("utf-8")), 7000)
+
 
 if __name__ == "__main__":
     unittest.main()
