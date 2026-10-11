@@ -804,6 +804,14 @@ function slateframe_assets() {
 		);
 	}
 
+	wp_enqueue_style(
+		'slateframe-print',
+		get_template_directory_uri() . '/assets/css/print.css',
+		array( 'slateframe-style' ),
+		$version,
+		'print'
+	);
+
 	wp_enqueue_script(
 		'slateframe-theme',
 		get_template_directory_uri() . '/assets/js/theme.js',

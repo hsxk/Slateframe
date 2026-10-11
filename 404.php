@@ -8,7 +8,7 @@
 get_header();
 $slateframe_recent = slateframe_not_found_posts_query();
 ?>
-<main id="main-content" class="slateframe-main">
+<main id="main-content" class="slateframe-main" tabindex="-1">
 	<section class="slateframe-page-header slateframe-not-found">
 		<div class="slateframe-shell">
 			<p class="slateframe-not-found-code" aria-hidden="true"><?php esc_html_e( '404', 'slateframe' ); ?></p>

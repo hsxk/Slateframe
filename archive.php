@@ -8,7 +8,7 @@
 get_header();
 global $wp_query;
 ?>
-<main id="main-content" class="slateframe-main">
+<main id="main-content" class="slateframe-main" tabindex="-1">
 	<header class="slateframe-page-header">
 		<div class="slateframe-shell">
 			<?php

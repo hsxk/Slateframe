@@ -160,6 +160,9 @@ test('skip link moves keyboard users to the main landmark', async ({ page }) => 
 	await expect(skipLink).toBeVisible();
 	await page.keyboard.press('Enter');
 	await expect(page).toHaveURL(/#main-content$/);
+	await expect(page.locator('#main-content')).toBeFocused();
+	await page.keyboard.press('Tab');
+	expect(await page.evaluate(() => document.activeElement.closest('#main-content') !== null)).toBe(true);
 });
 
 test('short mobile site identity and header controls share one aligned row', async ({ page }, testInfo) => {
