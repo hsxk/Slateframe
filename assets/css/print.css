@@ -26,7 +26,7 @@
   .slateframe-prose pre{white-space:pre-wrap;overflow-wrap:anywhere;overflow:visible!important;max-height:none!important;border:1px solid #777}
   .slateframe-prose :is(h2,h3,h4,h5,h6){break-after:avoid}
   .slateframe-prose :is(figure,blockquote,tr){break-inside:avoid}
-  .slateframe-prose img{max-block-size:none!important;object-fit:contain}
+  .slateframe-prose img{max-block-size:18cm!important;width:auto!important;max-width:100%;height:auto!important;object-fit:contain}
   .slateframe-prose a{color:#000!important;text-decoration:underline!important}
   .slateframe-prose .wp-block-table{overflow:visible!important;contain:none}
   .slateframe-prose>table,.slateframe-prose .wp-block-table table{display:table;width:100%!important;overflow:visible!important}

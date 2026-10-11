@@ -17,6 +17,7 @@ test('Core print presentation preserves readable article content', async ({ page
       '<h2 class="print-heading">Print heading 中文 日本語 العربية</h2>',
       '<figure class="print-figure"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2280%22/%3E" alt="Fixture"><figcaption>Caption</figcaption></figure>',
       '<blockquote class="print-quote"><p>Quoted article text</p></blockquote>',
+      '<figure class="print-portrait-figure"><img class="print-portrait" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22800%22 height=%222400%22%3E%3Crect width=%22800%22 height=%222400%22 fill=%22%234d83a8%22/%3E%3C/svg%3E" alt="Tall portrait figure"><figcaption>Portrait figure</figcaption></figure>',
       '<div class="wp-block-group has-background print-callout" style="background-color:#111;color:#eee"><p>Dark author callout</p></div>',
       '<pre class="print-code">very_long_print_identifier_without_breaks_or_whitespace_should_wrap_in_print_mode</pre>',
       '<div class="wp-block-table print-table"><table><thead><tr><th>Period</th><th>Value</th><th>Growth</th><th>Note</th></tr></thead><tbody><tr><td>2026</td><td>100</td><td>5%</td><td>財務データ_بيانات_verylongreference</td></tr></tbody></table></div>',
@@ -77,6 +78,9 @@ test('Core print presentation preserves readable article content', async ({ page
       coverImageHeight: box('.wp-block-cover__image-background').height,
       coverImageWidth: box('.wp-block-cover__image-background').width,
       coverWidth: box('.wp-block-cover').width,
+      portraitHeight: box('.print-portrait').height,
+      portraitWidth: box('.print-portrait').width,
+      portraitContainerWidth: box('.print-portrait-figure').width,
       coverBackground: style('.wp-block-cover__background').display,
       coverText: style('.wp-block-cover__inner-container p').color,
       boxSizing: style('.print-code').boxSizing,
@@ -111,6 +115,10 @@ test('Core print presentation preserves readable article content', async ({ page
   expect(s.coverImageHeight).toBeLessThanOrEqual(700);
   expect(s.coverImageWidth).toBeLessThanOrEqual(s.coverWidth + 1);
   expect(Math.abs(s.coverImageHeight / s.coverImageWidth - 2)).toBeLessThanOrEqual(0.05);
+  expect(s.portraitHeight).toBeGreaterThan(0);
+  expect(s.portraitHeight).toBeLessThanOrEqual(700);
+  expect(s.portraitWidth).toBeLessThanOrEqual(s.portraitContainerWidth + 1);
+  expect(Math.abs(s.portraitHeight / s.portraitWidth - 3)).toBeLessThanOrEqual(0.05);
   expect(s.coverText).toBe('rgb(0, 0, 0)');
   expect(s.boxSizing).toBe('border-box');
   expect(s.details).toBe('block');

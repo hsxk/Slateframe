@@ -38,6 +38,11 @@ class PrintPresentationContractTest(unittest.TestCase):
             with self.subTest(term=term):
                 self.assertIn(term, css)
 
+    def test_ordinary_portrait_images_are_page_bounded(self):
+        css = PRINT.read_text(encoding="utf-8")
+        self.assertIn(".slateframe-prose img{max-block-size:18cm!important", css)
+        self.assertIn("width:auto!important;max-width:100%;height:auto!important", css)
+
     def test_actions_artifact_gate(self):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         self.assertIn("print-article-viewport-" + chr(36) + "{viewport}.png", workflow)
