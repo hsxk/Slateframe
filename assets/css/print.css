@@ -29,8 +29,6 @@
   .slateframe-prose img{max-block-size:18cm!important;width:auto!important;max-width:100%;height:auto!important;object-fit:contain}
   .slateframe-prose a{color:#000!important;text-decoration:underline!important}
   .slateframe-prose .wp-block-table{overflow:visible!important;contain:none}
-  .slateframe-prose>table,.slateframe-prose .wp-block-table table{display:table;width:100%!important;max-width:100%!important;table-layout:fixed;overflow:visible!important}
-  .slateframe-prose .wp-block-table{max-inline-size:100%!important}
-  .slateframe-prose :is(th,td){padding-inline:0.2rem!important;box-sizing:border-box!important}
+  .slateframe-prose>table,.slateframe-prose .wp-block-table table{display:table;width:100%!important;table-layout:fixed;overflow:visible!important}
   .slateframe-prose :is(th,td){min-inline-size:0!important;overflow-wrap:anywhere}
 }
