@@ -13,6 +13,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 - Replace the pre-release fixture screenshot with the final polished WordPress.org showcase.
 - Document tested plugin coexistence where evidence exists.
 
+- Preserve native Query Loop project-link keyboard targets, media focus indication, RTL/CJK wrapping, 200% text zoom, and forced-colors evidence through responsive browser regressions. Manual WCAG review remains required.
+
 ## After the baseline is stable
 
 - Optional multilingual adapter examples for common plugins, kept outside core dependency paths.
