@@ -3,4 +3,4 @@
 .slateframe-main .slateframe-project-grid .slateframe-project-card:not(:has(.wp-block-post-featured-image img)){padding-block-start:calc(var(--slateframe-stack-gap) + var(--slateframe-media-gap));padding-inline-start:var(--slateframe-stack-gap);border-inline-start:2px solid var(--slateframe-accent)}
 
 /* Native Query Loop titles share the Appearance control target; media focus remains visible inside cropped frames. */
-.slateframe-project-grid .wp-block-post-title a{display:block;min-block-size:var(--slateframe-control)}.slateframe-project-grid .wp-block-post-featured-image a:focus-visible{outline-offset:calc(-1*var(--slateframe-focus-offset))}
+.slateframe-project-grid .wp-block-post-title a{display:block;min-block-size:var(--slateframe-control)}.slateframe-project-grid .wp-block-post-featured-image a{display:block;line-height:0}.slateframe-project-grid .wp-block-post-featured-image a:focus-visible{outline-offset:calc(-1*var(--slateframe-focus-offset))}

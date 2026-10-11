@@ -105,3 +105,65 @@ test('project links remain operable at 200 percent root text size', async ({ pag
   await links.first().scrollIntoViewIfNeeded();
   await capture(page, testInfo, 'text-zoom-200');
 });
+
+test('native featured-image links have full-frame targets and predictable keyboard order', async ({ page }, testInfo) => {
+  const { grid, cards } = await openGrid(page);
+  const mediaLink = grid.locator('.wp-block-post-featured-image a:has(img)').first();
+  await expect(mediaLink).toBeVisible();
+  const card = cards.filter({ has: mediaLink }).first();
+  const titleLink = card.locator('.wp-block-post-title a');
+  await expect(titleLink).toBeVisible();
+  expect(await mediaLink.getAttribute('href')).toBe(await titleLink.getAttribute('href'));
+
+  const geometry = await mediaLink.evaluate((node) => {
+    const image = node.querySelector('img');
+    const frame = node.getBoundingClientRect();
+    const raster = image.getBoundingClientRect();
+    return {
+      display: getComputedStyle(node).display,
+      height: frame.height,
+      width: frame.width,
+      imageHeight: raster.height,
+      imageWidth: raster.width,
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  expect(geometry.display).toBe('block');
+  expect(geometry.height).toBeGreaterThanOrEqual(44);
+  expect(geometry.width).toBeGreaterThanOrEqual(44);
+  expect(Math.abs(geometry.height - geometry.imageHeight)).toBeLessThanOrEqual(1);
+  expect(Math.abs(geometry.width - geometry.imageWidth)).toBeLessThanOrEqual(1);
+  expect(geometry.overflow).toBeLessThanOrEqual(1);
+
+  await mediaLink.focus();
+  await page.keyboard.press('Tab');
+  await expect(titleLink).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(mediaLink).toBeFocused();
+  const focus = async () => mediaLink.evaluate((node) => ({
+    style: getComputedStyle(node).outlineStyle,
+    width: Number.parseFloat(getComputedStyle(node).outlineWidth),
+  }));
+  expect((await focus()).style).toBe('solid');
+  expect((await focus()).width).toBeGreaterThanOrEqual(2);
+  await page.emulateMedia({ forcedColors: 'active' });
+  expect((await focus()).style).toBe('solid');
+  expect((await focus()).width).toBeGreaterThanOrEqual(2);
+  await mediaLink.scrollIntoViewIfNeeded();
+  await capture(page, testInfo, 'media-link-forced-colors');
+});
+
+test('text-only project cards expose no phantom featured-image links', async ({ page }) => {
+  const { cards } = await openGrid(page);
+  const textOnly = await cards.evaluateAll((nodes) => nodes
+    .filter((card) => !card.querySelector('.wp-block-post-featured-image img'))
+    .map((card) => ({
+      mediaLinks: card.querySelectorAll('.wp-block-post-featured-image a').length,
+      titleHref: card.querySelector('.wp-block-post-title a')?.getAttribute('href') || '',
+    })));
+  expect(textOnly.length).toBeGreaterThan(0);
+  for (const card of textOnly) {
+    expect(card.mediaLinks).toBe(0);
+    expect(card.titleHref).not.toBe('');
+  }
+});
