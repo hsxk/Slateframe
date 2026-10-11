@@ -131,12 +131,20 @@ test('mixed raster gallery preserves responsive portrait and square media withou
 	const captions = gallery.locator('figcaption');
 	await expect(captions).toHaveCount(2);
 	for (let index = 0; index < await captions.count(); index += 1) {
-		const style = await captions.nth(index).evaluate((node) => ({
-			position: getComputedStyle(node).position,
-			wrap: getComputedStyle(node).overflowWrap,
-		}));
+		const style = await captions.nth(index).evaluate((node) => {
+			const computed = getComputedStyle(node);
+			return {
+				position: computed.position,
+				wrap: computed.overflowWrap,
+				fontPx: Number.parseFloat(computed.fontSize),
+				rootFontPx: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+				lineHeightPx: Number.parseFloat(computed.lineHeight),
+			};
+		});
 		expect(style.position).toBe('static');
 		expect(style.wrap).toBe('anywhere');
+		expect(style.fontPx / style.rootFontPx).toBeGreaterThanOrEqual(0.87);
+		expect(style.lineHeightPx / style.fontPx).toBeGreaterThanOrEqual(1.5);
 	}
 	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
 });
