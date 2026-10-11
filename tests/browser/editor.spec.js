@@ -229,6 +229,12 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	const summary = details.locator('summary');
 	await expect(summary).toBeVisible();
 	expect((await summary.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	const nativeDisclosure = await summary.evaluate((node) => ({
+		display: getComputedStyle(node).display,
+		marker: getComputedStyle(node, '::marker').content,
+	}));
+	expect(nativeDisclosure.display).toBe('list-item');
+	expect(nativeDisclosure.marker).not.toBe('none');
 
 	const code = canvas.locator('.wp-block-code').first();
 	await expect(code).toBeVisible();
