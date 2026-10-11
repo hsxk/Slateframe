@@ -7,7 +7,7 @@
 
 get_header();
 ?>
-<main id="main-content" class="slateframe-main">
+<main id="main-content" class="slateframe-main" tabindex="-1">
 	<?php
 	while ( have_posts() ) :
 		the_post();

@@ -17,7 +17,7 @@ while ( have_posts() ) :
 	$slateframe_caption       = wp_get_attachment_caption( $slateframe_attachment_id );
 	$slateframe_details       = slateframe_attachment_details( $slateframe_attachment_id );
 	?>
-	<main id="main-content" class="slateframe-main">
+	<main id="main-content" class="slateframe-main" tabindex="-1">
 		<article <?php post_class( 'slateframe-entry' ); ?>>
 			<header class="slateframe-page-header">
 				<div class="slateframe-shell">
