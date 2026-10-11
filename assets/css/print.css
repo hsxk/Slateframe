@@ -30,5 +30,5 @@
   .slateframe-prose a{color:#000!important;text-decoration:underline!important}
   .slateframe-prose .wp-block-table{overflow:visible!important}
   .slateframe-prose>table,.slateframe-prose .wp-block-table table{display:table;width:100%!important;table-layout:fixed;overflow:visible!important}
-  .slateframe-prose :is(th,td){min-inline-size:0!important;overflow-wrap:anywhere}
+  .slateframe-prose :is(th,td){min-inline-size:0!important;overflow-wrap:anywhere;word-break:normal}
 }
