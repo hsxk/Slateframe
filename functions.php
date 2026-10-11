@@ -89,7 +89,7 @@ add_action( 'widgets_init', 'slateframe_register_widget_areas' );
  * @return string[] Class tokens that opt into Photography presentation.
  */
 function slateframe_photography_marker_classes() {
-	$markers = array(
+	$markers        = array(
 		'is-style-slateframe-contact-sheet',
 		'is-style-slateframe-diptych',
 		'is-style-slateframe-photo-feature',

@@ -25,7 +25,7 @@ function slateframe_footer_widget_sources() {
 		return $cache;
 	}
 
-	$cache = array(
+	$cache    = array(
 		'search_widget' => false,
 		'contents'      => array(),
 	);
@@ -105,7 +105,7 @@ function slateframe_footer_presentation_assets() {
 		return $cache;
 	}
 
-	$cache = array(
+	$cache   = array(
 		'photography'   => false,
 		'content_modes' => false,
 		'query_loop'    => false,

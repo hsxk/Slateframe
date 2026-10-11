@@ -120,9 +120,13 @@ class SyncedFooterAssetsTest(unittest.TestCase):
         if not source_file.exists():
             source_file = ROOT / "patches/0003-fix-forms-synced-footer-pattern-assets.patch"
         source = source_file.read_text(encoding="utf-8")
+        footer_source = (ROOT / "inc/footer-presentation.php").read_text(encoding="utf-8")
         self.assertIn("function slateframe_synced_form_assets(", source)
-        self.assertIn("has_block( 'core/block', $content )", source)
-        self.assertNotIn("time2log", source.lower())
+        self.assertIn("function slateframe_footer_widget_sources(", footer_source)
+        self.assertIn("has_block( 'core/block', $content )", footer_source)
+        self.assertIn("slateframe_synced_pattern_contents( parse_blocks( $content ), $seen )", footer_source)
+        self.assertIn("slateframe_footer_widget_sources()", source)
+        self.assertNotIn("time2log", (source + footer_source).lower())
 
 
 if __name__ == "__main__":
