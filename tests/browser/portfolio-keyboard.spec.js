@@ -5,8 +5,8 @@ const path = require('node:path');
 const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH || process.env.SLATEFRAME_PAGE_PATH || '/';
 const width = (testInfo) => Number(testInfo.project.name.replace('viewport-', ''));
 
-async function openGrid(page) {
-  await page.goto(showcasePath, { waitUntil: 'networkidle' });
+async function openGrid(page, targetPath = showcasePath) {
+  await page.goto(targetPath, { waitUntil: 'networkidle' });
   const grid = page.locator('.browser-project-grid').first();
   await expect(grid).toBeVisible();
   const cards = grid.locator('.slateframe-project-card');
@@ -107,10 +107,20 @@ test('project links remain operable at 200 percent root text size', async ({ pag
 });
 
 test('native featured-image links have full-frame targets and predictable keyboard order', async ({ page }, testInfo) => {
-  const { grid, cards } = await openGrid(page);
-  const mediaLink = grid.locator('.wp-block-post-featured-image a:has(img)').first();
+  // Showcase Query Loops can contain text-only posts. Test Core media on
+  // the dedicated Portfolio fixture where featured images are present.
+  const portfolioPath = process.env.SLATEFRAME_PROJECT_PATH;
+  expect(portfolioPath).toBeTruthy();
+  const { grid } = await openGrid(page, portfolioPath);
+  const mediaCards = grid.locator('.slateframe-project-card:has(.wp-block-post-featured-image a:has(img))');
+  expect(await mediaCards.count()).toBeGreaterThanOrEqual(4);
+  const card = mediaCards.first();
+  const mediaLink = card.locator('.wp-block-post-featured-image a:has(img)');
   await expect(mediaLink).toBeVisible();
-  const card = cards.filter({ has: mediaLink }).first();
+  await mediaLink.scrollIntoViewIfNeeded();
+  await expect.poll(() => mediaLink.locator('img').evaluate((image) =>
+    image.complete && image.naturalWidth > 0 && image.naturalHeight > 0
+  )).toBe(true);
   const titleLink = card.locator('.wp-block-post-title a');
   await expect(titleLink).toBeVisible();
   expect(await mediaLink.getAttribute('href')).toBe(await titleLink.getAttribute('href'));
@@ -166,4 +176,62 @@ test('text-only project cards expose no phantom featured-image links', async ({ 
     expect(card.mediaLinks).toBe(0);
     expect(card.titleHref).not.toBe('');
   }
+});
+
+test('Portfolio supports mixed native featured images and text-only cards', async ({ page }) => {
+  const portfolioPath = process.env.SLATEFRAME_PROJECT_PATH;
+  expect(portfolioPath).toBeTruthy();
+  const { cards } = await openGrid(page, portfolioPath);
+  await expect(cards).toHaveCount(6);
+  const details = await cards.evaluateAll((nodes) => nodes.map((card) => {
+    const image = card.querySelector('.wp-block-post-featured-image img');
+    const mediaLink = card.querySelector('.wp-block-post-featured-image a');
+    const titleLink = card.querySelector('.wp-block-post-title a');
+    return {
+      title: titleLink?.textContent?.trim() || '',
+      href: titleLink?.getAttribute('href') || '',
+      mediaHref: mediaLink?.getAttribute('href') || '',
+      imagePresent: Boolean(image),
+      alt: image?.getAttribute('alt') || '',
+    };
+  }));
+  expect(details.filter((card) => card.imagePresent)).toHaveLength(5);
+  expect(details.filter((card) => !card.imagePresent)).toHaveLength(1);
+  for (const card of details) {
+    expect(card.href).toBeTruthy();
+    expect(card.title).toBeTruthy();
+    if (card.imagePresent) {
+      expect(card.alt).not.toBe('');
+      expect(card.mediaHref).toBe(card.href);
+    } else {
+      expect(card.mediaHref).toBe('');
+    }
+  }
+  for (const image of await cards.locator('.wp-block-post-featured-image img').all()) {
+    await image.scrollIntoViewIfNeeded();
+    await expect.poll(() => image.evaluate((node) =>
+      node.complete && node.naturalWidth > 0 && node.naturalHeight > 0
+    )).toBe(true);
+  }
+});
+
+test('Portfolio native pagination separates page two from page one', async ({ page }) => {
+  const portfolioPath = process.env.SLATEFRAME_PROJECT_PATH;
+  expect(portfolioPath).toBeTruthy();
+  const { grid, cards } = await openGrid(page, portfolioPath);
+  const firstPageUrls = await cards.locator('.wp-block-post-title a').evaluateAll((nodes) =>
+    nodes.map((node) => node.href)
+  );
+  expect(new Set(firstPageUrls).size).toBe(6);
+  const next = grid.locator('.wp-block-query-pagination-next');
+  await expect(next).toBeVisible();
+  await next.click();
+  const remaining = page.locator('.browser-project-grid').first().locator('.slateframe-project-card');
+  await expect(remaining).toHaveCount(1);
+  const remainingTitle = remaining.locator('.wp-block-post-title a');
+  await expect(remainingTitle).toContainText('Portable project fixture 1');
+  expect(firstPageUrls).not.toContain(await remainingTitle.evaluate((node) => node.href));
+  expect(await page.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth
+  )).toBeLessThanOrEqual(1);
 });
