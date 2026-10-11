@@ -1362,6 +1362,15 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 	const firstCard = page.locator('.browser-project-grid .slateframe-project-card').first();
 	await expect(firstCard.locator('.wp-block-post-featured-image')).toHaveCount(0);
 	await expect(firstCard.locator('.wp-block-post-title a')).toContainText('可迁移的项目案例');
+	const noMediaCard = await firstCard.evaluate((card) => ({
+		borderWidth: Number.parseFloat(getComputedStyle(card).borderInlineStartWidth),
+		padding: Number.parseFloat(getComputedStyle(card).paddingInlineStart),
+		backgroundImage: getComputedStyle(card).backgroundImage,
+	}));
+	expect(noMediaCard.borderWidth, 'image-free cards retain a logical accent rule').toBeGreaterThanOrEqual(2);
+	expect(noMediaCard.padding, 'image-free cards have a readable inset').toBeGreaterThan(0);
+	expect(noMediaCard.backgroundImage, 'the theme must not fabricate a featured image').toBe('none');
+
 
 	const tracks = await grid.evaluate((node) => getComputedStyle(node).gridTemplateColumns.split(' ').filter(Boolean).length);
 	if (projectWidth(testInfo) <= 640) {

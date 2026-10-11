@@ -61,5 +61,22 @@ class DynamicBlocks(unittest.TestCase):
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
         self.assertIn(".slateframe-project-card:not(:has(.wp-block-post-featured-image img))", css)
         self.assertIn("border-inline-start:2px solid var(--slateframe-accent)", css)
+        self.assertIn("padding-block-start:calc(var(--slateframe-stack-gap) + var(--slateframe-media-gap))", css)
+        self.assertNotIn("justify-content:center", css)
+        self.assertNotIn(".wp-block-post-date{margin-block-start:var(--slateframe-stack-gap)}", css)
+
+    def test_dynamic_classname_with_multiple_tokens(self):
+        self.assertEqual(self.run_php('<!-- wp:query {"className":"another-class  slateframe-project-grid   utility"} /-->'), [True, 1])
+
+    def test_classname_does_not_match_other_attributes(self):
+        self.assertEqual(self.run_php('<!-- wp:query {"className":"other","metadata":"slateframe-project-grid"} /-->'), [False, 1])
+
+    def test_same_content_reuses_parse_cache(self):
+        content = '<!-- wp:query {"className":"slateframe-project-grid"} /-->'
+        code = STUB + FUNCTIONS + chr(10) + "echo json_encode(array(slateframe_content_has_class_marker(" + json.dumps(content) + ", array('slateframe-project-grid')), slateframe_content_has_class_marker(" + json.dumps(content) + ", array('unrelated')), $GLOBALS['parses']));"
+        done = subprocess.run(["php", "-r", code], capture_output=True, text=True, timeout=10)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertEqual(json.loads(done.stdout), [True, False, 1])
+
 if __name__ == "__main__":
     unittest.main()
