@@ -73,9 +73,12 @@ test('Core Details keeps a native marker, keyboard toggle, and RTL zoom affordan
 	const native = await summary.evaluate((node) => ({
 		display: getComputedStyle(node).display,
 		marker: getComputedStyle(node, '::marker').content,
+		color: getComputedStyle(node).color,
+		markerColor: getComputedStyle(node, '::marker').color,
 	}));
 	expect(native.display).toBe('list-item');
 	expect(native.marker).not.toBe('none');
+	expect(native.markerColor).toBe(native.color);
 	await expect(details).not.toHaveAttribute('open', '');
 	await summary.focus();
 	await page.keyboard.press('Enter');
@@ -101,6 +104,11 @@ test('Core Details keeps a native marker, keyboard toggle, and RTL zoom affordan
 	expect(geometry.right).toBeLessThanOrEqual(geometry.viewport + 1);
 	expect(geometry.overflow).toBeLessThanOrEqual(1);
 	await page.emulateMedia({ forcedColors: 'active' });
+	const forcedColor = await summary.evaluate((node) => ({
+		text: getComputedStyle(node).color,
+		marker: getComputedStyle(node, '::marker').color,
+	}));
+	expect(forcedColor.marker).toBe(forcedColor.text);
 	await summary.focus();
 	const focus = await summary.evaluate((node) => getComputedStyle(node).outlineStyle);
 	expect(focus).not.toBe('none');

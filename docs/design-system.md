@@ -44,7 +44,7 @@ Native semantic forms inherit the same control size, padding, radius, border, su
 
 Editorial micro-primitives are part of the same system: `kbd` and `samp` use the theme mono stack, keyboard hints have a restrained physical-key boundary, `mark` uses the semantic selection surface, and titled abbreviations use a readable dotted underline. These primitives are deliberately native HTML so they remain portable between Gutenberg, Classic content, and plugin output.
 
-Core Details must keep its **native disclosure marker**: applying `display:flex` to a `<summary>` removes the arrow in Chromium and makes the collapsed region appear like a static heading. Use the browser's `display:list-item` semantics, logical inside marker placement, the shared 44px minimum, and a bounded vertical inset; never replace the native Enter/Space toggle with theme JavaScript. Frontend and Gutenberg use the same reading rule. Representative 390/1440 Chromium evidence covers keyboard toggling, RTL, 200% text sizing, focus and forced colors.
+Core Details must keep its **native disclosure marker**: applying `display:flex` to a `<summary>` removes the arrow in Chromium and makes the collapsed region appear like a static heading. Use the browser's `display:list-item` semantics, logical inside marker placement, the shared 44px minimum, and a compact vertical inset. Let the marker inherit `currentColor` for native light/dark and forced-colors contrast without adding bespoke marker overrides or theme JavaScript. Frontend and Gutenberg use the same reading rule. Representative 390/1440 Chromium evidence covers keyboard toggling, RTL, 200% text sizing, focus and forced colors.
 
 ## Contextual assets
 

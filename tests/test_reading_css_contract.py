@@ -24,9 +24,9 @@ class SharedReadingCssTest(unittest.TestCase):
         css = READING.read_text(encoding="utf-8")
         self.assertIn("& .wp-block-details summary{display:list-item;", css)
         self.assertIn("min-block-size:var(--slateframe-control)", css)
+        self.assertIn("padding-block:.25em", css)
         self.assertIn("list-style-position:inside;cursor:pointer", css)
-        self.assertIn("& .wp-block-details summary::marker{color:var(--slateframe-accent)}", css)
-        self.assertIn("@media(forced-colors:active){:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-details summary::marker{color:CanvasText}}", css)
+        self.assertNotIn(".wp-block-details summary::marker{", css)
         self.assertNotIn("& .wp-block-details summary{min-block-size:var(--slateframe-control);display:flex;", css)
 
     def test_editor_has_no_competing_duplicate_typography(self):
