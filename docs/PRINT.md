@@ -1,10 +1,11 @@
 # Core article print presentation
 
-Slateframe uses a WordPress-enqueued, print-media-only CSS stylesheet at `assets/css/print.css`. It is generic theme presentation, not a PDF exporter, content service, analytics layer, or plugin dependency. Screen Appearance and interactive Gutenberg presentation remain unchanged.
+Slateframe uses a WordPress-enqueued, print-media-only CSS stylesheet at `assets/css/print.css`. It is generic theme presentation, not a PDF exporter, content service, analytics layer, or plugin dependency. Screen Appearance and interactive Gutenberg presentation remain unchanged. The screen `style.css` deliberately contains no print media rules: `print.css` is the single owner of print presentation.
 
 ## Core-first behavior
 
 - Print a high-contrast white page with black article content, regardless of screen color mode.
+- Reserve a small logical inline paper inset (0.5rem per side) so RTL/CJK text and focusable content do not touch the viewport edge in print preview, including at 200% text zoom.
 - Omit navigation, site chrome, comments, related links, pagination, and the native lightbox overlay; preserve semantic article content, images, figures, tables, quotations, captions, code, and links.
 - Remove the viewport-based main minimum height and screen width constraints without enlarging boxes beyond the printable area.
 - Wrap long code tokens, avoid clipped table scroll areas, and preserve native HTML and WordPress Core table structures.

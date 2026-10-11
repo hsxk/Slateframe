@@ -2,7 +2,7 @@
   .slateframe-site-header,.slateframe-site-footer,.slateframe-comments,.slateframe-post-navigation,.slateframe-related,.wp-lightbox-overlay{display:none!important}
   :root{color-scheme:light!important}
   html,body{overflow:visible!important}
-  body{background:#fff!important;color:#000!important}
+  body{background:#fff!important;color:#000!important;padding-inline:0.5rem}
   .slateframe-page-title,.slateframe-entry-title{max-inline-size:none;font-size:1.5rem;line-height:1.2}
   .slateframe-entry-meta a{min-block-size:0}
   .slateframe-prose :is(p,li){orphans:3;widows:3}

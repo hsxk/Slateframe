@@ -56,6 +56,9 @@ test('Core print presentation preserves readable article content', async ({ page
       lightbox: style('.print-overlay').display,
       mainHeight: style('.slateframe-main').minHeight,
       paper: style('body').backgroundColor,
+      paperInset: parseFloat(style('body').paddingInlineStart),
+      contentLeft: box('.slateframe-main').left,
+      contentRight: box('.slateframe-main').right,
       ink: style('body').color,
       codeOverflow: style('.print-code').overflowX,
       codeHeight: style('.print-code').maxHeight,
@@ -94,6 +97,9 @@ test('Core print presentation preserves readable article content', async ({ page
   }
   expect(s.mainHeight).toBe('0px');
   expect(s.paper).toBe('rgb(255, 255, 255)');
+  expect(s.paperInset).toBeGreaterThanOrEqual(8);
+  expect(s.contentLeft).toBeGreaterThanOrEqual(s.paperInset - 1);
+  expect(s.contentRight).toBeLessThanOrEqual(info.project.use.viewport.width - s.paperInset + 1);
   expect(s.ink).toBe('rgb(0, 0, 0)');
   expect(s.codeOverflow).toBe('visible');
   expect(s.codeHeight).toBe('none');

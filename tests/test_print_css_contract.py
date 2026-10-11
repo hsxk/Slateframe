@@ -34,6 +34,7 @@ class PrintPresentationContractTest(unittest.TestCase):
             "overflow:visible!important", "break-inside:avoid",
             "table-header-group", "table-footer-group",
             "orphans:3", "widows:3", "color:#000!important",
+            "padding-inline:0.5rem",
         ):
             with self.subTest(term=term):
                 self.assertIn(term, css)
@@ -42,6 +43,13 @@ class PrintPresentationContractTest(unittest.TestCase):
         css = PRINT.read_text(encoding="utf-8")
         self.assertIn(".slateframe-prose img{max-block-size:18cm!important", css)
         self.assertIn("width:auto!important;max-width:100%;height:auto!important", css)
+
+    def test_screen_stylesheet_has_no_duplicate_print_rules(self):
+        screen_css = (ROOT / "style.css").read_text(encoding="utf-8")
+        print_css = PRINT.read_text(encoding="utf-8")
+        self.assertNotIn("@media print", screen_css)
+        self.assertNotIn("@page", screen_css)
+        self.assertEqual(print_css.count("@media print"), 1)
 
     def test_actions_artifact_gate(self):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
