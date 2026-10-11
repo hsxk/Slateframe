@@ -8,11 +8,11 @@ const width = (info) => Number(info.project.name.replace('viewport-', ''));
 test('Core print presentation preserves readable article content', async ({ page }, info) => {
   expect(postPath, 'CI must publish a real WordPress article').toBeTruthy();
   await page.goto(postPath, { waitUntil: 'networkidle' });
-  await expect(page.locator('.slateframe-prose')).toBeVisible();
+  await expect(page.locator('article.slateframe-entry > .slateframe-prose')).toBeVisible();
   await expect(page.locator('link#slateframe-print-css[media="print"]')).toHaveCount(1);
 
   await page.evaluate(() => {
-    const prose = document.querySelector('.slateframe-prose');
+    const prose = document.querySelector('article.slateframe-entry > .slateframe-prose');
     prose.insertAdjacentHTML('beforeend', [
       '<h2 class="print-heading">Print heading 中文 日本語 العربية</h2>',
       '<figure class="print-figure"><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2240%22 height=%2280%22/%3E" alt="Fixture"><figcaption>Caption</figcaption></figure>',
