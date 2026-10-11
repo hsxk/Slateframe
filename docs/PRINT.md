@@ -13,7 +13,7 @@ Slateframe uses a WordPress-enqueued, print-media-only CSS stylesheet at `assets
 - Scale ordinary portrait article images, Cover media, and featured images to a maximum 18 cm on paper, without cropping or losing their natural proportions.
 - Keep headings with following material and keep figures and table rows together where supported by the browser's print fragmentation engine.
 - Native Details remain native: expand a closed disclosure before printing if the hidden text must be included; CSS does not forcibly open it.
-- Use RTL-compatible logical properties and allow CJK and long multilingual table tokens to wrap.
+- Use RTL-compatible logical properties and allow CJK and long multilingual table tokens to wrap. Keep semantic four-column tables intact; reduce cell inline padding instead of lowering the reader's font size or hiding columns. Extremely narrow print previews may still wrap words heavily at 200% zoom.
 
 ## Evidence and limits
 
