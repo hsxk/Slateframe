@@ -42,8 +42,8 @@
 .editor-styles-wrapper figcaption,
 .editor-styles-wrapper .wp-element-caption {
 	color: var(--slateframe-muted);
-	font-size: 0.84rem;
-	line-height: 1.5;
+	font-size: 0.875rem;
+	line-height: 1.55;
 }
 
 .editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
