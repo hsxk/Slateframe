@@ -792,7 +792,25 @@ jobs:
       - name: Run responsive browser smoke
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
-        run: npm run test:browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Test workers share one real WordPress database. WP-CLI fixture writers
+          # must not overlap each other or read-only stylesheet assertions.
+          readonly_specs=()
+          stateful_specs=()
+          for spec in tests/browser/*.spec.js; do
+            if grep -Eq 'execFileSync|execSync|spawnSync' "$spec"; then
+              stateful_specs+=("$spec")
+            else
+              readonly_specs+=("$spec")
+            fi
+          done
+          test "${#readonly_specs[@]}" -gt 0
+          test "${#stateful_specs[@]}" -gt 0
+          printf 'Parallel read-only specs: %s; isolated WP fixture specs: %s\\n' "${#readonly_specs[@]}" "${#stateful_specs[@]}"
+          npx playwright test "${readonly_specs[@]}"
+          npx playwright test "${stateful_specs[@]}" --workers=1
       - name: Verify compact Appearance bounds
         if: ${{ always() }}
         env:
