@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once get_template_directory() . '/inc/template-tags.php';
 require_once get_template_directory() . '/inc/content-discovery.php';
+require_once get_template_directory() . '/inc/footer-presentation.php';
 require_once get_template_directory() . '/inc/customizer.php';
 
 /**
@@ -83,6 +84,75 @@ function slateframe_register_widget_areas() {
 add_action( 'widgets_init', 'slateframe_register_widget_areas' );
 
 /**
+ * Return Photography markers, preserving the legacy broad-filter contract.
+ *
+ * @return string[] Class tokens that opt into Photography presentation.
+ */
+function slateframe_photography_marker_classes() {
+	$markers        = array(
+		'is-style-slateframe-contact-sheet',
+		'is-style-slateframe-diptych',
+		'is-style-slateframe-photo-feature',
+		'is-style-slateframe-photo-sequence',
+		'slateframe-photography-sequence',
+	);
+	$legacy_markers = apply_filters( 'slateframe_content_mode_markers', array() );
+	if ( is_array( $legacy_markers ) ) {
+		$markers = array_merge( $markers, $legacy_markers );
+	}
+
+	/**
+	 * Filters class markers that opt a document into Slateframe Photography.
+	 *
+	 * @param string[] $markers Photography presentation markers.
+	 */
+	return apply_filters( 'slateframe_photography_markers', $markers );
+}
+
+/**
+ * Return site-neutral Portfolio and Knowledge presentation markers.
+ *
+ * @return string[] Content-mode class tokens.
+ */
+function slateframe_content_mode_marker_classes() {
+	$markers = array(
+		'is-style-slateframe-project-feature',
+		'is-style-slateframe-learning-path',
+		'slateframe-project-grid',
+		'slateframe-knowledge-checklist',
+		'is-style-slateframe-steps',
+		'is-style-slateframe-checklist',
+		'is-style-slateframe-key-facts',
+		'is-style-slateframe-learning-callout',
+		'is-style-slateframe-definition',
+		'is-style-slateframe-metrics',
+		'is-style-slateframe-ledger',
+		'is-style-slateframe-project-brief',
+	);
+
+	/**
+	 * Filters class markers that trigger Slateframe's contextual styles.
+	 *
+	 * @param string[] $markers Content markers to scan for.
+	 */
+	return apply_filters( 'slateframe_content_mode_markers', $markers );
+}
+
+/**
+ * Return markers for the optional Core Query Loop presentation layer.
+ *
+ * @return string[] Query Loop class tokens.
+ */
+function slateframe_query_loop_marker_classes() {
+	/**
+	 * Filters class markers that opt a document into Query Loop presentation.
+	 *
+	 * @param string[] $markers Query Loop markers.
+	 */
+	return apply_filters( 'slateframe_query_loop_markers', array( 'slateframe-project-grid' ) );
+}
+
+/**
  * Check stored post content for exact CSS class markers.
  *
  * Marker detection is intentionally class-aware instead of substring-based so
@@ -90,10 +160,11 @@ add_action( 'widgets_init', 'slateframe_register_widget_areas' );
  * accidentally load contextual assets.
  *
  * @param string   $content Stored post content.
- * @param string[] $markers Class markers to detect.
+ * @param string[] $markers      Class markers to detect.
+ * @param bool     $parse_blocks Whether to inspect Gutenberg comments (false for Classic widgets).
  * @return bool
  */
-function slateframe_content_has_class_marker( $content, $markers ) {
+function slateframe_content_has_class_marker( $content, $markers, $parse_blocks = true ) {
 	if ( '' === trim( (string) $content ) || ! is_array( $markers ) || empty( $markers ) ) {
 		return false;
 	}
@@ -109,7 +180,7 @@ function slateframe_content_has_class_marker( $content, $markers ) {
 	}
 
 	// Dynamic Core blocks may store their className without HTML markup.
-	if ( false !== strpos( $content, '<!-- wp:' ) && false !== strpos( $content, '"className"' ) ) {
+	if ( $parse_blocks && false !== strpos( $content, '<!-- wp:' ) && false !== strpos( $content, '"className"' ) ) {
 		static $block_cache = array();
 		$key                = md5( $content );
 		if ( ! isset( $block_cache[ $key ] ) ) {
@@ -343,44 +414,19 @@ function slateframe_footer_form_assets() {
 		return $cache;
 	}
 
-	$needed   = array(
-		'forms'        => false,
-		'search_form'  => false,
+	$sources = slateframe_footer_widget_sources();
+	$needed  = array(
+		'forms'        => $sources['search_widget'],
+		'search_form'  => $sources['search_widget'],
 		'form_content' => false,
 	);
-	$sidebars = wp_get_sidebars_widgets();
 
-	if ( ! is_array( $sidebars ) || empty( $sidebars['footer-content'] ) || ! is_array( $sidebars['footer-content'] ) ) {
-		$cache = $needed;
-		return $cache;
-	}
-
-	$block_widgets = get_option( 'widget_block', array() );
-	$block_widgets = is_array( $block_widgets ) ? $block_widgets : array();
-
-	foreach ( $sidebars['footer-content'] as $widget_id ) {
-		if ( ! is_string( $widget_id ) ) {
-			continue;
-		}
-
-		if ( preg_match( '/^search-[1-9][0-9]*$/', $widget_id ) ) {
-			$needed['forms']       = true;
-			$needed['search_form'] = true;
-			continue;
-		}
-
-		if ( preg_match( '/^block-([1-9][0-9]*)$/', $widget_id, $matches ) ) {
-			$number  = (int) $matches[1];
-			$content = isset( $block_widgets[ $number ]['content'] ) ? $block_widgets[ $number ]['content'] : '';
-
-			if ( ! is_string( $content ) || '' === trim( $content ) ) {
-				continue;
-			}
-
+	foreach ( $sources['contents'] as $source ) {
+		$content = $source['content'];
+		if ( $source['block'] ) {
 			if ( has_block( 'core/search', $content ) ) {
 				$needed['forms'] = true;
 			}
-
 			if (
 				has_block( 'core/legacy-widget', $content ) &&
 				slateframe_blocks_have_legacy_search( parse_blocks( $content ) )
@@ -388,24 +434,8 @@ function slateframe_footer_form_assets() {
 				$needed['forms']       = true;
 				$needed['search_form'] = true;
 			}
-
-			// Core synced patterns store their actual markup in separate wp_block posts.
-			if ( has_block( 'core/block', $content ) ) {
-				$synced = slateframe_synced_form_assets( parse_blocks( $content ) );
-				foreach ( $needed as $key => $value ) {
-					$needed[ $key ] = $value || $synced[ $key ];
-				}
-			}
-		} elseif ( preg_match( '/^(custom_html|text)-([1-9][0-9]*)$/', $widget_id, $matches ) ) {
-			$option  = get_option( 'widget_' . $matches[1], array() );
-			$number  = (int) $matches[2];
-			$field   = 'text' === $matches[1] ? 'text' : 'content';
-			$content = is_array( $option ) && isset( $option[ $number ][ $field ] ) ? $option[ $number ][ $field ] : '';
-		} else {
-			continue;
 		}
-
-		if ( is_string( $content ) && slateframe_content_has_form( $content ) ) {
+		if ( slateframe_content_has_form( $content ) ) {
 			$needed['forms']        = true;
 			$needed['form_content'] = true;
 		}
@@ -414,7 +444,6 @@ function slateframe_footer_form_assets() {
 	$cache = $needed;
 	return $cache;
 }
-
 /**
  * Discover synced-pattern forms referenced by the current singular post.
  *
@@ -565,26 +594,7 @@ function slateframe_photography_styles_needed() {
 		return false;
 	}
 
-	$markers = array(
-		'is-style-slateframe-contact-sheet',
-		'is-style-slateframe-diptych',
-		'is-style-slateframe-photo-feature',
-		'is-style-slateframe-photo-sequence',
-		'slateframe-photography-sequence',
-	);
-
-	$legacy_markers = apply_filters( 'slateframe_content_mode_markers', array() );
-
-	if ( is_array( $legacy_markers ) ) {
-		$markers = array_merge( $markers, $legacy_markers );
-	}
-
-	/**
-	 * Filters class markers that opt a document into Slateframe Photography presentation.
-	 *
-	 * @param string[] $markers Photography presentation markers.
-	 */
-	$markers = apply_filters( 'slateframe_photography_markers', $markers );
+	$markers = slateframe_photography_marker_classes();
 
 	$contents = array_merge( array( $post->post_content ), slateframe_singular_synced_pattern_contents() );
 	foreach ( $contents as $content ) {
@@ -615,30 +625,7 @@ function slateframe_content_modes_needed() {
 		return false;
 	}
 
-	$markers = array(
-		'is-style-slateframe-project-feature',
-		'is-style-slateframe-learning-path',
-		'slateframe-project-grid',
-		'slateframe-knowledge-checklist',
-		'is-style-slateframe-steps',
-		'is-style-slateframe-checklist',
-		'is-style-slateframe-key-facts',
-		'is-style-slateframe-learning-callout',
-		'is-style-slateframe-definition',
-		'is-style-slateframe-metrics',
-		'is-style-slateframe-ledger',
-		'is-style-slateframe-project-brief',
-	);
-
-	/**
-	 * Filters the content markers that trigger Slateframe's shared contextual styles.
-	 *
-	 * Integrations may append site-neutral markers for content that reuses the
-	 * theme's Portfolio or Knowledge presentation layer.
-	 *
-	 * @param string[] $markers Content markers to scan for.
-	 */
-	$markers = apply_filters( 'slateframe_content_mode_markers', $markers );
+	$markers = slateframe_content_mode_marker_classes();
 
 	if ( ! is_array( $markers ) ) {
 		return false;
@@ -669,15 +656,7 @@ function slateframe_query_loop_styles_needed() {
 		return false;
 	}
 
-	/**
-	 * Filters class markers that opt a document into Slateframe Query Loop presentation.
-	 *
-	 * Integrations may append portable markers without coupling the theme to a post
-	 * type, taxonomy, page ID, slug, or multilingual URL structure.
-	 *
-	 * @param string[] $markers Query Loop presentation markers.
-	 */
-	$markers = apply_filters( 'slateframe_query_loop_markers', array( 'slateframe-project-grid' ) );
+	$markers = slateframe_query_loop_marker_classes();
 
 	foreach ( array_merge( array( $post->post_content ), slateframe_singular_synced_pattern_contents() ) as $content ) {
 		if ( slateframe_content_has_class_marker( $content, $markers ) ) {
@@ -693,12 +672,15 @@ function slateframe_query_loop_styles_needed() {
  */
 function slateframe_assets() {
 	$version              = wp_get_theme()->get( 'Version' );
-	$photography_needed   = slateframe_photography_styles_needed();
-	$content_modes_needed = slateframe_content_modes_needed();
-	$query_loop_needed    = slateframe_query_loop_styles_needed();
+	$footer_presentation  = slateframe_footer_presentation_assets();
+	$photography_needed   = slateframe_photography_styles_needed() || $footer_presentation['photography'];
+	$content_modes_needed = slateframe_content_modes_needed() || $footer_presentation['content_modes'];
+	$query_loop_needed    = slateframe_query_loop_styles_needed() || $footer_presentation['query_loop'];
 	$forms_needed         = slateframe_forms_styles_needed();
 	$form_content_needed  = slateframe_form_content_styles_needed();
 	$search_form_needed   = slateframe_search_form_styles_needed();
+	// Preserve CSS dependency closure even when extension filters disagree.
+	$forms_needed = $forms_needed || $form_content_needed || $search_form_needed;
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 	wp_enqueue_style(
@@ -777,7 +759,7 @@ function slateframe_assets() {
 		wp_enqueue_style(
 			'slateframe-photography',
 			get_template_directory_uri() . '/assets/css/photography.css',
-			array( 'slateframe-reading' ),
+			is_singular() ? array( 'slateframe-reading' ) : array( 'slateframe-style' ),
 			$version
 		);
 	}
@@ -786,7 +768,7 @@ function slateframe_assets() {
 		wp_enqueue_style(
 			'slateframe-content-modes',
 			get_template_directory_uri() . '/assets/css/content-modes.css',
-			array( 'slateframe-reading' ),
+			is_singular() ? array( 'slateframe-reading' ) : array( 'slateframe-style' ),
 			$version
 		);
 	}

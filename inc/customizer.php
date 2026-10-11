@@ -91,6 +91,9 @@ function slateframe_layout_value( $id ) {
 	$args  = $controls[ $id ];
 	$value = get_theme_mod( $id, $args['default'] );
 	$value = is_numeric( $value ) ? (float) $value : (float) $args['default'];
+	if ( ! is_finite( $value ) ) {
+		$value = (float) $args['default'];
+	}
 
 	return min( (float) $args['max'], max( (float) $args['min'], $value ) );
 }
@@ -111,6 +114,9 @@ function slateframe_sanitize_bounded_number( $value, $setting ) {
 	}
 
 	$value = is_numeric( $value ) ? (float) $value : (float) $args['default'];
+	if ( ! is_finite( $value ) ) {
+		$value = (float) $args['default'];
+	}
 
 	return min( (float) $args['max'], max( (float) $args['min'], $value ) );
 }
@@ -122,7 +128,12 @@ function slateframe_sanitize_bounded_number( $value, $setting ) {
  * @return string
  */
 function slateframe_format_css_number( $value ) {
-	$value = rtrim( rtrim( number_format( (float) $value, 2, '.', '' ), '0' ), '.' );
+	$value = (float) $value;
+	if ( ! is_finite( $value ) ) {
+		return '0';
+	}
+
+	$value = rtrim( rtrim( number_format( $value, 2, '.', '' ), '0' ), '.' );
 
 	return '' === $value ? '0' : $value;
 }
