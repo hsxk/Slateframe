@@ -32,4 +32,5 @@ test('Spatial System calc values survive computed-value substitution', async ({ 
   expect(zoomed.pagination).toBe(48);
   expect(zoomed.heading).toBe(96);
   expect(zoomed.overflow).toBeLessThanOrEqual(1);
+  await page.locator('.slateframe-spatial-calc-fixture').screenshot({ path: 'test-artifacts/screenshots/spatial-calc-390-rtl-200-forced-colors.png' });
 });

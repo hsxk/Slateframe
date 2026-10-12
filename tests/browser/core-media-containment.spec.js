@@ -39,4 +39,5 @@ test('native Core media remain bounded at seven responsive widths and in RTL', a
   await page.evaluate(() => { document.documentElement.dir = 'rtl'; document.documentElement.style.fontSize = '200%'; });
   await page.emulateMedia({ forcedColors: 'active' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await page.locator('.slateframe-core-media-fixture').screenshot({ path: 'test-artifacts/screenshots/core-media-390-rtl-200-forced-colors.png' });
 });

@@ -35,4 +35,5 @@ test('Core Calendar keeps its seven-column table and scrolls inside the reading 
   await page.evaluate(() => { document.documentElement.dir = 'rtl'; document.documentElement.style.fontSize = '200%'; });
   await page.emulateMedia({ forcedColors: 'active' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await page.locator('.slateframe-prose .wp-block-calendar').last().screenshot({ path: 'test-artifacts/screenshots/core-calendar-390-rtl-200-forced-colors.png' });
 });
