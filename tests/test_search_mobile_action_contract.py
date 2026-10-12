@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class SearchMobileActionContract(unittest.TestCase):
     def test_classic_search_uses_intrinsic_grid_and_full_width_action(self):
         css = (ROOT / 'assets/css/search-form.css').read_text()
-        self.assertIn('@media (max-width:640px)', css)
+        self.assertIn('@media(max-width:640px)', css)
         self.assertIn('display:grid;& button{max-width:none}', css)
         self.assertIn('.slateframe-search-form button{max-width:45%}', css)
         self.assertNotIn('!important', css)
