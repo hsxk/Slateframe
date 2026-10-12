@@ -12,7 +12,9 @@ test('native Core media remain bounded at seven responsive widths and in RTL', a
     fixture.innerHTML = '<figure class="wp-block-audio"><audio controls preload="none" style="width:960px"></audio></figure>' +
       '<figure class="wp-block-embed"><iframe title="Embed" width="960" height="240" src="about:blank"></iframe></figure>' +
       '<figure class="wp-block-embed"><object aria-label="Object media" width="960" height="120"></object></figure>' +
-      '<figure class="wp-block-embed"><embed title="Embedded media" width="960" height="120" type="text/plain"></figure>';
+      '<figure class="wp-block-embed"><embed title="Embedded media" width="960" height="120" type="text/plain"></figure>' +
+      '<figure class="wp-block-image" style="width:960px;margin:0"><img alt="Core image" width="960" height="320" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="></figure>' +
+      '<figure class="wp-block-gallery" style="width:960px;margin:0"><figure class="wp-block-image" style="width:960px;margin:0"><img alt="Core gallery" width="960" height="320" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="></figure></figure>';
     root.append(fixture);
   });
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
@@ -28,6 +30,16 @@ test('native Core media remain bounded at seven responsive widths and in RTL', a
       }));
       expect(result.overflow, width + 'px ' + dir + ' overflow').toBeLessThanOrEqual(1);
       expect(result.bounds).toHaveLength(4);
+      const figures = await page.locator('.slateframe-core-media-fixture').evaluate(root =>
+        [...root.querySelectorAll('figure.wp-block-image,figure.wp-block-gallery')].map(node => {
+          const rect = node.getBoundingClientRect(), parent = node.parentElement.getBoundingClientRect();
+          return { left: rect.left, right: rect.right, parentLeft: parent.left, parentRight: parent.right };
+        }));
+      expect(figures).toHaveLength(3);
+      for (const rect of figures) {
+        expect(rect.left, width + 'px ' + dir + ' figure left').toBeGreaterThanOrEqual(rect.parentLeft - 1);
+        expect(rect.right, width + 'px ' + dir + ' figure right').toBeLessThanOrEqual(rect.parentRight + 1);
+      }
       for (const rect of result.bounds) {
         expect(rect.width).toBeGreaterThan(0);
         expect(rect.left).toBeGreaterThanOrEqual(rect.parentLeft - 1);
@@ -38,6 +50,19 @@ test('native Core media remain bounded at seven responsive widths and in RTL', a
   await page.setViewportSize({ width: 390, height: 900 });
   await page.evaluate(() => { document.documentElement.dir = 'rtl'; document.documentElement.style.fontSize = '200%'; });
   await page.emulateMedia({ forcedColors: 'active' });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  const zoomed = await page.locator('.slateframe-core-media-fixture').evaluate(root => ({
+    overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    bounds: [...root.querySelectorAll('audio,iframe,object,embed')].map(node => {
+      const rect = node.getBoundingClientRect(), parent = node.parentElement.getBoundingClientRect();
+      return { width: rect.width, left: rect.left, right: rect.right, parentLeft: parent.left, parentRight: parent.right };
+    }),
+  }));
+  expect(zoomed.overflow).toBeLessThanOrEqual(1);
+  expect(zoomed.bounds).toHaveLength(4);
+  for (const rect of zoomed.bounds) {
+    expect(rect.width).toBeGreaterThan(0);
+    expect(rect.left).toBeGreaterThanOrEqual(rect.parentLeft - 1);
+    expect(rect.right).toBeLessThanOrEqual(rect.parentRight + 1);
+  }
   await page.locator('.slateframe-core-media-fixture').screenshot({ path: 'test-artifacts/screenshots/core-media-390-rtl-200-forced-colors.png' });
 });

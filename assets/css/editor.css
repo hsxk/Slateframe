@@ -115,3 +115,4 @@
 
 /* Preserve native Core Calendar table semantics inside the editor canvas. */
 .editor-styles-wrapper .wp-block-calendar{max-inline-size:100%;overflow-x:auto}
+.editor-styles-wrapper .wp-block-calendar th{white-space:nowrap}

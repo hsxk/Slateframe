@@ -27,13 +27,27 @@ test('Core Calendar keeps its seven-column table and scrolls inside the reading 
         pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       }));
       expect(size.overflow).toBe('auto');
+      expect(await calendar.locator('table').evaluate(node => getComputedStyle(node).display)).toBe('table');
+      expect(await calendar.locator('th').first().evaluate(node => getComputedStyle(node).whiteSpace)).toBe('nowrap');
       expect(size.pageOverflow, width + 'px ' + dir).toBeLessThanOrEqual(1);
-      if (width <= 412) expect(size.scroll).toBeGreaterThan(size.client);
+      if (width <= 412) {
+        expect(size.scroll).toBeGreaterThan(size.client);
+        const traveled = await calendar.evaluate((node, direction) => {
+          node.scrollLeft = direction === 'rtl' ? -10000 : 10000;
+          return Math.abs(node.scrollLeft);
+        }, dir);
+        expect(traveled, width + 'px ' + dir + ' calendar scroll').toBeGreaterThan(0);
+      }
     }
   }
   await page.setViewportSize({ width: 390, height: 900 });
   await page.evaluate(() => { document.documentElement.dir = 'rtl'; document.documentElement.style.fontSize = '200%'; });
   await page.emulateMedia({ forcedColors: 'active' });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  const zoomed = await calendar.evaluate(node => ({
+    scroll: node.scrollWidth, client: node.clientWidth,
+    pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+  }));
+  expect(zoomed.scroll).toBeGreaterThan(zoomed.client);
+  expect(zoomed.pageOverflow).toBeLessThanOrEqual(1);
   await page.locator('.slateframe-prose .wp-block-calendar').last().screenshot({ path: 'test-artifacts/screenshots/core-calendar-390-rtl-200-forced-colors.png' });
 });
