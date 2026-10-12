@@ -1,4 +1,4 @@
 /* Core styles use logical properties. Keep this file for targeted RTL corrections only. */
 [dir="rtl"] .slateframe-primary-nav,[dir="rtl"] .slateframe-footer-inner{text-align:start}
 /* Core Verse is poetry, not code: preserve the document writing direction. */
-[dir="rtl"] .slateframe-prose pre:not(.wp-block-verse),[dir="rtl"] .wp-block-code{direction:ltr;text-align:left}
+[dir="rtl"] .slateframe-prose pre:not(.wp-block-verse):not(.wp-block-preformatted),[dir="rtl"] .wp-block-code{direction:ltr;text-align:left}
