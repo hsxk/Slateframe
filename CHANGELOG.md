@@ -73,7 +73,7 @@ All notable changes to Slateframe will be documented here.
 - Optional native `footer-content` block/widget region for portable rich footers without site-specific template injection.
 - Responsive footer-widget grid and deterministic multilingual footer fixture with shared 44px control targets and overflow coverage.
 - Portfolio regression fixture for a real no-featured-image project with mixed CJK/RTL long-title wrapping.
-- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, opt-in local author media, and TOC compatibility migrated from recurring site-level WPCode needs.
+- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, opt-in local author media, and TOC compatibility migrated from recurring site-level presentation needs.
 - Public Slateframe hybrid-theme baseline.
 - WordPress-native template hierarchy and `theme.json` design system.
 - Accessible responsive navigation with a no-JavaScript fallback and mobile focus containment.

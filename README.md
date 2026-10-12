@@ -141,7 +141,7 @@ Public GitHub Actions currently enforce:
 - WordPress.org Theme Check against the built production ZIP in a real WordPress installation with `WP_DEBUG` enabled; REQUIRED findings block the build while advisory recommendations remain visible in the report.
 - WordPress/PHP compatibility smoke coverage for the minimum PHP target and modern PHP runtime.
 - `theme.json`, theme metadata, required files, and pattern metadata.
-- Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
+- Public namespace / Text Domain rules and guards against site-specific runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
 - JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual publishing/reading/comments/content-mode CSS, the Portfolio Query Loop layer, and JavaScript, including route-level aggregate budgets so moving CSS between requests cannot hide runtime growth.
 - Real WordPress + MariaDB installation and theme activation.
@@ -191,7 +191,7 @@ Repository documentation:
 - [Roadmap](docs/ROADMAP.md)
 - [WordPress.org readiness](docs/WORDPRESS-ORG.md)
 - [Migration audit](docs/MIGRATION.md)
-- [WPCode migration boundary](docs/WPCODE-MIGRATION.md)
+- [Portable integration boundaries](docs/INTEGRATION-BOUNDARIES.md)
 - [Changelog](CHANGELOG.md)
 
 ## Theme boundaries

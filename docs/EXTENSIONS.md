@@ -135,6 +135,6 @@ Slateframe provides restrained presentation for Core's Table of Contents block a
 
 ## Footer content region
 
-Slateframe registers an optional `footer-content` widget area above the compact brand/navigation/copyright row. It accepts Core block widgets and normal WordPress widgets, so sites can build multi-column project links, subscriptions, or multilingual footer content without template overrides or WPCode.
+Slateframe registers an optional `footer-content` widget area above the compact brand/navigation/copyright row. It accepts Core block widgets and normal WordPress widgets, so sites can build multi-column project links, subscriptions, or multilingual footer content without template overrides or custom snippet injection.
 
 The region is empty by default and emits no wrapper when unused. Contextual Photography, Portfolio/Knowledge, and Query Loop styles load only when active widget content requires them, including native Core lightbox settings; see `docs/FOOTER-PRESENTATION.md`. Content ownership, language visibility, subscription behavior, and external links remain with WordPress/plugins rather than theme runtime.
