@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class FooterListSemanticsContract(unittest.TestCase):
     def test_core_lists_and_nested_items_are_exempt_from_widget_reset(self):
         css = (ROOT / 'assets/css/footer.css').read_text(encoding='utf-8')
-        self.assertIn('.slateframe-footer-widget :where(ul,ol):not(.wp-block-list,.wp-block-list *){margin:0;padding:0;list-style:none}', css)
+        self.assertIn('.slateframe-footer-widget :where(ul,ol):not(.wp-block-list,.wp-block-list *,.wp-block-footnotes,.wp-block-footnotes *){margin:0;padding:0;list-style:none}', css)
         self.assertNotIn('.slateframe-footer-widget :where(ul,ol){margin:0;padding:0;list-style:none}', css)
         self.assertIn('.slateframe-footer-menu{display:flex', css)
 
