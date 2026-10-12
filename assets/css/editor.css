@@ -124,3 +124,6 @@
 
 /* Code keeps LTR syntax in an RTL editor; native Verse inherits direction. */
 .editor-styles-wrapper .wp-block-code{direction:ltr;text-align:left}
+
+/* Natural tracking for CJK Gutenberg post titles. */
+.editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
