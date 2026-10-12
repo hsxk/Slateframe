@@ -119,3 +119,5 @@
 
 /* Native File control parity with the published canvas. */
 .editor-styles-wrapper .wp-block-file__button{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;padding:var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);border-radius:var(--slateframe-radius);white-space:normal}
+
+.editor-styles-wrapper .wp-block-verse{font-family:inherit;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;max-inline-size:100%}
