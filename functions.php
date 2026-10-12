@@ -859,6 +859,39 @@ function slateframe_focusable_table_block( $block_content ) {
 add_filter( 'render_block_core/table', 'slateframe_focusable_table_block' );
 
 /**
+ * Make Core Calendar's horizontal scroll container keyboard reachable.
+ *
+ * Calendar renders a seven-column table inside a Core-owned wrapper. At
+ * narrow widths or text zoom, the wrapper scrolls instead of changing the
+ * table semantics. Keep author-supplied tabindex values untouched.
+ *
+ * @param string $block_content Rendered Core Calendar markup.
+ * @return string
+ */
+function slateframe_focusable_calendar_block( $block_content ) {
+	if ( '' === $block_content || false === strpos( $block_content, 'wp-block-calendar' ) ) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	while ( $processor->next_tag() ) {
+		if ( ! $processor->has_class( 'wp-block-calendar' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+
+		break;
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/calendar', 'slateframe_focusable_calendar_block' );
+
+/**
  * Keep direct TablePress output reachable when the table itself becomes the
  * horizontal scroll owner inside Slateframe's reading measure.
  *

@@ -116,3 +116,14 @@
 /* Preserve native Core Calendar table semantics inside the editor canvas. */
 .editor-styles-wrapper .wp-block-calendar{max-inline-size:100%;overflow-x:auto}
 .editor-styles-wrapper .wp-block-calendar th{white-space:nowrap}
+
+/* Native File control parity with the published canvas. */
+.editor-styles-wrapper .wp-block-file__button{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;padding:var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);border-radius:var(--slateframe-radius);white-space:normal}
+
+.editor-styles-wrapper .wp-block-verse{font-family:inherit;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;max-inline-size:100%}
+
+/* Code keeps LTR syntax in an RTL editor; native Verse inherits direction. */
+.editor-styles-wrapper .wp-block-code{direction:ltr;text-align:left}
+
+/* Natural tracking for CJK Gutenberg post titles. */
+.editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
