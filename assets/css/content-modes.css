@@ -4,3 +4,4 @@
 
 /* Native Query Loop titles share the Appearance control target; media focus remains visible inside cropped frames. */
 .slateframe-project-grid .wp-block-post-title a{display:block;min-block-size:var(--slateframe-control)}.slateframe-project-grid .wp-block-post-featured-image a{display:block;line-height:0}.slateframe-project-grid .wp-block-post-featured-image a:focus-visible{outline-offset:calc(-1*var(--slateframe-focus-offset))}
+.slateframe-project-grid .slateframe-project-card > :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date){inline-size:100%;min-inline-size:0;overflow-wrap:anywhere}
