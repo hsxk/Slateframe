@@ -1,0 +1,7 @@
+# Footer list semantics and navigation presentation
+
+Footer widgets accept both navigation lists and ordinary editorial Core List blocks. A blanket `ul, ol` reset erased authored bullets and ordered-list numbering. Slateframe now exempts native `.wp-block-list` blocks and their nested lists from the existing footer reset. Navigation, Archives, Categories, and classic widget lists retain their prior compact appearance. The dedicated `.slateframe-footer-menu` remains unchanged. Redundant `align-self` declarations on the footer navigation/copyright were also removed: the existing parent grid already defines desktop `end` and mobile `start` alignment.
+
+No JavaScript, translation, widget API, content migration, or site-specific dependency is introduced. The frontend retains the existing 44px navigation link targets. Authored Core List markers remain native, including RTL direction. This is a presentation correction rather than a new menu implementation.
+
+`tests/browser/footer-list-semantics.spec.js` also renders a real Core List through WordPress `do_blocks()` before checking CSS, and covers seven widths, LTR/RTL, ordered and unordered Core Lists, nested items, Archives/Categories, both menu families, 200% text size, forced colors, keyboard focus, and horizontal overflow. `tests/test_footer_list_semantics_contract.py` checks selector scoping and the unchanged combined runtime budget. The browser test requires the real WordPress/Chromium Actions environment; local static success is not release acceptance.
