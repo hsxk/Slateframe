@@ -107,4 +107,5 @@
 	overscroll-behavior-inline: contain;
 }
 
-.editor-styles-wrapper .slateframe-project-grid .wp-block-post-title{max-width:14em}
+.editor-styles-wrapper .slateframe-project-grid .wp-block-post-title{max-width:none}
+.editor-styles-wrapper .slateframe-project-grid .slateframe-project-card :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date){inline-size:100%;min-inline-size:0;overflow-wrap:anywhere}
