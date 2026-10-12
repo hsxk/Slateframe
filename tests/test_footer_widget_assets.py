@@ -164,7 +164,7 @@ class FooterWidgetAssetContract(unittest.TestCase):
             "@media(max-width:640px){.wp-block-search__button-outside .wp-block-search__inside-wrapper{display:grid;grid-template-columns:minmax(0,1fr)}",
             base,
         )
-        self.assertIn(".wp-block-search__button-outside .wp-block-search__button{margin-inline-start:0;max-inline-size:100%;white-space:normal}", base)
+        self.assertIn(".wp-block-search__button-outside .wp-block-search__button{margin:0;inline-size:100%;white-space:normal}", base)
         self.assertLessEqual(len(base.encode("utf-8")), 16000)
         self.assertLessEqual(len(forms.encode("utf-8")), 1300)
 
