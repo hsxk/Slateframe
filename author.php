@@ -22,17 +22,17 @@ $slateframe_author_bio = get_the_author_meta( 'description', $slateframe_author_
  */
 $slateframe_author_avatar = apply_filters( 'slateframe_author_avatar_html', '', $slateframe_author_id );
 ?>
-<main id="main-content" class="slateframe-main">
+<main id="main-content" class="slateframe-main" tabindex="-1">
 	<header class="slateframe-page-header">
 		<div class="slateframe-shell slateframe-author-header">
 			<?php if ( $slateframe_author_avatar ) : ?>
 				<div class="slateframe-author-avatar"><?php echo wp_kses_post( $slateframe_author_avatar ); ?></div>
 			<?php endif; ?>
 			<div class="slateframe-author-copy">
-			<h1 class="slateframe-page-title"><?php echo esc_html( get_the_author_meta( 'display_name', $slateframe_author_id ) ); ?></h1>
-			<?php if ( $slateframe_author_bio ) : ?>
-				<p class="slateframe-archive-description"><?php echo esc_html( $slateframe_author_bio ); ?></p>
-			<?php endif; ?>
+				<h1 class="slateframe-page-title"><?php echo esc_html( get_the_author_meta( 'display_name', $slateframe_author_id ) ); ?></h1>
+				<?php if ( $slateframe_author_bio ) : ?>
+					<p class="slateframe-archive-description"><?php echo esc_html( $slateframe_author_bio ); ?></p>
+				<?php endif; ?>
 			</div>
 		</div>
 	</header>
