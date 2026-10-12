@@ -21,9 +21,12 @@ class ResponsiveCoreContracts(unittest.TestCase):
 
     def test_search_core_and_theme_localizations(self):
         core = (ROOT / "assets/css/forms.css").read_text()
+        base = (ROOT / "style.css").read_text()
         own = (ROOT / "assets/css/search-form.css").read_text()
-        self.assertIn(".wp-block-search__inside-wrapper{flex-wrap:wrap", core)
-        self.assertIn("flex:1 1 min(100%,16rem)", core)
+        self.assertIn(".wp-block-search__inside-wrapper{flex-wrap:wrap", base)
+        self.assertIn("flex:1 1 16rem", base)
+        self.assertIn("margin-inline-start:0", core)
+        self.assertLessEqual(len(core.encode("utf-8")), 1300)
         self.assertIn("max-inline-size:45%", own)
 
     def test_css_static_budgets(self):
