@@ -494,3 +494,67 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	await expectLightboxSettled(portrait.dialog, portrait.enlarged, 'portrait screenshot evidence should capture the settled lightbox');
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-portrait-${testInfo.project.name}.png`), fullPage: false });
 });
+
+
+test('native WordPress Core Gallery can switch to the independent photo-sequence style', async ({ page }) => {
+	await openRasterPhotography(page);
+	const gallery = page.locator('#main-content .browser-raster-gallery');
+	await expect(gallery).toBeVisible();
+	// Use the real WordPress-rendered Gallery; exercise the independent block style.
+	await gallery.evaluate((node) => {
+		node.classList.remove('is-style-slateframe-contact-sheet');
+		node.classList.add('is-style-slateframe-photo-sequence');
+	});
+	await expect(gallery).toHaveClass(/is-style-slateframe-photo-sequence/);
+	const images = gallery.locator('img');
+	await expect(images).toHaveCount(2);
+	for (const img of await images.all()) {
+		await img.scrollIntoViewIfNeeded();
+		await expect.poll(() => img.evaluate((node) => node.complete && node.naturalWidth > 0)).toBe(true);
+	}
+	const details = await gallery.evaluate((node) => ({
+		display: getComputedStyle(node).display,
+		columns: getComputedStyle(node).gridTemplateColumns.split(' ').filter(Boolean).length,
+		firstSpan: getComputedStyle(node.querySelector('figure.wp-block-image')).gridColumnEnd,
+		captions: [...node.querySelectorAll('figcaption')].map((caption) => ({
+			position: getComputedStyle(caption).position,
+			shadow: getComputedStyle(caption).textShadow,
+		})),
+		images: [...node.querySelectorAll('img')].map((img) => ({
+			alt: img.alt,
+			fit: getComputedStyle(img).objectFit,
+			aspect: getComputedStyle(img).aspectRatio,
+		})),
+	}));
+	expect(details.display).toBe('grid');
+	expect(details.columns).toBe(page.viewportSize().width <= 640 ? 1 : 2);
+	if (page.viewportSize().width > 640) expect(details.firstSpan).toBe('-1');
+	for (const caption of details.captions) {
+		expect(caption.position).toBe('static');
+		expect(caption.shadow).toBe('none');
+	}
+	for (const image of details.images) {
+		expect(image.alt).toBeTruthy();
+		expect(image.fit).toBe('contain');
+		expect(image.aspect).toBe('auto');
+	}
+	await fs.mkdir(path.join('test-artifacts', 'photography-lightbox'), { recursive: true });
+	await gallery.screenshot({
+		path: path.join('test-artifacts', 'photography-lightbox', 'core-sequence-' + page.viewportSize().width + '.png'),
+	});
+});
+
+test('native photo sequence preserves RTL and zoomed captions', async ({ page }) => {
+	await openRasterPhotography(page);
+	await page.evaluate(() => {
+		document.documentElement.dir = 'rtl';
+		document.documentElement.style.fontSize = '200%';
+		const gallery = document.querySelector('.browser-raster-gallery');
+		gallery.classList.remove('is-style-slateframe-contact-sheet');
+		gallery.classList.add('is-style-slateframe-photo-sequence');
+	});
+	await expect(page.locator('.browser-raster-gallery figcaption')).toHaveCount(2);
+	await expect.poll(() => page.evaluate(() =>
+		document.documentElement.scrollWidth - document.documentElement.clientWidth
+	)).toBeLessThanOrEqual(1);
+});

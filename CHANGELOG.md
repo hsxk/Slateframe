@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Cover standalone Core Gallery Photo sequence rendering and responsive image proportions in the Photography runtime suite.
+
 - Assert native Gutenberg content/wide layout variables follow bounded Appearance widths at default, compact and spacious settings; retain mobile/desktop screenshots and verify opaque sticky-header rendering.
 - Verify 320/390px real-raster Photography contact sheets switch to a readable single-column layout with portrait/square image containment.
 
@@ -24,6 +26,8 @@ All notable changes to Slateframe will be documented here.
 - Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
 
 ### Fixed
+
+- Align standalone Core Gallery Photo sequence layout, captions, Gutenberg styling and reduced-motion hover behavior with the bundled Photography patterns.
 
 - Synchronize WordPress constrained/wide block layout variables with Slateframe reading/canvas Appearance settings on the front end and in the block editor.
 - Replace the translucent blurred sticky header with a quiet opaque surface, reducing compositing work while keeping light/dark contrast.

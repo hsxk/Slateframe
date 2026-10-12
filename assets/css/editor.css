@@ -46,6 +46,15 @@
 	line-height: 1.55;
 }
 
+.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-contact-sheet, .is-style-slateframe-diptych, .is-style-slateframe-photo-sequence, .slateframe-gallery-sequence) .wp-block-image figcaption {
+	position: static;
+	background: none;
+	color: var(--slateframe-muted);
+	text-shadow: none;
+	font-weight: 400;
+	text-align: start;
+}
+
 .editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
 	height: auto;
 	aspect-ratio: auto;
