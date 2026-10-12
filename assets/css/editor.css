@@ -116,3 +116,6 @@
 /* Preserve native Core Calendar table semantics inside the editor canvas. */
 .editor-styles-wrapper .wp-block-calendar{max-inline-size:100%;overflow-x:auto}
 .editor-styles-wrapper .wp-block-calendar th{white-space:nowrap}
+
+/* Native File control parity with the published canvas. */
+.editor-styles-wrapper .wp-block-file__button{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;padding:var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);border-radius:var(--slateframe-radius);white-space:normal}
