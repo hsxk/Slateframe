@@ -20,6 +20,8 @@ class CjkEditorEvidenceContract(unittest.TestCase):
                        'lang="ko-KR"', 'English override', 'toHaveCount(3)',
                        'toHaveCount(2)', 'forcedColors', 'rtl', '200%'):
             self.assertIn(needle, script)
+        # Explicit English descendants must not be counted as inherited Japanese.
+        self.assertEqual(script.count('> .wp-block-post-title:not([lang])'), 2)
 
 
 if __name__ == '__main__':

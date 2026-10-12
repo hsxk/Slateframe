@@ -36,8 +36,8 @@ test('real Gutenberg post title preserves inherited and explicit CJK tracking', 
     node.prepend(section);
   });
   const fixture = editor.locator('.slateframe-cjk-editor-fixture');
-  const inheritedJapanese = fixture.locator('[lang="ja"] > .wp-block-post-title');
-  const cjk = fixture.locator('[lang="ja"] > .wp-block-post-title, [lang="zh-Hant"], [lang="ko-KR"]');
+  const inheritedJapanese = fixture.locator('[lang="ja"] > .wp-block-post-title:not([lang])');
+  const cjk = fixture.locator('[lang="ja"] > .wp-block-post-title:not([lang]), [lang="zh-Hant"], [lang="ko-KR"]');
   const english = fixture.locator('[lang="en"]');
   await expect(inheritedJapanese).toHaveAttribute('class', /wp-block-post-title/);
   await expect(cjk).toHaveCount(3);
