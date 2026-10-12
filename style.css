@@ -18,4 +18,4 @@ Tags: blog,photography,portfolio,one-column,custom-logo,custom-menu,featured-ima
 
 .wp-block-search__button-outside .wp-block-search__inside-wrapper{flex-wrap:wrap;gap:var(--slateframe-component-gap)}.wp-block-search__button-outside .wp-block-search__input{flex:1 1 16rem}
 
-:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a:first-child{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a:first-of-type{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
