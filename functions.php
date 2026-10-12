@@ -95,6 +95,7 @@ function slateframe_photography_marker_classes() {
 		'is-style-slateframe-photo-feature',
 		'is-style-slateframe-photo-sequence',
 		'slateframe-photography-sequence',
+		'slateframe-gallery-sequence',
 	);
 	$legacy_markers = apply_filters( 'slateframe_content_mode_markers', array() );
 	if ( is_array( $legacy_markers ) ) {

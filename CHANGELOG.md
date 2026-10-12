@@ -27,6 +27,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Load the optional Photography stylesheet for a Core Gallery using the `slateframe-gallery-sequence` class without a lightbox, and bound portrait images to the same non-cropping height as the registered Photo sequence style.
+
 - Align standalone Core Gallery Photo sequence layout, captions, Gutenberg styling and reduced-motion hover behavior with the bundled Photography patterns.
 
 - Synchronize WordPress constrained/wide block layout variables with Slateframe reading/canvas Appearance settings on the front end and in the block editor.
