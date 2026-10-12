@@ -1,6 +1,13 @@
 const { test, expect } = require('@playwright/test');
 test('Spatial System calc values survive computed-value substitution', async ({ page }) => {
+  // Reading styles are intentionally limited to singular WordPress content.
   await page.goto('/', { waitUntil: 'networkidle' });
+  await expect(page.locator('link[rel="stylesheet"][href*="/assets/css/reading.css"]')).toHaveCount(0);
+  const firstPost = page.locator('.slateframe-card-title a').first();
+  await expect(firstPost).toBeVisible();
+  await firstPost.click();
+  await expect(page.locator('link[rel="stylesheet"][href*="/assets/css/reading.css"]')).toHaveCount(1);
+  await expect(page.locator('.slateframe-prose').first()).toBeVisible();
   await page.addStyleTag({ content: ':root{--slateframe-stack-gap:24px;--slateframe-header-height:72px;--slateframe-section-max:160px}' });
   await page.locator('body').evaluate(body => {
     const fixture = document.createElement('section');
