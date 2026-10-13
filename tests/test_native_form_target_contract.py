@@ -1,0 +1,27 @@
+"""Guard the Core-first form target CSS without duplicating browser acceptance."""
+from pathlib import Path
+import unittest
+
+CSS = (Path(__file__).resolve().parents[1] / 'style.css').read_text(encoding='utf-8')
+
+
+class NativeFormTargetContract(unittest.TestCase):
+    def test_native_labels_are_not_replaced_by_scripted_controls(self):
+        self.assertIn('label:has(>input[type=checkbox])', CSS)
+        self.assertIn('label:has(>input[type=radio])', CSS)
+        self.assertIn('input[type=checkbox]+label', CSS)
+        self.assertIn('input[type=radio]+label', CSS)
+
+    def test_labels_use_bounded_shared_control_token(self):
+        rule = CSS.split('form :is(label:has(', 1)[1].split('}', 1)[0]
+        self.assertIn('min-block-size:var(--slateframe-control)', rule)
+        self.assertIn('align-items:center', rule)
+
+    def test_native_file_range_and_color_keep_containment(self):
+        rule = CSS.split('form input:is([type=range],[type=color],[type=file]){', 1)[1].split('}', 1)[0]
+        for token in ('min-block-size:var(--slateframe-control)', 'min-inline-size:0', 'max-inline-size:100%'):
+            self.assertIn(token, rule)
+
+
+if __name__ == '__main__':
+    unittest.main()

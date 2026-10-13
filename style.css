@@ -20,3 +20,5 @@ Tags: blog,photography,portfolio,one-column,custom-logo,custom-menu,featured-ima
 
 :is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a:first-of-type{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
 :is(h1,h2,h3,.wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
+form :is(label:has(>input[type=checkbox]),label:has(>input[type=radio]),input[type=checkbox]+label,input[type=radio]+label){display:inline-flex;align-items:center;min-block-size:var(--slateframe-control)}
+form input:is([type=range],[type=color],[type=file]){min-block-size:var(--slateframe-control);min-inline-size:0;max-inline-size:100%}
