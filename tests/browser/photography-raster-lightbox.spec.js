@@ -558,3 +558,47 @@ test('native photo sequence preserves RTL and zoomed captions', async ({ page })
 		document.documentElement.scrollWidth - document.documentElement.clientWidth
 	)).toBeLessThanOrEqual(1);
 });
+
+
+test('real WordPress raster Gallery exercises sequence caption geometry at RTL 400% text', async ({ page }, testInfo) => {
+  await openRasterPhotography(page);
+  const gallery = page.locator('#main-content .browser-raster-gallery');
+  await expect(gallery).toBeVisible();
+  // Supplemental CSS contract on a real WordPress Gallery; separate serialized
+  // native/class-only fixtures remain required for release acceptance.
+  await gallery.evaluate(node => {
+    node.classList.remove('is-style-slateframe-contact-sheet');
+    node.classList.add('is-style-slateframe-photo-sequence');
+  });
+  const figure = gallery.locator(':scope > figure.wp-block-image').first();
+  const image = figure.locator('img');
+  await expect.poll(() => image.evaluate(n => n.complete && n.naturalWidth > 0)).toBe(true);
+  const inspect = async label => {
+    const m = await figure.evaluate(node => {
+      const fig = node.getBoundingClientRect();
+      const media = node.querySelector('img').getBoundingClientRect();
+      const caption = node.querySelector('figcaption').getBoundingClientRect();
+      return {figWidth:fig.width,mediaWidth:media.width,captionWidth:caption.width,
+        mediaStart:media.left,captionStart:caption.left,captionHeight:caption.height,
+        overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};
+    });
+    expect(m.mediaWidth, label).toBeGreaterThan(0);
+    expect(m.captionHeight, label).toBeGreaterThan(0);
+    expect(Math.abs(m.figWidth-m.mediaWidth), label).toBeLessThanOrEqual(4);
+    expect(Math.abs(m.captionWidth-m.mediaWidth), label).toBeLessThanOrEqual(4);
+    expect(Math.abs(m.captionStart-m.mediaStart), label).toBeLessThanOrEqual(4);
+    expect(m.overflow, label).toBeLessThanOrEqual(1);
+  };
+  await inspect('normal');
+  await figure.locator('figcaption').evaluate(node => {
+    node.textContent = '日本語 العربية 中文 — Long caption that must stay attached to the portrait photograph instead of expanding to the grid track. '.repeat(3);
+  });
+  await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
+  await page.evaluate(() => {document.documentElement.dir='rtl';document.documentElement.style.fontSize='64px';});
+  await inspect('RTL long caption 400%');
+  if ([390,1440,1920].includes(projectWidth(testInfo))) {
+    const dir=path.resolve('test-artifacts/photography-lightbox');
+    await fs.mkdir(dir,{recursive:true});
+    await page.screenshot({path:path.join(dir,`sequence-caption-rtl-zoom-${projectWidth(testInfo)}.png`),fullPage:true,animations:'disabled'});
+  }
+});
