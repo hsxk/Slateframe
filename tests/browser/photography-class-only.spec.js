@@ -4,7 +4,7 @@ const path = require('node:path');
 const fixture = process.env.SLATEFRAME_CLASS_ONLY_GALLERY_PATH;
 test.skip(!fixture, 'Real WordPress class-only Gallery fixture is required.');
 async function gallery(page) {
-  await page.goto(fixture,{waitUntil:'networkidle'});
+  await page.goto(fixture,{waitUntil:'domcontentloaded'});
   const g=page.locator('#main-content .browser-class-only-sequence.slateframe-gallery-sequence');
   await expect(g).toBeVisible();
   await expect(g.locator(':scope > figure.wp-block-image')).toHaveCount(2);
@@ -23,10 +23,11 @@ test('class-only Gallery loads Photography CSS without lightbox',async ({page})=
 test('ordinary Core Gallery without class or lightbox does not load Photography CSS',async ({page})=>{
   const plain=process.env.SLATEFRAME_PLAIN_GALLERY_PATH;
   test.skip(!plain,'Plain Core Gallery fixture required');
-  await page.goto(plain,{waitUntil:'networkidle'});
+  await page.goto(plain,{waitUntil:'domcontentloaded'});
   const g=page.locator('#main-content .wp-block-gallery');
   await expect(g).toBeVisible();
   await expect(g.locator(':scope > figure.wp-block-image')).toHaveCount(1);
+  await expect.poll(()=>g.locator('img').first().evaluate(i=>i.complete&&i.naturalWidth>0)).toBe(true);
   expect(await g.getAttribute('class')).not.toContain('slateframe-gallery-sequence');
   await expect(g.locator('.wp-lightbox-container')).toHaveCount(0);
   await expect(page.locator('link#slateframe-photography-css')).toHaveCount(0);
