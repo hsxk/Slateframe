@@ -40,7 +40,10 @@ test('normal mobile keeps caption and image width parity',async({page})=>{
  await page.goto(process.env.SLATEFRAME_RASTER_PHOTO_PATH,{waitUntil:'domcontentloaded'});
  const figure=page.locator('#main-content .browser-native-sequence > figure.wp-block-image').first();
  await expect(figure).toBeVisible();
- const m=await figure.evaluate(f=>{const i=f.querySelector('img').getBoundingClientRect(),c=f.querySelector('figcaption').getBoundingClientRect();return {difference:Math.abs(i.width-c.width),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}});
+ await expect.poll(()=>figure.locator('img').evaluate(i=>i.complete&&i.naturalWidth>0)).toBe(true);
+ const m=await figure.evaluate(f=>{const i=f.querySelector('img').getBoundingClientRect(),c=f.querySelector('figcaption').getBoundingClientRect();return {imageWidth:i.width,captionWidth:c.width,difference:Math.abs(i.width-c.width),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}});
+ expect(m.imageWidth).toBeGreaterThan(0);
+ expect(m.captionWidth).toBeGreaterThan(0);
  expect(m.difference).toBeLessThanOrEqual(2);
  expect(m.overflow).toBeLessThanOrEqual(1);
 });
