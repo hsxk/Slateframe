@@ -1465,6 +1465,20 @@ test('portable showcase modes respond as a coherent editorial system', async ({ 
 		const projectTemplate = document.querySelector('.browser-project-grid .wp-block-post-template');
 		const firstProjectCard = projectTemplate.querySelector('.browser-project-card');
 		const captions = [...gallery.querySelectorAll('figcaption')];
+		const galleryBox = gallery.getBoundingClientRect();
+		const galleryGeometry = galleryItems.map((figure) => {
+			const figureBox = figure.getBoundingClientRect();
+			const imageBox = figure.querySelector('img').getBoundingClientRect();
+			const captionBox = figure.querySelector('figcaption').getBoundingClientRect();
+			return {
+				figureWidth: figureBox.width,
+				imageWidth: imageBox.width,
+				captionWidth: captionBox.width,
+				captionOffset: captionBox.left - figureBox.left,
+				centerOffset: (figureBox.left + figureBox.right - galleryBox.left - galleryBox.right) / 2,
+				withinGallery: figureBox.left >= galleryBox.left - 2 && figureBox.right <= galleryBox.right + 2,
+			};
+		});
 
 		return {
 			galleryTracks: getComputedStyle(gallery).gridTemplateColumns.split(' ').filter(Boolean).length,
@@ -1474,13 +1488,14 @@ test('portable showcase modes respond as a coherent editorial system', async ({ 
 			firstWidth: galleryItems[0].getBoundingClientRect().width,
 			secondWidth: galleryItems[1].getBoundingClientRect().width,
 			captionPositions: captions.map((caption) => getComputedStyle(caption).position),
+			galleryGeometry,
 		};
 	});
 
 	if (projectWidth(testInfo) <= 640) {
 		expect(layout.galleryTracks).toBe(1);
 		expect(layout.projectTracks).toBe(1);
-		expect(Math.abs(layout.firstWidth - layout.secondWidth)).toBeLessThanOrEqual(2);
+		// Equal grid tracks must not force intrinsically different images to the same width.
 	} else {
 		expect(layout.galleryTracks).toBe(2);
 		expect(layout.firstWidth).toBeGreaterThan(layout.secondWidth * 1.7);
@@ -1489,6 +1504,18 @@ test('portable showcase modes respond as a coherent editorial system', async ({ 
 
 	if (projectWidth(testInfo) >= 1440) {
 		expect(layout.projectWidth).toBeGreaterThan(900);
+	}
+
+	expect(layout.galleryGeometry).toHaveLength(3);
+	for (const item of layout.galleryGeometry) {
+		expect(item.figureWidth).toBeGreaterThan(0);
+		expect(item.withinGallery).toBe(true);
+		expect(Math.abs(item.figureWidth - item.imageWidth)).toBeLessThanOrEqual(2);
+		expect(Math.abs(item.figureWidth - item.captionWidth)).toBeLessThanOrEqual(2);
+		expect(Math.abs(item.captionOffset)).toBeLessThanOrEqual(2);
+		if (projectWidth(testInfo) <= 640) {
+			expect(Math.abs(item.centerOffset)).toBeLessThanOrEqual(2);
+		}
 	}
 
 	expect(layout.firstProjectCardWidth).toBeGreaterThan(220);
