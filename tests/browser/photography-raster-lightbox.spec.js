@@ -599,6 +599,22 @@ test('real WordPress raster Gallery exercises sequence caption geometry at RTL 4
   if ([390,1440,1920].includes(projectWidth(testInfo))) {
     const dir=path.resolve('test-artifacts/photography-lightbox');
     await fs.mkdir(dir,{recursive:true});
-    await page.screenshot({path:path.join(dir,`sequence-caption-rtl-zoom-${projectWidth(testInfo)}.png`),fullPage:true,animations:'disabled'});
+    // The full-page capture must contain decoded media and the site footer.
+    for (const img of await page.locator('#main-content img').all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect.poll(() => img.evaluate(n => n.complete && n.naturalWidth > 0)).toBe(true);
+    }
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      window.scrollTo(0, 0);
+    });
+    const footerBottom = await page.locator('footer').last().evaluate(
+      el => el.getBoundingClientRect().bottom + window.scrollY
+    );
+    const screenshot = await page.screenshot({path:path.join(dir,`sequence-caption-rtl-zoom-${projectWidth(testInfo)}.png`),fullPage:true,animations:'disabled'});
+    expect(footerBottom).toBeGreaterThan(0);
+    expect(screenshot.readUInt32BE(16)).toBe(projectWidth(testInfo));
+    expect(screenshot.readUInt32BE(20)).toBeGreaterThanOrEqual(Math.ceil(footerBottom)-2);
   }
 });
