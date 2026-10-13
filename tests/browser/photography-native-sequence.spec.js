@@ -5,10 +5,12 @@ const path = require('node:path');
 const fixture = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
 test.skip(!fixture, 'Real WordPress Gallery fixture is required.');
 async function gallery(page) {
-  await page.goto(fixture, {waitUntil:'networkidle'});
+  await page.goto(fixture, {waitUntil:'domcontentloaded'});
   const g=page.locator('#main-content .browser-native-sequence.is-style-slateframe-photo-sequence');
   await expect(g).toBeVisible();
   await expect(g.locator(':scope > figure.wp-block-image')).toHaveCount(2);
+  await expect(g.locator('img')).toHaveCount(2);
+  await expect(g.locator('figcaption')).toHaveCount(2);
   for(const img of await g.locator('img').all()){
     await img.scrollIntoViewIfNeeded();
     await expect.poll(()=>img.evaluate(n=>n.complete && n.naturalWidth>0)).toBe(true);

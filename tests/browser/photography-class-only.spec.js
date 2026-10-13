@@ -8,6 +8,8 @@ async function gallery(page) {
   const g=page.locator('#main-content .browser-class-only-sequence.slateframe-gallery-sequence');
   await expect(g).toBeVisible();
   await expect(g.locator(':scope > figure.wp-block-image')).toHaveCount(2);
+  await expect(g.locator('img')).toHaveCount(2);
+  await expect(g.locator('figcaption')).toHaveCount(2);
   for(const img of await g.locator('img').all()){
     await img.scrollIntoViewIfNeeded();
     await expect.poll(()=>img.evaluate(n=>n.complete && n.naturalWidth>0)).toBe(true);
