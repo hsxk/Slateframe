@@ -40,6 +40,16 @@ class SharedReadingCssTest(unittest.TestCase):
             with self.subTest(selector=selector):
                 self.assertNotIn(selector, editor)
 
+    def test_core_table_of_contents_is_plugin_agnostic(self):
+        reading = READING.read_text(encoding="utf-8")
+        self.assertIn(".slateframe-prose .wp-block-table-of-contents", reading)
+        self.assertIn("min-block-size:var(--slateframe-control)", reading)
+        for path in (ROOT / "style.css", ROOT / "rtl.css", *(ROOT / "assets/css").glob("*.css")):
+            css = path.read_text(encoding="utf-8").lower()
+            for legacy in ("ez-toc", "yoast", "jetpack", "wpcode", "polylang", "time2log", "time2analyze"):
+                with self.subTest(file=path.name, legacy=legacy):
+                    self.assertNotIn(legacy, css)
+
     def test_existing_asset_budgets(self):
         self.assertLessEqual(READING.stat().st_size, 7000)
         self.assertLessEqual(EDITOR.stat().st_size, 5000)

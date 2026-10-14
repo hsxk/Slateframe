@@ -100,7 +100,7 @@ test('native file selector wraps its button in narrow RTL forced-colors layout',
     document.documentElement.dir = 'rtl';
     document.documentElement.style.fontSize = '64px';
     for (const input of document.querySelectorAll('#slateframe-native-form-fixture input[type="file"]')) {
-      input.style.inlineSize = '58px';
+      input.style.inlineSize = '100%';
     }
   });
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
@@ -113,6 +113,7 @@ test('native file selector wraps its button in narrow RTL forced-colors layout',
         inputWidth: node.getBoundingClientRect().width,
         buttonWidth: parseFloat(button.width),
         buttonHeight: parseFloat(button.height),
+        fontSize: parseFloat(getComputedStyle(node).fontSize),
         whiteSpace: button.whiteSpace,
         overflowWrap: button.overflowWrap,
       };
@@ -120,6 +121,7 @@ test('native file selector wraps its button in narrow RTL forced-colors layout',
     expect(measure.inputWidth).toBeGreaterThan(0);
     expect(measure.buttonWidth).toBeLessThanOrEqual(measure.inputWidth + 1);
     expect(measure.buttonHeight).toBeGreaterThanOrEqual(44);
+    expect(measure.buttonHeight).toBeLessThanOrEqual(Math.max(44, measure.fontSize * 3));
     expect(measure.whiteSpace).toBe('normal');
     expect(measure.overflowWrap).toBe('anywhere');
   }

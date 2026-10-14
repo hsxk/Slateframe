@@ -19,3 +19,5 @@ Slateframe is a free, Core-first Hybrid Theme. Reusable presentation belongs in 
 ## Acceptance
 
 The distributable archive must contain only theme runtime and public assets. Public examples use generic content and local starter media, never copied production records. Integrations should use WordPress APIs and documented `slateframe_` filters without introducing locale assumptions or data migrations into theme core.
+
+Core Table of Contents presentation uses native `.wp-block-table-of-contents` markup. Slateframe does not ship selectors tied to Easy Table of Contents or other specific TOC plugins; such integrations remain the responsibility of those plugins or child themes. This keeps the public theme's CSS lean and avoids carrying legacy site-specific dependencies.
