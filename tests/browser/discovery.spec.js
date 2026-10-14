@@ -75,10 +75,12 @@ test('native Core TOC links inherit bounded touch targets and keyboard focus', a
 		const fixture = document.createElement('nav');
 		fixture.className = 'wp-block-table-of-contents';
 		fixture.setAttribute('aria-label', 'Contents');
+		fixture.dataset.slateframeQaToc = 'true';
 		fixture.innerHTML = '<ol><li><a href="#main-content">Overview — 中文 日本語</a></li></ol>';
 		node.prepend(fixture);
 	});
-	const link = prose.locator('.wp-block-table-of-contents a');
+	const link = prose.locator('[data-slateframe-qa-toc] a');
+	await expect(link).toHaveCount(1);
 	await expect(link).toBeVisible();
 	expect((await link.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
 	await link.focus();
@@ -204,6 +206,7 @@ test('native Core TOC captions reflow in RTL and at 200 percent text size', asyn
 		const fixture = document.createElement('nav');
 		fixture.className = 'wp-block-table-of-contents';
 		fixture.setAttribute('aria-label', 'Contents');
+		fixture.dataset.slateframeQaToc = 'true';
 		fixture.innerHTML = '<ol><li><a href="#main-content">中文 日本語 العربية — Long translated heading without truncation</a></li></ol>';
 		node.prepend(fixture);
 	});
@@ -211,7 +214,8 @@ test('native Core TOC captions reflow in RTL and at 200 percent text size', asyn
 		document.documentElement.dir = 'rtl';
 		document.documentElement.style.fontSize = '200%';
 	});
-	const link = prose.locator('.wp-block-table-of-contents a');
+	const link = prose.locator('[data-slateframe-qa-toc] a');
+	await expect(link).toHaveCount(1);
 	await expect(link).toBeVisible();
 	const bounds = await link.boundingBox();
 	expect(bounds?.height || 0).toBeGreaterThanOrEqual(44);
