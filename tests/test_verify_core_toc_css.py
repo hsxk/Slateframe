@@ -36,6 +36,30 @@ class NativeTocGateTest(unittest.TestCase):
         self.css.write_text(BASE + SELECTOR + '{\n' + LINK.split('{', 1)[1].replace(';', ';\n'), encoding='utf-8')
         verify(self.root)
 
+    def test_rejects_nonexistent_ancestor(self):
+        self.reject(BASE + '.never ' + LINK)
+
+    def test_rejects_print_only_rule(self):
+        self.reject(BASE + '@media print{' + LINK + '}')
+
+    def test_rejects_supports_only_rule(self):
+        self.reject(BASE + '@supports (display:grid){' + LINK + '}')
+
+    def test_rejects_comma_list_selector(self):
+        self.reject(BASE + '.never, ' + LINK)
+
+    def test_rejects_conditional_override_after_valid_rule(self):
+        self.reject(BASE + LINK + '@media(max-width:320px){' + LINK + '}')
+
+    def test_rejects_prefixed_override_after_valid_rule(self):
+        self.reject(BASE + LINK + '.never ' + LINK)
+
+    def test_rejects_unbalanced_braces(self):
+        self.reject(BASE + LINK + '}')
+
+    def test_rejects_unterminated_css_string(self):
+        self.reject(BASE + LINK + '.other{content:"unterminated}')
+
     def test_unrelated_button_cannot_satisfy_target(self):
         self.reject(BASE + SELECTOR + '{display:inline-flex}' + '.wp-block-file__button{min-block-size:var(--slateframe-control)}')
 

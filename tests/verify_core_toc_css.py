@@ -18,24 +18,65 @@ LEGACY = re.compile(r'ez-toc|yoast|jetpack|wpcode|polylang|time2log|time2analyze
 
 
 def declarations(css: str, selector: str) -> dict[str, str]:
-    """Parse one exact non-nested rule; reject duplicates and malformed declarations."""
+    """Read one exact top-level selector, not a prefixed or conditional match.
+
+    A substring regex could accept a nonexistent ancestor or print-only
+    media rule. Only an unconditional exact selector establishes parity.
+    """
     css = re.sub(r'/\*.*?\*/', '', css, flags=re.S)
-    matches = re.findall(re.escape(selector) + r'\s*\{([^{}]*)\}', css, flags=re.S)
-    if len(matches) != 1:
-        raise ValueError(f'expected one native TOC link rule, found {len(matches)}')
-    values: dict[str, str] = {}
-    for item in matches[0].split(';'):
-        if not item.strip():
+    depth = 0
+    start = 0
+    opening = 0
+    current_selector = ''
+    quote = None
+    escaped = False
+    rules: list[str] = []
+    for index, char in enumerate(css):
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
             continue
-        if ':' not in item:
-            raise ValueError('malformed native TOC declaration')
-        key, value = item.split(':', 1)
+        if char in ("'", '"'):
+            quote = char
+            continue
+        if char == '{':
+            if depth == 0:
+                current_selector = css[start:index].strip()
+                opening = index + 1
+            depth += 1
+        elif char == '}':
+            depth -= 1
+            if depth < 0:
+                raise ValueError('unbalanced Core TOC CSS braces')
+            if depth == 0:
+                if current_selector == selector:
+                    block = css[opening:index]
+                    if '{' in block or '}' in block:
+                        raise ValueError('nested Core TOC link rule')
+                    rules.append(block)
+                start = index + 1
+    if depth != 0 or quote:
+        raise ValueError('unbalanced Core TOC CSS block or string')
+    if len(rules) != 1:
+        raise ValueError(f'expected one exact top-level Core TOC link rule, found {len(rules)}')
+    if len(re.findall(re.escape(selector) + r'\s*\{', css)) != 1:
+        raise ValueError('duplicate or conditional Core TOC link rule')
+    values: dict[str, str] = {}
+    for declaration in rules[0].split(';'):
+        if not declaration.strip():
+            continue
+        if ':' not in declaration:
+            raise ValueError('malformed Core TOC CSS declaration')
+        key, value = declaration.split(':', 1)
         key, value = key.strip().lower(), re.sub(r'\s+', '', value)
         if not key or not value or key in values:
-            raise ValueError('duplicate or empty native TOC declaration')
+            raise ValueError('duplicate or empty Core TOC CSS declaration')
         values[key] = value
     return values
-
 
 def verify(root: Path) -> None:
     root = root.resolve()
