@@ -38,15 +38,13 @@ jobs:
         run: |
           python3 bin/check-screenshot.py screenshot.png
           python3 -m unittest discover -s tests -p "test_*.py"
-      - name: Guard contextual selector contracts
+      - name: Guard native Core TOC targets and plugin-neutral CSS
         shell: bash
         run: |
-          grep -Fq '.slateframe-prose :where(#ez-toc-container,.ez-toc-container)' assets/css/publishing.css
-          grep -Fq '.slateframe-prose :where(#ez-toc-container,.ez-toc-container) :where(a,button,.ez-toc-toggle)' assets/css/reading.css
-          if grep -Fq '.slateframe-prose:where(#ez-toc-container' assets/css/publishing.css assets/css/reading.css; then
-            echo 'Contextual CSS must preserve the descendant combinator before TOC compatibility selectors.' >&2
-            exit 1
-          fi
+          set -euo pipefail
+          python3 tests/verify_core_toc_css.py
+          test -f tests/test_verify_core_toc_css.py
+          test -f tests/test_reading_css_contract.py
       - name: Guard public namespace and language-agnostic runtime
         shell: bash
         run: |

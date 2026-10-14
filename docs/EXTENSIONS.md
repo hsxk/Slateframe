@@ -131,7 +131,7 @@ A site or avatar plugin may return local-media markup here. Slateframe sanitizes
 
 ## Table of contents compatibility
 
-Slateframe provides restrained presentation for Core's Table of Contents block and common `.ez-toc-container` output, including the shared control-height baseline for TOC actions. The theme does not generate TOC structure, rewrite plugin strings, or own SEO/schema behavior.
+Slateframe styles WordPress Core's `.wp-block-table-of-contents` markup with shared reading rhythm and bounded control targets. The theme does not generate TOC structure, rewrite plugin strings, or own SEO/schema behavior. Third-party TOC presentation belongs in plugins or child themes, not Slateframe core.
 
 ## Footer content region
 
