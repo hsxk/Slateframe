@@ -29,5 +29,9 @@ class NativeFormTargetContract(unittest.TestCase):
         for token in ('max-inline-size:100%', 'min-block-size:var(--slateframe-control)', 'white-space:normal', 'overflow-wrap:anywhere'):
             self.assertIn(token, rule)
 
+    def test_native_file_input_itself_wraps_internal_filename(self):
+        self.assertIn('form input[type=file]{white-space:normal;overflow-wrap:anywhere}', CSS)
+        self.assertLessEqual(len(CSS.encode('utf-8')), 16000)
+
 if __name__ == '__main__':
     unittest.main()
