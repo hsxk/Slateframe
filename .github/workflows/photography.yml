@@ -89,6 +89,8 @@ jobs:
           CONTENT="<!-- wp:image {\"id\":${LANDSCAPE_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true},\"className\":\"is-style-slateframe-photo-feature\"} --><figure class=\"wp-block-image size-large is-style-slateframe-photo-feature\"><img src=\"${LANDSCAPE_SRC}\" alt=\"Raster landscape fixture\" class=\"wp-image-${LANDSCAPE_ID} wp-image-raster wp-image-raster-landscape\" width=\"${LANDSCAPE_WIDTH}\" height=\"${LANDSCAPE_HEIGHT}\"/><figcaption class=\"wp-element-caption\">Responsive raster photography fixture</figcaption></figure><!-- /wp:image --><!-- wp:gallery {\"align\":\"wide\",\"linkTo\":\"none\",\"columns\":2,\"imageCrop\":false,\"className\":\"browser-raster-gallery is-style-slateframe-contact-sheet\"} --><figure class=\"wp-block-gallery alignwide has-nested-images columns-2 browser-raster-gallery is-style-slateframe-contact-sheet\"><!-- wp:image {\"id\":${PORTRAIT_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true}} --><figure class=\"wp-block-image size-large\"><img src=\"${PORTRAIT_SRC}\" alt=\"Raster portrait fixture\" class=\"wp-image-${PORTRAIT_ID} wp-image-raster-portrait\" width=\"${PORTRAIT_WIDTH}\" height=\"${PORTRAIT_HEIGHT}\"/><figcaption class=\"wp-element-caption\">Portrait frame — 日本語 العربية</figcaption></figure><!-- /wp:image --><!-- wp:image {\"id\":${SQUARE_ID},\"sizeSlug\":\"large\",\"linkDestination\":\"none\",\"lightbox\":{\"enabled\":true}} --><figure class=\"wp-block-image size-large\"><img src=\"${SQUARE_SRC}\" alt=\"Raster square fixture\" class=\"wp-image-${SQUARE_ID} wp-image-raster-square\" width=\"${SQUARE_WIDTH}\" height=\"${SQUARE_HEIGHT}\"/><figcaption class=\"wp-element-caption\">Square frame — 中文 multilingual caption</figcaption></figure><!-- /wp:image --></figure><!-- /wp:gallery -->"
           PAGE_ID=$(wp post create --path=/tmp/wp-photo --post_type=page --post_status=publish --post_title='Raster Photography Fixture' --post_content="$CONTENT" --porcelain)
           echo "SLATEFRAME_RASTER_PHOTO_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
+          wp eval-file "$GITHUB_WORKSPACE/tests/fixtures/gallery-fixtures.php" "$PORTRAIT_ID" "$SQUARE_ID" "$PAGE_ID" --path=/tmp/wp-photo >> "$GITHUB_ENV"
+          wp eval-file "$GITHUB_WORKSPACE/tests/fixtures/verify-gallery-fixtures.php" "$PAGE_ID" "$PORTRAIT_ID" "$SQUARE_ID" --path=/tmp/wp-photo
       - name: Install Playwright and start WordPress
         run: |
           npm install --package-lock=false --no-audit --no-fund
@@ -98,7 +100,17 @@ jobs:
       - name: Verify responsive raster and lightbox behavior
         env:
           PLAYWRIGHT_TEST_BASE_URL: http://127.0.0.1:8080
-        run: npx playwright test tests/browser/photography-raster-lightbox.spec.js
+          PLAYWRIGHT_JSON_OUTPUT_FILE: test-artifacts/photography-lightbox/playwright-results.json
+        run: |
+          set -euo pipefail
+          : "${SLATEFRAME_RASTER_PHOTO_PATH:?Missing raster fixture}"
+          : "${SLATEFRAME_CLASS_ONLY_GALLERY_PATH:?Missing class-only fixture}"
+          : "${SLATEFRAME_PLAIN_GALLERY_PATH:?Missing plain Gallery fixture}"
+          rm -rf test-artifacts/photography-lightbox
+          mkdir -p test-artifacts/photography-lightbox
+          npx playwright test --reporter=list,html,json tests/browser/photography-raster-lightbox.spec.js tests/browser/photography-native-sequence.spec.js tests/browser/photography-class-only.spec.js tests/browser/photography-zoom-caption.spec.js
+      - name: Require executed Gallery test coverage
+        run: python3 tests/verify_gallery_ci_results.py
       - name: Upload photography artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
