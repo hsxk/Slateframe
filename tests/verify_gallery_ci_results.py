@@ -32,29 +32,62 @@ REQUIRED.update({
 
 
 def verify(report):
+    """Validate individual executions *and* reporter totals, never only totals."""
+    if not isinstance(report, dict) or not isinstance(report.get('suites'), list) or not report['suites']:
+        raise ValueError('Missing Playwright suites')
+    if report.get('errors'):
+        raise ValueError('Playwright reporter contains top-level errors')
     found = {}
-    def walk(suite, filename=""):
-        filename = suite.get("file", filename)
-        for spec in suite.get("specs", []):
-            for test in spec.get("tests", []):
-                key = (Path(filename).name, spec.get("title"), test.get("projectName"))
-                found.setdefault(key, []).append(test)
-        for child in suite.get("suites", []):
+    counts = {'expected': 0, 'skipped': 0}
+
+    def walk(suite, filename=''):
+        if not isinstance(suite, dict):
+            raise ValueError('Malformed Playwright suite')
+        filename = Path(suite.get('file') or filename).name
+        for spec in suite.get('specs', []):
+            if not isinstance(spec, dict) or not isinstance(spec.get('tests'), list):
+                raise ValueError('Malformed Playwright spec')
+            for test in spec['tests']:
+                if not isinstance(test, dict):
+                    raise ValueError('Malformed Playwright test')
+                key = (filename, spec.get('title'), test.get('projectName'))
+                if not all(isinstance(part, str) and part for part in key):
+                    raise ValueError('Missing Playwright test identity')
+                if key in found:
+                    raise ValueError(f'Duplicate Gallery test identity: {key}')
+                found[key] = test
+                status, results = test.get('status'), test.get('results')
+                if status not in counts or not isinstance(results, list) or len(results) != 1:
+                    raise ValueError(f'Unexpected, missing or retried Gallery test: {key}')
+                result = results[0]
+                if not isinstance(result, dict) or result.get('status') != ('passed' if status == 'expected' else 'skipped'):
+                    raise ValueError(f'Inconsistent Gallery test outcome: {key}')
+                if result.get('errors') or result.get('error'):
+                    raise ValueError(f'Gallery test includes execution errors: {key}')
+                counts[status] += 1
+        for child in suite.get('suites', []):
             walk(child, filename)
-    for suite in report.get("suites", []):
+
+    for suite in report['suites']:
         walk(suite)
-    for key in sorted(REQUIRED):
-        matches = found.get(key, [])
-        if len(matches) != 1:
-            raise ValueError(f"Required Gallery test not executed exactly once: {key}")
-        results = matches[0].get("results", [])
-        if len(results) != 1 or results[0].get("status") != "passed" or matches[0].get("status") not in ("expected", None):
-            raise ValueError(f"Gallery test failed, skipped or retried: {key}")
-    summary = report.get("stats", {})
-    if not summary or any(summary.get(k, 0) for k in ("unexpected", "flaky", "interrupted")):
-        raise ValueError("Playwright report includes unexpected or flaky tests")
-    print(f"Verified {len(REQUIRED)} executed Gallery viewport assertions")
+    missing = REQUIRED - found.keys()
+    if missing:
+        raise ValueError(f'Required Gallery test not executed: {sorted(missing)[0]}')
+    for key in REQUIRED:
+        if found[key]['status'] != 'expected':
+            raise ValueError(f'Required Gallery test skipped: {key}')
+    stats = report.get('stats')
+    if not isinstance(stats, dict):
+        raise ValueError('Missing Playwright statistics')
+    for key in ('expected', 'skipped', 'unexpected', 'flaky'):
+        if type(stats.get(key)) is not int or stats[key] < 0:
+            raise ValueError(f'Invalid Playwright statistic: {key}')
+    if stats['expected'] != counts['expected'] or stats['skipped'] != counts['skipped']:
+        raise ValueError('Playwright statistics disagree with executed tests')
+    if stats['unexpected'] or stats['flaky'] or stats.get('interrupted', 0):
+        raise ValueError('Playwright report includes unexpected, interrupted or flaky tests')
+    print(f'Verified {len(REQUIRED)} required Gallery assertions; {counts["expected"]} passed, {counts["skipped"]} intentional skips')
 
 
-if __name__ == "__main__":
-    verify(json.loads(REPORT.read_text(encoding="utf-8")))
+if __name__ == '__main__':
+    verify(json.loads(REPORT.read_text(encoding='utf-8')))
