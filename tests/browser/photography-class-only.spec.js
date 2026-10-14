@@ -93,6 +93,28 @@ test('forced colors and reduced motion do not break layout',async ({page})=>{
   expect(m.display).toBe('grid');expect(m.overflow).toBeLessThanOrEqual(1);
   for(const w of m.widths)expect(w).toBeGreaterThan(0);
 });
+test('two-frame Gallery centers final image in LTR and RTL at every viewport', async ({page}) => {
+  const g = await gallery(page);
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
+    await expect.poll(() => g.evaluate(node => {
+      const galleryRect = node.getBoundingClientRect();
+      const figure = node.querySelector(':scope > figure.wp-block-image:last-child');
+      const figureRect = figure.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      const contentLeft = galleryRect.left + parseFloat(style.paddingLeft);
+      const contentRight = galleryRect.right - parseFloat(style.paddingRight);
+      return Math.abs((contentLeft + contentRight - figureRect.left - figureRect.right) / 2);
+    }), {message: `Final frame must be centered (${direction})`}).toBeLessThanOrEqual(2);
+    const m = await g.evaluate(node => {
+      const galleryRect = node.getBoundingClientRect();
+      const last = node.querySelector(':scope > figure.wp-block-image:last-child').getBoundingClientRect();
+      return {left: last.left, right: last.right, galleryLeft: galleryRect.left, galleryRight: galleryRect.right};
+    });
+    expect(m.left).toBeGreaterThanOrEqual(m.galleryLeft - 1);
+    expect(m.right).toBeLessThanOrEqual(m.galleryRight + 1);
+  }
+});
 test('class-only Gallery records full WordPress screenshot',async ({page})=>{
   const width=page.viewportSize().width;
   test.skip(![390,1440].includes(width),'Representative viewports');

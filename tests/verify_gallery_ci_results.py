@@ -15,6 +15,8 @@ VIEWPORTS = (320, 375, 390, 412, 768, 1440, 1920)
 REQUIRED = {(filename, title, f'viewport-{width}') for filename, title in SUITES.items()
             if filename != 'photography-zoom-caption.spec.js' for width in VIEWPORTS}
 REQUIRED.update({
+    *{('photography-native-sequence.spec.js', 'two-frame Gallery centers final image in LTR and RTL at every viewport', f'viewport-{w}') for w in VIEWPORTS},
+    *{('photography-class-only.spec.js', 'two-frame Gallery centers final image in LTR and RTL at every viewport', f'viewport-{w}') for w in VIEWPORTS},
     ('photography-raster-lightbox.spec.js', 'raster photography exposes responsive candidates and stable intrinsic geometry', 'viewport-390'),
     ('photography-native-sequence.spec.js', 'Core Lightbox keyboard focus and 44px target', 'viewport-390'),
     ('photography-native-sequence.spec.js', 'Gallery WCAG A/AA axe', 'viewport-390'),

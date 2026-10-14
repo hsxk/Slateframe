@@ -76,6 +76,28 @@ test('Gallery WCAG A/AA axe',async ({page})=>{
     .withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa','wcag22aa']).analyze();
   expect(r.violations.map(v=>v.id)).toEqual([]);
 });
+test('two-frame Gallery centers final image in LTR and RTL at every viewport', async ({page}) => {
+  const g = await gallery(page);
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
+    await expect.poll(() => g.evaluate(node => {
+      const galleryRect = node.getBoundingClientRect();
+      const figure = node.querySelector(':scope > figure.wp-block-image:last-child');
+      const figureRect = figure.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      const contentLeft = galleryRect.left + parseFloat(style.paddingLeft);
+      const contentRight = galleryRect.right - parseFloat(style.paddingRight);
+      return Math.abs((contentLeft + contentRight - figureRect.left - figureRect.right) / 2);
+    }), {message: `Final frame must be centered (${direction})`}).toBeLessThanOrEqual(2);
+    const m = await g.evaluate(node => {
+      const galleryRect = node.getBoundingClientRect();
+      const last = node.querySelector(':scope > figure.wp-block-image:last-child').getBoundingClientRect();
+      return {left: last.left, right: last.right, galleryLeft: galleryRect.left, galleryRight: galleryRect.right};
+    });
+    expect(m.left).toBeGreaterThanOrEqual(m.galleryLeft - 1);
+    expect(m.right).toBeLessThanOrEqual(m.galleryRight + 1);
+  }
+});
 test('full WordPress page screenshots',async ({page})=>{
   const width=page.viewportSize().width;
   test.skip(![320,390,768,1440,1920].includes(width),'Representative viewports');
