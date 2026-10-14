@@ -59,6 +59,10 @@ No. Slateframe is designed around WordPress core templates, blocks, patterns, me
 
 No. The theme is language-agnostic and works with normal WordPress locales. Multilingual plugins may integrate through public hooks without becoming core dependencies.
 
+= Can I use the Photo sequence style without a Slateframe pattern? =
+
+Yes. Apply Photo sequence to a native Core Gallery in the block Styles panel. The first image spans the two-column desktop grid; narrow screens use one column. Images keep their natural proportions, even with the Core crop option enabled. Core lightbox remains optional.
+
 = Does Slateframe support RTL and CJK content? =
 
 The layout architecture uses logical properties and targeted RTL corrections. Long translated strings and CJK titles are included in the responsive browser regression suite.

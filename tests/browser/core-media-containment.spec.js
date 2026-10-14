@@ -4,6 +4,14 @@ test('native Core media remain bounded at seven responsive widths and in RTL', a
   const post = page.locator('.slateframe-card-title a').first();
   await expect(post).toBeVisible();
   await post.click();
+  await page.waitForLoadState('networkidle');
+  // The Core media containment contract is meaningful only after the
+  // singular reading stylesheet and global image rules are available.
+  await expect.poll(() => page.evaluate(() => {
+    const hrefs = [...document.styleSheets].map(sheet => sheet.href || '');
+    return hrefs.some(href => href.includes('/style.css')) &&
+      hrefs.some(href => href.includes('/assets/css/reading.css'));
+  })).toBe(true);
   const prose = page.locator('.slateframe-prose').first();
   await expect(prose).toBeVisible();
   await prose.evaluate(root => {
