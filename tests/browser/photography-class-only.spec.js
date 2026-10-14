@@ -12,7 +12,8 @@ async function gallery(page) {
   await expect(g.locator('figcaption')).toHaveCount(2);
   for(const img of await g.locator('img').all()){
     await img.scrollIntoViewIfNeeded();
-    await expect.poll(()=>img.evaluate(n=>n.complete && n.naturalWidth>0)).toBe(true);
+    await expect.poll(()=>img.evaluate(n=>n.complete && n.naturalWidth>0 && n.naturalHeight>0)).toBe(true);
+    await img.evaluate(async n=>{await n.decode();await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));});
   }
   return g;
 }
@@ -36,6 +37,7 @@ test('ordinary Core Gallery without class or lightbox does not load Photography 
 });
 test('class-only Gallery keeps bounded grid and natural media ratio',async ({page})=>{
   const g=await gallery(page),v=page.viewportSize();
+  await expect.poll(()=>g.locator('img').evaluateAll(ns=>Math.max(...ns.map(i=>{const b=i.getBoundingClientRect();return b.width>0&&b.height>0&&i.naturalHeight>0?Math.abs(b.width/b.height-i.naturalWidth/i.naturalHeight):Infinity;}))),{message:'Decoded Core Gallery media must settle at natural aspect ratio',timeout:5000}).toBeLessThan(0.03);
   const m=await g.evaluate(n=>({
     display:getComputedStyle(n).display,
     columns:getComputedStyle(n).gridTemplateColumns.trim().split(/\s+/).length,

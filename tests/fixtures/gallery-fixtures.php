@@ -31,7 +31,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		false !== strpos( $raster->post_content, 'browser-native-sequence' ) ) {
 		throw new RuntimeException( 'Missing raster page or duplicate native Gallery.' );
 	}
-	$image = static function ( $id, $lightbox ) {
+	$image    = static function ( $id, $lightbox ) {
 		$attributes = array(
 			'id'              => $id,
 			'sizeSlug'        => 'large',
@@ -47,8 +47,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 		return '<!-- wp:image ' . wp_json_encode( $attributes ) . ' --><figure class="wp-block-image size-large">' .
 			$html . '<figcaption class="wp-element-caption">Portrait / Square — 中文 日本語 العربية</figcaption></figure><!-- /wp:image -->';
 	};
-	$gallery = static function ( $classes, $image_ids, $lightbox ) use ( $image ) {
-		$attributes = array( 'columns' => 2, 'imageCrop' => false );
+	$gallery  = static function ( $classes, $image_ids, $lightbox ) use ( $image ) {
+		$attributes = array(
+			'columns'   => 2,
+			'imageCrop' => false,
+		);
 		if ( $classes ) {
 			$attributes['className'] = $classes;
 		}
@@ -60,23 +63,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 		return '<!-- wp:gallery ' . wp_json_encode( $attributes ) . ' -->' .
 			$html . '</figure><!-- /wp:gallery -->';
 	};
-	$native = $gallery( 'browser-native-sequence is-style-slateframe-photo-sequence', array( $ids[0], $ids[1] ), true );
+	$native   = $gallery( 'browser-native-sequence is-style-slateframe-photo-sequence', array( $ids[0], $ids[1] ), true );
 	$variants = array(
 		'SLATEFRAME_CLASS_ONLY_GALLERY_PATH' => array(
 			'Class-only Gallery fixture',
 			$gallery( 'browser-class-only-sequence slateframe-gallery-sequence', array( $ids[0], $ids[1] ), false ),
 		),
-		'SLATEFRAME_PLAIN_GALLERY_PATH' => array(
+		'SLATEFRAME_PLAIN_GALLERY_PATH'      => array(
 			'Plain Gallery negative control',
 			$gallery( '', array( $ids[1] ), false ),
 		),
 	);
-	$created = array();
+	$created  = array();
 	try {
 		foreach ( $variants as $key => $variant ) {
 			$id = wp_insert_post(
-				array( 'post_type' => 'page', 'post_status' => 'publish',
-					'post_title' => $variant[0], 'post_content' => $variant[1] ),
+				array(
+					'post_type'    => 'page',
+					'post_status'  => 'publish',
+					'post_title'   => $variant[0],
+					'post_content' => $variant[1],
+				),
 				true
 			);
 			if ( is_wp_error( $id ) || ! $id ) {
@@ -85,7 +92,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 			$created[ $key ] = $id;
 		}
 		$updated = wp_update_post(
-			array( 'ID' => $ids[2], 'post_content' => $raster->post_content . $native ),
+			array(
+				'ID'           => $ids[2],
+				'post_content' => $raster->post_content . $native,
+			),
 			true
 		);
 		if ( is_wp_error( $updated ) || ! $updated ) {
