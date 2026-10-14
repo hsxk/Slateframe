@@ -91,3 +91,42 @@ test('native labels, keyboard, zoom and forced-colors preserve accessibility', a
     path: path.join(directory, 'native-form-targets-rtl-zoom-' + width + '.png'),
   });
 });
+
+test('native file selector wraps its button in narrow RTL forced-colors layout', async ({ page }, testInfo) => {
+  const width = testInfo.project.use.viewport?.width;
+  test.skip(![320, 390, 1440].includes(width), 'Representative native file-button viewports');
+  await mount(page);
+  await page.evaluate(() => {
+    document.documentElement.dir = 'rtl';
+    document.documentElement.style.fontSize = '64px';
+    for (const input of document.querySelectorAll('#slateframe-native-form-fixture input[type="file"]')) {
+      input.style.inlineSize = '58px';
+    }
+  });
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  const files = page.locator('#slateframe-native-form-fixture input[type="file"]');
+  await expect(files).toHaveCount(2);
+  for (const input of await files.all()) {
+    const measure = await input.evaluate((node) => {
+      const button = getComputedStyle(node, '::file-selector-button');
+      return {
+        inputWidth: node.getBoundingClientRect().width,
+        buttonWidth: parseFloat(button.width),
+        buttonHeight: parseFloat(button.height),
+        whiteSpace: button.whiteSpace,
+        overflowWrap: button.overflowWrap,
+      };
+    });
+    expect(measure.inputWidth).toBeGreaterThan(0);
+    expect(measure.buttonWidth).toBeLessThanOrEqual(measure.inputWidth + 1);
+    expect(measure.buttonHeight).toBeGreaterThanOrEqual(44);
+    expect(measure.whiteSpace).toBe('normal');
+    expect(measure.overflowWrap).toBe('anywhere');
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  const directory = path.resolve('test-artifacts/screenshots');
+  await fs.mkdir(directory, { recursive: true });
+  await files.last().screenshot({
+    path: path.join(directory, 'native-file-selector-rtl-forced-colors-' + width + '.png'),
+  });
+});

@@ -23,5 +23,11 @@ class NativeFormTargetContract(unittest.TestCase):
             self.assertIn(token, rule)
 
 
+    def test_native_file_button_wraps_in_narrow_forced_color_layout(self):
+        self.assertIn('form input[type=file]::file-selector-button{', CSS)
+        rule = CSS.split('form input[type=file]::file-selector-button{', 1)[1].split('}', 1)[0]
+        for token in ('max-inline-size:100%', 'min-block-size:var(--slateframe-control)', 'white-space:normal', 'overflow-wrap:anywhere'):
+            self.assertIn(token, rule)
+
 if __name__ == '__main__':
     unittest.main()
