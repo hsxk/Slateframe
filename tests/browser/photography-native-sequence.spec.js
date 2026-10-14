@@ -20,14 +20,14 @@ async function gallery(page) {
 }
 test('serialized Gallery preserves responsive grid, uncropped media and sources', async ({page})=>{
   const g=await gallery(page), width=page.viewportSize().width;
-  await expect.poll(()=>g.locator('img').evaluateAll(ns=>Math.max(...ns.map(i=>{const b=i.getBoundingClientRect();return b.width>0&&b.height>0&&i.naturalHeight>0?Math.abs(b.width/b.height-i.naturalWidth/i.naturalHeight):Infinity;}))),{message:'Decoded Core Gallery media must settle at natural aspect ratio',timeout:5000}).toBeLessThan(0.03);
+  await expect.poll(()=>g.locator('img').evaluateAll(ns=>ns.every(i=>{const b=i.getBoundingClientRect();return i.complete&&i.naturalWidth>0&&i.naturalHeight>0&&b.width>0&&b.height>0&&getComputedStyle(i).objectFit==='contain';})),{message:'Decoded Core Gallery media must have visible contained boxes',timeout:5000}).toBe(true);
   const m=await g.evaluate(n=>({
     display:getComputedStyle(n).display,
     columns:getComputedStyle(n).gridTemplateColumns.trim().split(/\s+/).length,
     span:getComputedStyle(n.querySelector(':scope > figure')).gridColumnEnd,
     overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
-    images:[...n.querySelectorAll('img')].map(i=>{const b=i.getBoundingClientRect();return {
-      w:b.width,h:b.height,nw:i.naturalWidth,nh:i.naturalHeight,alt:i.alt,
+    images:[...n.querySelectorAll('img')].map(i=>{const b=i.getBoundingClientRect(),s=getComputedStyle(i),scale=Math.min(b.width/i.naturalWidth,b.height/i.naturalHeight);return {
+      w:b.width,h:b.height,nw:i.naturalWidth,nh:i.naturalHeight,paintW:i.naturalWidth*scale,paintH:i.naturalHeight*scale,alt:i.alt,
       fit:getComputedStyle(i).objectFit,srcset:i.getAttribute('srcset')||'',
       sizes:i.getAttribute('sizes')||''};})
   }));
@@ -42,7 +42,10 @@ test('serialized Gallery preserves responsive grid, uncropped media and sources'
     expect(i.alt).not.toBe('');expect(i.fit).toBe('contain');
     expect(i.srcset.split(',').length).toBeGreaterThanOrEqual(2);
     expect(i.sizes).not.toBe('');
-    expect(Math.abs(i.w/i.h-i.nw/i.nh)).toBeLessThan(0.03);
+    expect(i.paintW).toBeGreaterThanOrEqual(44);expect(i.paintH).toBeGreaterThanOrEqual(44);
+    expect(i.paintW).toBeLessThanOrEqual(i.w+1);expect(i.paintH).toBeLessThanOrEqual(i.h+1);
+    expect(Math.min(i.w-i.paintW,i.h-i.paintH)).toBeLessThanOrEqual(1);
+    expect(Math.abs(i.paintW/i.paintH-i.nw/i.nh)).toBeLessThan(0.03);
   }
 });
 test('multilingual captions contain within RTL and zoomed layout',async ({page})=>{
