@@ -893,6 +893,32 @@ function slateframe_focusable_calendar_block( $block_content ) {
 add_filter( 'render_block_core/calendar', 'slateframe_focusable_calendar_block' );
 
 /**
+ * Keep native Core Code and Preformatted scroll containers keyboard reachable.
+ *
+ * @param string $block_content Rendered Core block markup.
+ * @return string
+ */
+function slateframe_focusable_code_block( $block_content ) {
+	if ( '' === $block_content || ( false === strpos( $block_content, 'wp-block-code' ) && false === strpos( $block_content, 'wp-block-preformatted' ) ) ) {
+		return $block_content;
+	}
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+	while ( $processor->next_tag( 'pre' ) ) {
+		if ( ! $processor->has_class( 'wp-block-code' ) && ! $processor->has_class( 'wp-block-preformatted' ) ) {
+			continue;
+		}
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+		break;
+	}
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/code', 'slateframe_focusable_code_block' );
+add_filter( 'render_block_core/preformatted', 'slateframe_focusable_code_block' );
+
+
+/**
  * Keep direct TablePress output reachable when the table itself becomes the
  * horizontal scroll owner inside Slateframe's reading measure.
  *

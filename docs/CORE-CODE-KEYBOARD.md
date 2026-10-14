@@ -1,7 +1,9 @@
-# Keyboard access to native Core code
+# Native Core code keyboard scrolling
 
-Slateframe keeps WordPress Core Code and Preformatted blocks as native `pre` and `code` markup. Long lines should scroll within the reading measure, without widening the page.
+WordPress Core Code and Preformatted blocks retain their native `pre` and `code` elements. Slateframe adds `tabindex="0"` to the rendered Core `pre` scroll container only if an author has not already set tabindex. The filter does not rewrite arbitrary Classic HTML, plugins or other blocks. The existing reading and editor CSS keeps long lines horizontally scrollable without enlarging the document.
 
-A proposed accessibility improvement adds `tabindex="0"` to Core-rendered scroll containers only when no author-provided tabindex exists. The change must not rewrite plugin-owned blocks or classic HTML. Keyboard and screen-reader behavior must be verified in real browsers before release.
+The real-WordPress showcase includes long unbroken Core Code and Preformatted lines. Chromium tests exercise native ArrowRight (LTR) and ArrowLeft (RTL) keyboard scrolling at 320, 375, 390, 412, 768, 1440 and 1920px. At 390 and 1440px they also inspect 200% text zoom, forced colors, focus, overflow and screenshot evidence.
 
-Validation targets: 320, 375, 390, 412, 768, 1440 and 1920 CSS pixels; LTR/RTL; 200% text zoom; forced colors; native keyboard scrolling and screenshots. This document describes an acceptance target, not a verified release result.
+The compact mobile header menu additionally caps its scrollable height to a viewport-relative measure and reserves a stable scrollbar gutter. A long multilingual navigation fixture checks that the last link remains keyboard reachable at 200% text zoom without document-level overflow.
+
+Manual Firefox, Safari/VoiceOver and NVDA review remains required before release. No JavaScript or third-party block runtime is added for code scrolling.
