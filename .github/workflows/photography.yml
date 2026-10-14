@@ -29,6 +29,10 @@ jobs:
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The PR event defaults to a synthetic merge commit. Evidence must
+          # identify the actual head being tested, not the synthetic merge SHA.
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
@@ -111,6 +115,12 @@ jobs:
           npx playwright test --reporter=list,html,json tests/browser/photography-raster-lightbox.spec.js tests/browser/photography-native-sequence.spec.js tests/browser/photography-class-only.spec.js tests/browser/photography-zoom-caption.spec.js
       - name: Require executed Gallery test coverage
         run: python3 tests/verify_gallery_ci_results.py
+      - name: Require exact-SHA Gallery screenshot evidence
+        env:
+          SLATEFRAME_EVIDENCE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          python3 tests/verify_gallery_screenshots.py
       - name: Upload photography artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
