@@ -628,4 +628,31 @@ test('real WordPress raster Gallery exercises sequence caption geometry at RTL 4
     expect(screenshot.readUInt32BE(16)).toBe(projectWidth(testInfo));
     expect(screenshot.readUInt32BE(20)).toBeGreaterThanOrEqual(Math.ceil(footerBottom)-2);
   }
+  if (projectWidth(testInfo) === 390) {
+    // A 400% text-only zoom combined with a short landscape viewport must
+    // widen the caption instead of forcing 64px text into a 90px image width.
+    await page.setViewportSize({ width: 360, height: 225 });
+    await inspect('RTL long caption 400% / short landscape viewport');
+    for (const img of await page.locator('#main-content img').all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect.poll(() => img.evaluate(n => n.complete && n.naturalWidth > 0)).toBe(true);
+    }
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      window.scrollTo(0, 0);
+    });
+    const footerBottom = await page.locator('footer').last().evaluate(
+      el => el.getBoundingClientRect().bottom + window.scrollY
+    );
+    const out = path.resolve('test-artifacts/photography-lightbox');
+    await fs.mkdir(out, { recursive: true });
+    const image = await page.screenshot({
+      path: path.join(out, 'sequence-caption-textzoom-360x225.png'),
+      fullPage: true,
+      animations: 'disabled',
+    });
+    expect(image.readUInt32BE(16)).toBe(360);
+    expect(image.readUInt32BE(20)).toBeGreaterThanOrEqual(Math.ceil(footerBottom)-2);
+  }
 });
