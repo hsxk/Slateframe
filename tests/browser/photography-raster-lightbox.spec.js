@@ -579,14 +579,25 @@ test('real WordPress raster Gallery exercises sequence caption geometry at RTL 4
       const media = node.querySelector('img').getBoundingClientRect();
       const caption = node.querySelector('figcaption').getBoundingClientRect();
       return {figWidth:fig.width,mediaWidth:media.width,captionWidth:caption.width,
-        mediaStart:media.left,captionStart:caption.left,captionHeight:caption.height,
+        mediaStart:media.left,captionStart:caption.left,
+        mediaCenter:(media.left+media.right)/2,figCenter:(fig.left+fig.right)/2,
+        captionHeight:caption.height,
         overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};
     });
     expect(m.mediaWidth, label).toBeGreaterThan(0);
     expect(m.captionHeight, label).toBeGreaterThan(0);
-    expect(Math.abs(m.figWidth-m.mediaWidth), label).toBeLessThanOrEqual(4);
-    expect(Math.abs(m.captionWidth-m.mediaWidth), label).toBeLessThanOrEqual(4);
-    expect(Math.abs(m.captionStart-m.mediaStart), label).toBeLessThanOrEqual(4);
+    expect(Math.abs(m.captionWidth-m.figWidth), label).toBeLessThanOrEqual(4);
+    if (label === 'normal') {
+      expect(Math.abs(m.figWidth-m.mediaWidth), label).toBeLessThanOrEqual(4);
+      expect(Math.abs(m.captionStart-m.mediaStart), label).toBeLessThanOrEqual(4);
+    } else {
+      // At 400% text sizing a 90px portrait must not force an unreadable
+      // 90px caption. Allow the figure to widen while centering its media.
+      expect(m.captionWidth, label).toBeGreaterThanOrEqual(
+        Math.min(240, page.viewportSize().width - 24)
+      );
+      expect(Math.abs(m.mediaCenter-m.figCenter), label).toBeLessThanOrEqual(4);
+    }
     expect(m.overflow, label).toBeLessThanOrEqual(1);
   };
   await inspect('normal');
