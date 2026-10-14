@@ -17,9 +17,9 @@ class SpatialCalcContract(unittest.TestCase):
 
     def test_hero_and_pagination_use_valid_spatial_sums(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
-        self.assertIn("calc(var(--slateframe-stack-gap) + var(--slateframe-stack-gap))", css)
-        self.assertIn(".slateframe-entry-hero{margin-block-end:clamp(", css)
-        self.assertIn(".slateframe-pagination{margin-block:calc(", css)
+        doubled = "calc(var(--slateframe-stack-gap)*2)"
+        self.assertIn(".slateframe-entry-hero{margin-block-end:clamp(" + doubled + ",5vw,", css)
+        self.assertIn(".slateframe-pagination{margin-block:" + doubled + " var(--slateframe-section)", css)
 
     def test_heading_anchor_offset_uses_valid_spatial_sum(self):
         css = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
