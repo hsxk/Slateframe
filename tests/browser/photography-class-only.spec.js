@@ -24,7 +24,7 @@ test('class-only Gallery loads Photography CSS without lightbox',async ({page})=
 });
 test('ordinary Core Gallery without class or lightbox does not load Photography CSS',async ({page})=>{
   const plain=process.env.SLATEFRAME_PLAIN_GALLERY_PATH;
-  test.skip(!plain,'Plain Core Gallery fixture required');
+  expect(plain, 'Plain Core Gallery negative-control fixture is required when class-only Gallery tests run').toBeTruthy();
   await page.goto(plain,{waitUntil:'domcontentloaded'});
   const g=page.locator('#main-content .wp-block-gallery');
   await expect(g).toBeVisible();
