@@ -18,3 +18,5 @@ form input[type=file]{white-space:normal;overflow-wrap:anywhere}
 
 
 @media screen{.wp-block-footnotes a[href^="#fnref"]{display:inline-grid;place-items:center;min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);max-inline-size:100%;border-radius:var(--slateframe-radius)}:is([id^=fnref],.wp-block-footnotes li[id^=fn]){scroll-margin-block-start:var(--slateframe-header-height);&:target{outline:2px solid var(--slateframe-accent);@media(forced-colors:active){outline-color:Highlight}}}}
+
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-details[open]>summary+*{margin-block-start:0}

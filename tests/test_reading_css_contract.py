@@ -24,8 +24,10 @@ class SharedReadingCssTest(unittest.TestCase):
         css = READING.read_text(encoding="utf-8")
         self.assertIn("& .wp-block-details summary{display:list-item;", css)
         self.assertIn("min-block-size:var(--slateframe-control)", css)
-        self.assertIn("padding-block:.25em", css)
-        self.assertIn("list-style-position:inside;cursor:pointer", css)
+        self.assertIn("padding-block:max(.25em,calc((var(--slateframe-control) - 1.5em)/2))", css)
+        self.assertIn("list-style-position:inside;overflow-wrap:anywhere;cursor:pointer", css)
+        self.assertIn("border-block:var(--slateframe-rule)", css)
+        self.assertIn("margin-block-end:var(--slateframe-component-gap)", css)
         self.assertNotIn(".wp-block-details summary::marker{", css)
         self.assertNotIn("& .wp-block-details summary{min-block-size:var(--slateframe-control);display:flex;", css)
 
