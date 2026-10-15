@@ -32,7 +32,9 @@ jobs:
         with:
           # The PR event defaults to a synthetic merge commit. Evidence must
           # identify the actual head being tested, not the synthetic merge SHA.
+          repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'

@@ -450,3 +450,37 @@ test('appearance profile stays contained across content modes and captures revie
 		await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
 });
+
+
+test('appearance profile keeps Core Footnote return controls within bounded dimensions', async ({ page }, testInfo) => {
+	await page.goto(process.env.SLATEFRAME_POST_PATH || showcasePath, { waitUntil: 'networkidle' });
+	const prose = page.locator('.slateframe-prose').first();
+	await expect(prose).toBeVisible();
+	await prose.evaluate(node => {
+		const region = document.createElement('section');
+		region.className = 'slateframe-appearance-footnotes';
+		region.innerHTML = '<p>Reference <sup id="fnref-appearance"><a href="#fn-appearance">1</a></sup></p><ol class="wp-block-footnotes"><li id="fn-appearance">Native Core Footnote <a href="#fnref-appearance" aria-label="Return to reference">↩</a></li></ol>';
+		node.append(region);
+	});
+	const target = prose.locator('.slateframe-appearance-footnotes a[href="#fnref-appearance"]');
+	const metrics = await target.evaluate(node => {
+		const rect = node.getBoundingClientRect();
+		return {
+			width: rect.width,
+			height: rect.height,
+			control: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
+			overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	});
+	near(metrics.control, profile.control, 1);
+	expect(metrics.width).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(metrics.height).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(metrics.overflow).toBeLessThanOrEqual(1);
+	await prose.locator('a[href="#fn-appearance"]').click();
+	await expect(prose.locator('#fn-appearance')).toHaveCSS('outline-style', 'solid');
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await prose.locator('.slateframe-appearance-footnotes').screenshot({
+		path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-footnotes.png`),
+	});
+});

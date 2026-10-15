@@ -359,3 +359,44 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 
 	await expect(page.locator('.interface-interface-skeleton__header, .editor-header').first()).toBeVisible();
 });
+
+test('real Gutenberg canvas applies native Core Footnote return control geometry', async ({ page }, testInfo) => {
+	const canvas = await loginAndOpenEditor(page);
+	const root = canvas.locator('.editor-styles-wrapper').first();
+	const fixture = root.locator('.slateframe-editor-footnote-qa');
+	await root.evaluate((node) => {
+		const section = document.createElement('section');
+		section.className = 'slateframe-editor-footnote-qa';
+		section.innerHTML = '<p>Core reference <sup id="fnref-editor-qa"><a href="#fn-editor-qa">1</a></sup></p><ol class="wp-block-footnotes"><li id="fn-editor-qa">Editor note 日本語 中文 العربية <a href="#fnref-editor-qa" aria-label="Return to reference">↩</a></li></ol>';
+		node.append(section);
+	});
+	try {
+		const backreference = fixture.locator('.wp-block-footnotes a[href="#fnref-editor-qa"]');
+		await expect(backreference).toBeVisible();
+		const metrics = await backreference.evaluate((node) => {
+			const box = node.getBoundingClientRect();
+			return {
+				width: box.width,
+				height: box.height,
+				control: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
+				inlineDisplay: getComputedStyle(document.querySelector('.slateframe-editor-footnote-qa sup a')).display,
+				rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			};
+		});
+		expect(metrics.control).toBeGreaterThanOrEqual(44);
+		expect(metrics.width).toBeGreaterThanOrEqual(metrics.control - 1);
+		expect(metrics.height).toBeGreaterThanOrEqual(metrics.control - 1);
+		expect(metrics.inlineDisplay).not.toBe('inline-flex');
+		expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
+		await fixture.evaluate((node) => { node.dir = 'rtl'; });
+		await page.emulateMedia({ forcedColors: 'active' });
+		await backreference.focus();
+		await expect(backreference).toBeFocused();
+		expect(await backreference.evaluate((node) => getComputedStyle(node).outlineStyle)).not.toBe('none');
+		const screenshotDir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(screenshotDir, { recursive: true });
+		await fixture.screenshot({ path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-core-footnote-control.png`) });
+	} finally {
+		await fixture.evaluate((node) => node.remove()).catch(() => {});
+	}
+});
