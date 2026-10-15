@@ -26,6 +26,16 @@ test('real Core Calendar keeps keyboard scrolling at zoom in LTR and RTL', async
     await expect(calendar).toBeVisible();
     await expect(calendar).toHaveAttribute('tabindex', '0');
     await expect(calendar.locator('table')).toBeVisible();
+    // Test-only preceding sentinel proves real Tab access to the scroll region.
+    await calendar.evaluate(node => {
+      const marker = document.createElement('button');
+      marker.type = 'button';
+      marker.className = 'slateframe-calendar-focus-before';
+      marker.setAttribute('aria-label', 'Before calendar');
+      marker.style.cssText = 'position:absolute;inline-size:1px;block-size:1px;overflow:hidden;clip-path:inset(50%)';
+      node.before(marker);
+    });
+    const before = page.locator('.slateframe-calendar-focus-before');
     await page.addStyleTag({ content: '.slateframe-prose .wp-block-calendar table{min-inline-size:760px}' });
 
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
@@ -42,8 +52,11 @@ test('real Core Calendar keeps keyboard scrolling at zoom in LTR and RTL', async
         expect(geometry.pageOverflow, `${width}px ${dir}`).toBeLessThanOrEqual(1);
         if (width <= 412) {
           expect(geometry.scroll, `${width}px ${dir}`).toBeGreaterThan(geometry.client);
-          await calendar.focus();
+          await before.focus();
+          await expect(before).toBeFocused();
+          await page.keyboard.press('Tab');
           await expect(calendar).toBeFocused();
+          expect(await calendar.evaluate(node => node.matches(':focus-visible'))).toBe(true);
           await calendar.evaluate(node => { node.scrollLeft = 0; });
           await page.keyboard.press(dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight');
           await expect.poll(async () => Math.abs(await calendar.evaluate(node => node.scrollLeft)),
@@ -58,8 +71,13 @@ test('real Core Calendar keeps keyboard scrolling at zoom in LTR and RTL', async
       document.documentElement.style.fontSize = '200%';
     });
     await page.emulateMedia({ forcedColors: 'active' });
-    await calendar.focus();
+    await before.focus();
+    await page.keyboard.press('Tab');
+    await expect(calendar).toBeFocused();
     const zoom = await calendar.evaluate(node => ({
+      focusVisible: node.matches(':focus-visible'),
+      outlineWidth: parseFloat(getComputedStyle(node).outlineWidth),
+      outlineOffset: parseFloat(getComputedStyle(node).outlineOffset),
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       scrollable: node.scrollWidth > node.clientWidth,
       outline: getComputedStyle(node).outlineStyle,
@@ -67,6 +85,9 @@ test('real Core Calendar keeps keyboard scrolling at zoom in LTR and RTL', async
     expect(zoom.overflow).toBeLessThanOrEqual(1);
     expect(zoom.scrollable).toBe(true);
     expect(zoom.outline).not.toBe('none');
+    expect(zoom.focusVisible).toBe(true);
+    expect(zoom.outlineWidth).toBeGreaterThanOrEqual(2);
+    expect(zoom.outlineOffset).toBeLessThanOrEqual(0);
     await calendar.screenshot({ path: 'test-artifacts/screenshots/core-calendar-keyboard-390-rtl-200-forced-colors.png' });
   } finally {
     wp('post', 'delete', id, '--force');
