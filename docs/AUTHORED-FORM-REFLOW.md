@@ -23,5 +23,9 @@ non-overlap, keyboard focus, forced-colors, and Axe. This is presentation-only:
 no plugin, analytics, SEO, cache, runtime JavaScript, or production dependency.
 
 In forced-colors mode the shared form controls use the system ButtonFace and
-ButtonText pair instead of a custom light/dark palette. The browser regression
-captures the exact fixture before the axe audit so failures retain a screenshot.
+ButtonText pair instead of a custom light/dark palette. The browser regression checks both LTR and RTL at 400% text zoom,
+compares the computed foreground/background palette, and captures the exact
+fixture before each axe audit so failures retain screenshots. The forced-colors
+selector uses `:is()` rather than `:where()` because the conditional forms.css
+loads after style.css: the system palette must outrank the later authored-form
+button colors without using `!important` or raising any CSS budget.

@@ -57,18 +57,28 @@ test('authored form actions wrap at 400% zoom without clipping or losing keyboar
     }
   }
   if (![320, 390, 1440].includes(width)) return;
-  await page.evaluate(() => { document.documentElement.dir = 'rtl'; document.documentElement.style.fontSize = '64px'; });
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
-  await page.locator('#sf-save').focus();
-  await page.keyboard.press('Tab');
-  await expect(page.locator('#sf-reset')).toBeFocused();
-  expect(await page.locator('#sf-reset').evaluate((el) => el.matches(':focus-visible'))).toBe(true);
-  await page.keyboard.press('Shift+Tab');
-  await expect(page.locator('#sf-save')).toBeFocused();
   const dir = path.resolve('test-artifacts/screenshots');
   await fs.mkdir(dir, { recursive: true });
-  await form.screenshot({ path: path.join(dir, `authored-form-rtl-400-forced-colors-${width}.png`) });
-  const axe = await new AxeBuilder({ page }).include('#slateframe-authored-form-reflow')
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
-  expect(axe.violations).toEqual([]);
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate((value) => {
+      document.documentElement.dir = value;
+      document.documentElement.style.fontSize = '64px';
+    }, direction);
+    await page.locator('#sf-save').focus();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('#sf-reset')).toBeFocused();
+    expect(await page.locator('#sf-reset').evaluate((el) => el.matches(':focus-visible'))).toBe(true);
+    await page.keyboard.press('Shift+Tab');
+    await expect(page.locator('#sf-save')).toBeFocused();
+    const palette = await page.locator('#sf-save').evaluate((el) => {
+      const computed = getComputedStyle(el);
+      return { foreground: computed.color, background: computed.backgroundColor };
+    });
+    expect(palette.foreground, `${width}px ${direction} system button foreground`).not.toBe(palette.background);
+    await form.screenshot({ path: path.join(dir, `authored-form-${direction}-400-forced-colors-${width}.png`) });
+    const axe = await new AxeBuilder({ page }).include('#slateframe-authored-form-reflow')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(axe.violations, `${width}px ${direction} forced-colors`).toEqual([]);
+  }
 });

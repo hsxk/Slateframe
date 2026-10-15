@@ -15,15 +15,16 @@ class AuthoredFormZoomContract(unittest.TestCase):
         self.assertNotIn('!important', CSS)
 
     def test_forced_colors_system_button_palette(self):
-        self.assertIn('form :where(button,[type=submit],[type=button],[type=reset])', STYLE)
+        self.assertIn('form :is(button,[type=submit],[type=button],[type=reset])', STYLE)
         self.assertIn('background:ButtonFace;color:ButtonText', STYLE)
+        self.assertNotIn('form :where(button,[type=submit],[type=button],[type=reset]){background:', STYLE)
         self.assertLessEqual(len(STYLE.encode('utf-8')), 16000)
 
     def test_real_wordpress_browser_checks_zoom_direction_and_focus(self):
         for value in ('[16, 32, 64]', "['ltr', 'rtl']", 'pageOverflow',
                       'bodyOverflow', 'innerOverflow', 'flexWrap', 'Shift+Tab',
                       ':focus-visible', "forcedColors: 'active'",
-                      'authored-form-rtl-400-forced-colors-',
+                      'authored-form-${direction}-400-forced-colors-',
                       'AxeBuilder'):
             with self.subTest(value=value):
                 self.assertIn(value, BROWSER)
