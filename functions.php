@@ -843,7 +843,7 @@ function slateframe_focusable_table_block( $block_content ) {
 
 	$processor = new WP_HTML_Tag_Processor( $block_content );
 
-	while ( $processor->next_tag() ) {
+	while ( $processor->next_tag( array( 'tag_name' => 'FIGURE' ) ) ) {
 		if ( ! $processor->has_class( 'wp-block-table' ) ) {
 			continue;
 		}
@@ -876,7 +876,7 @@ function slateframe_focusable_calendar_block( $block_content ) {
 
 	$processor = new WP_HTML_Tag_Processor( $block_content );
 
-	while ( $processor->next_tag() ) {
+	while ( $processor->next_tag( array( 'tag_name' => 'DIV' ) ) ) {
 		if ( ! $processor->has_class( 'wp-block-calendar' ) ) {
 			continue;
 		}
