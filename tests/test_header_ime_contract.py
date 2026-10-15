@@ -10,7 +10,12 @@ class HeaderImeContract(unittest.TestCase):
         source = (ROOT / "assets/js/theme.js").read_text()
         self.assertEqual(source.count("d.addEventListener('keydown'"), 1)
         self.assertIn("e.defaultPrevented||e.isComposing||e.keyCode===229", source)
-        self.assertIn("e.key==='Escape'&&h.classList.contains('is-open')", source)
+        # The compact runtime shares the same state predicate across click, Escape,
+        # focus, and pointer handlers; test its semantic link to is-open.
+        self.assertIn("O='is-open'", source)
+        self.assertIn("opened=()=>H.contains(O)", source)
+        self.assertIn("e.key==='Escape'&&opened()", source)
+        self.assertIn("t.addEventListener('click',()=>opened()?close(true):open())", source)
         self.assertIn("e.preventDefault();close(true)", source)
 
     def test_browser_covers_cjk_and_normal_keyboard_exit(self):
