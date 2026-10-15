@@ -21,3 +21,7 @@ WordPress page. Acceptance covers 320/375/390/412/768/1440/1920px,
 LTR/RTL, 100/200/400% text zoom, page and internal overflow, button bounds,
 non-overlap, keyboard focus, forced-colors, and Axe. This is presentation-only:
 no plugin, analytics, SEO, cache, runtime JavaScript, or production dependency.
+
+In forced-colors mode the shared form controls use the system ButtonFace and
+ButtonText pair instead of a custom light/dark palette. The browser regression
+captures the exact fixture before the axe audit so failures retain a screenshot.

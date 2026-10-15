@@ -8,11 +8,9 @@ test('real Gutenberg post title preserves inherited and explicit CJK tracking', 
   await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
   await page.locator('#user_login').fill('admin');
   await page.locator('#user_pass').fill('ci-password');
-  await Promise.all([
-    page.waitForURL(/\/wp-admin\//, { waitUntil: 'domcontentloaded' }),
-    page.locator('#wp-submit').click(),
-  ]);
+  await page.locator('#wp-submit').click();
   await page.goto(`/wp-admin/post.php?post=${postId}&action=edit`, { waitUntil: 'domcontentloaded' });
+  await expect(page).toHaveURL(/\/wp-admin\/post\.php\?post=/);
   await page.waitForFunction(() => Boolean(window.wp?.data?.select?.('core/block-editor')?.getBlocks?.().length));
   // Core's welcome dialog must be dismissed before taking editor evidence.
   const welcomeGuide = page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i }).first();

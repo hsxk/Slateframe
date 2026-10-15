@@ -65,10 +65,10 @@ test('authored form actions wrap at 400% zoom without clipping or losing keyboar
   expect(await page.locator('#sf-reset').evaluate((el) => el.matches(':focus-visible'))).toBe(true);
   await page.keyboard.press('Shift+Tab');
   await expect(page.locator('#sf-save')).toBeFocused();
-  const axe = await new AxeBuilder({ page }).include('#slateframe-authored-form-reflow')
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
-  expect(axe.violations).toEqual([]);
   const dir = path.resolve('test-artifacts/screenshots');
   await fs.mkdir(dir, { recursive: true });
   await form.screenshot({ path: path.join(dir, `authored-form-rtl-400-forced-colors-${width}.png`) });
+  const axe = await new AxeBuilder({ page }).include('#slateframe-authored-form-reflow')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+  expect(axe.violations).toEqual([]);
 });
