@@ -7,9 +7,10 @@ sizing, the default English "Post Comment" control expands beyond the viewport
 
 Slateframe supplies only the `submit_button` presentation template to Core's
 `comment_form()` API. It preserves Core's `%1$s` name, `%2$s` id, `%3$s` class,
-and `%4$s` translated label, while rendering a semantic `<button type="submit">`
+and `%4$s` translated label and submitted value, while rendering a semantic `<button type="submit">`
 whose text can wrap. This does not change form fields, nonce handling,
-validation, submission, comments behavior, or plugin integrations.
+validation, submission, comments behavior, or plugin integrations. The browser
+regression also checks the native submitter FormData value.
 
 The regression test checks the real WordPress fixture at all seven standard
 viewport projects, both writing directions, forced colors, keyboard focus,

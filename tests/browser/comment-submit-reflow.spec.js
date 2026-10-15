@@ -13,6 +13,10 @@ test('native comment submit label reflows at 400% in both directions without cli
 	const submit = form.locator('button#submit[name="submit"][type="submit"]');
 	await expect(submit).toHaveCount(1);
 	await expect(submit).toHaveText(/\S/);
+	await expect(submit).toHaveAttribute('value', /\S/);
+	expect((await submit.getAttribute('value')).trim()).toBe((await submit.innerText()).trim());
+	const postedValue = await submit.evaluate((button) => new FormData(button.form, button).get(button.name));
+	expect(postedValue).toBe((await submit.innerText()).trim());
 	await expect(form.locator('input[type="submit"]')).toHaveCount(0);
 	for (const dir of ['ltr', 'rtl']) {
 		await page.locator('html').evaluate((element, direction) => {

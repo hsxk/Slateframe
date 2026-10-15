@@ -10,7 +10,7 @@ class CommentSubmitReflowContract(unittest.TestCase):
         php = (ROOT / 'comments.php').read_text(encoding='utf-8')
         self.assertIn('comment_form(', php)
         self.assertIn("'submit_button' => '<button", php)
-        for marker in ('name="%1$s"', 'id="%2$s"', 'class="%3$s"', '>%4$s</button>'):
+        for marker in ('name="%1$s"', 'id="%2$s"', 'class="%3$s"', 'value="%4$s"', '>%4$s</button>'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, php)
         self.assertNotIn('type="submit" value="%4$s"', php)
@@ -19,7 +19,7 @@ class CommentSubmitReflowContract(unittest.TestCase):
         script = (ROOT / 'tests/browser/comment-submit-reflow.spec.js').read_text(encoding='utf-8')
         for marker in ('forcedColors:', "'400%'", "['ltr', 'rtl']", 'pageOverflow',
                        'textOverflow', 'verticalOverflow', 'outlineStyle',
-                       'toBeFocused()', 'fullPage: true'):
+                       'toBeFocused()', 'new FormData(', 'fullPage: true'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, script)
 

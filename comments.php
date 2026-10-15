@@ -54,7 +54,7 @@ $slateframe_comment_count = get_comments_number();
 	// submit control cannot wrap its value and can overflow narrow viewports.
 	comment_form(
 		array(
-			'submit_button' => '<button name="%1$s" type="submit" id="%2$s" class="%3$s">%4$s</button>',
+			'submit_button' => '<button name="%1$s" type="submit" id="%2$s" class="%3$s" value="%4$s">%4$s</button>',
 		)
 	);
 	?>
