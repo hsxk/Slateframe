@@ -118,6 +118,7 @@ test('native file selector wraps its button in narrow RTL forced-colors layout',
         overflowWrap: button.overflowWrap,
         internalOverflow: node.scrollWidth - node.clientWidth,
         inputWhiteSpace: getComputedStyle(node).whiteSpace,
+        inputOverflowWrap: getComputedStyle(node).overflowWrap,
       };
     });
     expect(measure.inputWidth).toBeGreaterThan(0);
@@ -128,6 +129,7 @@ test('native file selector wraps its button in narrow RTL forced-colors layout',
     expect(measure.overflowWrap).toBe('anywhere');
     expect(measure.internalOverflow, 'Native file label must not be clipped inside the input').toBeLessThanOrEqual(1);
     expect(measure.inputWhiteSpace).toBe('normal');
+    expect(measure.inputOverflowWrap).toBe('anywhere');
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   const directory = path.resolve('test-artifacts/screenshots');
