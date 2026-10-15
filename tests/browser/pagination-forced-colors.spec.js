@@ -32,7 +32,7 @@ function expectSelectedState(state, label) {
 	expect(state.color, `${label}: ${JSON.stringify(state)}`).toBe(state.highlight);
 	expect(state.outline).toBe('solid');
 	expect(state.width).toBeGreaterThanOrEqual(2);
-	expect(state.offset).toBeLessThanOrEqual(-2);
+	expect(state.offset).toBe(0);
 	expect(state.targetWidth).toBeGreaterThanOrEqual(44);
 	expect(state.targetHeight).toBeGreaterThanOrEqual(44);
 	expect(state.overflow).toBeLessThanOrEqual(1);

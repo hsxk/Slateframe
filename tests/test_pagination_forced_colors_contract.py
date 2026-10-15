@@ -10,7 +10,7 @@ BROWSER = ROOT / 'tests/browser/pagination-forced-colors.spec.js'
 class PaginationForcedColorsContract(unittest.TestCase):
     def test_current_page_has_non_color_marker_in_system_high_contrast(self):
         css = STYLE.read_text(encoding='utf-8')
-        rule = 'nav .current{outline:2px solid Highlight;outline-offset:-2px}'
+        rule = ':is(nav,.wp-block-query-pagination) .current{outline:2px solid Highlight}'
         self.assertIn('@media(forced-colors:active){', css)
         self.assertIn(rule, css)
         self.assertEqual(css.count(rule), 1)
