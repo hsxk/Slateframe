@@ -10,7 +10,7 @@ BROWSER = (ROOT / 'tests/browser/print-closed-details.spec.js').read_text(encodi
 class PrintDetailsContractTest(unittest.TestCase):
     def test_shared_script_budget_and_native_lifecycle(self):
         self.assertLessEqual(len(JS.encode('utf-8')), 3376)
-        for token in ("'beforeprint'", "'afterprint'", "details:not([open])", 'pd.forEach(x=>x.open=true)', 'pd?.forEach(x=>x.open=false)', 'if(pd)return'):
+        for token in ("'beforeprint'", "'afterprint'", "details:not([open])", 'pd.forEach(x=>x.open=1)', 'pd?.forEach(x=>x.open=0)', 'pd||=', 'pd=0'):
             with self.subTest(token=token):
                 self.assertIn(token, JS)
 
