@@ -1,0 +1,7 @@
+# Native pagination in forced colors
+
+Slateframe preserves WordPress Core pagination, including the classic posts paginator, the Query Loop pagination block, and native `<!--nextpage-->` navigation. The current page remains marked with `aria-current="page"` and the Core `current` class. In forced-colors mode, a 2px system `Highlight` outline, inset by 2px, adds a non-color visual boundary without `forced-color-adjust:none`, JavaScript, or new pagination markup. The `nav .current` selector also supports a current marker in other native navigation contexts; it does not match WordPress menu items whose classes are `current-menu-item` or `current_page_item`.
+
+The WordPress browser test uses the existing multipage article and seven-post Portfolio Query Loop fixtures. It checks actual selected elements, Tab/Shift+Tab, 200% zoom, 320px RTL 400% zoom, all seven configured viewport widths, and screenshots at 320/390/1440. The test does not silently inject fake WordPress pagination into the DOM.
+
+The aggregate Photography + Discussion budget remains **43,000 bytes**, unchanged. The new selected-page indicator is offset by behavior-preserving selector consolidation and inherited `overflow-wrap` cleanup, so the combined runtime does not grow. Keep file-input button wrapping explicit; the input and Core file-link continue to inherit `overflow-wrap:anywhere` from the theme body. The regular-mode appearance and CJK checkbox/radio label matching must remain unchanged. Real WordPress Actions and screenshots for the new commit are still required before merging.
