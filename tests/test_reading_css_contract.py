@@ -34,7 +34,7 @@ class SharedReadingCssTest(unittest.TestCase):
 
     def test_native_scroll_focus_keeps_core_semantics_and_budget(self):
         css = READING.read_text(encoding="utf-8")
-        selector = ":is(.wp-block-code,.wp-block-table,.wp-block-calendar,.slateframe-prose pre):focus-visible"
+        selector = ":is(.wp-block-code,.wp-block-table,.wp-block-calendar,.slateframe-prose pre,.slateframe-prose>table):focus-visible"
         self.assertEqual(css.count(selector), 1)
         self.assertIn(selector + "{outline:2px solid Highlight;outline-offset:-2px}", css)
         self.assertNotIn("-webkit-overflow-scrolling:touch", css)
