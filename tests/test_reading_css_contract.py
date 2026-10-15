@@ -28,6 +28,7 @@ class SharedReadingCssTest(unittest.TestCase):
         self.assertIn("list-style-position:inside;overflow-wrap:anywhere;cursor:pointer", css)
         self.assertIn("border-block:var(--slateframe-rule)", css)
         self.assertIn("margin-block-end:var(--slateframe-component-gap)", css)
+        self.assertIn("& .wp-block-details[open]>summary+*{margin-block-start:0}", css)
         self.assertNotIn(".wp-block-details summary::marker{", css)
         self.assertNotIn("& .wp-block-details summary{min-block-size:var(--slateframe-control);display:flex;", css)
 

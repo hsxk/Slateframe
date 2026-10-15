@@ -11,7 +11,7 @@ class CoreDetailsContract(unittest.TestCase):
         self.assertIn("border-block:var(--slateframe-rule)", css)
         self.assertNotIn(".wp-block-details summary::marker{", css)
         self.assertLessEqual(len(css.encode()), 7000)
-        self.assertIn(".wp-block-details[open]>summary+*{margin-block-start:0}", (ROOT / "style.css").read_text())
+        self.assertIn("& .wp-block-details[open]>summary+*{margin-block-start:0}", css)
 
     def test_browser_coverage(self):
         js = (ROOT / "tests/browser/core-details-accessibility.spec.js").read_text()
