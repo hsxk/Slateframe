@@ -20,13 +20,15 @@ class ClassOnlyGalleryAssets(unittest.TestCase):
         self.assertIn("'slateframe-photography-sequence'", self.php)
 
     def test_bounded_images_share_selector(self):
-        self.assertIn('.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence) .wp-block-image img', self.css)
+        self.assertIn('.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence){min-inline-size:0;max-inline-size:100%;gap:', self.css)
+        self.assertIn('gap:var(--slateframe-media-gap);& .wp-block-image img{', self.css)
         self.assertIn('max-block-size:min(62dvh,42rem)', self.css)
         self.assertIn('aspect-ratio:auto', self.css)
         self.assertIn('object-fit:contain', self.css)
 
     def test_editor_caption_parity(self):
-        self.assertIn('.slateframe-gallery-sequence) figure.wp-block-image figcaption', self.css)
+        self.assertIn('&.has-nested-images figure.wp-block-image figcaption{', self.css)
+        self.assertIn('overflow-wrap:anywhere', self.css)
         self.assertIn('.slateframe-gallery-sequence) .wp-block-image figcaption', self.editor)
 
     def test_no_theme_boundary_regression(self):
