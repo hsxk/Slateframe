@@ -49,5 +49,13 @@ $slateframe_comment_count = get_comments_number();
 		<p><?php esc_html_e( 'Comments are closed.', 'slateframe' ); ?></p>
 	<?php endif; ?>
 
-	<?php comment_form(); ?>
+	<?php
+	// A real button wraps its translated label at extreme text zoom; an input
+	// submit control cannot wrap its value and can overflow narrow viewports.
+	comment_form(
+		array(
+			'submit_button' => '<button name="%1$s" type="submit" id="%2$s" class="%3$s" value="%4$s">%4$s</button>',
+		)
+	);
+	?>
 </section>

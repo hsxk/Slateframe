@@ -49,7 +49,8 @@ async function metrics(page) {
     const b = download.getBoundingClientRect();
     return {
       filename: { width: a.width, height: a.height },
-      download: { width: b.width, height: b.height },
+      filenameOverflowWrap: getComputedStyle(filename).overflowWrap,
+      download: { width: b.width, height: b.height, minHeight: parseFloat(getComputedStyle(download).minHeight) },
       verseDirection: getComputedStyle(verse).direction,
       codeDirection: getComputedStyle(code).direction,
       verseWrap: getComputedStyle(verse).whiteSpace,
@@ -76,7 +77,9 @@ test('native Core File and Verse preserve geometry and writing direction at seve
       const m = await metrics(page);
       expect(m.filename.height, width + 'px ' + dir).toBeGreaterThanOrEqual(43);
       expect(m.filename.width).toBeGreaterThanOrEqual(43);
-      expect(m.download.height).toBeGreaterThanOrEqual(43);
+      expect(m.filenameOverflowWrap).toBe('anywhere');
+      expect(m.download.minHeight, width + 'px ' + dir).toBeGreaterThanOrEqual(44);
+      expect(m.download.height, width + 'px ' + dir).toBeGreaterThanOrEqual(44);
       expect(m.download.width).toBeGreaterThanOrEqual(43);
       expect(m.verseDirection).toBe(dir);
       expect(m.codeDirection).toBe('ltr');

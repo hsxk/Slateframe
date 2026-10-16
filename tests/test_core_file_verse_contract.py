@@ -7,18 +7,29 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class NativeCorePublishing(unittest.TestCase):
     def test_file_button_geometry_in_frontend_and_editor(self):
-        for file, scope in (("reading.css", ".slateframe-prose"), ("editor.css", ".editor-styles-wrapper")):
-            css = (ROOT / "assets/css" / file).read_text()
-            self.assertIn(scope + " .wp-block-file__button{display:inline-flex", css)
-            self.assertIn("min-block-size:var(--slateframe-control)", css)
-            self.assertIn("max-inline-size:100%", css)
-            self.assertIn("border-radius:var(--slateframe-radius)", css)
-            self.assertIn("white-space:normal", css)
+        cases = (
+            ("reading.css", ".slateframe-prose a.wp-block-file__button", "min-height:var(--slateframe-control)"),
+            ("editor.css", ".editor-styles-wrapper .wp-block-file__button", "min-block-size:var(--slateframe-control)"),
+        )
+        for filename, selector, minimum in cases:
+            with self.subTest(filename=filename):
+                css = (ROOT / "assets/css" / filename).read_text(encoding="utf-8")
+                self.assertEqual(css.count(selector + "{"), 1)
+                rule = css.split(selector + "{", 1)[1].split("}", 1)[0]
+                for property in (
+                    "display:inline-flex", minimum, "max-inline-size:100%",
+                    "border-radius:var(--slateframe-radius)", "white-space:normal",
+                ):
+                    with self.subTest(property=property):
+                        self.assertIn(property, rule)
+        # The bounded control token cannot fall below the 44px target.
+        style = (ROOT / "style.css").read_text(encoding="utf-8")
+        self.assertIn("--slateframe-control:44px", style)
 
     def test_verse_is_editorial_and_preformatted_remains_scrollable(self):
-        reading = (ROOT / "assets/css/reading.css").read_text()
-        publishing = (ROOT / "assets/css/publishing.css").read_text()
-        editor = (ROOT / "assets/css/editor.css").read_text()
+        reading = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
+        publishing = (ROOT / "assets/css/publishing.css").read_text(encoding="utf-8")
+        editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         self.assertIn(".slateframe-prose pre:not(.wp-block-verse),.wp-block-code{", reading)
         for css, scope in ((publishing, ".slateframe-prose"), (editor, ".editor-styles-wrapper")):
             self.assertIn(scope + " .wp-block-verse{font-family:inherit;white-space:pre-wrap;overflow-wrap:anywhere", css)

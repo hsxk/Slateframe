@@ -137,7 +137,8 @@ test('primary mobile controls meet the 44px touch-target baseline', async ({ pag
 	expect(summaryBox).not.toBeNull();
 	expect(summaryBox.height).toBeGreaterThanOrEqual(44);
 
-	const submit = page.locator('.slateframe-comments input[type="submit"]').first();
+	const submit = page.locator('.slateframe-comments button#submit[type="submit"]').first();
+	await expect(submit).toHaveAccessibleName(/\S/);
 	const submitBox = await submit.boundingBox();
 	expect(submitBox).not.toBeNull();
 	expect(submitBox.height).toBeGreaterThanOrEqual(44);

@@ -24,10 +24,22 @@ class SharedReadingCssTest(unittest.TestCase):
         css = READING.read_text(encoding="utf-8")
         self.assertIn("& .wp-block-details summary{display:list-item;", css)
         self.assertIn("min-block-size:var(--slateframe-control)", css)
-        self.assertIn("padding-block:.25em", css)
-        self.assertIn("list-style-position:inside;cursor:pointer", css)
+        self.assertIn("padding-block:max(.25em,calc((var(--slateframe-control) - 1.5em)/2))", css)
+        self.assertIn("list-style-position:inside;overflow-wrap:anywhere;cursor:pointer", css)
+        self.assertIn("border-block:var(--slateframe-rule)", css)
+        self.assertIn("margin-block-end:var(--slateframe-component-gap)", css)
+        self.assertIn("& .wp-block-details[open]>summary+*{margin-block-start:0}", css)
         self.assertNotIn(".wp-block-details summary::marker{", css)
         self.assertNotIn("& .wp-block-details summary{min-block-size:var(--slateframe-control);display:flex;", css)
+
+    def test_native_scroll_focus_keeps_core_semantics_and_budget(self):
+        css = READING.read_text(encoding="utf-8")
+        selector = ":is(.wp-block-code,.wp-block-table,.wp-block-calendar,.slateframe-prose pre,.slateframe-prose>table):focus-visible"
+        self.assertEqual(css.count(selector), 1)
+        self.assertIn(selector + "{outline:2px solid Highlight;outline-offset:-2px}", css)
+        self.assertNotIn("-webkit-overflow-scrolling:touch", css)
+        self.assertNotIn(".wp-block-table{tabindex:", css)
+        self.assertLessEqual(len(css.encode("utf-8")), 7000)
 
     def test_editor_has_no_competing_duplicate_typography(self):
         editor = EDITOR.read_text(encoding="utf-8")

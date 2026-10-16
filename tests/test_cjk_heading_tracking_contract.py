@@ -27,8 +27,14 @@ class CjkHeadingTrackingContract(unittest.TestCase):
         editor = (ROOT / 'tests/browser/cjk-heading-editor.spec.js').read_text(encoding='utf-8')
         for term in ('ja', 'ja-JP', 'zh-Hans', 'zh-Hant', 'ko-KR', 'en', '320', '375', '390', '412', '768', '1440', '1920', 'rtl', '200%', 'forcedColors', 'scrollWidth'):
             self.assertIn(term, browser)
-        for term in ('SLATEFRAME_EDITOR_POST_ID', 'editor-canvas', 'wp-block-post-title', 'domcontentloaded', 'ja', 'en', 'rtl', '200%', 'forcedColors'):
+        for term in ('SLATEFRAME_EDITOR_POST_ID', 'editor-canvas', 'wp-block-post-title', 'ja', 'en', 'rtl', '200%', 'forcedColors'):
             self.assertIn(term, editor)
+        # Authentication moved into the shared real WordPress editor helper.
+        # Preserve the original DOM-ready contract without requiring duplication.
+        helper = (ROOT / 'tests/browser/support/editor-login.js').read_text(encoding='utf-8')
+        self.assertIn("openAuthenticatedEditor(page, postId)", editor)
+        self.assertIn("'domcontentloaded'", helper)
+        self.assertIn("'core/block-editor'", helper)
 
 
 if __name__ == '__main__':

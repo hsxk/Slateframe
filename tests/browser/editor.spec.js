@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { openAuthenticatedEditor } = require('./support/editor-login');
 
 const editorPostId = process.env.SLATEFRAME_EDITOR_POST_ID;
 const projectWidth = (testInfo) => testInfo.project.use.viewport?.width || 1440;
@@ -11,19 +12,7 @@ test.beforeEach(({}, testInfo) => {
 });
 
 async function loginAndOpenEditor(page) {
-	await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
-	await page.locator('#user_login').fill('admin');
-	await page.locator('#user_pass').fill('ci-password');
-	await Promise.all([
-		page.waitForURL(/\/wp-admin\//),
-		page.locator('#wp-submit').click(),
-	]);
-
-	await page.goto(`/wp-admin/post.php?post=${editorPostId}&action=edit`, { waitUntil: 'domcontentloaded' });
-	await page.waitForFunction(() => {
-		const select = window.wp?.data?.select?.('core/block-editor');
-		return Boolean(select?.getBlocks?.().length);
-	});
+	await openAuthenticatedEditor(page, editorPostId);
 
 	const welcomeGuide = page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i }).first();
 	try {
