@@ -114,7 +114,7 @@ jobs:
           : "${SLATEFRAME_PLAIN_GALLERY_PATH:?Missing plain Gallery fixture}"
           rm -rf test-artifacts/photography-lightbox
           mkdir -p test-artifacts/photography-lightbox
-          npx playwright test --reporter=list,html,json tests/browser/photography-raster-lightbox.spec.js tests/browser/photography-native-sequence.spec.js tests/browser/photography-class-only.spec.js tests/browser/photography-zoom-caption.spec.js
+          npx playwright test --reporter=list,html,json tests/browser/photography-raster-lightbox.spec.js tests/browser/photography-native-sequence.spec.js tests/browser/photography-class-only.spec.js tests/browser/photography-zoom-caption.spec.js tests/browser/lightbox-rtl-safe-area.spec.js
       - name: Require executed Gallery test coverage
         run: python3 tests/verify_gallery_ci_results.py
       - name: Require exact-SHA Gallery screenshot evidence

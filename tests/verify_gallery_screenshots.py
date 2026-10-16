@@ -17,6 +17,9 @@ REQUIRED = {
     **{f'native-sequence-page-{w}.png': w for w in WIDTHS},
     **{f'photography-page-viewport-{w}.png': w for w in WIDTHS},
     **{f'class-only-sequence-{w}.png': w for w in (390, 1440)},
+    **{f'lightbox-rtl-close-viewport-{w}.png': w for w in WIDTHS},
+    **{f'lightbox-navigation-{direction}-viewport-{w}.png': w for w in WIDTHS for direction in ('ltr', 'rtl')},
+    **{f'lightbox-navigation-breakpoint-{w}.png': w for w in (959, 960)},
     **{f'lightbox-landscape-viewport-{w}.png': w for w in WIDTHS},
     **{f'lightbox-portrait-viewport-{w}.png': w for w in WIDTHS},
     **{f'zoom-caption-{kind}-{direction}-360x225.png': 360
