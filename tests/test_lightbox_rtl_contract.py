@@ -32,6 +32,10 @@ class NativeLightboxContract(unittest.TestCase):
     def test_keyboard_and_target_size_are_covered(self):
         self.assertIn('browser-raster-gallery', TEST)
         self.assertIn('toHaveCount(2)', TEST)
+        self.assertIn('wp-lightbox-navigation-button-next:visible', TEST)
+        self.assertIn('wp-lightbox-navigation-button-prev:visible', TEST)
+        self.assertIn('toHaveAccessibleName(/Raster square fixture/i)', TEST)
+        self.assertIn('toHaveAccessibleName(/Raster portrait fixture/i)', TEST)
         self.assertIn('toBeGreaterThanOrEqual(44)', TEST)
         self.assertIn("page.keyboard.press('Escape')", TEST)
         self.assertIn('toBeFocused()', TEST)

@@ -101,7 +101,13 @@ test('native Core gallery navigation respects mobile bottom safe area and deskto
         expect(m.transform).not.toBe('none');
       }
     }
+    // The existing portrait screenshot is a separate evidence scene. Navigate to
+    // the square image before capture, then return to verify focus restoration.
+    await dialog.locator('.wp-lightbox-navigation-button-next:visible').click();
+    await expect(dialog).toHaveAccessibleName(/Raster square fixture/i);
     if (evidenceWidths.includes(width(info))) await capture(page, 'lightbox-navigation-' + direction + '-viewport-' + width(info) + '.png');
+    await dialog.locator('.wp-lightbox-navigation-button-prev:visible').click();
+    await expect(dialog).toHaveAccessibleName(/Raster portrait fixture/i);
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
     await expect(trigger).toBeFocused();
