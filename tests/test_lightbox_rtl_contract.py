@@ -14,7 +14,8 @@ class NativeLightboxContract(unittest.TestCase):
     def test_rtl_reanchors_without_double_counting_safe_area(self):
         self.assertIn('.wp-lightbox-overlay:dir(rtl) .wp-lightbox-close-button', CSS)
         self.assertIn('right:auto;left:calc(env(safe-area-inset-left,0px)', CSS)
-        self.assertIn('margin-inline-end:0', CSS)
+        self.assertIn('margin-inline-end:var(--slateframe-component-gap)', CSS)
+        self.assertNotIn('margin-inline-end:0}', CSS)
         self.assertIn('margin-block-start:var(--slateframe-component-gap)', CSS)
         self.assertNotIn('margin-block-start:max(', CSS)
 

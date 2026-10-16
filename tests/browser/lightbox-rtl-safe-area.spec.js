@@ -52,10 +52,11 @@ async function verifyClose(page, info, direction) {
   expect(Math.abs(m.margin - m.gap)).toBeLessThanOrEqual(1);
   if (direction === 'rtl') {
     expect(m.left).toBeLessThan(m.vw - m.right);
-    expect(m.left).toBeGreaterThanOrEqual(m.offset - 1);
+    expect(m.left).toBeGreaterThanOrEqual(m.offset + m.gap - 1);
     if (evidenceWidths.includes(width(info))) await capture(page, 'lightbox-rtl-close-viewport-' + width(info) + '.png');
   } else {
     expect(m.vw - m.right).toBeLessThan(m.left);
+    expect(m.vw - m.right).toBeGreaterThanOrEqual(m.offset + m.gap - 1);
   }
   await page.keyboard.press('Escape');
   await expect(dialog).toBeHidden();
