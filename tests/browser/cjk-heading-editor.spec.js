@@ -1,17 +1,12 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
+const { openAuthenticatedEditor } = require('./support/editor-login');
 const postId = process.env.SLATEFRAME_EDITOR_POST_ID;
 const widthOf = info => info.project.use.viewport?.width || 1440;
 
 test('real Gutenberg post title preserves inherited and explicit CJK tracking', async ({ page }, info) => {
   test.skip(!postId || ![390, 1440].includes(widthOf(info)), 'Requires WordPress editor fixture');
-  await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
-  await page.locator('#user_login').fill('admin');
-  await page.locator('#user_pass').fill('ci-password');
-  await page.locator('#wp-submit').click();
-  await page.goto(`/wp-admin/post.php?post=${postId}&action=edit`, { waitUntil: 'domcontentloaded' });
-  await expect(page).toHaveURL(/\/wp-admin\/post\.php\?post=/);
-  await page.waitForFunction(() => Boolean(window.wp?.data?.select?.('core/block-editor')?.getBlocks?.().length));
+  await openAuthenticatedEditor(page, postId);
   // Core's welcome dialog must be dismissed before taking editor evidence.
   const welcomeGuide = page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i }).first();
   try {
