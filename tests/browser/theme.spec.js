@@ -1,3 +1,4 @@
+const { settlePortfolioImagesForEvidence } = require('./visual-evidence');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { test, expect } = require('@playwright/test');
@@ -368,19 +369,6 @@ test('site identity reflows without truncating multilingual text', async ({ page
 		path: path.join(screenshotDir, testInfo.project.name + '-site-identity-reflow.png'),
 	});
 });
-
-async function settlePortfolioImagesForEvidence(page) {
-	const images = page.locator('.slateframe-project-grid .wp-block-post-featured-image img');
-	const count = await images.count();
-	expect(count).toBeGreaterThanOrEqual(4);
-	for (let index = 0; index < count; index += 1) {
-		const image = images.nth(index);
-		await image.scrollIntoViewIfNeeded();
-		await expect.poll(() => image.evaluate((node) => node.complete && node.naturalWidth > 0)).toBe(true);
-		await image.evaluate((node) => node.decode());
-	}
-	await page.evaluate(() => window.scrollTo(0, 0));
-}
 
 test('200% text enlargement keeps core content modes contained', async ({ page }, testInfo) => {
 	test.skip(projectWidth(testInfo) !== 320, 'The narrowest viewport is the strongest text-resize containment fixture.');
