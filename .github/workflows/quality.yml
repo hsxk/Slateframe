@@ -823,18 +823,25 @@ jobs:
           # must not overlap each other or read-only stylesheet assertions.
           readonly_specs=()
           stateful_specs=()
+          authenticated_specs=()
           for spec in tests/browser/*.spec.js; do
             if grep -Eq 'execFileSync|execSync|spawnSync' "$spec"; then
               stateful_specs+=("$spec")
+            elif grep -Eq 'openAuthenticatedEditor|support/editor-login' "$spec"; then
+              # Login POSTs mutate WordPress session state; isolate them from
+              # parallel readers and fixture writers without skipping assertions.
+              authenticated_specs+=("$spec")
             else
               readonly_specs+=("$spec")
             fi
           done
           test "${#readonly_specs[@]}" -gt 0
           test "${#stateful_specs[@]}" -gt 0
-          printf 'Parallel read-only specs: %s; isolated WP fixture specs: %s\\n' "${#readonly_specs[@]}" "${#stateful_specs[@]}"
+          test "${#authenticated_specs[@]}" -gt 0
+          printf 'Parallel read-only: %s; isolated WP fixture: %s; isolated Gutenberg login: %s\\n' "${#readonly_specs[@]}" "${#stateful_specs[@]}" "${#authenticated_specs[@]}"
           npx playwright test "${readonly_specs[@]}"
           npx playwright test "${stateful_specs[@]}" --workers=1
+          npx playwright test "${authenticated_specs[@]}" --workers=1
       - name: Verify compact Appearance bounds
         if: ${{ always() }}
         env:
