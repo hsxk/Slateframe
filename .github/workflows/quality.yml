@@ -839,6 +839,8 @@ jobs:
           test "${#stateful_specs[@]}" -gt 0
           test "${#authenticated_specs[@]}" -gt 0
           printf 'Parallel read-only: %s; isolated WP fixture: %s; isolated Gutenberg login: %s\\n' "${#readonly_specs[@]}" "${#stateful_specs[@]}" "${#authenticated_specs[@]}"
+          # Preserve failure traces before a later suite clears test-results.
+          trap 'status=$?; if [ "$status" -ne 0 ] && [ -d test-results ]; then mkdir -p test-artifacts/browser-failure; cp -a test-results test-artifacts/browser-failure/responsive; fi' EXIT
           npx playwright test "${readonly_specs[@]}"
           npx playwright test "${stateful_specs[@]}" --workers=1
           npx playwright test "${authenticated_specs[@]}" --workers=1
@@ -940,6 +942,7 @@ jobs:
           name: slateframe-browser
           path: |
             test-artifacts/screenshots/
+            test-artifacts/browser-failure/
             playwright-report/
             test-results/
             /tmp/slateframe-server.log
