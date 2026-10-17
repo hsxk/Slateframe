@@ -35,6 +35,10 @@ class InventoryContract(unittest.TestCase):
                     name = f'appearance-{profile}-viewport-{width}-{surface}.png'
                     (self.root / name).write_bytes(png(width))
                     self.files.append(name)
+        for width in (320, 375, 390, 412, 768, 1440, 1920):
+            name = f'viewport-{width}-page.png'
+            (self.root / name).write_bytes(png(width))
+            self.files.append(name)
         legacy = []
         for name in self.files[:18]:
             data = (self.root / name).read_bytes()
@@ -45,9 +49,9 @@ class InventoryContract(unittest.TestCase):
         context.start()
         self.addCleanup(context.stop)
 
-    def test_generate_verify_all_48(self):
-        self.assertEqual(run('generate', self.root), 48)
-        self.assertEqual(run('verify', self.root), 48)
+    def test_generate_verify_all_required_55(self):
+        self.assertEqual(run('generate', self.root), 55)
+        self.assertEqual(run('verify', self.root), 55)
 
     def test_rejects_missing_manifest(self):
         with self.assertRaises(ValueError):
@@ -81,18 +85,19 @@ class InventoryContract(unittest.TestCase):
 
     def test_accepts_element_crop(self):
         (self.root / 'appearance-compact-viewport-390-footnotes.png').write_bytes(png(288))
-        self.assertEqual(run('generate', self.root), 49)
+        self.assertEqual(run('generate', self.root), 56)
 
     def test_all_responsive_full_pages_enforce_real_viewport_width(self):
         for width in (320, 375, 390, 412, 768, 1440, 1920):
             with self.subTest(width=width):
                 name = self.root / f'viewport-{width}-page.png'
+                original = name.read_bytes()
                 name.write_bytes(png(width))
-                self.assertEqual(run('generate', self.root), 49)
+                self.assertEqual(run('generate', self.root), 55)
                 name.write_bytes(png(width - 1))
                 with self.assertRaisesRegex(ValueError, 'width mismatch'):
                     run('generate', self.root)
-                name.unlink()
+                name.write_bytes(original)
 
     def test_non_fullpage_crops_keep_their_actual_width(self):
         for name, width in (
@@ -103,8 +108,33 @@ class InventoryContract(unittest.TestCase):
             with self.subTest(name=name):
                 path = self.root / name
                 path.write_bytes(png(width))
-                self.assertEqual(run('generate', self.root), 49)
+                self.assertEqual(run('generate', self.root), 56)
                 path.unlink()
+
+    def test_rejects_missing_appearance_mode_even_if_count_is_unchanged(self):
+        victim = self.root / 'appearance-spacious-viewport-1440-photography-lightbox.png'
+        victim.unlink()
+        (self.root / 'unrelated-extra.png').write_bytes(png(390))
+        with self.assertRaisesRegex(ValueError, 'Missing required visual coverage.*spacious'):
+            run('generate', self.root)
+
+    def test_rejects_missing_responsive_viewport_even_if_count_is_unchanged(self):
+        (self.root / 'viewport-320-page.png').unlink()
+        (self.root / 'unrelated-extra.png').write_bytes(png(390))
+        with self.assertRaisesRegex(ValueError, 'Missing required visual coverage.*viewport-320-page'):
+            run('generate', self.root)
+
+    def test_missing_visual_coverage_invalidates_previous_inventory(self):
+        run('generate', self.root)
+        (self.root / 'viewport-768-page.png').unlink()
+        with self.assertRaisesRegex(ValueError, 'visual coverage|Insufficient screenshot'):
+            run('generate', self.root)
+        self.assertFalse((self.root / MANIFEST).exists())
+
+    def test_required_coverage_is_independent_of_extra_element_crops(self):
+        (self.root / 'gutenberg-viewport-1440-portfolio-first.png').write_bytes(png(300))
+        self.assertEqual(run('generate', self.root), 56)
+        self.assertEqual(run('verify', self.root), 56)
 
     def test_rejects_legacy_hash_mismatch(self):
         data = json.loads((self.root / 'VISUAL_EVIDENCE.json').read_text())

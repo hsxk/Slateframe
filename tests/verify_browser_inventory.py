@@ -23,6 +23,29 @@ FULL_PAGE = re.compile(
 )
 NAME = re.compile(r'[a-zA-Z0-9][a-zA-Z0-9_.-]*\.png\Z')
 
+# A raw screenshot count cannot prove that all Appearance modes or viewport
+# families were captured. Extra PNGs must never satisfy this coverage gate.
+REQUIRED_APPEARANCE = frozenset(
+    f'appearance-{profile}-viewport-{width}-{surface}.png'
+    for profile in ('compact', 'default', 'spacious')
+    for width in (390, 1440)
+    for surface in (
+        'portfolio', 'photography', 'knowledge', 'post',
+        'home-controls', 'search-controls', 'page', 'photography-lightbox',
+    )
+)
+REQUIRED_RESPONSIVE = frozenset(
+    f'viewport-{width}-page.png'
+    for width in (320, 375, 390, 412, 768, 1440, 1920)
+)
+REQUIRED_SCREENSHOTS = REQUIRED_APPEARANCE | REQUIRED_RESPONSIVE
+
+
+def check_coverage(records):
+    missing = REQUIRED_SCREENSHOTS.difference(records)
+    if missing:
+        raise ValueError('Missing required visual coverage: ' + ', '.join(sorted(missing)))
+
 
 def scan(root):
     reject_linked_ancestors(root)
@@ -56,8 +79,9 @@ def scan(root):
                                   width=actual_width, height=height, bytes=len(data))
         if len(records) > 5000:
             raise ValueError('Too many screenshot files')
-    if len(records) < 48:
+    if len(records) < len(REQUIRED_SCREENSHOTS):
         raise ValueError('Insufficient screenshot evidence')
+    check_coverage(records)
     return dict(sorted(records.items()))
 
 
