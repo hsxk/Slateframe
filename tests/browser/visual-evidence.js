@@ -36,4 +36,4 @@ async function settleLightboxImageForEvidence(image) {
 	await image.evaluate((node) => node.decode());
 }
 
-module.exports = { settlePortfolioImagesForEvidence, settlePhotographyImagesForEvidence, settleLightboxImageForEvidence };
+module.exports = { settleImagesForEvidence, settlePortfolioImagesForEvidence, settlePhotographyImagesForEvidence, settleLightboxImageForEvidence };

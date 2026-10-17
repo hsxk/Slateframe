@@ -16,7 +16,7 @@ const context = { module: { exports: {} }, require: (id) => {
 	return { expect };
 } };
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, 'visual-evidence.js'), 'utf8'), context);
-const { settlePortfolioImagesForEvidence, settlePhotographyImagesForEvidence, settleLightboxImageForEvidence } = context.module.exports;
+const { settleImagesForEvidence, settlePortfolioImagesForEvidence, settlePhotographyImagesForEvidence, settleLightboxImageForEvidence } = context.module.exports;
 
 function fixture(count, options = {}) {
 	const log = [];
@@ -47,6 +47,10 @@ function fixture(count, options = {}) {
 	const portfolio = fixture(4);
 	await settlePortfolioImagesForEvidence(portfolio.page);
 	assert.equal(portfolio.log.filter((x) => x === 'decode').length, 4);
+	const crop = fixture(2);
+	await settleImagesForEvidence(crop.page, '#main-content .wp-block-image img', 2);
+	assert.equal(crop.log.filter((x) => x === 'decode').length, 2);
+	await assert.rejects(() => settleImagesForEvidence(fixture(1).page, '#main-content .wp-block-image img', 2));
 	const photography = fixture(5);
 	await settlePhotographyImagesForEvidence(photography.page);
 	assert.equal(photography.log.filter((x) => x === 'decode').length, 5);
@@ -60,5 +64,5 @@ function fixture(count, options = {}) {
 	await settleLightboxImageForEvidence(fixture(1).page.locator().nth(0));
 	await assert.rejects(() => settleLightboxImageForEvidence(fixture(1, { brokenAt: 0 }).page.locator().nth(0)));
 	await assert.rejects(() => settleLightboxImageForEvidence(fixture(1, { decodeFailsAt: 0 }).page.locator().nth(0)));
-	console.log('12/12 visual evidence helper scenarios passed');
+	console.log('14/14 visual evidence helper scenarios passed');
 })().catch((error) => { console.error(error); process.exitCode = 1; });

@@ -1,6 +1,7 @@
 const {test,expect}=require('@playwright/test');
 const fs=require('node:fs/promises');
 const path=require('node:path');
+const { settleImagesForEvidence } = require('./visual-evidence');
 const variants=[['native','SLATEFRAME_RASTER_PHOTO_PATH','.browser-native-sequence'],['class-only','SLATEFRAME_CLASS_ONLY_GALLERY_PATH','.browser-class-only-sequence']];
 const longCaption=('中文摄影说明 日本語の長いキャプション العربية — A translated caption must remain legible at browser zoom. ').repeat(3);
 test.beforeEach(({},info)=>test.skip(info.project.use.viewport?.width!==1440,'Representative viewport only'));
@@ -28,6 +29,7 @@ for(const [name,env,selector] of variants){
    expect(m.centers).toBeLessThanOrEqual(2);
    expect(m.below).toBe(true);
    expect(m.overflow).toBeLessThanOrEqual(1);
+   await settleImagesForEvidence(page, '#main-content .wp-block-image img', 2);
    const dest=path.resolve('test-artifacts/photography-lightbox');
    await fs.mkdir(dest,{recursive:true});
    await page.screenshot({path:path.join(dest,`zoom-caption-${name}-${dir}-360x225.png`),fullPage:true,animations:'disabled'});
