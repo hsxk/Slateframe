@@ -14,7 +14,13 @@ from verify_footnotes_screenshots import validate_png, read_bounded_regular_file
 ROOT = Path('test-artifacts/screenshots')
 MANIFEST = 'BROWSER_SCREENSHOT_INVENTORY.json'
 METADATA = frozenset(('HEAD_SHA.txt', 'VISUAL_EVIDENCE.json', MANIFEST))
-FULL_PAGE = re.compile(r'appearance-(compact|default|spacious)-viewport-(390|1440)-(?!footnotes\.png|content-pagination\.png)[a-z0-9-]+\.png\Z')
+# Viewport-prefixed files are full-page evidence; Gutenberg and control crops
+# use distinct prefixes. The two Appearance component crops remain exempt.
+FULL_PAGE = re.compile(
+    r'(?:appearance-(compact|default|spacious)-viewport-(390|1440)-'
+    r'(?!footnotes\.png|content-pagination\.png)[a-z0-9-]+'
+    r'|viewport-(320|375|390|412|768|1440|1920)-[a-z0-9-]+)\.png\Z'
+)
 NAME = re.compile(r'[a-zA-Z0-9][a-zA-Z0-9_.-]*\.png\Z')
 
 
@@ -41,7 +47,7 @@ def scan(root):
             raise ValueError('Invalid screenshot width')
         actual_width, height = validate_png(path, width)
         match = FULL_PAGE.fullmatch(path.name)
-        if match and actual_width != int(match.group(2)):
+        if match and actual_width != int(match.group(2) or match.group(3)):
             raise ValueError('Full-page viewport width mismatch')
         total += len(data)
         if total > 1024 * 1024 * 1024:

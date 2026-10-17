@@ -83,6 +83,29 @@ class InventoryContract(unittest.TestCase):
         (self.root / 'appearance-compact-viewport-390-footnotes.png').write_bytes(png(288))
         self.assertEqual(run('generate', self.root), 49)
 
+    def test_all_responsive_full_pages_enforce_real_viewport_width(self):
+        for width in (320, 375, 390, 412, 768, 1440, 1920):
+            with self.subTest(width=width):
+                name = self.root / f'viewport-{width}-page.png'
+                name.write_bytes(png(width))
+                self.assertEqual(run('generate', self.root), 49)
+                name.write_bytes(png(width - 1))
+                with self.assertRaisesRegex(ValueError, 'width mismatch'):
+                    run('generate', self.root)
+                name.unlink()
+
+    def test_non_fullpage_crops_keep_their_actual_width(self):
+        for name, width in (
+            ('compact-nav-viewport-320-200-forced-colors.png', 288),
+            ('gutenberg-viewport-1440-portfolio-first.png', 368),
+            ('appearance-spacious-viewport-1440-content-pagination.png', 800),
+        ):
+            with self.subTest(name=name):
+                path = self.root / name
+                path.write_bytes(png(width))
+                self.assertEqual(run('generate', self.root), 49)
+                path.unlink()
+
     def test_rejects_legacy_hash_mismatch(self):
         data = json.loads((self.root / 'VISUAL_EVIDENCE.json').read_text())
         data['files'][0]['sha256'] = '0' * 64
