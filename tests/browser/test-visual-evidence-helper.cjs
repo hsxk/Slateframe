@@ -21,9 +21,9 @@ const { settleImagesForEvidence, settlePortfolioImagesForEvidence, settlePhotogr
 function fixture(count, options = {}) {
 	const log = [];
 	const nodes = Array.from({ length: count }, (_, i) => ({
-		complete: true,
-		naturalWidth: options.brokenAt === i ? 0 : 160,
-		naturalHeight: options.zeroHeightAt === i ? 0 : 120,
+		complete: options.lazyAt !== i && options.stuckLazyAt !== i,
+		naturalWidth: options.brokenAt === i || options.lazyAt === i || options.stuckLazyAt === i ? 0 : 160,
+		naturalHeight: options.zeroHeightAt === i || options.lazyAt === i || options.stuckLazyAt === i ? 0 : 120,
 		decode: async () => { log.push('decode'); if (options.decodeFailsAt === i) throw Error('decode failed'); },
 	}));
 	const page = {
@@ -31,7 +31,14 @@ function fixture(count, options = {}) {
 			count: async () => nodes.length,
 			nth: (i) => ({
 				visible: options.hiddenAt !== i,
-				scrollIntoViewIfNeeded: async () => log.push('scroll'),
+				scrollIntoViewIfNeeded: async () => {
+					log.push('scroll');
+					if (options.lazyAt === i) {
+						nodes[i].complete = true;
+						nodes[i].naturalWidth = 160;
+						nodes[i].naturalHeight = 120;
+					}
+				},
 				evaluate: async (fn) => fn(nodes[i]),
 			}),
 		}),
@@ -51,6 +58,10 @@ function fixture(count, options = {}) {
 	await settleImagesForEvidence(crop.page, '#main-content .wp-block-image img', 2);
 	assert.equal(crop.log.filter((x) => x === 'decode').length, 2);
 	await assert.rejects(() => settleImagesForEvidence(fixture(1).page, '#main-content .wp-block-image img', 2));
+	const lazy = fixture(2, { lazyAt: 1 });
+	await settleImagesForEvidence(lazy.page, '#main-content .wp-block-image img', 2);
+	assert.equal(lazy.log.filter((x) => x === 'decode').length, 2);
+	await assert.rejects(() => settleImagesForEvidence(fixture(2, { stuckLazyAt: 1 }).page, '#main-content .wp-block-image img', 2));
 	const photography = fixture(5);
 	await settlePhotographyImagesForEvidence(photography.page);
 	assert.equal(photography.log.filter((x) => x === 'decode').length, 5);
@@ -64,5 +75,5 @@ function fixture(count, options = {}) {
 	await settleLightboxImageForEvidence(fixture(1).page.locator().nth(0));
 	await assert.rejects(() => settleLightboxImageForEvidence(fixture(1, { brokenAt: 0 }).page.locator().nth(0)));
 	await assert.rejects(() => settleLightboxImageForEvidence(fixture(1, { decodeFailsAt: 0 }).page.locator().nth(0)));
-	console.log('14/14 visual evidence helper scenarios passed');
+	console.log('16/16 visual evidence helper scenarios passed');
 })().catch((error) => { console.error(error); process.exitCode = 1; });
