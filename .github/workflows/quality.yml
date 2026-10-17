@@ -931,6 +931,8 @@ jobs:
           done
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
+          python3 tests/verify_browser_inventory.py generate
+          python3 tests/verify_browser_inventory.py verify
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
