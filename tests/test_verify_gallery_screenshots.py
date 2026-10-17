@@ -103,6 +103,22 @@ class ScreenshotEvidenceTests(unittest.TestCase):
         self.path.unlink()
         for i, (name, width) in enumerate(gate.REQUIRED.items()):
             (self.folder / name).write_bytes(png(width, color=1 + i))
+        for i, (name, viewport) in enumerate(gate.SUPPLEMENTAL.items()):
+            (self.folder / name).write_bytes(png(min(390, viewport), color=100 + i))
+
+    def test_missing_auxiliary_screenshot_is_rejected(self):
+        self.make_all()
+        (self.folder / 'core-sequence-320.png').unlink()
+        with patch.dict(os.environ, {'GITHUB_ACTIONS': 'false'}, clear=True):
+            with self.assertRaisesRegex(ValueError, 'auxiliary Gallery screenshot'):
+                gate.verify()
+
+    def test_auxiliary_crop_must_fit_its_viewport(self):
+        self.make_all()
+        (self.folder / 'core-sequence-320.png').write_bytes(png(321))
+        with patch.dict(os.environ, {'GITHUB_ACTIONS': 'false'}, clear=True):
+            with self.assertRaisesRegex(ValueError, 'exceeds viewport'):
+                gate.verify()
 
     def test_complete_manifest(self):
         self.make_all()
@@ -110,7 +126,7 @@ class ScreenshotEvidenceTests(unittest.TestCase):
             gate.verify()
         import json
         manifest = json.loads((self.folder / 'gallery-evidence-manifest.json').read_text())
-        self.assertEqual(len(manifest['screenshots']), len(gate.REQUIRED))
+        self.assertEqual(len(manifest['screenshots']), len(gate.REQUIRED) + len(gate.SUPPLEMENTAL))
 
     def test_duplicate_cross_scene_rejected(self):
         self.make_all()
