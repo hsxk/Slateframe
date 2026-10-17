@@ -20,3 +20,10 @@ phpcs.xml.dist
 
 # Exclude the packaging manifest itself from published themes.
 .distignore
+
+# Defense in depth: generated Python caches never belong in release ZIPs.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
