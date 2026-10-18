@@ -26,10 +26,12 @@ class PortfolioEmptyResultsContract(unittest.TestCase):
         for fragment in ('--post_type=page', '--post_content=', '--force',
                          'wp-block-query-no-results', 'wp-block-post-template > .wp-block-post',
                          'wp-block-query-pagination a', 'forcedColors', "'rtl'", "'200%'",
-                         'document.documentElement.scrollWidth'):
+                         'document.documentElement.scrollWidth', 'WP_Block_Patterns_Registry',
+                         'slateframe/portfolio-project-grid', 'Registered Portfolio Query Loop search contract changed'):
             self.assertIn(fragment, source)
         self.assertIn("const id = wp('post', 'create'", source)
         self.assertIn("wp('post', 'delete', id, '--force')", source)
+        self.assertNotIn("const content = '<!-- wp:group", source)
 
 
 if __name__ == "__main__":

@@ -45,6 +45,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Added
 
+- Introduce a portable, translatable Knowledge FAQ composition using native Core Details, with real WordPress keyboard, RTL/zoom, forced-colors and print evidence.
+
 - Native multipage post and Page navigation now has a labelled landmark, shared touch-sized controls, RTL-safe wrapping, and compact/default/spacious browser screenshot coverage.
 - Mobile site identity and header controls now stay in one aligned row for ordinary titles while preserving translated-title wrapping and keyboard access.
 

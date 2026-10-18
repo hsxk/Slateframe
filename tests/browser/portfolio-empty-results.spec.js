@@ -5,21 +5,23 @@ const path = require('node:path');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8' }).trim();
 const noMatches = 'slateframe-no-projects-found-' + '4c19b253a6';
-const content = '<!-- wp:group {"align":"wide","className":"slateframe-project-grid","layout":{"type":"constrained"}} -->' +
-  '<div class="wp-block-group alignwide slateframe-project-grid">' +
-  '<!-- wp:query {"queryId":0,"query":{"perPage":6,"postType":"post","search":"' + noMatches + '","inherit":false},"displayLayout":{"type":"flex","columns":3}} -->' +
-  '<div class="wp-block-query"><!-- wp:post-template -->' +
-  '<!-- wp:post-title {"isLink":true} /--><!-- /wp:post-template -->' +
-  '<!-- wp:query-no-results --><!-- wp:paragraph -->' +
-  '<p>No projects are available yet. 中文 日本語 العربية</p>' +
-  '<!-- /wp:paragraph --><!-- /wp:query-no-results -->' +
-  '</div><!-- /wp:query --></div><!-- /wp:group -->';
+// Exercise the registered production pattern rather than a hand-written lookalike.
+const content = () => {
+  const blocks = wp('eval', "echo WP_Block_Patterns_Registry::get_instance()->get_registered('slateframe/portfolio-project-grid')['content'];");
+  const emptySearch = '"search":""';
+  if (!blocks.includes(emptySearch)) throw new Error('Registered Portfolio Query Loop search contract changed');
+  return blocks.replace(emptySearch, '"search":"' + noMatches + '"');
+};
 
 const viewport = (info) => info.project.use.viewport?.width || 0;
 
 test('empty native Query Loop is readable without phantom cards, pagination or overflow', async ({ page }, info) => {
+  const blocks = content();
+  expect(blocks).toContain('<!-- wp:query-no-results -->');
+  expect(blocks).toContain('No projects are available yet.');
+  expect(blocks).toContain('"search":"' + noMatches + '"');
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
-    '--post_title=Slateframe empty Portfolio fixture', '--post_content=' + content, '--porcelain');
+    '--post_title=Slateframe empty Portfolio fixture', '--post_content=' + blocks, '--porcelain');
   try {
     await page.goto('/?page_id=' + id, { waitUntil: 'domcontentloaded' });
     const grid = page.locator('.slateframe-project-grid').first();
