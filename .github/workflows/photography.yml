@@ -50,7 +50,7 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
           chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
           mkdir -p /tmp/wp-photo
-          wp core download --path=/tmp/wp-photo --version=latest
+          bash bin/retry-wp-core-download.sh --path=/tmp/wp-photo --version=latest
           wp config create --path=/tmp/wp-photo --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path=/tmp/wp-photo --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-photo/wp-content/themes/slateframe

@@ -224,7 +224,7 @@ jobs:
           set -euo pipefail
           site="/tmp/wp-compat-${{ matrix.wordpress }}-${{ matrix.php }}"
           mkdir -p "$site"
-          wp core download --path="$site" --version="${{ matrix.wordpress }}"
+          bash bin/retry-wp-core-download.sh --path="$site" --version="${{ matrix.wordpress }}"
           wp config create --path="$site" --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path="$site" --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" "$site/wp-content/themes/slateframe"
@@ -265,7 +265,7 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
           chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
           mkdir -p /tmp/wp-theme-check
-          wp core download --path=/tmp/wp-theme-check --version=latest
+          bash bin/retry-wp-core-download.sh --path=/tmp/wp-theme-check --version=latest
           wp config create --path=/tmp/wp-theme-check --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp config set WP_DEBUG true --raw --path=/tmp/wp-theme-check
           wp core install --path=/tmp/wp-theme-check --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
@@ -331,7 +331,7 @@ jobs:
       - name: Install WordPress and activate Slateframe
         run: |
           mkdir -p /tmp/wp-site
-          wp core download --path=/tmp/wp-site --version=latest
+          bash bin/retry-wp-core-download.sh --path=/tmp/wp-site --version=latest
           wp config create --path=/tmp/wp-site --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path=/tmp/wp-site --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
@@ -445,7 +445,7 @@ jobs:
           set -euo pipefail
           curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp && chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
           mkdir -p /tmp/wp-browser
-          wp core download --path=/tmp/wp-browser --version=latest
+          bash bin/retry-wp-core-download.sh --path=/tmp/wp-browser --version=latest
           wp config create --path=/tmp/wp-browser --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           wp post delete 1 --force --path=/tmp/wp-browser >/dev/null
