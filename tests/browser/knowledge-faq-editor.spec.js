@@ -4,6 +4,20 @@ const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8' }).trim();
 
+async function dismissEditorWelcomeGuide(page) {
+  const guide = page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i }).first();
+  try {
+    await guide.waitFor({ state: 'visible', timeout: 2_000 });
+    const close = guide.getByRole('button', { name: /close/i }).first();
+    await expect(close).toBeVisible();
+    await close.click();
+  } catch (error) {
+    // First-use Core onboarding is optional, but must never obscure evidence.
+    if (await guide.isVisible().catch(() => false)) throw error;
+  }
+  await expect(guide).toBeHidden();
+}
+
 test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'One WordPress fixture covers seven responsive widths');
   const blocks = wp('eval', "echo WP_Block_Patterns_Registry::get_instance()->get_registered('slateframe/knowledge-faq')['content'];");
@@ -12,6 +26,7 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     '--post_title=Slateframe native FAQ editor fixture', '--post_content=' + blocks, '--porcelain');
   try {
     await openAuthenticatedEditor(page, id);
+    await dismissEditorWelcomeGuide(page);
     const framed = await page.locator('iframe[name="editor-canvas"]').count() > 0;
     const canvas = framed ? page.frameLocator('iframe[name="editor-canvas"]') : page;
     const root = canvas.locator('.editor-styles-wrapper').first();
@@ -65,10 +80,33 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     await page.setViewportSize({ width: 390, height: 900 });
     await root.evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    await expect(page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i })).toBeHidden();
+    // Check real visible text fragments, not just the element outer boxes.
+    // Closed Core Details have layout-hidden paragraphs: exclude those.
+    const zoomBounds = await faq.evaluate(node => {
+      const bounds = node.getBoundingClientRect();
+      const canvas = node.closest('.editor-styles-wrapper');
+      return {
+        overflow: canvas.scrollWidth - canvas.clientWidth,
+        clipped: [...node.querySelectorAll('h2, p, summary')].flatMap(child => {
+          if (!child.getClientRects().length) return [];
+          const box = child.getBoundingClientRect();
+          const range = document.createRange();
+          range.selectNodeContents(child);
+          const textOutside = [...range.getClientRects()].some(rect =>
+            rect.width > 0 && (rect.left < bounds.left - 2 || rect.right > bounds.right + 2));
+          return box.left < bounds.left - 1 || box.right > bounds.right + 1 || textOutside
+            ? [child.tagName.toLowerCase()] : [];
+        }),
+      };
+    });
+    expect(zoomBounds.overflow).toBeLessThanOrEqual(1);
+    expect(zoomBounds.clipped).toEqual([]);
     await faq.screenshot({ path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-390-rtl-200-forced-colors.png' });
     await page.emulateMedia({ forcedColors: 'none' });
     await page.setViewportSize({ width: 1440, height: 900 });
     await root.evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
+    await expect(page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i })).toBeHidden();
     await faq.screenshot({ path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-1440-ltr.png' });
   } finally {
     wp('post', 'delete', id, '--force');

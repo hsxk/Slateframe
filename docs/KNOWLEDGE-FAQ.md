@@ -9,3 +9,9 @@ Editors can replace every question and answer, add sources as normal Core links,
 The real WordPress browser regression reads the *registered* pattern from WordPress, publishes a disposable page, and checks its three disclosures across 320, 375, 390, 412, 768, 1440 and 1920px, LTR/RTL and bounded 44/48/56px controls. It verifies Enter/Space, 200% text zoom, forced-colors, focus outline, print rendering and no horizontal overflow. It captures a 390px RTL forced-colors image and a 1440px LTR image after clearing the keyboard-focus scroll and inline control override, and deletes the fixture even on failure. The static contract checks Core block nesting, text-domain localization, neutral copy and the absence of plugin or proprietary dependencies.
 
 Do not mark the slice released until Theme quality and Photography Actions both succeed on the exact PR HEAD and the actual screenshot artifact has been inspected. The local tests alone are not a release gate.
+
+### Gutenberg visual evidence
+
+The editor test inserts the *registered* pattern into a temporary WordPress draft and verifies Core block validity. WordPress may show a first-use "Welcome to the editor" dialog after authentication; the test must dismiss it and assert it remains hidden before **both** editor screenshots. A passing Playwright test with a dialog obscuring the pattern is not acceptable visual evidence.
+
+At 390px RTL with 200% text and forced-colors, the editor test checks actual visible heading, paragraph and summary text fragments as well as the editor's horizontal overflow. Layout-hidden paragraphs inside closed Core Details must be excluded from text-geometry checks. Reviewers should inspect the unobstructed 390px and 1440px PNGs from the exact PR HEAD artifact, not rely on the existence of screenshot files or a prior SHA's green checks.
