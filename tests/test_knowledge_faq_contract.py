@@ -47,6 +47,13 @@ class KnowledgeFaqContract(unittest.TestCase):
         self.assertEqual(source.count("'Pattern answer'"), 3)
         self.assertNotRegex(source, r'<(?:a|script|iframe|img)\b')
 
+    def test_fullpage_capture_resets_keyboard_focus_scroll_and_control_override(self):
+        source = BROWSER.read_text(encoding='utf-8')
+        self.assertIn("window.scrollTo({ top: 0, left: 0, behavior: 'instant' })", source)
+        self.assertIn('Math.abs(window.scrollY)', source)
+        self.assertIn('await summary.evaluate(node => node.blur())', source)
+        self.assertIn("node.style.removeProperty('--slateframe-control')", source)
+
     def test_real_wordpress_browser_matrix_and_cleanup(self):
         source = BROWSER.read_text(encoding='utf-8')
         for needle in (

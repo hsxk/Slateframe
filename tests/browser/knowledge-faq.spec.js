@@ -64,8 +64,17 @@ test('registered Core FAQ stays keyboard-operable, readable and bounded', async 
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-faq-390-rtl-200-forced-colors.png', fullPage: true });
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
+    await page.locator('html').evaluate(node => {
+      node.dir = 'ltr';
+      node.style.fontSize = '';
+      node.style.removeProperty('--slateframe-control');
+    });
     await page.emulateMedia({ forcedColors: 'none' });
+    // Keyboard focus scrolls the document; normalize the viewport before full-page visual evidence.
+    await summary.evaluate(node => node.blur());
+    await expect(summary).not.toBeFocused();
+    await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+    await expect.poll(() => page.evaluate(() => Math.abs(window.scrollY))).toBeLessThanOrEqual(1);
     await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-faq-1440-ltr.png', fullPage: true });
     await page.emulateMedia({ media: 'print' });
     await expect(details).toHaveCount(3);
