@@ -15,6 +15,10 @@ VIEWPORTS = (320, 375, 390, 412, 768, 1440, 1920)
 REQUIRED = {(filename, title, f'viewport-{width}') for filename, title in SUITES.items()
             if filename != 'photography-zoom-caption.spec.js' for width in VIEWPORTS}
 REQUIRED.update({
+    *{('lightbox-rtl-safe-area.spec.js', 'native Core lightbox close control follows RTL inline-end safe area and restores focus', f'viewport-{w}') for w in VIEWPORTS},
+    *{('lightbox-rtl-safe-area.spec.js', 'native Core lightbox close control retains LTR right-edge placement', f'viewport-{w}') for w in VIEWPORTS},
+    *{('lightbox-rtl-safe-area.spec.js', 'native Core gallery navigation respects mobile bottom safe area and desktop Core placement', f'viewport-{w}') for w in VIEWPORTS},
+    ('lightbox-rtl-safe-area.spec.js', 'native Core navigation preserves its 959px/960px breakpoint', 'viewport-390'),
     *{('photography-native-sequence.spec.js', 'two-frame Gallery centers final image in LTR and RTL at every viewport', f'viewport-{w}') for w in VIEWPORTS},
     *{('photography-class-only.spec.js', 'two-frame Gallery centers final image in LTR and RTL at every viewport', f'viewport-{w}') for w in VIEWPORTS},
     ('photography-raster-lightbox.spec.js', 'raster photography exposes responsive candidates and stable intrinsic geometry', 'viewport-390'),

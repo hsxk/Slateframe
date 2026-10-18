@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { settlePhotographyImagesForEvidence } = require('./visual-evidence');
 const fixture = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
 test.skip(!fixture, 'Real WordPress Gallery fixture is required.');
 async function gallery(page) {
@@ -101,7 +102,8 @@ test('two-frame Gallery centers final image in LTR and RTL at every viewport', a
 test('full WordPress page screenshots',async ({page})=>{
   const width=page.viewportSize().width;
   test.skip(![320,390,768,1440,1920].includes(width),'Representative viewports');
-  await gallery(page);await page.evaluate(()=>scrollTo(0,0));
+  await gallery(page);
+  await settlePhotographyImagesForEvidence(page);
   const dir=path.resolve('test-artifacts/photography-lightbox');
   await fs.mkdir(dir,{recursive:true});
   await page.screenshot({path:path.join(dir,'native-sequence-page-'+width+'.png'),fullPage:true,animations:'disabled'});

@@ -36,6 +36,10 @@ jobs:
           node --check assets/js/theme.js
           node --check playwright.config.js
           find tests/browser -type f -name '*.js' -print0 | xargs -0 -n1 node --check
+          node --check tests/browser/test-visual-evidence-helper.cjs
+          node tests/browser/test-visual-evidence-helper.cjs
+          node tests/browser/test-wordpress-login.cjs
+          node tests/browser/test-editor-login-helper.cjs
       - name: Validate build script syntax
         run: bash -n bin/build-theme-zip.sh
       - name: Validate screenshot PNG and corruption regression
@@ -222,7 +226,7 @@ jobs:
           set -euo pipefail
           site="/tmp/wp-compat-${{ matrix.wordpress }}-${{ matrix.php }}"
           mkdir -p "$site"
-          wp core download --path="$site" --version="${{ matrix.wordpress }}"
+          bash bin/retry-wp-core-download.sh --path="$site" --version="${{ matrix.wordpress }}"
           wp config create --path="$site" --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path="$site" --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" "$site/wp-content/themes/slateframe"
@@ -263,7 +267,7 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp
           chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
           mkdir -p /tmp/wp-theme-check
-          wp core download --path=/tmp/wp-theme-check --version=latest
+          bash bin/retry-wp-core-download.sh --path=/tmp/wp-theme-check --version=latest
           wp config create --path=/tmp/wp-theme-check --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp config set WP_DEBUG true --raw --path=/tmp/wp-theme-check
           wp core install --path=/tmp/wp-theme-check --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
@@ -329,7 +333,7 @@ jobs:
       - name: Install WordPress and activate Slateframe
         run: |
           mkdir -p /tmp/wp-site
-          wp core download --path=/tmp/wp-site --version=latest
+          bash bin/retry-wp-core-download.sh --path=/tmp/wp-site --version=latest
           wp config create --path=/tmp/wp-site --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path=/tmp/wp-site --url=http://127.0.0.1:8080 --title=Slateframe --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           ln -s "$GITHUB_WORKSPACE" /tmp/wp-site/wp-content/themes/slateframe
@@ -443,7 +447,7 @@ jobs:
           set -euo pipefail
           curl -fsSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o /tmp/wp && chmod +x /tmp/wp && sudo mv /tmp/wp /usr/local/bin/wp
           mkdir -p /tmp/wp-browser
-          wp core download --path=/tmp/wp-browser --version=latest
+          bash bin/retry-wp-core-download.sh --path=/tmp/wp-browser --version=latest
           wp config create --path=/tmp/wp-browser --dbname=wordpress --dbuser=root --dbpass=root --dbhost=127.0.0.1:3306 --skip-check
           wp core install --path=/tmp/wp-browser --url=http://127.0.0.1:8080 --title='Slateframe' --admin_user=admin --admin_password=ci-password --admin_email=ci@example.com --skip-email
           wp post delete 1 --force --path=/tmp/wp-browser >/dev/null
@@ -821,18 +825,27 @@ jobs:
           # must not overlap each other or read-only stylesheet assertions.
           readonly_specs=()
           stateful_specs=()
+          authenticated_specs=()
           for spec in tests/browser/*.spec.js; do
             if grep -Eq 'execFileSync|execSync|spawnSync' "$spec"; then
               stateful_specs+=("$spec")
+            elif grep -Eq 'openAuthenticatedEditor|support/editor-login' "$spec"; then
+              # Login POSTs mutate WordPress session state; isolate them from
+              # parallel readers and fixture writers without skipping assertions.
+              authenticated_specs+=("$spec")
             else
               readonly_specs+=("$spec")
             fi
           done
           test "${#readonly_specs[@]}" -gt 0
           test "${#stateful_specs[@]}" -gt 0
-          printf 'Parallel read-only specs: %s; isolated WP fixture specs: %s\\n' "${#readonly_specs[@]}" "${#stateful_specs[@]}"
+          test "${#authenticated_specs[@]}" -gt 0
+          printf 'Parallel read-only: %s; isolated WP fixture: %s; isolated Gutenberg login: %s\\n' "${#readonly_specs[@]}" "${#stateful_specs[@]}" "${#authenticated_specs[@]}"
+          # Preserve failure traces before a later suite clears test-results.
+          trap 'status=$?; if [ "$status" -ne 0 ] && [ -d test-results ]; then mkdir -p test-artifacts/browser-failure; cp -a test-results test-artifacts/browser-failure/responsive; fi' EXIT
           npx playwright test "${readonly_specs[@]}"
           npx playwright test "${stateful_specs[@]}" --workers=1
+          npx playwright test "${authenticated_specs[@]}" --workers=1
       - name: Verify compact Appearance bounds
         if: ${{ always() }}
         env:
@@ -922,6 +935,8 @@ jobs:
           done
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
+          python3 tests/verify_browser_inventory.py generate
+          python3 tests/verify_browser_inventory.py verify
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -929,6 +944,7 @@ jobs:
           name: slateframe-browser
           path: |
             test-artifacts/screenshots/
+            test-artifacts/browser-failure/
             playwright-report/
             test-results/
             /tmp/slateframe-server.log

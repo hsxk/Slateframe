@@ -1,5 +1,6 @@
 /** Shared authentication boundary for real WordPress Gutenberg acceptance tests. */
 const { expect } = require('@playwright/test');
+const { buildLoginForm, validateLoginRedirect, hasWordPressSession } = require('./wordpress-login');
 
 async function openAuthenticatedEditor(page, postId) {
   const id = String(postId);
@@ -7,47 +8,45 @@ async function openAuthenticatedEditor(page, postId) {
     throw new Error('The Gutenberg fixture requires a positive integer post ID.');
   }
 
-  await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
+  // Never transmit the fixed CI credentials outside the loopback fixture.
+  // Preserve WordPress installations mounted under a path prefix.
+  const fixtureBase = new URL(process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://127.0.0.1:8080');
+  if (!['127.0.0.1', 'localhost', '[::1]'].includes(fixtureBase.hostname) ||
+      !['http:', 'https:'].includes(fixtureBase.protocol) || fixtureBase.username || fixtureBase.password) {
+    throw new Error('Gutenberg authentication requires a loopback WordPress fixture.');
+  }
+  const basePath = fixtureBase.pathname.endsWith('/') ? fixtureBase.pathname : fixtureBase.pathname + '/';
+  const expectedLoginURL = new URL(basePath + 'wp-login.php', fixtureBase.origin);
+  await page.goto(expectedLoginURL.href, { waitUntil: 'domcontentloaded' });
   const loginURL = page.url();
   const loginAddress = new URL(loginURL);
-  const origin = loginAddress.origin;
-  const loginPath = loginAddress.pathname;
-  if (!loginPath.endsWith('/wp-login.php')) {
-    throw new Error('Unexpected WordPress login endpoint.');
+  if (loginAddress.origin !== expectedLoginURL.origin ||
+      loginAddress.pathname !== expectedLoginURL.pathname) {
+    throw new Error('Unexpected WordPress login endpoint for the configured fixture.');
   }
-  const editorPath = loginPath.slice(0, -'/wp-login.php'.length) + '/wp-admin/post.php';
-  await page.locator('#user_login').fill('admin');
-  await page.locator('#user_pass').fill('ci-password');
+  const editorPath = loginAddress.pathname.slice(0, -'/wp-login.php'.length) + '/wp-admin/post.php';
+  const editorURL = loginAddress.origin + editorPath + '?post=' + encodeURIComponent(id) + '&action=edit';
+  await expect(page.locator('#loginform')).toBeVisible();
 
-  // Observe the actual login POST, not an intermediate dashboard load event.
-  const loginResponse = page.waitForResponse((response) => {
-    const url = new URL(response.url());
-    return url.origin === origin && url.pathname === loginPath
-      && response.request().method() === 'POST';
+  // Perform real Core authentication through the browser context's shared
+  // cookie jar. Do not depend on a navigation POST event from clicking Submit.
+  const response = await page.request.post(loginURL, {
+    form: buildLoginForm(loginURL, editorURL),
+    maxRedirects: 0,
   });
-  const [response] = await Promise.all([
-    loginResponse,
-    page.locator('#wp-submit').click({ noWaitAfter: true }),
-  ]);
-  if (response.status() >= 400) {
-    throw new Error(`WordPress login POST returned HTTP ${response.status()}.`);
-  }
-
-  // Failed credentials can return an HTTP 200 response. Require a real session.
+  validateLoginRedirect(response, loginURL, editorURL);
   await expect.poll(async () => {
     const cookies = await page.context().cookies(loginURL);
-    return cookies.some((cookie) => cookie.name.startsWith('wordpress_logged_in_') && cookie.value);
+    return hasWordPressSession(cookies);
   }).toBe(true);
 
-  await page.goto(`${editorPath}?post=${encodeURIComponent(id)}&action=edit`, {
-    waitUntil: 'domcontentloaded',
-  });
+  await page.goto(editorURL, { waitUntil: 'domcontentloaded' });
   await expect(page).toHaveURL(/\/wp-admin\/post\.php\?/);
-  const editorURL = new URL(page.url());
-  expect(editorURL.origin).toBe(origin);
-  expect(editorURL.pathname).toBe(editorPath);
-  expect(editorURL.searchParams.get('post')).toBe(id);
-  expect(editorURL.searchParams.get('action')).toBe('edit');
+  const actual = new URL(page.url());
+  expect(actual.origin).toBe(loginAddress.origin);
+  expect(actual.pathname).toBe(editorPath);
+  expect(actual.searchParams.get('post')).toBe(id);
+  expect(actual.searchParams.get('action')).toBe('edit');
   await page.waitForFunction(() => {
     const select = window.wp?.data?.select?.('core/block-editor');
     return Boolean(select?.getBlocks?.().length);

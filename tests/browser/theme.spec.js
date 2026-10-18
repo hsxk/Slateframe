@@ -1,3 +1,4 @@
+const { settlePortfolioImagesForEvidence } = require('./visual-evidence');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { test, expect } = require('@playwright/test');
@@ -394,6 +395,9 @@ test('200% text enlargement keeps core content modes contained', async ({ page }
 			node.style.fontSize = '200%';
 			if (rtl) node.dir = 'rtl';
 		}, name === 'knowledge-rtl');
+		if (name === 'portfolio') {
+			await settlePortfolioImagesForEvidence(page);
+		}
 		await page.screenshot({
 			path: path.join(screenshotDir, `viewport-320-text-resize-${name}.png`),
 			fullPage: true,

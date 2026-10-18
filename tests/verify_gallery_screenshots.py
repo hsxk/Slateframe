@@ -17,10 +17,20 @@ REQUIRED = {
     **{f'native-sequence-page-{w}.png': w for w in WIDTHS},
     **{f'photography-page-viewport-{w}.png': w for w in WIDTHS},
     **{f'class-only-sequence-{w}.png': w for w in (390, 1440)},
+    **{f'lightbox-rtl-close-viewport-{w}.png': w for w in WIDTHS},
+    **{f'lightbox-navigation-{direction}-viewport-{w}.png': w for w in WIDTHS for direction in ('ltr', 'rtl')},
+    **{f'lightbox-navigation-breakpoint-{w}.png': w for w in (959, 960)},
     **{f'lightbox-landscape-viewport-{w}.png': w for w in WIDTHS},
     **{f'lightbox-portrait-viewport-{w}.png': w for w in WIDTHS},
     **{f'zoom-caption-{kind}-{direction}-360x225.png': 360
        for kind in ('native', 'class-only') for direction in ('ltr', 'rtl')},
+}
+# Include auxiliary Core crops and zoom captures in the exact-SHA hash manifest.
+# Crop widths are measured from PNG data, never assumed equal to the viewport.
+SUPPLEMENTAL = {
+    **{f'core-sequence-{w}.png': w for w in (320, 375, 390, 412, 768, 1440, 1920)},
+    **{f'sequence-caption-rtl-zoom-{w}.png': w for w in (390, 1440, 1920)},
+    'sequence-caption-textzoom-360x225.png': 360,
 }
 MAGIC = b'\x89PNG\r\n\x1a\n'
 
@@ -189,6 +199,26 @@ def verify():
             allowed = any(pair == {f'native-sequence-page-{w}.png', f'photography-page-viewport-{w}.png'} for w in WIDTHS)
             if not allowed:
                 raise ValueError(f'duplicate screenshot evidence: {pair}')
+        seen[record['pixel_sha256']] = filename
+        records[filename] = record
+    # Auxiliary screenshots are required evidence too, but some are element
+    # crops narrower than their browser viewport. Validate their real PNG
+    # dimensions and bind their hashes to this run without inventing width.
+    for filename, viewport_width in SUPPLEMENTAL.items():
+        path = ROOT / filename
+        safe_path(path)
+        if not path.is_file() or path.is_symlink() or path.stat().st_nlink != 1:
+            raise ValueError(f'missing or linked auxiliary Gallery screenshot: {path}')
+        with path.open('rb') as handle:
+            header = handle.read(24)
+        if len(header) < 24 or not header.startswith(MAGIC):
+            raise ValueError(f'invalid auxiliary Gallery PNG: {path}')
+        actual_width = int.from_bytes(header[16:20], 'big')
+        if not 200 <= actual_width <= viewport_width:
+            raise ValueError(f'auxiliary Gallery crop exceeds viewport: {path}')
+        record = inspect_png(path, actual_width)
+        if record['pixel_sha256'] in seen:
+            raise ValueError(f'duplicate auxiliary Gallery screenshot: {filename}')
         seen[record['pixel_sha256']] = filename
         records[filename] = record
     run_id = os.environ.get('GITHUB_RUN_ID')

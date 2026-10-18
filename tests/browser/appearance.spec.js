@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const { settlePortfolioImagesForEvidence, settlePhotographyImagesForEvidence, settleLightboxImageForEvidence } = require('./visual-evidence');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
@@ -19,7 +20,7 @@ const near = (received, expected, tolerance = 1) => expect(Math.abs(received - e
  */
 async function expectLightboxSettled(dialog) {
 	const image = dialog.locator('img[sizes="100vw"]').last();
-	await expect(image).toBeVisible();
+	await settleLightboxImageForEvidence(image);
 	await expect.poll(() => dialog.evaluate((node) =>
 		node.getAnimations({ subtree: true }).filter((animation) => animation.playState === 'running').length
 	), { message: 'native lightbox animations must finish before visual evidence', timeout: 5_000 }).toBe(0);
@@ -447,6 +448,8 @@ test('appearance profile stays contained across content modes and captures revie
 				expect(['contain', 'fill']).toContain(image.objectFit);
 			}
 		}
+		if (name === 'portfolio') await settlePortfolioImagesForEvidence(page);
+		if (name === 'photography') await settlePhotographyImagesForEvidence(page);
 		await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
 });

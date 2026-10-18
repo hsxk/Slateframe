@@ -2,6 +2,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { settlePhotographyImagesForEvidence } = require('./visual-evidence');
 
 const rasterPath = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
 const representativeWidths = [320, 390, 768, 1440, 1920];
@@ -470,7 +471,9 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	await openRasterPhotography(page);
 	const screenshotDir = path.resolve('test-artifacts/photography-lightbox');
 	await fs.mkdir(screenshotDir, { recursive: true });
-	await page.screenshot({ path: path.join(screenshotDir, `photography-page-${testInfo.project.name}.png`), fullPage: true });
+	// Force all lazy Core images to load, decode and settle before full-page evidence.
+	await settlePhotographyImagesForEvidence(page);
+	await page.screenshot({ path: path.join(screenshotDir, `photography-page-${testInfo.project.name}.png`), fullPage: true, animations: 'disabled' });
 
 	const feature = await openLightbox(page, 'keyboard');
 	await expectLightboxSettled(feature.dialog, feature.enlarged, 'landscape screenshot evidence should capture the settled lightbox');
