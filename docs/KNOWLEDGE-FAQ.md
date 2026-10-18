@@ -15,3 +15,9 @@ Do not mark the slice released until Theme quality and Photography Actions both 
 The editor test inserts the *registered* pattern into a temporary WordPress draft and verifies Core block validity. WordPress may show a first-use "Welcome to the editor" dialog after authentication; the test must dismiss it and assert it remains hidden before **both** editor screenshots. A passing Playwright test with a dialog obscuring the pattern is not acceptable visual evidence.
 
 At 390px RTL with 200% text and forced-colors, the editor test checks actual visible heading, paragraph and summary text fragments as well as the editor's horizontal overflow. Layout-hidden paragraphs inside closed Core Details must be excluded from text-geometry checks. Reviewers should inspect the unobstructed 390px and 1440px PNGs from the exact PR HEAD artifact, not rely on the existence of screenshot files or a prior SHA's green checks.
+
+### Expanded accessibility and bottom-of-canvas evidence
+
+The registered Core FAQ is tested with native keyboard Enter/Space toggles and axe WCAG A/AA in both collapsed and expanded states at 390px RTL and 1440px LTR. Test fixtures are deleted in `finally`; no axe rules are disabled.
+
+At 390px RTL and 200% text, Gutenberg may extend the final FAQ paragraph below the inner editor viewport. Record a separate paragraph screenshot after scrolling it into view and check text fragments and clipping ancestors. Only real WordPress/Chromium evidence for the exact PR SHA can establish acceptance.
