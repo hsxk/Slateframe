@@ -27,6 +27,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Preserve the native Knowledge Steps badge gutter in the Gutenberg canvas at narrow RTL widths; assert editor badge/text separation and keep the editor stylesheet under its existing 5000-byte budget.
+
 - Load the optional Photography stylesheet for a Core Gallery using the `slateframe-gallery-sequence` class without a lightbox, and bound portrait images to the same non-cropping height as the registered Photo sequence style.
 
 - Align standalone Core Gallery Photo sequence layout, captions, Gutenberg styling and reduced-motion hover behavior with the bundled Photography patterns.
