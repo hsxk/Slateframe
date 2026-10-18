@@ -292,12 +292,15 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 				padding: parseFloat(item.paddingInlineStart),
 				badgeWidth,
 				badgeDirection: badge.direction,
+				badgeInset: item.direction === 'rtl' ? badge.right : badge.left,
+				itemDirection: item.direction,
 				textGap,
 			};
 		}));
 	expect(editorStepMetrics).toHaveLength(3);
 	for (const step of editorStepMetrics) {
-		expect(step.badgeDirection).toBe('ltr');
+		expect(step.badgeDirection).toBe(step.itemDirection);
+		expect(step.badgeInset).toBe('0px');
 		expect(step.padding).toBeGreaterThanOrEqual(step.badgeWidth + 8);
 		expect(step.textGap).toBeGreaterThanOrEqual(0);
 	}

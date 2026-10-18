@@ -45,6 +45,7 @@ test('native Core steps align paragraphs and nested lists at all responsive widt
             position: getComputedStyle(first).position,
             markerPosition: getComputedStyle(first, '::before').position,
             markerDirection: getComputedStyle(first, '::before').direction,
+            markerInset: getComputedStyle(first, '::before')[getComputedStyle(first).direction === 'rtl' ? 'right' : 'left'],
             first: [box(first.querySelector('.nested-explanation')),
               box(first.querySelector('.nested-checks')), box(first.querySelector('.nested-followup'))],
             second: [box(second.querySelector('.block-first')), box(second.querySelector('.nested-numbered'))],
@@ -56,7 +57,8 @@ test('native Core steps align paragraphs and nested lists at all responsive widt
         expect(result.display, width + ' ' + dir).toBe('list-item');
         expect(result.position).toBe('relative');
         expect(result.markerPosition).toBe('absolute');
-        expect(result.markerDirection).toBe('ltr');
+        expect(result.markerDirection).toBe(dir);
+        expect(result.markerInset).toBe('0px');
         expect(result.nestedBullet).not.toBe('none');
         expect(result.nestedNumber).not.toBe('none');
         const edge = r => dir === 'ltr' ? r.left : r.right;
@@ -85,13 +87,14 @@ test('Core step badges and checklist marks survive 200% RTL, forced colors and p
       const badge = getComputedStyle(node, '::before');
       return {
         border: badge.borderTopStyle, borderWidth: parseFloat(badge.borderTopWidth),
-        direction: badge.direction, minHeight: parseFloat(getComputedStyle(node).minBlockSize),
+        direction: badge.direction, right: badge.right, minHeight: parseFloat(getComputedStyle(node).minBlockSize),
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     });
     expect(result.border).toBe('solid');
     expect(result.borderWidth).toBeGreaterThanOrEqual(1);
-    expect(result.direction).toBe('ltr');
+    expect(result.direction).toBe('rtl');
+    expect(result.right).toBe('0px');
     expect(result.minHeight).toBeGreaterThanOrEqual(44);
     expect(result.overflow).toBeLessThanOrEqual(1);
     const checklist = page.locator('.slateframe-prose .is-style-slateframe-checklist > li');
