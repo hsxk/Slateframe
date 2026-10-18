@@ -12,13 +12,13 @@ class WordPressDownloadRetryTests(unittest.TestCase):
     def run_case(self, errors, expected_status):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
-            (root / 'errors').write_text('\n'.join(errors) + '\n')
+            (root / 'errors').write_text('\n'.join(message.replace('\n', r'\n') for message in errors) + '\n')
             (root / 'wp').write_text('''#!/bin/sh
 printf '%s\\n' "$*" >> "$TEST_LOG"
 count=$(wc -l < "$TEST_LOG")
 message=$(sed -n "${count}p" "$TEST_ERRORS")
 if [ "$message" = 'SUCCESS' ]; then exit 0; fi
-printf '%s\\n' "$message" >&2
+printf '%b\\n' "$message" >&2
 exit 1
 ''')
             (root / 'sleep').write_text('#!/bin/sh\nprintf "%s\\n" "$*" >> "$TEST_SLEEP"\n')
@@ -54,6 +54,36 @@ exit 1
     def test_http_404_is_not_hidden(self):
         calls, sleeps, _ = self.run_case(['Error: 404 Not Found'], 1)
         self.assertEqual((len(calls), sleeps), (1, []))
+
+
+    def test_mixed_transient_and_fatal_checksum_is_not_retried(self):
+        calls, sleeps, result = self.run_case(['cURL error 28: timeout\\nChecksum mismatch'], 1)
+        self.assertEqual((len(calls), sleeps), (1, []))
+        self.assertIn('fatal validation/configuration', result.stderr)
+
+    def test_mixed_transient_and_fatal_certificate_is_not_retried(self):
+        calls, sleeps, _ = self.run_case(['cURL error 6: Could not resolve host\\nSSL certificate problem'], 1)
+        self.assertEqual((len(calls), sleeps), (1, []))
+
+    def test_unrecognized_curl_error_is_not_retried(self):
+        calls, sleeps, _ = self.run_case(['cURL error 280: Unknown failure'], 1)
+        self.assertEqual((len(calls), sleeps), (1, []))
+
+    def test_two_transient_errors_then_success(self):
+        calls, sleeps, _ = self.run_case(['cURL error 7: Connection timed out',
+                                           'cURL error 28: Resolving timed out', 'SUCCESS'], 0)
+        self.assertEqual((len(calls), sleeps), (3, ['5', '10']))
+
+    def test_mixed_transient_and_invalid_version_is_not_retried(self):
+        calls, sleeps, _ = self.run_case(['cURL error 28: timeout\\nInvalid version'], 1)
+        self.assertEqual((len(calls), sleeps), (1, []))
+
+    def test_no_arguments_returns_usage_without_network(self):
+        with tempfile.TemporaryDirectory() as folder:
+            result = subprocess.run(['bash', str(SCRIPT)], capture_output=True, text=True,
+                                    env={**os.environ, 'TMPDIR': folder}, timeout=5)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn('Usage:', result.stderr)
 
 
 if __name__ == '__main__':

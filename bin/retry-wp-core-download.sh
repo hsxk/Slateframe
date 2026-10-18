@@ -13,7 +13,13 @@ for attempt in 1 2 3; do
     exit 0
   fi
   cat "$log_file" >&2
-  if ! grep -Eiq 'cURL error (6|7|28)|[Rr]esolv(ing|e) timed out|[Cc]ould not resolve host|[Tt]emporary failure in name resolution|[Cc]onnection timed out' "$log_file"; then
+  # Fatal validation or configuration errors take precedence over transient
+  # network messages. Never retry a mixed-error response.
+  if grep -Eiq 'checksum mismatch|signature mismatch|SSL certificate problem|permission denied|fatal error|invalid (version|option|argument)|HTTP (4[0-9]{2}|5[0-9]{2})|(^|[[:space:]])(403 forbidden|404 not found)' "$log_file"; then
+    echo 'WordPress download has a fatal validation/configuration error; not retrying.' >&2
+    exit 1
+  fi
+  if ! grep -Eiq 'cURL error (6|7|28)([^0-9]|$)|[Rr]esolv(ing|e) timed out|[Cc]ould not resolve host|[Tt]emporary failure in name resolution|[Cc]onnection timed out' "$log_file"; then
     echo 'WordPress download failed for a non-transient reason; not retrying.' >&2
     exit 1
   fi
