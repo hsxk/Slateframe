@@ -38,7 +38,48 @@ REQUIRED_RESPONSIVE = frozenset(
     f'viewport-{width}-page.png'
     for width in (320, 375, 390, 412, 768, 1440, 1920)
 )
-REQUIRED_SCREENSHOTS = REQUIRED_APPEARANCE | REQUIRED_RESPONSIVE
+# These are exact-HEAD WordPress/Chromium artifacts, not WordPress.org theme screenshots.
+# The inventory must reject missing FAQ evidence even when other PNGs exist.
+REQUIRED_FAQ = frozenset((
+    'gutenberg-knowledge-faq-390-rtl-200-forced-colors.png',
+    'gutenberg-knowledge-faq-final-paragraph-390-rtl-200-forced-colors.png',
+    'gutenberg-knowledge-faq-1440-ltr.png',
+    'knowledge-faq-axe-390-rtl-closed.png',
+    'knowledge-faq-axe-390-rtl-expanded.png',
+    'knowledge-faq-axe-1440-ltr-closed.png',
+    'knowledge-faq-axe-1440-ltr-expanded.png',
+    'knowledge-faq-axe-390-rtl-expanded-200-forced-colors.png',
+    'knowledge-faq-axe-390-rtl-200-forced-colors-keyboard-focus.png',
+))
+REQUIRED_SCREENSHOTS = REQUIRED_APPEARANCE | REQUIRED_RESPONSIVE | REQUIRED_FAQ
+
+# A filename alone is insufficient proof of a readable multi-line paragraph or
+# keyboard focus target. These minimum crop heights deliberately stay below
+# the expected Core rendering at 200% text and the 44px control contract.
+FAQ_MIN_CROP_HEIGHT = {
+    'gutenberg-knowledge-faq-final-paragraph-390-rtl-200-forced-colors.png': 80,
+    'knowledge-faq-axe-390-rtl-200-forced-colors-keyboard-focus.png': 44,
+}
+
+# A crop may be narrower than its viewport, but it cannot be wider. Keep
+# element screenshots from a desktop viewport from masquerading as 390px
+# RTL evidence, without imposing a full-page screenshot dimension.
+FAQ_VIEWPORT_WIDTH = {
+    name: 1440 if '-1440-' in name else 390
+    for name in REQUIRED_FAQ
+}
+
+
+def check_faq_viewport_width(name, width):
+    viewport = FAQ_VIEWPORT_WIDTH.get(name)
+    if viewport is not None and width > viewport:
+        raise ValueError(f'FAQ crop exceeds viewport: {name} ({width}px > {viewport}px)')
+
+
+def check_faq_crop_dimensions(name, height):
+    minimum = FAQ_MIN_CROP_HEIGHT.get(name)
+    if minimum is not None and height < minimum:
+        raise ValueError(f'Incomplete FAQ visual crop: {name} ({height}px < {minimum}px)')
 
 
 def check_coverage(records):
@@ -69,6 +110,8 @@ def scan(root):
         if not 200 <= width <= 1924:
             raise ValueError('Invalid screenshot width')
         actual_width, height = validate_png(path, width)
+        check_faq_crop_dimensions(path.name, height)
+        check_faq_viewport_width(path.name, actual_width)
         match = FULL_PAGE.fullmatch(path.name)
         if match and actual_width != int(match.group(2) or match.group(3)):
             raise ValueError('Full-page viewport width mismatch')
@@ -121,6 +164,27 @@ def check_legacy(root, sha, records):
             raise ValueError('Legacy evidence hash mismatch')
 
 
+def check_faq_state_evidence(root):
+    """Reject accidentally duplicated closed/expanded FAQ screenshots.
+
+    Compare decoded pixels, not PNG byte hashes: compression and metadata can
+    differ even when the browser captured the same visual state twice.
+    """
+    for width, direction in ((390, 'rtl'), (1440, 'ltr')):
+        stem = f'knowledge-faq-axe-{width}-{direction}-'
+        closed = root / f'{stem}closed.png'
+        expanded = root / f'{stem}expanded.png'
+        closed_size, closed_raster = validate_png(closed, width, include_raster_hash=True)
+        expanded_size, expanded_raster = validate_png(expanded, width, include_raster_hash=True)
+        if closed_raster == expanded_raster:
+            raise ValueError(f'Identical FAQ closed and expanded evidence: {width}px {direction}')
+        # Different pixels can be caused by hover, focus or anti-aliasing while
+        # the disclosure remains closed. Native Core Details must reveal answer
+        # content and increase the captured FAQ's height meaningfully.
+        if expanded_size[1] - closed_size[1] < 24:
+            raise ValueError(f'FAQ expanded evidence lacks content growth: {width}px {direction}')
+
+
 def run(mode, root=ROOT):
     sha, run_id, attempt = identity(root)
     target = root / MANIFEST
@@ -130,6 +194,7 @@ def run(mode, root=ROOT):
         target.unlink(missing_ok=True)
     records = scan(root)
     check_legacy(root, sha, records)
+    check_faq_state_evidence(root)
     expected = dict(schema_version=1, head_sha=sha, run_id=run_id,
                     run_attempt=attempt, screenshots=records)
     if mode == 'generate':

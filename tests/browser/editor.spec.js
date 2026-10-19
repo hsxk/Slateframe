@@ -272,6 +272,39 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	expect(rtlMetrics.direction).toBe('rtl');
 	expect(rtlMetrics.rootOverflow).toBeLessThanOrEqual(1);
 
+	const editorStepMetrics = await knowledge.locator('ol.is-style-slateframe-steps > li').evaluateAll(nodes =>
+		nodes.map(node => {
+			const item = getComputedStyle(node);
+			const badge = getComputedStyle(node, '::before');
+			const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+			let textNode;
+			while ((textNode = walker.nextNode()) && !textNode.textContent.trim()) {}
+			if (!textNode) throw new Error('Missing Core list step text');
+			const range = document.createRange();
+			range.selectNodeContents(textNode);
+			const textBox = range.getBoundingClientRect();
+			const itemBox = node.getBoundingClientRect();
+			const badgeWidth = parseFloat(badge.width);
+			const textGap = item.direction === 'rtl'
+				? itemBox.right - badgeWidth - textBox.right
+				: textBox.left - itemBox.left - badgeWidth;
+			return {
+				padding: parseFloat(item.paddingInlineStart),
+				badgeWidth,
+				badgeDirection: badge.direction,
+				badgeInset: item.direction === 'rtl' ? badge.right : badge.left,
+				itemDirection: item.direction,
+				textGap,
+			};
+		}));
+	expect(editorStepMetrics).toHaveLength(3);
+	for (const step of editorStepMetrics) {
+		expect(step.badgeDirection).toBe(step.itemDirection);
+		expect(step.badgeInset).toBe('0px');
+		expect(step.padding).toBeGreaterThanOrEqual(step.badgeWidth + 8);
+		expect(step.textGap).toBeGreaterThanOrEqual(0);
+	}
+
 	await expect(page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i })).toBeHidden();
 
 	const screenshotDir = path.resolve('test-artifacts/screenshots');

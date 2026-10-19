@@ -933,6 +933,9 @@ jobs:
             screenshot="test-artifacts/screenshots/print-article-viewport-${viewport}.png"
             test -s "$screenshot" || { echo "Missing print evidence: $screenshot" >&2; exit 1; }
           done
+          # The browser inventory below enforces all nine FAQ screenshots,
+          # including the full Gutenberg paragraph and keyboard focus crop.
+          # Never use the fixed 1200x900 WordPress.org validator for these crops.
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
           python3 tests/verify_browser_inventory.py generate
