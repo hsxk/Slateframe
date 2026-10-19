@@ -13,7 +13,9 @@ body{background:#fff!important;color:#000!important;padding-inline:0.5rem}
 .slateframe-prose .wp-block-cover__image-background{position:static!important;display:block;width:auto!important;max-width:100%;max-height:18cm!important;height:auto!important;object-fit:contain;margin-inline:auto}
 .slateframe-prose .wp-block-cover{display:block;min-block-size:0!important;min-height:0!important;padding:0;background:transparent!important}
 .slateframe-prose .wp-block-spacer{height:0!important;min-height:0!important}
-.slateframe-prose details[open]>summary{break-after:avoid}
+/* Printed articles must include answers from initially closed Core Details. */
+.slateframe-prose details:not([open])::details-content{content-visibility:visible!important}
+.slateframe-prose details>summary{break-after:avoid;list-style:none}
 .slateframe-prose .wp-block-button__link{border:1px solid #000}
 .slateframe-pagination,.slateframe-content-pages{display:none!important}
 .slateframe-entry-hero-image{max-height:18cm!important;object-fit:contain}
