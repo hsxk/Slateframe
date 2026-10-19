@@ -21,6 +21,29 @@ class PortfolioEmptyResultsContract(unittest.TestCase):
         self.assertIn("'Empty project grid message', 'slateframe'", source)
         self.assertIn('esc_html_x(', source)
 
+    def test_browser_asserts_registered_localized_copy(self):
+        source = BROWSER.read_text(encoding="utf-8")
+        self.assertIn('const expectedEmptyText = await page.evaluate', source)
+        self.assertIn('new DOMParser()', source)
+        self.assertIn('<!-- wp:query-no-results -->', source)
+        self.assertIn("paragraphs.length === 1", source)
+        self.assertIn("expect(expectedEmptyText).not.toBe('')", source)
+        self.assertIn('await expect(empty).toContainText(expectedEmptyText)', source)
+        self.assertNotIn("expect(blocks).toContain('No projects are available yet.')", source)
+        self.assertNotIn("await expect(empty).toContainText('No projects are available yet.')", source)
+
+    def test_browser_checks_visible_text_geometry_not_just_wrapper(self):
+        source = BROWSER.read_text(encoding="utf-8")
+        for fragment in (
+            'document.createRange()', 'range.selectNodeContents(paragraph)',
+            'textRects: textRects.length', 'clippedText: textRects.some(',
+            'expect(result.textRects).toBeGreaterThan(0)',
+            'expect(result.clippedText', "style.visibility !== 'hidden'",
+            'Number(style.opacity) > 0',
+        ):
+            with self.subTest(fragment=fragment):
+                self.assertIn(fragment, source)
+
     def test_real_browser_empty_fixture_and_containment(self):
         source = BROWSER.read_text(encoding="utf-8")
         for fragment in ('--post_type=page', '--post_content=', '--force',

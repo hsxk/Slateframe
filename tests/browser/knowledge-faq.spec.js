@@ -50,7 +50,17 @@ test('registered Core FAQ stays keyboard-operable, readable and bounded', async 
     }
     const summary = details.first().locator('summary');
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
+    await page.locator('html').evaluate(node => {
+      node.dir = 'rtl';
+      node.style.fontSize = '200%';
+      // The preceding viewport matrix ends at 56px. Screenshot the active
+      // Appearance preset, not the final synthetic test override.
+      node.style.removeProperty('--slateframe-control');
+    });
+    const naturalControl = await page.locator('html').evaluate(node =>
+      parseFloat(getComputedStyle(node).getPropertyValue('--slateframe-control')));
+    expect(naturalControl).toBeGreaterThanOrEqual(44);
+    expect(naturalControl).toBeLessThanOrEqual(56);
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     await expect(details.first()).not.toHaveAttribute('open');
     await summary.focus();
