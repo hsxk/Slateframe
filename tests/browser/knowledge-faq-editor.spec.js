@@ -71,10 +71,33 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
         expect(metrics.overflow, width + ' ' + direction).toBeLessThanOrEqual(1);
         expect(metrics.summaries).toHaveLength(3);
         for (const box of metrics.summaries) {
-          expect(box.height).toBeGreaterThanOrEqual(43);
+          expect(box.height).toBeGreaterThanOrEqual(44);
           expect(box.left).toBeGreaterThanOrEqual(metrics.left - 1);
           expect(box.right).toBeLessThanOrEqual(metrics.right + 1);
         }
+      }
+    }
+    // Cover the narrowest Gutenberg editor widths at 200% text zoom.
+    for (const width of [320, 375, 412]) {
+      await page.setViewportSize({ width, height: 900 });
+      await root.evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
+      const zoom = await faq.evaluate(node => {
+        const canvas = node.closest('.editor-styles-wrapper');
+        const bounds = canvas.getBoundingClientRect();
+        return {
+          overflow: canvas.scrollWidth - canvas.clientWidth,
+          left: bounds.left, right: bounds.right,
+          summaries: [...node.querySelectorAll('details > summary')].map(summary => {
+            const rect = summary.getBoundingClientRect();
+            return { left: rect.left, right: rect.right, height: rect.height };
+          }),
+        };
+      });
+      expect(zoom.overflow, width + 'px RTL 200%').toBeLessThanOrEqual(1);
+      for (const rect of zoom.summaries) {
+        expect(rect.left).toBeGreaterThanOrEqual(zoom.left - 1);
+        expect(rect.right).toBeLessThanOrEqual(zoom.right + 1);
+        expect(rect.height).toBeGreaterThanOrEqual(44);
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
@@ -103,6 +126,49 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     expect(zoomBounds.overflow).toBeLessThanOrEqual(1);
     expect(zoomBounds.clipped).toEqual([]);
     await faq.screenshot({ path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-390-rtl-200-forced-colors.png' });
+    // At 200% zoom, the last paragraph may sit below Gutenberg's inner viewport.
+    // Preserve separate evidence of its actual text rather than accepting a partial block image.
+    const closingParagraph = faq.locator('p').last();
+    // The registered PHP pattern is translated by WordPress. An English-only
+    // assertion would reject a correct Japanese/Chinese/RTL installation.
+    // Compare the editor against the actual localized registered Core pattern.
+    const expectedClosingText = await page.evaluate(markup => {
+      const parsed = new DOMParser().parseFromString(markup, 'text/html');
+      return parsed.querySelector('.slateframe-knowledge-faq > p:last-child')?.textContent?.trim() || '';
+    }, blocks);
+    expect(expectedClosingText).not.toBe('');
+    await expect(closingParagraph).toHaveText(expectedClosingText);
+    await closingParagraph.scrollIntoViewIfNeeded();
+    const closingGeometry = await closingParagraph.evaluate(node => {
+      const bounds = node.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const rects = [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0);
+      const outside = rects.some(rect => rect.left < bounds.left - 2 ||
+        rect.right > bounds.right + 2 || rect.top < bounds.top - 2 || rect.bottom > bounds.bottom + 2);
+      const clippedByAncestor = [];
+      for (let ancestor = node.parentElement; ancestor && ancestor !== document.body; ancestor = ancestor.parentElement) {
+        const style = getComputedStyle(ancestor);
+        const clipsX = /(auto|scroll|hidden|clip)/.test(style.overflowX);
+        const clipsY = /(auto|scroll|hidden|clip)/.test(style.overflowY);
+        if (!clipsX && !clipsY) continue;
+        const box = ancestor.getBoundingClientRect();
+        if (rects.some(rect => (clipsX && (rect.left < box.left - 2 || rect.right > box.right + 2)) ||
+          (clipsY && (rect.top < box.top - 2 || rect.bottom > box.bottom + 2)))) {
+          clippedByAncestor.push(ancestor.className || ancestor.tagName);
+        }
+      }
+      const outsideFrame = rects.some(rect => rect.top < -2 || rect.bottom > window.innerHeight + 2 ||
+        rect.left < -2 || rect.right > window.innerWidth + 2);
+      return { lines: rects.length, outside, clippedByAncestor, outsideFrame };
+    });
+    expect(closingGeometry.lines).toBeGreaterThan(1);
+    expect(closingGeometry.outside).toBe(false);
+    expect(closingGeometry.clippedByAncestor).toEqual([]);
+    expect(closingGeometry.outsideFrame).toBe(false);
+    await closingParagraph.screenshot({
+      path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-final-paragraph-390-rtl-200-forced-colors.png',
+    });
     await page.emulateMedia({ forcedColors: 'none' });
     await page.setViewportSize({ width: 1440, height: 900 });
     await root.evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });

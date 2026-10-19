@@ -18,6 +18,12 @@ At 390px RTL with 200% text and forced-colors, the editor test checks actual vis
 
 ### Expanded accessibility and bottom-of-canvas evidence
 
-The registered Core FAQ is tested with native keyboard Enter/Space toggles and axe WCAG A/AA in both collapsed and expanded states at 390px RTL and 1440px LTR. Test fixtures are deleted in `finally`; no axe rules are disabled.
+A separate real-WordPress axe regression scans the registered Core FAQ with all three native disclosures closed and expanded at 390px RTL and 1440px LTR. It checks accessible summary names, native Enter/Space opening and closing for all three disclosures, visible answers, WCAG 2 A/AA, 2.1 AA and 2.2 AA, and unconditional fixture cleanup. The test also captures both states at both widths. Do not suppress axe rules or replace the registered pattern with static HTML.
 
-At 390px RTL and 200% text, Gutenberg may extend the final FAQ paragraph below the inner editor viewport. Record a separate paragraph screenshot after scrolling it into view and check text fragments and clipping ancestors. Only real WordPress/Chromium evidence for the exact PR SHA can establish acceptance.
+At 390px RTL and 200% text, the Gutenberg FAQ can extend below the inner editor iframe's visible area. A whole-block screenshot may therefore leave the final paragraph outside the visible frame even when the layout is correct. Capture `gutenberg-knowledge-faq-final-paragraph-390-rtl-200-forced-colors.png` after scrolling that actual paragraph into view, then assert its text-fragment bounds and clipping ancestors. This improves evidence but does not prove that the theme layout was defective; only exact-SHA WordPress/Chromium artifacts establish the outcome.
+
+### Keyboard focus and complete editor evidence
+
+At 390px RTL and 1440px LTR, Tab and Shift+Tab must traverse the three native summaries in order without toggling them. Assert `:focus-visible` after keyboard navigation and capture a separate 390px RTL/200%/forced-colors focus-indicator screenshot.
+
+The Gutenberg final-paragraph screenshot must follow a real scroll and validate multi-line text fragments against paragraph bounds, all clipping ancestors in both axes, and the editor iframe viewport. At 320px, 375px and 412px RTL/200%, verify the editor's horizontal overflow, summary bounds and at least 44px hit targets. Do not mark this slice visually accepted until exact-HEAD Actions artifacts are inspected.

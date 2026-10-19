@@ -36,8 +36,22 @@ test('registered Core FAQ disclosures meet WCAG A/AA when closed and expanded', 
         await expect(summaries.nth(index)).toHaveAccessibleName(/\S/);
         await expect(details.nth(index)).not.toHaveAttribute('open');
       }
+      // Real Tab traversal must preserve the native closed state and visible focus.
+      await summaries.first().focus();
+      await page.keyboard.press('Tab');
+      await expect(summaries.nth(1)).toBeFocused();
+      expect(await summaries.nth(1).evaluate(node => node.matches(':focus-visible'))).toBe(true);
+      await page.keyboard.press('Tab');
+      await expect(summaries.nth(2)).toBeFocused();
+      expect(await summaries.nth(2).evaluate(node => node.matches(':focus-visible'))).toBe(true);
+      await page.keyboard.press('Shift+Tab');
+      await expect(summaries.nth(1)).toBeFocused();
+      for (let index = 0; index < 3; index += 1) {
+        await expect(details.nth(index)).not.toHaveAttribute('open');
+      }
       for (const expanded of [false, true]) {
         if (expanded) {
+          // Exercise the browser's native keyboard activation, not a mouse-only click.
           for (let index = 0; index < 3; index += 1) {
             const summary = summaries.nth(index);
             await summary.focus();
@@ -72,10 +86,28 @@ test('registered Core FAQ disclosures meet WCAG A/AA when closed and expanded', 
           await faq.screenshot({
             path: 'test-artifacts/screenshots/knowledge-faq-axe-390-rtl-expanded-200-forced-colors.png',
           });
+          // Record the actual browser focus indicator, not a CSS-only assumption.
+          await summaries.first().focus();
+          await page.keyboard.press('Tab');
+          await expect(summaries.nth(1)).toBeFocused();
+          expect(await summaries.nth(1).evaluate(node => node.matches(':focus-visible'))).toBe(true);
+          // :focus-visible alone does not guarantee that forced-colors paints a ring.
+          // Capture the surrounding Core Details so the outline is not cropped at
+          // the summary element's bounding box.
+          const focusOutline = await summaries.nth(1).evaluate(node => {
+            const style = getComputedStyle(node);
+            return { style: style.outlineStyle, width: parseFloat(style.outlineWidth) };
+          });
+          expect(focusOutline.style).not.toBe('none');
+          expect(focusOutline.width).toBeGreaterThan(0);
+          await details.nth(1).screenshot({
+            path: 'test-artifacts/screenshots/knowledge-faq-axe-390-rtl-200-forced-colors-keyboard-focus.png',
+          });
           await page.emulateMedia({ forcedColors: 'none' });
           await page.locator('html').evaluate(node => { node.style.fontSize = ''; });
         }
         if (expanded) {
+          // Verify every native disclosure can be closed again from the keyboard.
           for (let index = 0; index < 3; index += 1) {
             const summary = summaries.nth(index);
             await summary.focus();
