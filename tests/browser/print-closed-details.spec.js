@@ -48,6 +48,8 @@ test('closed Core Details are printable without changing reading state', async (
     await page.screenshot({ path: path.join(dir, `print-closed-details-${info.project.name}.png`), fullPage: true });
   }
 
+  // Return to screen media before checking the native afterprint lifecycle.
+  await page.emulateMedia({ media: 'screen' });
   await page.evaluate(() => dispatchEvent(new Event('afterprint')));
   await expect(page.locator('.print-closed-body')).toBeHidden();
   await expect(page.locator('.print-nested-body')).toBeHidden();
@@ -56,8 +58,11 @@ test('closed Core Details are printable without changing reading state', async (
   expect(await nested.evaluate((el) => el.open)).toBe(false);
   expect(await opened.evaluate((el) => el.open)).toBe(true);
   // A second print session must work after the first cleanup.
+  await page.emulateMedia({ media: 'print' });
   await page.evaluate(() => dispatchEvent(new Event('beforeprint')));
   await expect(page.locator('.print-nested-body')).toBeVisible();
+  await page.emulateMedia({ media: 'screen' });
   await page.evaluate(() => dispatchEvent(new Event('afterprint')));
+  await expect(page.locator('.print-nested-body')).toBeHidden();
   expect(await closed.evaluate((el) => el.open)).toBe(false);
 });
