@@ -5,6 +5,12 @@ test('Core Calendar translated headings remain readable at mobile zoom and in RT
   const post = page.locator('.slateframe-card-title a').first();
   await expect(post).toBeVisible();
   await post.click();
+  // The article may become visible before its WordPress reading stylesheet loads.
+  // Assert against the fully loaded Core presentation, not an in-flight navigation.
+  await page.waitForLoadState('load');
+  const readingStyle = page.locator('link#slateframe-reading-css');
+  await expect(readingStyle).toHaveAttribute('href', /\/assets\/css\/reading\.css/);
+  await expect.poll(() => readingStyle.evaluate(link => link.sheet !== null)).toBe(true);
   const prose = page.locator('.slateframe-prose').first();
   await expect(prose).toBeVisible();
   await prose.evaluate(root => {
