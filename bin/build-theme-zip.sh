@@ -11,12 +11,25 @@ SOURCE_DATE_EPOCH="${SOURCE_DATE_EPOCH:-946684800}"
 
 # An arbitrary output folder under the source tree can recursively copy
 # itself with rsync. The default dist/ is explicitly excluded by .distignore.
-python3 - "$ROOT" "$DIST_DIR" <<'PY_OUTPUT_GUARD'
+SOURCE_DATE_EPOCH="$SOURCE_DATE_EPOCH" python3 - "$ROOT" "$DIST_DIR" <<'PY_OUTPUT_GUARD'
+import os
 import sys
 from pathlib import Path
 
+# Validate before rm -rf: malformed or out-of-range epochs must not destroy a prior ZIP.
+try:
+    epoch = int(os.environ["SOURCE_DATE_EPOCH"])
+except ValueError:
+    raise SystemExit("SOURCE_DATE_EPOCH must be an integer") from None
+if epoch > 4354819199:
+    raise SystemExit("SOURCE_DATE_EPOCH exceeds ZIP timestamp year 2107")
+
 root = Path(sys.argv[1]).resolve()
-output = Path(sys.argv[2]).resolve()
+# A symlinked output directory could redirect destructive cleanup to external files.
+requested_output = Path(os.path.abspath(sys.argv[2]))
+output = Path(os.path.realpath(sys.argv[2]))
+if output != requested_output:
+    raise SystemExit("Output directory must not traverse symbolic links")
 if output == Path(output.anchor):
     raise SystemExit("Output directory must not be the filesystem root")
 if output == root or (root in output.parents and output != root / "dist"):
