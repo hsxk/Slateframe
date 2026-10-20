@@ -27,7 +27,9 @@ class ResponsiveCoreContracts(unittest.TestCase):
         self.assertIn("flex:1 1 16rem", base)
         self.assertIn("margin-inline-start:0", core)
         self.assertLessEqual(len(core.encode("utf-8")), 1300)
-        self.assertIn(".slateframe-search-form button{max-width:45%}", own)
+        self.assertIn(".slateframe-search-form button{flex:1 1 10rem}", own)
+        self.assertIn("display:flex;flex-wrap:wrap", own)
+        self.assertIn("@media(max-width:640px){.slateframe-search-form{display:grid}}", own)
         self.assertLessEqual(len(own.encode("utf-8")), 300)
 
     def test_css_static_budgets(self):
