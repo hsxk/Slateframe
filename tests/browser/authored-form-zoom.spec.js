@@ -5,7 +5,8 @@ const path = require('node:path');
 
 const fixture = `<form id="slateframe-authored-form-reflow" aria-label="Native form reflow verification">
   <fieldset><legend>日本語中文 العربية – form controls</legend><p><label for="sf-author-name">Name</label><input id="sf-author-name" type="text"></p></fieldset>
-  <div class="slateframe-form-actions" style="display:flex;gap:12px;max-width:100%">
+  <div class="slateframe-form-actions" style="gap:12px;max-width:100%">
+    <input type="checkbox" aria-label="Consent"><input type="radio" name="choice" aria-label="Choice"><input type="range" aria-label="Level">
     <button id="sf-save" type="button">保存并继续 / Save changes</button><button id="sf-reset" type="reset">Reset</button>
   </div></form>`;
 
@@ -37,13 +38,22 @@ test('authored form actions wrap at 400% zoom without clipping or losing keyboar
         const buttons = [...row.querySelectorAll('button')].map((button) => {
           const box = button.getBoundingClientRect();
           return { left: box.left, right: box.right, top: box.top, bottom: box.bottom,
-            height: box.height, innerOverflow: button.scrollWidth - button.clientWidth };
+            height: box.height, width: box.width, innerOverflow: button.scrollWidth - button.clientWidth };
         });
-        return { flexWrap: getComputedStyle(row).flexWrap, bounds: { left: bounds.left, right: bounds.right }, buttons,
+        return { display: getComputedStyle(row).display, flexWrap: getComputedStyle(row).flexWrap,
+          fieldsetPadding: parseFloat(getComputedStyle(node.querySelector("fieldset")).paddingInlineStart),
+          choices: [...row.querySelectorAll("input")].map(el => ({type: el.type, width: el.getBoundingClientRect().width, flexBasis: getComputedStyle(el).flexBasis})),
+          bounds: { left: bounds.left, right: bounds.right, width: bounds.width }, buttons,
           pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           bodyOverflow: document.body.scrollWidth - document.body.clientWidth };
       });
+      expect(result.display).toBe('flex');
       expect(result.flexWrap).toBe('wrap');
+      expect(result.fieldsetPadding).toBeLessThanOrEqual(24);
+      for (const choice of result.choices) {
+        expect(choice.flexBasis).toBe('auto');
+        if (choice.type !== 'range') expect(choice.width).toBeLessThan(80);
+      }
       expect(result.pageOverflow, `${width}px ${direction} ${fontSize}px`).toBeLessThanOrEqual(1);
       expect(result.bodyOverflow).toBeLessThanOrEqual(1);
       for (const button of result.buttons) {
@@ -51,6 +61,11 @@ test('authored form actions wrap at 400% zoom without clipping or losing keyboar
         expect(button.right).toBeLessThanOrEqual(result.bounds.right + 1);
         expect(button.innerOverflow).toBeLessThanOrEqual(1);
         expect(button.height).toBeGreaterThanOrEqual(44);
+        if (fontSize === 64) {
+          expect(button.width, `${width}px ${direction}: readable 400% action`).toBeGreaterThanOrEqual(
+            Math.min(result.bounds.width, 12 * fontSize) - 2,
+          );
+        }
       }
       const [a, b] = result.buttons;
       expect(a.right <= b.left + 1 || b.right <= a.left + 1 || a.bottom <= b.top + 1 || b.bottom <= a.top + 1).toBe(true);
