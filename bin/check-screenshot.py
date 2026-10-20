@@ -54,13 +54,17 @@ def validate(path: Path) -> None:
     try:
         # Every directory is anchored and opened with O_NOFOLLOW, so neither
         # the parent nor the leaf can be swapped for a symlink during open.
-        with os.fdopen(open_screenshot_nofollow(path), 'rb') as source:
-            info = os.fstat(source.fileno())
+        descriptor = open_screenshot_nofollow(path)
+        try:
+            info = os.fstat(descriptor)
             if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
                 raise ValueError('non-regular or hardlinked screenshot')
             if info.st_size > MAX_FILE_BYTES:
                 raise ValueError('oversized screenshot PNG')
-            data = source.read(MAX_FILE_BYTES + 1)
+            with os.fdopen(descriptor, 'rb', closefd=False) as source:
+                data = source.read(MAX_FILE_BYTES + 1)
+        finally:
+            os.close(descriptor)
     except OSError as error:
         raise ValueError('unreadable screenshot PNG') from error
     if len(data) > MAX_FILE_BYTES:
