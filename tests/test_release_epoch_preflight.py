@@ -54,6 +54,10 @@ class ReleaseEpochPreflightTests(unittest.TestCase):
         self.assertEqual(b"previous-release-zip", old.read_bytes())
         self.assertEqual("keep", (staged / "keep.txt").read_text())
 
+    def test_builder_remains_executable_in_git_checkout(self):
+        # Release CI invokes ./bin/build-theme-zip.sh directly.
+        self.assertTrue(os.access(SCRIPT, os.X_OK), "release builder must retain Git mode 100755")
+
     def test_non_integer_preserves_prior_release(self):
         self.assert_invalid_preserves_release("nonsense", "must be an integer")
 
