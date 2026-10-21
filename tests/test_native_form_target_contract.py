@@ -25,13 +25,14 @@ class NativeFormTargetContract(unittest.TestCase):
 
 
     def test_native_file_button_wraps_in_narrow_forced_color_layout(self):
-        self.assertIn('form input[type=file]::file-selector-button{', CSS)
-        rule = CSS.split('form input[type=file]::file-selector-button{', 1)[1].split('}', 1)[0]
+        self.assertIn('form input:is([type=range],[type=color],[type=file]){', CSS)
+        self.assertIn('&[type=file]{white-space:normal;&::file-selector-button{', CSS)
+        rule = CSS.split('&::file-selector-button{', 1)[1].split('}', 1)[0]
         for token in ('max-inline-size:100%', 'min-block-size:var(--slateframe-control)', 'white-space:normal', 'overflow-wrap:anywhere'):
             self.assertIn(token, rule)
 
     def test_native_file_input_itself_wraps_internal_filename(self):
-        self.assertIn('form input[type=file]{white-space:normal}', CSS)
+        self.assertIn('&[type=file]{white-space:normal;&::file-selector-button{', CSS)
         self.assertIn('overflow-wrap:anywhere;text-rendering:optimizeLegibility}', CSS)
         browser = (Path(__file__).resolve().parents[1] / 'tests/browser/native-form-targets.spec.js').read_text(encoding='utf-8')
         self.assertIn('inputOverflowWrap', browser)

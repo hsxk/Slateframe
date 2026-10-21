@@ -42,7 +42,8 @@ class PaginationForcedColorsContract(unittest.TestCase):
         css = STYLE.read_text(encoding='utf-8')
         self.assertIn('label:has(>input:is([type=checkbox],[type=radio]))', css)
         self.assertIn('input:is([type=checkbox],[type=radio])+label', css)
-        self.assertIn('form input[type=file]::file-selector-button{', css)
+        self.assertIn('form input:is([type=range],[type=color],[type=file]){', css)
+        self.assertIn('&[type=file]{white-space:normal;&::file-selector-button{', css)
 
 
 if __name__ == '__main__':
