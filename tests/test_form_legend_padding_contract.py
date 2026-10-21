@@ -15,7 +15,7 @@ class LegendPaddingContract(unittest.TestCase):
 
     def test_word_level_browser_coverage(self):
         source = (ROOT / 'tests/browser/fieldset-legend-zoom.spec.js').read_text(encoding='utf-8')
-        for needle in ("['ltr', 'rtl']", '[16, 32, 64]', "'controls'.length",
+        for needle in ("['forms', 'form-content']", "['ltr', 'rtl']", '[16, 32, 64]', "'controls'.length",
                        'width >= 375', 'forcedColors', 'fieldset-legend-rtl-400-',
                        'scrollWidth - document.documentElement.clientWidth'):
             with self.subTest(needle=needle):

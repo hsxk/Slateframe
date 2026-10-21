@@ -6,7 +6,10 @@ test('native fieldset legend retains readable RTL/CJK words at 400% text size', 
   const width = Number(info.project.name.replace('viewport-', ''));
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('main').first()).toBeVisible();
-  await page.addStyleTag({ url: '/wp-content/themes/slateframe/assets/css/form-content.css' });
+  // A dynamically injected fixture must load both conditional authored-form styles.
+  for (const name of ['forms', 'form-content']) {
+    await page.addStyleTag({ url: '/wp-content/themes/slateframe/assets/css/' + name + '.css' });
+  }
   await page.locator('main').first().evaluate((main) => {
     const section = document.createElement('section');
     section.className = 'slateframe-shell';
