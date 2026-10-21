@@ -6,6 +6,7 @@ test('Core data table numerals survive seven widths, RTL, zoom and forced colors
   await post.click();
   const prose = page.locator('.slateframe-prose').first();
   await expect(prose).toBeVisible();
+  await page.waitForFunction(() => [...document.styleSheets].some(sheet => sheet.href?.includes('/assets/css/reading.css') && sheet.cssRules.length > 0));
   await prose.evaluate(root => root.insertAdjacentHTML('beforeend',
     '<figure class="wp-block-table is-style-slateframe-data"><table><tbody><tr><td>1234567890</td></tr></tbody></table></figure>'));
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {

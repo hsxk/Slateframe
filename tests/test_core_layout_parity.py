@@ -27,8 +27,18 @@ class ResponsiveCoreContracts(unittest.TestCase):
         self.assertIn("flex:1 1 16rem", base)
         self.assertIn("margin-inline-start:0", core)
         self.assertLessEqual(len(core.encode("utf-8")), 1300)
-        self.assertIn(".slateframe-search-form button{max-width:45%}", own)
+        self.assertIn(".slateframe-search-form button{flex:1 1 10rem}", own)
+        self.assertIn("display:flex;flex-wrap:wrap", own)
+        self.assertIn("@media(max-width:640px){.slateframe-search-form{display:grid}}", own)
         self.assertLessEqual(len(own.encode("utf-8")), 300)
+
+    def test_core_file_focus_ring_uses_accessible_theme_token(self):
+        css = (ROOT / "assets/css/reading.css").read_text()
+        base = (ROOT / "style.css").read_text()
+        self.assertIn(":focus-visible,.wp-block-file>a:focus-visible:focus{", base)
+        self.assertIn("outline:var(--slateframe-focus-width) solid var(--slateframe-focus)", base)
+        self.assertIn("--slateframe-focus-width:3px", base)
+        self.assertLessEqual(len(css.encode("utf-8")), 7000)
 
     def test_css_static_budgets(self):
         for name, limit in {"content-modes.css":7000,"editor.css":5000,"comments.css":3000}.items():

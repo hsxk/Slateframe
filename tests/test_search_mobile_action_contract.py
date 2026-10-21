@@ -9,8 +9,11 @@ class SearchMobileActionContract(unittest.TestCase):
     def test_classic_search_uses_intrinsic_grid_and_full_width_action(self):
         css = (ROOT / 'assets/css/search-form.css').read_text()
         self.assertIn('@media(max-width:640px)', css)
-        self.assertIn('display:grid;& button{max-width:none}', css)
-        self.assertIn('.slateframe-search-form button{max-width:45%}', css)
+        self.assertIn('display:grid}', css)
+        self.assertIn('.slateframe-search-form button{flex:1 1 10rem}', css)
+        self.assertIn('flex-wrap:wrap', css)
+        self.assertIn('& label{flex:1 1 24rem;min-width:0}', css)
+        self.assertLessEqual(len(css.encode('utf-8')), 300)
         self.assertNotIn('!important', css)
 
     def test_core_search_uses_same_mobile_action_width(self):

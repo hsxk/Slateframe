@@ -27,3 +27,11 @@ At 390px RTL and 200% text, the Gutenberg FAQ can extend below the inner editor 
 At 390px RTL and 1440px LTR, Tab and Shift+Tab must traverse the three native summaries in order without toggling them. Assert `:focus-visible` after keyboard navigation and capture a separate 390px RTL/200%/forced-colors focus-indicator screenshot.
 
 The Gutenberg final-paragraph screenshot must follow a real scroll and validate multi-line text fragments against paragraph bounds, all clipping ancestors in both axes, and the editor iframe viewport. At 320px, 375px and 412px RTL/200%, verify the editor's horizontal overflow, summary bounds and at least 44px hit targets. Do not mark this slice visually accepted until exact-HEAD Actions artifacts are inspected.
+
+### Printing closed Core Details
+
+Printing a Knowledge article must not silently omit answers from its initially closed Core Details. The print-only presentation rule reveals the native `::details-content` box without modifying the `open` attribute or adding JavaScript. It also keeps each summary with its answer. The on-screen disclosure remains closed and keyboard-operable.
+
+The dedicated real-WordPress print regression uses the registered pattern and checks all three answers at seven viewport widths, both text directions and 200% root text size. It captures 390px and 1440px print evidence; verify those actual screenshots from the exact PR HEAD Actions before release.
+
+This relies on browser support for the native `::details-content` pseudo-element. Older engines without that support may still omit closed answers from print output; use print preview and open the disclosures before printing in those browsers. Do not add a custom accordion or a runtime JavaScript print handler as a workaround.

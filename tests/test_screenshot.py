@@ -1,5 +1,6 @@
 """Regression tests for the shipped PNG decoder contract."""
 import importlib.util
+import os
 import struct
 import tempfile
 import unittest
@@ -65,6 +66,59 @@ class ScreenshotIntegrityTests(unittest.TestCase):
             chunks.append((kind, cls.original[offset + 8:offset + 8 + size]))
             offset += 12 + size
         return chunks
+
+    def test_rejects_symlinked_screenshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            original = Path(directory) / 'original.png'
+            original.write_bytes(self.original)
+            linked = Path(directory) / 'linked.png'
+            linked.symlink_to(original)
+            with self.assertRaisesRegex(ValueError, 'symlinked'):
+                MODULE.validate(linked)
+
+    def test_rejects_symlinked_parent_directory(self):
+        with tempfile.TemporaryDirectory() as directory:
+            original = Path(directory) / 'real'
+            original.mkdir()
+            (original / 'screenshot.png').write_bytes(self.original)
+            linked = Path(directory) / 'alias'
+            linked.symlink_to(original, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, 'symlinked'):
+                MODULE.validate(linked / 'screenshot.png')
+
+    def test_rejects_hardlinked_screenshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            original = Path(directory) / 'original.png'
+            original.write_bytes(self.original)
+            linked = Path(directory) / 'linked.png'
+            os.link(original, linked)
+            with self.assertRaisesRegex(ValueError, 'hardlinked'):
+                MODULE.validate(linked)
+
+    def test_rejects_oversized_screenshot_without_loading_it(self):
+        with tempfile.TemporaryDirectory() as directory:
+            oversized = Path(directory) / 'oversized.png'
+            with oversized.open('wb') as target:
+                target.truncate(MODULE.MAX_FILE_BYTES + 1)
+            with self.assertRaisesRegex(ValueError, 'oversized'):
+                MODULE.validate(oversized)
+
+    def test_rejects_non_regular_screenshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(ValueError, 'non-regular'):
+                MODULE.validate(Path(directory))
+
+    def test_rejects_invalid_chunk_type_bytes(self):
+        parts = self.source_chunks()
+        parts.insert(1, (b'tE1t', b'bad'))
+        with self.assertRaisesRegex(ValueError, 'chunk type'):
+            self.validate_bytes(self.rebuild_chunks(parts))
+
+    def test_rejects_lowercase_reserved_chunk_bit(self):
+        parts = self.source_chunks()
+        parts.insert(1, (b'tExt', b'bad'))
+        with self.assertRaisesRegex(ValueError, 'reserved chunk bit'):
+            self.validate_bytes(self.rebuild_chunks(parts))
 
     def test_release_builder_keeps_executable_mode(self):
         self.assertTrue((ROOT / "bin" / "build-theme-zip.sh").stat().st_mode & 0o111)

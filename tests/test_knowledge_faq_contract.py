@@ -53,6 +53,13 @@ class KnowledgeFaqContract(unittest.TestCase):
         self.assertIn('Math.abs(window.scrollY)', source)
         self.assertIn('await summary.evaluate(node => node.blur())', source)
         self.assertIn("node.style.removeProperty('--slateframe-control')", source)
+        # A reset after the 1440px screenshot is too late: the viewport matrix
+        # ends with a 56px override, which would taint the 390px visual evidence.
+        mobile_capture = source.split('knowledge-faq-390-rtl-200-forced-colors.png')[0]
+        self.assertIn("node.style.removeProperty('--slateframe-control')", mobile_capture)
+        self.assertIn('expect(naturalControl).toBeGreaterThanOrEqual(44)', mobile_capture)
+        self.assertIn('expect(naturalControl).toBeLessThanOrEqual(56)', mobile_capture)
+
 
     def test_real_wordpress_browser_matrix_and_cleanup(self):
         source = BROWSER.read_text(encoding='utf-8')

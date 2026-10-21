@@ -18,7 +18,17 @@ const viewport = (info) => info.project.use.viewport?.width || 0;
 test('empty native Query Loop is readable without phantom cards, pagination or overflow', async ({ page }, info) => {
   const blocks = content();
   expect(blocks).toContain('<!-- wp:query-no-results -->');
-  expect(blocks).toContain('No projects are available yet.');
+  // The registered PHP pattern is localized by WordPress. Read the exact
+  // Core Query No Results paragraph, not the English source string or an
+  // unrelated paragraph in the same project-grid pattern.
+  const expectedEmptyText = await page.evaluate(markup => {
+    const noResults = markup.match(/<!-- wp:query-no-results -->([\s\S]*?)<!-- \/wp:query-no-results -->/);
+    if (!noResults) return '';
+    const parsed = new DOMParser().parseFromString(noResults[1], 'text/html');
+    const paragraphs = parsed.querySelectorAll('p');
+    return paragraphs.length === 1 ? paragraphs[0].textContent.trim() : '';
+  }, blocks);
+  expect(expectedEmptyText).not.toBe('');
   expect(blocks).toContain('"search":"' + noMatches + '"');
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
     '--post_title=Slateframe empty Portfolio fixture', '--post_content=' + blocks, '--porcelain');
@@ -27,7 +37,7 @@ test('empty native Query Loop is readable without phantom cards, pagination or o
     const grid = page.locator('.slateframe-project-grid').first();
     const empty = grid.locator('.wp-block-query-no-results').first();
     await expect(empty).toBeVisible();
-    await expect(empty).toContainText('No projects are available yet.');
+    await expect(empty).toContainText(expectedEmptyText);
     await expect(grid.locator('.wp-block-post-template > .wp-block-post')).toHaveCount(0);
     await expect(grid.locator('.wp-block-query-pagination a')).toHaveCount(0);
 
@@ -39,15 +49,25 @@ test('empty native Query Loop is readable without phantom cards, pagination or o
       await page.emulateMedia({ forcedColors: 'active' });
       const result = await empty.evaluate((node) => {
         const box = node.getBoundingClientRect();
+        const style = getComputedStyle(node);
+        const textRects = [...node.querySelectorAll('p')].flatMap(paragraph => {
+          const range = document.createRange();
+          range.selectNodeContents(paragraph);
+          return [...range.getClientRects()].filter(rect => rect.width > 0 && rect.height > 0);
+        });
         return {
           width: document.documentElement.clientWidth,
           scrollWidth: document.documentElement.scrollWidth,
           left: box.left,
           right: box.right,
-          visible: getComputedStyle(node).display !== 'none',
+          visible: style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0,
+          textRects: textRects.length,
+          clippedText: textRects.some(rect => rect.left < box.left - 2 || rect.right > box.right + 2),
         };
       });
       expect(result.visible).toBe(true);
+      expect(result.textRects).toBeGreaterThan(0);
+      expect(result.clippedText, direction + ' localized empty-state text').toBe(false);
       expect(result.scrollWidth - result.width).toBeLessThanOrEqual(1);
       expect(result.left).toBeGreaterThanOrEqual(-1);
       expect(result.right).toBeLessThanOrEqual(result.width + 1);

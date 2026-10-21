@@ -10,7 +10,9 @@ STYLE = (ROOT / 'style.css').read_text(encoding='utf-8')
 
 class AuthoredFormZoomContract(unittest.TestCase):
     def test_shared_native_button_reflow_and_existing_asset_budget(self):
-        self.assertIn('form .slateframe-form-actions{flex-wrap:wrap}', CSS)
+        self.assertIn('& .slateframe-form-actions{display:flex;flex-wrap:wrap}', CSS)
+        self.assertIn('padding:min(var(--slateframe-stack-gap),clamp(8px,2vw,24px))', CSS)
+        self.assertNotIn('form .slateframe-form-actions{flex-wrap:wrap}', CSS)
         self.assertLessEqual(len(CSS.encode('utf-8')), 750)
         self.assertNotIn('!important', CSS)
 
@@ -31,6 +33,10 @@ class AuthoredFormZoomContract(unittest.TestCase):
 
     def test_theme_local_style_loading_without_runtime_dependency(self):
         self.assertIn("['forms', 'form-content']", BROWSER)
+        self.assertNotIn('style="display:flex', BROWSER)
+        self.assertIn('readable 400% action', BROWSER)
+        self.assertIn('choice.flexBasis', BROWSER)
+        self.assertIn('fieldsetPadding', BROWSER)
         self.assertIn('/assets/css/${name}.css', BROWSER)
         self.assertNotIn('cdn.', BROWSER)
         self.assertNotIn('fetch(', BROWSER)
