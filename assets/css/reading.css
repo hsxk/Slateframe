@@ -2,3 +2,4 @@
 .slateframe-prose a.wp-block-file__button{display:inline-flex;align-items:center;min-height:var(--slateframe-control);max-inline-size:100%;padding:var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);border-radius:var(--slateframe-radius);white-space:normal}
 :is(.slateframe-prose,.editor-styles-wrapper) .wp-block-table-of-contents a{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
 :is(.wp-block-code,.wp-block-table,.wp-block-calendar,.slateframe-prose pre,.slateframe-prose>table):focus-visible{outline:2px solid Highlight;outline-offset:-2px}
+.slateframe-prose .wp-block-file>a:focus-visible{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}
