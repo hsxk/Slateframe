@@ -11,7 +11,7 @@ STYLE = (ROOT / 'style.css').read_text(encoding='utf-8')
 class AuthoredFormZoomContract(unittest.TestCase):
     def test_shared_native_button_reflow_and_existing_asset_budget(self):
         self.assertIn('& .slateframe-form-actions{display:flex;flex-wrap:wrap}', CSS)
-        self.assertIn('padding:min(var(--slateframe-stack-gap),clamp(12px,2vw,24px))', CSS)
+        self.assertIn('padding:min(var(--slateframe-stack-gap),clamp(8px,2vw,24px))', CSS)
         self.assertNotIn('form .slateframe-form-actions{flex-wrap:wrap}', CSS)
         self.assertLessEqual(len(CSS.encode('utf-8')), 750)
         self.assertNotIn('!important', CSS)
