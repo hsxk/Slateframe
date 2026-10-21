@@ -4,6 +4,13 @@ test('Core Calendar keeps its seven-column table and scrolls inside the reading 
   const post = page.locator('.slateframe-card-title a').first();
   await expect(post).toBeVisible();
   await post.click();
+  // A visible article can precede the completion of its contextual stylesheet.
+  // Wait for the actual WordPress reading CSS before injecting the Calendar;
+  // otherwise the test intermittently observes the browser's default overflow.
+  await page.waitForLoadState('load');
+  const readingStyle = page.locator('link#slateframe-reading-css');
+  await expect(readingStyle).toHaveAttribute('href', /\/assets\/css\/reading\.css/);
+  await expect.poll(() => readingStyle.evaluate(link => link.sheet !== null)).toBe(true);
   const prose = page.locator('.slateframe-prose').first();
   await expect(prose).toBeVisible();
   await prose.evaluate(root => {
