@@ -119,7 +119,10 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		await expect(locator).toBeVisible();
 		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
-		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+		// Shared native form controls bound inline padding at 12px to remain readable
+		// at 400% text zoom; the underlying Appearance spacing token still scales.
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+			Math.min(12 * profile.spacing, 12), 1);
 	}
 	await page.locator('.slateframe-main').evaluate((node) => {
 		const fixture = document.createElement('div');
@@ -135,7 +138,11 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		await expect(locator).toBeVisible();
 		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
-		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+		// The native Core Search controls use the bounded form padding; the
+		// independent Core Button link still follows the Appearance token.
+		const isFormControl = await locator.evaluate((node) => Boolean(node.closest('form')));
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+			isFormControl ? Math.min(12 * profile.spacing, 12) : 12 * profile.spacing, 1);
 	}
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
@@ -152,12 +159,15 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		await expect(field).toBeVisible();
 		expect((await field.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
-		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+			Math.min(12 * profile.spacing, 12), 1);
 	}
 	const semanticButton = page.locator('#browser-form-action');
 	await expect(semanticButton).toBeVisible();
 	expect((await semanticButton.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	near(await semanticButton.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	near(await semanticButton.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+		Math.min(12 * profile.spacing, 12), 1);
 	const imageSubmit = page.locator('#browser-image-submit');
 	await expect(imageSubmit).toBeVisible();
 	const imageSubmitMetrics = await imageSubmit.evaluate((node) => ({
