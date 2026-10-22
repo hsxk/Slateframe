@@ -1,9 +1,11 @@
 """Guard Core File filename wrapping against late WordPress block CSS."""
 from pathlib import Path
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 STYLE = (ROOT / "style.css").read_text(encoding="utf-8")
+READING = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
 
 
 class CoreFileWrapContract(unittest.TestCase):
@@ -14,9 +16,21 @@ class CoreFileWrapContract(unittest.TestCase):
             "max-inline-size:100%;overflow-wrap:anywhere}", STYLE
         )
 
+    def test_download_label_wraps_inside_bounded_control(self):
+        rules = re.findall(r"\.slateframe-prose a\.wp-block-file__button\{([^}]*)\}", READING)
+        self.assertEqual(len(rules), 1)
+        declarations = dict(
+            part.split(":", 1) for part in rules[0].split(";") if ":" in part
+        )
+        self.assertEqual(declarations.get("overflow-wrap"), "anywhere")
+        self.assertEqual(declarations.get("white-space"), "normal")
+        self.assertEqual(declarations.get("max-inline-size"), "100%")
+        self.assertEqual(declarations.get("min-height"), "var(--slateframe-control)")
+
     def test_existing_runtime_budgets_are_preserved(self):
         size = lambda path: (ROOT / path).stat().st_size
         self.assertLessEqual(size("style.css"), 16000)
+        self.assertLessEqual(size("assets/css/reading.css"), 7000)
         shared = sum(size(name) for name in (
             "style.css", "assets/css/navigation.css", "assets/css/footer.css",
             "assets/js/theme.js", "assets/css/reading.css", "assets/css/publishing.css",
