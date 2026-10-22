@@ -9,9 +9,9 @@ READING = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
 
 
 class CoreFileWrapContract(unittest.TestCase):
-    def test_filename_explicitly_wraps_under_core_styles(self):
+    def test_filename_and_download_wrap_under_core_styles(self):
         self.assertIn(
-            ".wp-block-file>a:first-of-type{display:inline-flex;"
+            ".wp-block-file>a{display:inline-flex;"
             "align-items:center;min-block-size:var(--slateframe-control);"
             "max-inline-size:100%;overflow-wrap:anywhere}", STYLE
         )
@@ -22,7 +22,7 @@ class CoreFileWrapContract(unittest.TestCase):
         declarations = dict(
             part.split(":", 1) for part in rules[0].split(";") if ":" in part
         )
-        self.assertEqual(declarations.get("overflow-wrap"), "anywhere")
+        self.assertNotIn("overflow-wrap", declarations)
         self.assertEqual(declarations.get("white-space"), "normal")
         self.assertEqual(declarations.get("max-inline-size"), "100%")
         self.assertEqual(declarations.get("min-height"), "var(--slateframe-control)")
