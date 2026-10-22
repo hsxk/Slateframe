@@ -23,6 +23,8 @@ class CoreFileWrapContract(unittest.TestCase):
             "assets/css/forms.css", "assets/css/comments.css", "assets/css/form-content.css",
         ))
         self.assertLessEqual(shared, 38000)
+        photography_discussion = shared - size("assets/css/form-content.css") + size("assets/css/photography.css")
+        self.assertLessEqual(photography_discussion, 43000)
 
 
 if __name__ == "__main__":
