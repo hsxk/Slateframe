@@ -20,6 +20,10 @@ if ( false === $lock || ! flock( $lock, LOCK_EX ) ) {
     throw new RuntimeException( 'Cannot lock disposable footer widget fixture.' );
 }
 try {
+    // WP-CLI may have primed alloptions before waiting on another worker's lock.
+    wp_cache_delete( 'alloptions', 'options' );
+    wp_cache_delete( 'widget_block', 'options' );
+    wp_cache_delete( 'sidebars_widgets', 'options' );
     $widgets = get_option( 'widget_block', array() );
     $sidebars = wp_get_sidebars_widgets();
     $sidebar = isset( $sidebars['footer-content'] ) ? $sidebars['footer-content'] : array();
