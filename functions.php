@@ -686,7 +686,7 @@ function slateframe_assets() {
 	$comments_visible     = is_singular() && ! $password_form_needed;
 	$comments_open        = $comments_visible && comments_open();
 	// Closed but unlocked threads still render their historical comments.
-	$comments_needed      = $comments_open || ( $comments_visible && (bool) get_comments_number() );
+	$comments_needed = $comments_open || ( $comments_visible && (bool) get_comments_number() );
 	// Preserve CSS dependency closure even when extension filters disagree.
 	$forms_needed = $forms_needed || $form_content_needed || $search_form_needed || $comments_needed;
 	$forms_needed = $forms_needed || $password_form_needed;
