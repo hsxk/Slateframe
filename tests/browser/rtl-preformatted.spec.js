@@ -14,10 +14,15 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
     const prose = document.createElement('pre');
     prose.className = 'wp-block-preformatted';
     prose.textContent = 'نص عربي متعدد الأسطر\n  日本語の整形済みテキスト\n' + 'نص '.repeat(90);
+    const verse = document.createElement('pre');
+    verse.className = 'wp-block-verse';
+    verse.textContent = 'قصيدة عربية\n日本語の詩\n中文诗歌';
     const code = document.createElement('pre');
     code.className = 'wp-block-code';
-    code.textContent = 'const source = "' + 'source-'.repeat(90) + '";';
-    fixture.append(prose, code);
+    const codeText = document.createElement('code');
+    codeText.textContent = 'const source = "' + 'source-'.repeat(90) + '";';
+    code.append(codeText);
+    fixture.append(prose, verse, code);
     root.append(fixture);
   });
   const fixture = page.locator('.slateframe-preformatted-rtl-fixture');
@@ -27,12 +32,25 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
       await page.evaluate(value => { document.documentElement.dir = value; }, dir);
       const result = await fixture.evaluate(root => ({
         proseDirection: getComputedStyle(root.querySelector('.wp-block-preformatted')).direction,
+        verseDirection: getComputedStyle(root.querySelector('.wp-block-verse')).direction,
         codeDirection: getComputedStyle(root.querySelector('.wp-block-code')).direction,
         proseOverflow: getComputedStyle(root.querySelector('.wp-block-preformatted')).overflowX,
+        codeOverflow: getComputedStyle(root.querySelector('.wp-block-code')).overflowX,
+        codeAlign: getComputedStyle(root.querySelector('.wp-block-code')).textAlign,
+        codeWhiteSpace: getComputedStyle(root.querySelector('.wp-block-code code')).whiteSpace,
+        codeOverflowWrap: getComputedStyle(root.querySelector('.wp-block-code code')).overflowWrap,
+        codeScrollWidth: root.querySelector('.wp-block-code').scrollWidth,
+        codeClientWidth: root.querySelector('.wp-block-code').clientWidth,
         pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       }));
       expect(result.proseDirection, `${width}px ${dir}`).toBe(dir);
+      expect(result.verseDirection, `${width}px ${dir} Verse must follow prose`).toBe(dir);
       expect(result.codeDirection).toBe('ltr');
+      expect(result.codeAlign).toBe('left');
+      expect(result.codeOverflow).toBe('auto');
+      expect(result.codeWhiteSpace).toBe('pre-wrap');
+      expect(result.codeOverflowWrap).toBe('anywhere');
+      expect(result.codeScrollWidth, `${width}px ${dir} Core Code should wrap, not add a keyboard stop`).toBeLessThanOrEqual(result.codeClientWidth + 2);
       expect(result.proseOverflow).toBe('auto');
       expect(result.pageOverflow).toBeLessThanOrEqual(1);
     }
@@ -41,6 +59,9 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
   await page.evaluate(() => { document.documentElement.dir = 'rtl'; document.documentElement.style.fontSize = '200%'; });
   await page.emulateMedia({ forcedColors: 'active' });
   expect(await fixture.locator('.wp-block-preformatted').evaluate(node => getComputedStyle(node).direction)).toBe('rtl');
+  expect(await fixture.locator('.wp-block-verse').evaluate(node => getComputedStyle(node).direction)).toBe('rtl');
   expect(await fixture.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await expect(fixture.locator('.wp-block-code')).not.toHaveAttribute('tabindex', '0');
+  await expect(fixture.locator('.wp-block-preformatted')).not.toHaveAttribute('tabindex', '0');
   await fixture.screenshot({ path: 'test-artifacts/screenshots/rtl-preformatted-390-zoom-forced-colors.png' });
 });
