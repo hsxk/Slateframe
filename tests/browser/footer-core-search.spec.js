@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { footerWidgetId, footerWidgetMutation } = require('./support/footer-widget-fixture');
 
 const wp = (php) => execFileSync('wp', ['eval', php, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 20_000,
@@ -9,35 +10,16 @@ const wp = (php) => execFileSync('wp', ['eval', php, '--path=/tmp/wp-browser'], 
 
 // Change the real WordPress widget settings, not the browser DOM. This also
 // validates the theme's pre-enqueue detection for otherwise form-free archives.
-const fixtureId = 90817;
-const install = `
-$widgets = get_option('widget_block', array());
-$widgets[${fixtureId}] = array('content' => '<!-- wp:search {"label":"Search","buttonText":"検索 Search 搜索","buttonPosition":"button-outside"} /-->');
-update_option('widget_block', $widgets);
-$sidebars = wp_get_sidebars_widgets();
-$sidebars['footer-content'] = isset($sidebars['footer-content']) ? $sidebars['footer-content'] : array();
-if (!in_array('block-${fixtureId}', $sidebars['footer-content'], true)) {
-    $sidebars['footer-content'][] = 'block-${fixtureId}';
-}
-wp_set_sidebars_widgets($sidebars);
-`;
-const remove = `
-$widgets = get_option('widget_block', array());
-unset($widgets[${fixtureId}]);
-update_option('widget_block', $widgets);
-$sidebars = wp_get_sidebars_widgets();
-$sidebars['footer-content'] = array_values(array_diff(isset($sidebars['footer-content']) ? $sidebars['footer-content'] : array(), array('block-${fixtureId}')));
-wp_set_sidebars_widgets($sidebars);
-`;
-
 test('real Core Search footer widget retains controls at 200% zoom', async ({ page }, testInfo) => {
   test.skip(!process.env.CI, 'Needs the CI WordPress CLI fixture');
-  wp(install);
+  const fixtureId = footerWidgetId(testInfo.project.name);
+  wp(footerWidgetMutation(fixtureId, 'install'));
   try {
     await page.goto('/', { waitUntil: 'networkidle' });
     // The archive has no form of its own: forms.css must come from the widget.
     await expect(page.locator('link[href*="/assets/css/forms.css"]')).toHaveCount(1);
-    const search = page.locator('.slateframe-footer-content .slateframe-footer-widget .wp-block-search').last();
+    const search = page.locator(`.slateframe-footer-content #block-${fixtureId} .wp-block-search`);
+    await expect(search).toHaveCount(1);
     await expect(search).toBeVisible();
     const input = search.locator('input[type=search]');
     const button = search.locator('button[type=submit]');
@@ -87,6 +69,6 @@ test('real Core Search footer widget retains controls at 200% zoom', async ({ pa
       }
     }
   } finally {
-    wp(remove);
+    wp(footerWidgetMutation(fixtureId, 'remove'));
   }
 });
