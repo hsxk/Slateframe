@@ -170,6 +170,9 @@ function slateframe_entry_meta() {
 	 * @param int    $author_id  WordPress user ID.
 	 */
 	$author_url = apply_filters( 'slateframe_author_url', $author_url, $author_id );
+	// Extensions may intentionally suppress a byline link or return invalid data.
+	// Sanitize before deciding whether to render an anchor at all.
+	$author_url = is_string( $author_url ) ? esc_url_raw( $author_url ) : '';
 
 	echo '<div class="slateframe-entry-meta">';
 	slateframe_posted_on();
@@ -225,6 +228,11 @@ function slateframe_entry_footer() {
 	 * @param int    $post_id Current post ID.
 	 */
 	$tags = apply_filters( 'slateframe_entry_tags_html', $tags, get_the_ID() );
+
+	// The public hooks accept HTML strings. Ignore malformed plugin returns
+	// instead of passing arrays or WP_Error objects to wp_kses_post().
+	$categories = is_string( $categories ) ? $categories : '';
+	$tags       = is_string( $tags ) ? $tags : '';
 
 	if ( ! $categories && ! $tags ) {
 		return;
