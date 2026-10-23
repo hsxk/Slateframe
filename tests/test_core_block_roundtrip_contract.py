@@ -19,6 +19,14 @@ class CoreBlockRoundtripContract(unittest.TestCase):
         source = SPEC.read_text(encoding='utf-8')
         self.assertIn('expect(evidence.after).toEqual(evidence.before)', source)
         self.assertIn('isEditedPostDirty', source)
+        self.assertIn('parsedAttributes: parsed[0]?.attributes', source)
+        self.assertIn('expect(result.parsedValid, `${result.name} must be valid Core markup`).toBe(true)', source)
+        self.assertIn("file.parsedAttributes.href", source)
+        self.assertIn("file.parsedAttributes.fileName", source)
+        self.assertIn("file.parsedAttributes.showDownloadButton", source)
+        self.assertIn("verse.parsedAttributes.content", source)
+        self.assertIn("code.parsedAttributes.content", source)
+        self.assertNotIn('not.toBe(false)', source)
         for forbidden in ('data.dispatch(', 'savePost(', 'insertBlocks(', 'removeBlocks(', 'editPost('):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, source)

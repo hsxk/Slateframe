@@ -46,6 +46,7 @@ test('real Gutenberg Core File, Verse and Code round-trip without editing the po
         second,
         parsedName: parsed[0]?.name,
         parsedValid: parsed[0]?.isValid,
+        parsedAttributes: parsed[0]?.attributes,
         parsedCount: parsed.length,
         saveElement: Boolean(blocks.getSaveContent(name, attributes)),
       };
@@ -58,11 +59,20 @@ test('real Gutenberg Core File, Verse and Code round-trip without editing the po
   for (const result of evidence.results) {
     expect(result.parsedCount, result.name).toBe(1);
     expect(result.parsedName, result.name).toBe(result.name);
-    expect(result.parsedValid, result.name).not.toBe(false);
+    expect(result.parsedValid, `${result.name} must be valid Core markup`).toBe(true);
     expect(result.saveElement, result.name).toBe(true);
     expect(result.second, `${result.name} must serialize deterministically`).toBe(result.first);
     expect(result.first, result.name).toContain('日本語');
     expect(result.first, result.name).toContain('العربية');
     expect(result.first, result.name).toMatch(/<!-- wp:(file|verse|code)/);
+    expect(result.first, result.name).toMatch(/<!-- \/wp:(file|verse|code) -->/);
   }
+  const [file, verse, code] = evidence.results;
+  expect(file.parsedAttributes.href).toBe('/wp-content/uploads/slateframe-fixtures/guide.pdf');
+  expect(file.parsedAttributes.fileName).toContain('日本語 中文 العربية');
+  expect(file.parsedAttributes.showDownloadButton).toBe(true);
+  expect(verse.parsedAttributes.content).toContain('日本語 — 中文');
+  expect(verse.parsedAttributes.content).toContain('العربية — Korean 한국어');
+  expect(code.parsedAttributes.content).toContain('const label =');
+  expect(code.parsedAttributes.content).toContain('日本語 中文 العربية');
 });
