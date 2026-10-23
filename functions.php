@@ -352,7 +352,14 @@ function slateframe_pattern_form_assets( $contents ) {
 		'form_content' => false,
 	);
 
+	if ( ! is_array( $contents ) ) {
+		return $needed;
+	}
+
 	foreach ( $contents as $content ) {
+		if ( ! is_string( $content ) ) {
+			continue;
+		}
 		if ( has_block( 'core/search', $content ) ) {
 			$needed['forms'] = true;
 		}
@@ -525,8 +532,8 @@ function slateframe_forms_styles_needed() {
 		$needed = post_password_required() || comments_open() || (bool) get_comments_number();
 		$post   = get_post();
 
-		if ( ! $needed && $post instanceof WP_Post ) {
-			$needed = has_block( 'core/search', $post ) || slateframe_content_has_form( $post->post_content );
+		if ( ! $needed && $post instanceof WP_Post && is_string( $post->post_content ) ) {
+			$needed = has_block( 'core/search', $post->post_content ) || slateframe_content_has_form( $post->post_content );
 		}
 	}
 
