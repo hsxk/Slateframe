@@ -17,6 +17,8 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
     const code = document.createElement('pre');
     code.className = 'wp-block-code';
     code.textContent = 'const source = "' + 'source-'.repeat(90) + '";';
+    prose.tabIndex = 0;
+    code.tabIndex = 0;
     fixture.append(prose, code);
     root.append(fixture);
   });
@@ -29,10 +31,16 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
         proseDirection: getComputedStyle(root.querySelector('.wp-block-preformatted')).direction,
         codeDirection: getComputedStyle(root.querySelector('.wp-block-code')).direction,
         proseOverflow: getComputedStyle(root.querySelector('.wp-block-preformatted')).overflowX,
+        codeOverflow: getComputedStyle(root.querySelector('.wp-block-code')).overflowX,
+        codeAlign: getComputedStyle(root.querySelector('.wp-block-code')).textAlign,
+        codeScrollable: root.querySelector('.wp-block-code').scrollWidth > root.querySelector('.wp-block-code').clientWidth,
         pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       }));
       expect(result.proseDirection, `${width}px ${dir}`).toBe(dir);
       expect(result.codeDirection).toBe('ltr');
+      expect(result.codeAlign).toBe('left');
+      expect(result.codeOverflow).toBe('auto');
+      expect(result.codeScrollable, `${width}px ${dir} code must scroll inside its own box`).toBe(true);
       expect(result.proseOverflow).toBe('auto');
       expect(result.pageOverflow).toBeLessThanOrEqual(1);
     }
@@ -42,5 +50,8 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
   await page.emulateMedia({ forcedColors: 'active' });
   expect(await fixture.locator('.wp-block-preformatted').evaluate(node => getComputedStyle(node).direction)).toBe('rtl');
   expect(await fixture.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await fixture.locator('.wp-block-preformatted').focus();
+  await page.keyboard.press('Tab');
+  await expect(fixture.locator('.wp-block-code')).toBeFocused();
   await fixture.screenshot({ path: 'test-artifacts/screenshots/rtl-preformatted-390-zoom-forced-colors.png' });
 });
