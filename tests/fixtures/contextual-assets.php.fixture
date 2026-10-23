@@ -29,9 +29,14 @@ function add_action() {}
 function add_filter() {}
 function is_singular() { return true; }
 function post_password_required() { return false; }
-function get_post() { return new WP_Post(); }
+function get_post() { $post = new WP_Post(); if ( array_key_exists( 'context_content', $GLOBALS ) ) { $post->post_content = $GLOBALS['context_content']; } return $post; }
 function has_block() { return false; }
 function parse_blocks( $content ) {
+    if ( ! is_string( $content ) ) { throw new TypeError( 'parse_blocks requires string' ); }
+    $GLOBALS['parse_calls'] = isset( $GLOBALS['parse_calls'] ) ? $GLOBALS['parse_calls'] + 1 : 1;
+    if ( false !== strpos( $content, '<!-- wp:image' ) && false !== strpos( $content, '"lightbox"' ) && false !== strpos( $content, '"enabled":true' ) ) {
+        return array( array( 'blockName' => 'core/image', 'attrs' => array( 'lightbox' => array( 'enabled' => true ) ) ) );
+    }
     if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:group' ) ) {
         return array( array( 'blockName' => 'core/group', 'attrs' => array( 'className' => 'slateframe-gallery-sequence' ) ) );
     }
@@ -72,4 +77,16 @@ check_marker( true === slateframe_blocks_have_legacy_search( array( array( 'bloc
 check_marker( true === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/gallery', 'attrs' => array( 'lightbox' => array( 'enabled' => true ) ) ) ) ), 'Core lightbox lost' );
 check_marker( false === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/image', 'attrs' => array( 'lightbox' => array( 'enabled' => 'false' ) ) ) ) ), 'String false enabled lightbox' );
 check_marker( true === slateframe_photography_styles_needed(), 'Mixed marker filter lost valid class' );
+function check_photo_parse( $content, $expected, $expected_parses, $label ) {
+    $GLOBALS['context_content'] = $content;
+    $GLOBALS['parse_calls'] = 0;
+    check_marker( $expected === slateframe_photography_styles_needed(), $label . ' result' );
+    check_marker( $expected_parses === $GLOBALS['parse_calls'], $label . ' parse budget' );
+}
+check_photo_parse( '<p>Ordinary article content</p>', false, 0, 'Plain article' );
+check_photo_parse( '<p>Literal "lightbox" in prose</p>', false, 1, 'Quoted prose' );
+check_photo_parse( '<!-- wp:image {"lightbox":{"enabled":true}} /-->', true, 1, 'Core Image lightbox' );
+check_photo_parse( '<!-- wp:image {"lightbox":{"enabled":false}} /-->', false, 1, 'Disabled lightbox' );
+check_photo_parse( '<div class="slateframe-gallery-sequence"></div>', true, 0, 'Photography marker' );
+check_photo_parse( array( 'malformed' ), false, 0, 'Malformed stored content' );
 echo "Contextual assets: {$checks} assertions passed\n";

@@ -621,7 +621,7 @@ function slateframe_photography_styles_needed() {
 		if ( is_array( $markers ) && slateframe_content_has_class_marker( $content, $markers ) ) {
 			return true;
 		}
-		if ( slateframe_blocks_have_lightbox( parse_blocks( $content ) ) ) {
+		if ( is_string( $content ) && false !== strpos( $content, '"lightbox"' ) && slateframe_blocks_have_lightbox( parse_blocks( $content ) ) ) {
 			return true;
 		}
 	}
