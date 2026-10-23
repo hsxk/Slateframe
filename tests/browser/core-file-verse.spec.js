@@ -114,7 +114,12 @@ test('Core File keyboard focus remains visible in forced colors and 200% text zo
     }));
     expect(focus.visible).toBe(true);
     expect(focus.outline).not.toBe('none');
-    expect(focus.width).toBeGreaterThanOrEqual(2);
+    // Chromium can report its 1px UA outline for one frame after forced-colors
+    // and programmatic focus. Keep the >=2px requirement; wait for computed CSS.
+    await expect.poll(
+      () => link.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth)),
+      { message: 'Core File focus outline must reach at least 2px', timeout: 5000 },
+    ).toBeGreaterThanOrEqual(2);
   }
   const m = await metrics(page);
   expect(m.verseDirection).toBe('rtl');

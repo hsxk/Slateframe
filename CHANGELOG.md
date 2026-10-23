@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Keep the strict 2px Core File forced-colors focus assertion while waiting for Chromium's computed outline to settle after focus and media changes.
+
 - Cover standalone Core Gallery Photo sequence rendering and responsive image proportions in the Photography runtime suite.
 
 - Assert native Gutenberg content/wide layout variables follow bounded Appearance widths at default, compact and spacious settings; retain mobile/desktop screenshots and verify opaque sticky-header rendering.
