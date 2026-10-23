@@ -1,0 +1,70 @@
+<?php
+/**
+ * Isolated template fixture: verify single.php's comments boundary.
+ *
+ * @package Slateframe
+ */
+
+$slateframe_state = array(
+	'loop'  => 0,
+	'calls' => 0,
+	'open'  => '1' === getenv( 'SLATEFRAME_COMMENTS_OPEN' ),
+	'count' => (int) getenv( 'SLATEFRAME_COMMENTS_COUNT' ),
+);
+
+function get_header() {}
+function get_footer() {}
+function have_posts() {
+	global $slateframe_state;
+	return 0 === $slateframe_state['loop'];
+}
+function the_post() {
+	global $slateframe_state;
+	++$slateframe_state['loop'];
+}
+function post_class( $class ) {
+	echo 'class="' . htmlspecialchars( $class, ENT_QUOTES ) . '"';
+}
+function slateframe_entry_meta() {}
+function slateframe_get_display_title() {
+	return 'Fixture post';
+}
+function wp_kses_post( $value ) {
+	return $value;
+}
+function slateframe_featured_media() {}
+function the_content() {}
+function slateframe_content_pagination() {}
+function slateframe_entry_footer() {}
+function slateframe_related_posts() {}
+function apply_filters( $name, $default ) {
+	return false;
+}
+function get_the_ID() {
+	return 1;
+}
+function comments_open() {
+	global $slateframe_state;
+	return $slateframe_state['open'];
+}
+function get_comments_number() {
+	global $slateframe_state;
+	return $slateframe_state['count'];
+}
+function comments_template() {
+	global $slateframe_state;
+	++$slateframe_state['calls'];
+	echo '<section id="comments"></section>';
+}
+
+ob_start();
+require dirname( __DIR__, 2 ) . '/single.php';
+$html = ob_get_clean();
+
+echo json_encode(
+	array(
+		'calls'                => $slateframe_state['calls'],
+		'has_comments_section' => false !== strpos( $html, 'id="comments"' ),
+		'has_main'             => false !== strpos( $html, 'id="main-content"' ),
+	)
+);
