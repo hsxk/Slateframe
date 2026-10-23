@@ -83,6 +83,7 @@ function slateframe_discovery_bound_query_args( $args, $excluded_post_id = 0 ) {
 	$args['no_found_rows']       = true;
 	$args['suppress_filters']    = false;
 	$args['ignore_sticky_posts'] = true;
+
 	$excluded = slateframe_discovery_positive_ids( isset( $args['post__not_in'] ) ? $args['post__not_in'] : array() );
 	if ( $excluded_post_id ) {
 		$excluded[] = absint( $excluded_post_id );
