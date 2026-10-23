@@ -1,0 +1,73 @@
+<?php
+/** Core synced-pattern and footer widget ID normalization regression. */
+define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
+class WP_Post {
+    public $post_type = 'wp_block';
+    public $post_status = 'publish';
+    public $post_content = '<!-- wp:search /-->';
+}
+function get_template_directory() { return dirname( __DIR__, 2 ); }
+function add_action() {}
+function add_filter() {}
+function get_post( $id = null ) {
+    $GLOBALS['lookups'][] = $id;
+    return new WP_Post();
+}
+function has_block( $name, $content ) {
+    return false !== strpos( $content, '<!-- wp:' . str_replace( 'core/', '', $name ) );
+}
+function parse_blocks( $content ) { return array(); }
+function wp_get_sidebars_widgets() { return $GLOBALS['sidebars']; }
+function get_option( $key, $default = false ) {
+    return isset( $GLOBALS['options'][ $key ] ) ? $GLOBALS['options'][ $key ] : $default;
+}
+require dirname( __DIR__, 2 ) . '/functions.php';
+$checks = 0;
+function check_boundary( $valid, $label ) {
+    global $checks;
+    if ( ! $valid ) { throw new RuntimeException( $label ); }
+    ++$checks;
+}
+function reference( $value ) {
+    return array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => $value ) ) );
+}
+foreach ( array( 31, '31', '00031', '00000031', PHP_INT_MAX, (string) PHP_INT_MAX ) as $id ) {
+    $seen = array();
+    $GLOBALS['lookups'] = array();
+    $contents = slateframe_synced_pattern_contents( reference( $id ), $seen );
+    check_boundary( 1 === count( $contents ) && array( (int) $id ) === $GLOBALS['lookups'], 'Valid synced reference' );
+}
+foreach ( array( null, false, true, 31.0, '31.0', '31e0', '+31', ' 31', '31 ', '0', '000', '-31', array( 31 ), new stdClass(), '99999999999999999999999999999999999999', '00099999999999999999999999999999999999999' ) as $id ) {
+    $seen = array();
+    $GLOBALS['lookups'] = array();
+    $contents = slateframe_synced_pattern_contents( reference( $id ), $seen );
+    check_boundary( array() === $contents && array() === $GLOBALS['lookups'] && array() === $seen, 'Invalid synced reference' );
+}
+$seen = array();
+$GLOBALS['lookups'] = array();
+$contents = slateframe_synced_pattern_contents( array_merge( reference( '00031' ), reference( 31 ), reference( '00000031' ) ), $seen );
+check_boundary( 1 === count( $contents ) && array( 31 ) === $GLOBALS['lookups'], 'Canonical synced reference deduplication' );
+$seen = array();
+$GLOBALS['lookups'] = array();
+$contents = slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/group', 'innerBlocks' => reference( '00031' ) ) ), $seen );
+check_boundary( 1 === count( $contents ) && array( 31 ) === $GLOBALS['lookups'], 'Nested Core group reference' );
+foreach ( array( '1', '42', (string) PHP_INT_MAX ) as $valid ) {
+    check_boundary( (int) $valid === slateframe_footer_widget_number( $valid ), 'Valid widget ID' );
+}
+foreach ( array( '', 0, 1, null, false, '0', '00', '01', '+1', '-1', '1.0', '1e2', ' 1', '1 ', '9999999999999999999999999999999', '0009999999999999999999999999999' ) as $invalid ) {
+    check_boundary( 0 === slateframe_footer_widget_number( $invalid ), 'Invalid widget ID' );
+}
+$overflow = '9999999999999999999999999999999';
+$GLOBALS['sidebars'] = array( 'footer-content' => array( 'search-' . $overflow, 'block-' . $overflow, 'custom_html-' . $overflow, 'text-' . $overflow ) );
+$GLOBALS['options'] = array(
+    'widget_block' => array( PHP_INT_MAX => array( 'content' => '<form></form>' ) ),
+    'widget_custom_html' => array( PHP_INT_MAX => array( 'content' => '<form></form>' ) ),
+    'widget_text' => array( PHP_INT_MAX => array( 'text' => '<form></form>' ) ),
+);
+$sources = slateframe_footer_widget_sources();
+check_boundary( false === $sources['search_widget'] && array() === $sources['contents'], 'Overflow widget ID aliases existing content' );
+// A separate request must retain valid Core and Classic widget identities.
+// The static cache is request-scoped, so validate the suffix helper directly.
+check_boundary( 3 === slateframe_footer_widget_number( '3' ) && 5 === slateframe_footer_widget_number( '5' ), 'Valid mixed widget IDs' );
+check_boundary( 0 === slateframe_footer_widget_number( $overflow ) && 7 === slateframe_footer_widget_number( '7' ), 'Overflow cannot shadow valid widget IDs' );
+echo "Core ID boundaries: {$checks} assertions passed\n";

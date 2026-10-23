@@ -5,6 +5,7 @@ Slateframe discovers contextual CSS for **published** WordPress Core synced patt
 ## Input and traversal rules
 
 - A parsed block must be an array. A `core/block` reference is read only when `attrs` is an array and `ref` is a positive integer or a decimal digit string.
+- Numeric synced references are normalized without overflow aliasing: padded decimal IDs remain valid and deduplicate, while out-of-range decimal strings never fetch a different `wp_block` at `PHP_INT_MAX`. Active Core/Classic footer widget instance IDs receive the same exact-identity check before asset discovery.
 - Invalid attributes (including objects), invalid references and unpublished/non-`wp_block` targets are ignored rather than passed to Core APIs.
 - A referenced `WP_Post` must have **string** `post_content` before Slateframe stores or parses it. Singular post content is likewise validated before `has_block()` and cache-key hashing.
 - The form-asset collector accepts only an array of string pattern contents; malformed filtered entries are skipped before invoking Core `has_block()`. The singular form fallback also checks `post_content` before Core Search detection, without losing valid Core Search or authored `<form>` detection.

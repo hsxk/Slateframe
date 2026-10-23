@@ -312,6 +312,11 @@ function slateframe_synced_pattern_contents( $blocks, &$seen, $depth = 0 ) {
 		$attrs   = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
 		$raw_ref = isset( $attrs['ref'] ) ? $attrs['ref'] : null;
 		$ref     = ( is_int( $raw_ref ) || ( is_string( $raw_ref ) && ctype_digit( $raw_ref ) ) ) ? (int) $raw_ref : 0;
+		// Decimal strings outside PHP's integer range must never resolve to a
+		// different published pattern ID after a saturating integer cast.
+		if ( is_string( $raw_ref ) && $ref > 0 && ltrim( $raw_ref, '0' ) !== (string) $ref ) {
+			continue;
+		}
 		if ( $ref <= 0 || ( isset( $seen[ $ref ] ) && $seen[ $ref ] <= $depth ) ) {
 			continue;
 		}

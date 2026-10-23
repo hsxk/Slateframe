@@ -10,6 +10,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Resolve a Core widget instance number without integer-overflow aliasing.
+ *
+ * @param string $digits Decimal widget instance suffix.
+ * @return int Positive instance number, or zero for invalid/overflow input.
+ */
+function slateframe_footer_widget_number( $digits ) {
+	if ( ! is_string( $digits ) || ! preg_match( '/^[1-9][0-9]*$/D', $digits ) ) {
+		return 0;
+	}
+
+	$number = (int) $digits;
+	return $number > 0 && (string) $number === $digits ? $number : 0;
+}
+
+/**
  * Read active footer widget content once for form and presentation discovery.
  *
  * Preserve the widget type: raw Classic HTML must not be interpreted as a
@@ -42,17 +57,23 @@ function slateframe_footer_widget_sources() {
 			continue;
 		}
 
-		if ( preg_match( '/^search-[1-9][0-9]*$/', $widget_id ) ) {
+		if (
+			preg_match( '/^search-([1-9][0-9]*)$/', $widget_id, $matches ) &&
+			slateframe_footer_widget_number( $matches[1] )
+		) {
 			$cache['search_widget'] = true;
 			continue;
 		}
 
 		if ( preg_match( '/^block-([1-9][0-9]*)$/', $widget_id, $matches ) ) {
+			$number = slateframe_footer_widget_number( $matches[1] );
+			if ( ! $number ) {
+				continue;
+			}
 			if ( null === $block_widgets ) {
 				$block_widgets = get_option( 'widget_block', array() );
 				$block_widgets = is_array( $block_widgets ) ? $block_widgets : array();
 			}
-			$number  = (int) $matches[1];
 			$content = isset( $block_widgets[ $number ]['content'] ) ? $block_widgets[ $number ]['content'] : '';
 			if ( ! is_string( $content ) || '' === trim( $content ) ) {
 				continue;
@@ -71,8 +92,11 @@ function slateframe_footer_widget_sources() {
 				}
 			}
 		} elseif ( preg_match( '/^(custom_html|text)-([1-9][0-9]*)$/', $widget_id, $matches ) ) {
+			$number = slateframe_footer_widget_number( $matches[2] );
+			if ( ! $number ) {
+				continue;
+			}
 			$option  = get_option( 'widget_' . $matches[1], array() );
-			$number  = (int) $matches[2];
 			$field   = 'text' === $matches[1] ? 'text' : 'content';
 			$content = is_array( $option ) && isset( $option[ $number ][ $field ] ) ? $option[ $number ][ $field ] : '';
 			if ( is_string( $content ) && '' !== trim( $content ) ) {
