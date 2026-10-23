@@ -14,7 +14,7 @@ class ContextualAssetGuards(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("Contextual assets: 41 assertions passed", result.stdout)
+        self.assertIn("Contextual assets: 62 assertions passed", result.stdout)
 
     def test_source_guards(self):
         source = (ROOT / "functions.php").read_text(encoding="utf-8")
