@@ -32,7 +32,10 @@ function add_filter() {}
 function is_singular() { return true; }
 function post_password_required() { return false; }
 function get_post() { $post = new WP_Post(); if ( array_key_exists( 'context_content', $GLOBALS ) ) { $post->post_content = $GLOBALS['context_content']; } return $post; }
-function has_block() { return false; }
+function has_block( $name, $content ) {
+    if ( ! is_string( $content ) && ! $content instanceof WP_Post ) { throw new TypeError( 'Core has_block requires post text or WP_Post' ); }
+    return false;
+}
 function parse_blocks( $content ) {
     if ( ! is_string( $content ) ) { throw new TypeError( 'parse_blocks requires string' ); }
     $GLOBALS['parse_calls'] = isset( $GLOBALS['parse_calls'] ) ? $GLOBALS['parse_calls'] + 1 : 1;
@@ -124,5 +127,11 @@ $nested = array( array( 'blockName' => 'core/group', 'innerBlocks' => array( arr
 check_marker( 1 === count( slateframe_synced_pattern_contents( $nested, $seen ) ) && 0 === $seen[36], 'Nested Core group consumed reference depth' );
 $seen = array();
 check_marker( array() === slateframe_synced_pattern_contents( $nested, $seen, 8 ), 'Synced reference depth limit ignored' );
+foreach ( array( array( 'invalid post content' ), new stdClass() ) as $bad_content ) {
+    $GLOBALS['context_content'] = $bad_content;
+    check_marker( array() === slateframe_singular_synced_pattern_contents(), 'Malformed singular synced content' );
+    $flags = slateframe_singular_synced_form_assets();
+    check_marker( false === $flags['forms'] && false === $flags['search_form'] && false === $flags['form_content'], 'Malformed singular form content' );
+}
 unset( $GLOBALS['context_content'] );
 echo "Contextual assets: {$checks} assertions passed\n";
