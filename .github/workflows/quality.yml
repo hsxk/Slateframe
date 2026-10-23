@@ -808,6 +808,18 @@ jobs:
           echo "SLATEFRAME_PAGE_PATH=/?page_id=$PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EDITOR_POST_ID=$EDITOR_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_POST_PATH=/?p=$POST_ID" >> "$GITHUB_ENV"
+          # Exercise Core's native password prompt without altering normal recent-post fixtures.
+          PROTECTED_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=post \
+            --post_status=publish \
+            --post_date='1990-01-01 00:00:00' \
+            --comment_status=open \
+            --post_password='slateframe-ci' \
+            --post_title='Protected Core fixture' \
+            --post_content='Private fixture content — not rendered without password' \
+            --porcelain)
+          echo "SLATEFRAME_PROTECTED_POST_PATH=/?p=$PROTECTED_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_MULTIPAGE_POST_PATH=/?p=$MULTIPAGE_POST_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_MULTIPAGE_PAGE_PATH=/?page_id=$MULTIPAGE_PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EMPTY_AUTHOR_PATH=/?author=$EMPTY_AUTHOR_ID" >> "$GITHUB_ENV"

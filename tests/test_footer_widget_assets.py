@@ -71,6 +71,9 @@ function get_post() {
 function comments_open() {
 	return false;
 }
+function post_password_required() {
+	return false;
+}
 function get_comments_number() {
 	return 0;
 }
