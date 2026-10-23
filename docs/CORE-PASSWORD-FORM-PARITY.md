@@ -11,3 +11,9 @@ The shared slateframe-forms stylesheet must load for the native password form ev
 - A second browser scenario submits an incorrect fixture password, verifies that private content and discussion assets remain hidden, then submits the correct password through WordPress Core. It checks that the native comment form and styles return and that the postpass cookie remains effective after reload. No theme-owned password logic is introduced.
 - The browser fixture uses a temporary CI post, not production content. Representative 320/390/1440px screenshots are saved with exact-HEAD Actions evidence.
 - The theme remains presentation-only: no password management, media access-control plugin behavior, JavaScript, or third-party dependency is added.
+
+## Protected authored presentation
+
+Core password protection hides authored block and HTML content until a valid postpass cookie is present. Slateframe must not inspect locked post content or resolve its synced-pattern references just to decide whether Photography, Portfolio/Knowledge, Query Loop, or authored form-state CSS is needed. The visible native password form still receives the shared 44px form-control layer; independent public footer widgets and extension opt-ins remain eligible for their own styles.
+
+The real WordPress browser fixture contains authored Photography, Portfolio/Query Loop and form markers behind a second password. The browser verifies those CSS files are absent while locked, return after Core unlocks the post, and remain available after reload. This is asset minimization and presentation parity, not a replacement for WordPress Core password handling.

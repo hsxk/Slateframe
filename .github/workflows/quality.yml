@@ -820,6 +820,20 @@ jobs:
             --post_content='Private fixture content — not rendered without password' \
             --porcelain)
           echo "SLATEFRAME_PROTECTED_POST_PATH=/?p=$PROTECTED_ID" >> "$GITHUB_ENV"
+
+          # A second protected post exercises authored contextual assets without
+          # changing the normal WordPress browser fixtures.
+          PROTECTED_PRESENTATION_ID=$(wp post create \
+            --path=/tmp/wp-browser \
+            --post_type=post \
+            --post_status=publish \
+            --post_date='1990-01-02 00:00:00' \
+            --comment_status=closed \
+            --post_password='slateframe-ci-presentation' \
+            --post_title='Protected presentation fixture' \
+            --post_content='<!-- wp:html --><div class="slateframe-gallery-sequence slateframe-project-grid"><form action="#" method="get"><label for="visual-fixture">Private visual fixture — hidden until unlocked</label><input id="visual-fixture" name="v"></form></div><!-- /wp:html -->' \
+            --porcelain)
+          echo "SLATEFRAME_PROTECTED_PRESENTATION_PATH=/?p=$PROTECTED_PRESENTATION_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_MULTIPAGE_POST_PATH=/?p=$MULTIPAGE_POST_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_MULTIPAGE_PAGE_PATH=/?page_id=$MULTIPAGE_PAGE_ID" >> "$GITHUB_ENV"
           echo "SLATEFRAME_EMPTY_AUTHOR_PATH=/?author=$EMPTY_AUTHOR_ID" >> "$GITHUB_ENV"
