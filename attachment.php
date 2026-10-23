@@ -11,7 +11,7 @@ while ( have_posts() ) :
 	the_post();
 
 	$slateframe_attachment_id = get_the_ID();
-	$slateframe_parent_id     = wp_get_post_parent_id( $slateframe_attachment_id );
+	$slateframe_parent_id     = slateframe_public_attachment_parent_id( $slateframe_attachment_id );
 	$slateframe_file_url      = wp_get_attachment_url( $slateframe_attachment_id );
 	$slateframe_mime_type     = (string) get_post_mime_type( $slateframe_attachment_id );
 	$slateframe_caption       = wp_get_attachment_caption( $slateframe_attachment_id );

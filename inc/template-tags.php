@@ -79,6 +79,27 @@ function slateframe_featured_media( $post_id = 0 ) {
 }
 
 /**
+ * Return the public parent of an attachment, if one exists.
+ *
+ * Attachment pages can be reached independently of their parent. Never
+ * expose a private, draft, scheduled, trashed, or non-viewable parent's
+ * title and permalink in the attachment recovery navigation. Core decides
+ * public visibility for built-in and registered custom post types.
+ *
+ * @param int $attachment_id Attachment post ID.
+ * @return int Public parent post ID, or zero when no public parent exists.
+ */
+function slateframe_public_attachment_parent_id( $attachment_id ) {
+	$parent_id = (int) wp_get_post_parent_id( absint( $attachment_id ) );
+
+	if ( 0 >= $parent_id || ! is_post_publicly_viewable( $parent_id ) ) {
+		return 0;
+	}
+
+	return $parent_id;
+}
+
+/**
  * Return portable attachment metadata without exposing server file paths.
  *
  * @param int $attachment_id Attachment post ID.
