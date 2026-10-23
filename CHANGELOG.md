@@ -29,6 +29,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Preserve natural letter spacing for Chinese, Japanese and Korean site titles while keeping Latin brand tracking and the existing bounded navigation CSS budget; verify RTL, 400% text, keyboard focus and responsive widths in real WordPress Chromium.
+
 - Preserve shared form-control CSS for open and historical comment threads even when an integration opts out of general form styles; retain selective loading and threaded-reply gating.
 
 - Align native numbered-step badge positioning with inherited RTL direction in both published content and Gutenberg, and assert the badge's physical inset against the list text gutter rather than checking padding alone.
