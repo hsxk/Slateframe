@@ -16,6 +16,7 @@ for (const id of ids) {
   for (const operation of ['install', 'remove']) {
     const code = footerWidgetMutation(id, operation);
     assert.match(code, /flock\( \$lock, LOCK_EX \)/);
+    assert.match(code, /wp_cache_delete\( 'alloptions', 'options' \)/);
     assert.match(code, /finally \{/);
     assert.match(code, /flock\( \$lock, LOCK_UN \)/);
     assert.match(code, new RegExp(`block-${id}`));
@@ -42,7 +43,9 @@ const initial = {
 fs.writeFileSync(stateFile, JSON.stringify(initial));
 const phpStubs = `
 function fixture_state() { return json_decode(file_get_contents(getenv('SLATEFRAME_FIXTURE_STATE')), true); }
-function get_option($name, $default = false) { $state = fixture_state(); return $state[$name] ?? $default; }
+$GLOBALS['option_cache'] = array('widget_block' => array(77 => array('content' => 'pre-existing')), 'sidebars_widgets' => array('footer-content' => array('block-77'), 'sidebar-other' => array('text-2'))); // Simulate stale WP-CLI bootstrap cache.
+function wp_cache_delete($name, $group) { unset($GLOBALS['option_cache'][$name]); if ('alloptions' === $name) { $GLOBALS['option_cache'] = array(); } }
+function get_option($name, $default = false) { if (array_key_exists($name, $GLOBALS['option_cache'])) { return $GLOBALS['option_cache'][$name]; } $state = fixture_state(); $GLOBALS['option_cache'][$name] = $state[$name] ?? $default; return $GLOBALS['option_cache'][$name]; }
 function wp_get_sidebars_widgets() { return get_option('sidebars_widgets', array()); }
 function update_option($name, $value) { $state = fixture_state(); $state[$name] = $value; file_put_contents(getenv('SLATEFRAME_FIXTURE_STATE'), json_encode($state)); }
 function wp_set_sidebars_widgets($sidebars) { update_option('sidebars_widgets', $sidebars); }
