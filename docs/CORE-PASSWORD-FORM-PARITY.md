@@ -8,5 +8,6 @@ The shared slateframe-forms stylesheet must load for the native password form ev
 
 - python3 -m unittest discover -s tests -p test_password_form_asset_parity.py runs isolated PHP tests against the actual functions and confirms both CSS dependency closure and comment-asset suppression.
 - tests/browser/password-form-parity.spec.js visits a real password-protected WordPress fixture, checks native form and asset handles, verifies content remains hidden, then checks 44px controls, keyboard focus, RTL, 400% text zoom and forced colors across responsive projects.
+- A second browser scenario submits an incorrect fixture password, verifies that private content and discussion assets remain hidden, then submits the correct password through WordPress Core. It checks that the native comment form and styles return and that the postpass cookie remains effective after reload. No theme-owned password logic is introduced.
 - The browser fixture uses a temporary CI post, not production content. Representative 320/390/1440px screenshots are saved with exact-HEAD Actions evidence.
 - The theme remains presentation-only: no password management, media access-control plugin behavior, JavaScript, or third-party dependency is added.
