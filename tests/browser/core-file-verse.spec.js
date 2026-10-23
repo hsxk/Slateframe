@@ -58,6 +58,9 @@ async function metrics(page) {
       codeScroll: code.scrollWidth,
       codeClient: code.clientWidth,
       codeOverflow: getComputedStyle(code).overflowX,
+      codeWhiteSpace: getComputedStyle(code.querySelector('code')).whiteSpace,
+      codeOverflowWrap: getComputedStyle(code.querySelector('code')).overflowWrap,
+      codeTabIndex: code.hasAttribute('tabindex'),
       documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     };
   });
@@ -86,7 +89,10 @@ test('native Core File and Verse preserve geometry and writing direction at seve
       expect(m.verseWrap).toBe('pre-wrap');
       expect(m.verseOverflowWrap).toBe('anywhere');
       expect(m.codeOverflow).toBe('auto');
-      expect(m.codeScroll).toBeGreaterThan(m.codeClient);
+      expect(m.codeWhiteSpace).toBe('pre-wrap');
+      expect(m.codeOverflowWrap).toBe('anywhere');
+      expect(m.codeScroll, width + 'px ' + dir + ' Core Code must wrap without a keyboard-only scroll stop').toBeLessThanOrEqual(m.codeClient + 2);
+      expect(m.codeTabIndex).toBe(false);
       expect(m.documentOverflow, width + 'px ' + dir).toBeLessThanOrEqual(1);
     }
   }
