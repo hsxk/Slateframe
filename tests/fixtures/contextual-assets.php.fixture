@@ -1,0 +1,75 @@
+<?php
+/** Isolated Core marker and lightbox regression against actual theme functions. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+class WP_Post {
+    public $ID = 17;
+    public $post_content = '<div class="slateframe-gallery-sequence"></div>';
+}
+class WP_HTML_Tag_Processor {
+    private $html;
+    private $offset = 0;
+    private $classes = '';
+    public function __construct( $html ) {
+        if ( ! is_string( $html ) ) { throw new TypeError( 'HTML must be a string' ); }
+        $this->html = $html;
+    }
+    public function next_tag( $options = null ) {
+        $tag = is_array( $options ) && isset( $options['tag_name'] ) ? preg_quote( $options['tag_name'], '~' ) : '[a-z][a-z0-9-]*';
+        if ( ! preg_match( '~<(' . $tag . ')\b([^>]*)>~i', $this->html, $match, PREG_OFFSET_CAPTURE, $this->offset ) ) { return false; }
+        $this->offset = $match[0][1] + strlen( $match[0][0] );
+        $this->classes = '';
+        if ( preg_match( '~\bclass=["\x27]([^"\x27]*)["\x27]~i', $match[2][0], $attrs ) ) { $this->classes = $attrs[1]; }
+        return true;
+    }
+    public function has_class( $name ) { return in_array( $name, preg_split( '/\s+/', $this->classes ), true ); }
+}
+function get_template_directory() { return dirname( __DIR__, 2 ); }
+function add_action() {}
+function add_filter() {}
+function is_singular() { return true; }
+function post_password_required() { return false; }
+function get_post() { return new WP_Post(); }
+function has_block() { return false; }
+function parse_blocks( $content ) {
+    if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:group' ) ) {
+        return array( array( 'blockName' => 'core/group', 'attrs' => array( 'className' => 'slateframe-gallery-sequence' ) ) );
+    }
+    return array();
+}
+function apply_filters( $name, $value ) {
+    if ( 'slateframe_photography_markers' === $name ) {
+        return array_merge( $value, array( array( 'invalid' ), new WP_Error(), 'slateframe-gallery-sequence' ) );
+    }
+    return $value;
+}
+require dirname( __DIR__, 2 ) . '/functions.php';
+set_error_handler( function( $severity, $message ) { throw new ErrorException( $message, 0, $severity ); } );
+$checks = 0;
+function check_marker( $ok, $message ) {
+    global $checks;
+    if ( ! $ok ) { throw new RuntimeException( $message ); }
+    ++$checks;
+}
+foreach ( array( null, false, array( 'bad' ), new stdClass(), new WP_Error() ) as $bad ) {
+    check_marker( false === slateframe_content_has_class_marker( $bad, array( 'slateframe-gallery-sequence' ) ), 'Malformed class content' );
+    check_marker( false === slateframe_content_has_form( $bad ), 'Malformed form content' );
+}
+check_marker( true === slateframe_content_has_class_marker( '<div class="slateframe-gallery-sequence"></div>', array( array( 'bad' ), new WP_Error(), 'slateframe-gallery-sequence' ) ), 'Valid marker lost' );
+check_marker( false === slateframe_content_has_class_marker( '<p>slateframe-gallery-sequence</p>', array( 'slateframe-gallery-sequence' ) ), 'Prose false positive' );
+check_marker( false === slateframe_content_has_class_marker( '<div class="slateframe-gallery-sequence-more"></div>', array( 'slateframe-gallery-sequence' ) ), 'Substring false positive' );
+check_marker( true === slateframe_content_has_class_marker( '<!-- wp:group {"className":"slateframe-gallery-sequence"} /-->', array( 'slateframe-gallery-sequence' ) ), 'Gutenberg marker lost' );
+check_marker( true === slateframe_content_has_form( '<form action="/"><input></form>' ), 'Real form lost' );
+check_marker( false === slateframe_content_has_form( '<formidable></formidable>' ), 'Form-like tag false positive' );
+foreach ( array( null, false, new WP_Error() ) as $bad ) {
+    check_marker( false === slateframe_blocks_have_legacy_search( $bad ), 'Malformed legacy tree' );
+    check_marker( false === slateframe_blocks_have_lightbox( $bad ), 'Malformed lightbox tree' );
+}
+check_marker( false === slateframe_blocks_have_class_marker( array( array( 'attrs' => new WP_Error() ) ), array( 'slateframe-gallery-sequence' ) ), 'Malformed Gutenberg attrs' );
+check_marker( false === slateframe_blocks_have_legacy_search( array( array( 'blockName' => 'core/legacy-widget', 'attrs' => new WP_Error() ) ) ), 'Malformed legacy attrs' );
+check_marker( false === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/image', 'attrs' => new WP_Error() ) ) ), 'Malformed lightbox attrs' );
+check_marker( true === slateframe_blocks_have_legacy_search( array( array( 'blockName' => 'core/group', 'innerBlocks' => array( array( 'blockName' => 'core/legacy-widget', 'attrs' => array( 'idBase' => 'search' ) ) ) ) ) ), 'Nested Core search lost' );
+check_marker( true === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/gallery', 'attrs' => array( 'lightbox' => array( 'enabled' => true ) ) ) ) ), 'Core lightbox lost' );
+check_marker( false === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/image', 'attrs' => array( 'lightbox' => array( 'enabled' => 'false' ) ) ) ) ), 'String false enabled lightbox' );
+check_marker( true === slateframe_photography_styles_needed(), 'Mixed marker filter lost valid class' );
+echo "Contextual assets: {$checks} assertions passed\n";
