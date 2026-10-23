@@ -111,7 +111,7 @@ function slateframe_attachment_details( $attachment_id ) {
 	$details       = array();
 	$mime_type     = get_post_mime_type( $attachment_id );
 
-	if ( $mime_type ) {
+	if ( is_string( $mime_type ) && '' !== $mime_type ) {
 		$details[ __( 'File type', 'slateframe' ) ] = $mime_type;
 	}
 
@@ -134,7 +134,25 @@ function slateframe_attachment_details( $attachment_id ) {
 	 * @param array<string,string> $details       Label/value metadata.
 	 * @param int                  $attachment_id Attachment post ID.
 	 */
-	return apply_filters( 'slateframe_attachment_details', $details, $attachment_id );
+	$filtered = apply_filters( 'slateframe_attachment_details', $details, $attachment_id );
+	if ( ! is_array( $filtered ) ) {
+		return $details;
+	}
+
+	$safe_details = array();
+	foreach ( $filtered as $label => $value ) {
+		if (
+			! is_string( $label ) ||
+			'' === trim( $label ) ||
+			! is_string( $value ) ||
+			'' === trim( $value )
+		) {
+			continue;
+		}
+		$safe_details[ $label ] = $value;
+	}
+
+	return $safe_details;
 }
 
 /**

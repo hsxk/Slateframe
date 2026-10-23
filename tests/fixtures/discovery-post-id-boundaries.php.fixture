@@ -1,0 +1,61 @@
+<?php
+/** Isolated ID normalization and discovery adapter boundary regression. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+function absint( $value ) { return abs( (int) $value ); }
+$GLOBALS['slateframe_discovery_filters'] = array();
+function apply_filters( $hook, $value, ...$args ) {
+	return array_key_exists( $hook, $GLOBALS['slateframe_discovery_filters'] )
+		? $GLOBALS['slateframe_discovery_filters'][ $hook ] : $value;
+}
+class WP_Query {
+	public $args;
+	public function __construct( $args ) { $this->args = $args; }
+}
+require dirname( __DIR__, 2 ) . '/inc/content-discovery.php';
+$cases = 0;
+function check_case( $condition, $message ) {
+	global $cases;
+	if ( ! $condition ) { throw new RuntimeException( $message ); }
+	++$cases;
+}
+check_case( slateframe_discovery_positive_ids( array( 3, '003', 3, '0004' ) ) === array( 3, 4 ), 'Stable deduplication' );
+check_case( slateframe_discovery_positive_ids( array( new WP_Error(), array( 1 ), true, false, 7 ) ) === array( 7 ), 'Reject non-scalars and booleans' );
+check_case( slateframe_discovery_positive_ids( array( '9999999999999999999999999999', 8 ) ) === array( 8 ), 'Reject overflow' );
+check_case( slateframe_discovery_positive_ids( array( '1.0', '1e2', ' 1', '+1', '-1', 1 ) ) === array( 1 ), 'Strict decimal IDs' );
+check_case( slateframe_discovery_positive_ids( array( '000', '0002', 2 ) ) === array( 2 ), 'Reject zero and normalize padding' );
+check_case( slateframe_discovery_positive_ids( new WP_Error() ) === array(), 'Non-array response' );
+$without = slateframe_discovery_constrain_post_in( array( 'post__not_in' => array( 2 ) ), 1 );
+check_case( ! isset( $without['post__in'] ), 'Absent inclusion must remain unrestricted' );
+$invalid = slateframe_discovery_constrain_post_in( array( 'post__in' => new WP_Error() ), 0 );
+check_case( $invalid['post__in'] === array( 0 ), 'Malformed inclusion fails closed' );
+$intersect = slateframe_discovery_bound_query_args( array(
+	'post__in' => array( 3, '04', 4, 7, 9 ),
+	'post__not_in' => array( 3, '0007', new WP_Error(), array( 9 ), '1.0', true ),
+), 4 );
+check_case( $intersect['post__in'] === array( 9 ), 'Canonical inclusion minus exclusions and source' );
+check_case( $intersect['post__not_in'] === array( 3, 7, 4 ), 'Malformed exclusions ignored and source included' );
+check_case( $intersect['post_type'] === 'post' && $intersect['post_status'] === 'publish', 'Visibility locked' );
+check_case( $intersect['posts_per_page'] === 3 && $intersect['nopaging'] === false, 'Pagination bounded' );
+$no_cast = slateframe_discovery_bound_query_args( array( 'post__in' => array( 1, 2 ), 'post__not_in' => array( new WP_Error(), array( 5 ), true, '1.0' ) ) );
+check_case( $no_cast['post__in'] === array( 1, 2 ), 'Malformed exclusions must not silently exclude post 1' );
+check_case( $no_cast['post__not_in'] === array(), 'Malformed exclusion values removed' );
+$all = slateframe_discovery_bound_query_args( array( 'post__in' => array( '001', 2 ), 'post__not_in' => array( 1, '002' ) ) );
+check_case( $all['post__in'] === array( 0 ), 'All excluded inclusion fails closed' );
+$empty = slateframe_discovery_bound_query_args( array() );
+check_case( $empty['post__not_in'] === array(), 'No exclusions stays empty' );
+$stable = slateframe_discovery_bound_query_args( array( 'post__not_in' => array( 5, '005', 2, 5 ) ), 2 );
+check_case( $stable['post__not_in'] === array( 5, 2 ), 'Exclusion order and uniqueness stable' );
+$GLOBALS['slateframe_discovery_filters']['slateframe_not_found_posts_args'] = array(
+	'post_type' => 'page', 'post_status' => 'private', 'posts_per_page' => 999,
+	'post__not_in' => array( new WP_Error(), true, '0005', '1.0', 8 ),
+	'post__in' => array( 5, 6, 8 ),
+);
+$query = slateframe_not_found_posts_query();
+check_case( $query->args['post__in'] === array( 6 ), '404 adapter candidate intersection' );
+check_case( $query->args['post__not_in'] === array( 5, 8 ), '404 adapter exclusions normalized' );
+check_case( $query->args['post_type'] === 'post' && $query->args['post_status'] === 'publish' && $query->args['posts_per_page'] === 3, '404 public bounded query' );
+$GLOBALS['slateframe_discovery_filters']['slateframe_not_found_posts_args']['post__in'] = false;
+$query = slateframe_not_found_posts_query();
+check_case( $query->args['post__in'] === array( 0 ), '404 malformed inclusion fails closed' );
+echo "Discovery post ID boundaries: {$cases} cases passed\n";

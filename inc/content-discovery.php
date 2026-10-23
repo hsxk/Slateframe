@@ -10,87 +10,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Intersect explicit inclusion and exclusion lists before WP_Query.
+ * Normalize positive decimal IDs from Core and public adapter arrays.
  *
- * WordPress ignores post__not_in when post__in is present; an empty post__in
- * also means unrestricted. Never widen an adapter's explicit candidate set.
+ * Avoid coercing nested arrays, booleans, objects, decimal strings or
+ * overflowing integers into unrelated post/term IDs. Preserve input order.
  *
- * @param array $args Query arguments.
- * @param int   $excluded_post_id Source article, if any.
- * @return array
+ * @param mixed $candidates Potential ID array.
+ * @return int[] Unique positive IDs.
  */
-function slateframe_discovery_constrain_post_in( $args, $excluded_post_id = 0 ) {
-	if ( ! array_key_exists( 'post__in', $args ) ) {
-		return $args;
-	}
-	if ( ! is_array( $args['post__in'] ) ) {
-		$args['post__in'] = array( 0 );
-		return $args;
-	}
-	$excluded = array( $excluded_post_id );
-	if ( isset( $args['post__not_in'] ) && is_array( $args['post__not_in'] ) ) {
-		foreach ( $args['post__not_in'] as $candidate ) {
-			if ( ( is_int( $candidate ) || is_string( $candidate ) ) && preg_match( '/^[0-9]+$/D', (string) $candidate ) ) {
-				$id = (int) $candidate;
-				if ( 0 < $id && ltrim( (string) $candidate, '0' ) === (string) $id ) {
-					$excluded[] = $id;
-				}
-			}
-		}
-	}
-	$ids = array();
-	foreach ( $args['post__in'] as $candidate ) {
-		if ( ! is_int( $candidate ) && ! is_string( $candidate ) ) {
-			continue;
-		}
-		if ( ! preg_match( '/^[0-9]+$/D', (string) $candidate ) ) {
-			continue;
-		}
-		$id = (int) $candidate;
-		if ( 0 < $id && ltrim( (string) $candidate, '0' ) === (string) $id && ! in_array( $id, $excluded, true ) ) {
-			$ids[] = $id;
-		}
-	}
-	$ids              = array_values( array_unique( $ids ) );
-	$args['post__in'] = $ids ? $ids : array( 0 );
-	return $args;
-}
-
-/**
- * Preserve public post-only, published-only, bounded query invariants.
- *
- * @param array $args Query arguments.
- * @param int   $excluded_post_id Source article, if any.
- * @return array
- */
-function slateframe_discovery_bound_query_args( $args, $excluded_post_id = 0 ) {
-	$args['post_type']           = 'post';
-	$args['post_status']         = 'publish';
-	$args['posts_per_page']      = 3;
-	$args['nopaging']            = false;
-	$args['fields']              = 'all';
-	$args['no_found_rows']       = true;
-	$args['suppress_filters']    = false;
-	$args['ignore_sticky_posts'] = true;
-	if ( $excluded_post_id ) {
-		$excluded             = isset( $args['post__not_in'] ) && is_array( $args['post__not_in'] ) ? $args['post__not_in'] : array();
-		$args['post__not_in'] = array_values( array_unique( array_merge( array_map( 'absint', $excluded ), array( $excluded_post_id ) ) ) );
-	}
-	return slateframe_discovery_constrain_post_in( $args, $excluded_post_id );
-}
-
-/**
- * Normalize taxonomy IDs returned by Core or public taxonomy adapters.
- *
- * WordPress normally returns integer IDs for a fields=ids request, but
- * taxonomy filters can return a WP_Error, null, or mixed array. Ignore
- * malformed members instead of allowing array_map() to throw or producing
- * accidental term 1 from an object/array cast.
- *
- * @param mixed $candidates Taxonomy ID response.
- * @return int[] Positive, unique term IDs in their original order.
- */
-function slateframe_discovery_taxonomy_ids( $candidates ) {
+function slateframe_discovery_positive_ids( $candidates ) {
 	if ( ! is_array( $candidates ) ) {
 		return array();
 	}
@@ -110,6 +38,74 @@ function slateframe_discovery_taxonomy_ids( $candidates ) {
 	}
 
 	return array_values( array_unique( $ids ) );
+}
+
+/**
+ * Intersect explicit inclusion and exclusion lists before WP_Query.
+ *
+ * WordPress ignores post__not_in when post__in is present; an empty post__in
+ * also means unrestricted. Never widen an adapter's explicit candidate set.
+ *
+ * @param array $args Query arguments.
+ * @param int   $excluded_post_id Source article, if any.
+ * @return array
+ */
+function slateframe_discovery_constrain_post_in( $args, $excluded_post_id = 0 ) {
+	if ( ! array_key_exists( 'post__in', $args ) ) {
+		return $args;
+	}
+
+	$excluded = slateframe_discovery_positive_ids( isset( $args['post__not_in'] ) ? $args['post__not_in'] : array() );
+	if ( $excluded_post_id ) {
+		$excluded[] = absint( $excluded_post_id );
+	}
+
+	$ids              = slateframe_discovery_positive_ids( $args['post__in'] );
+	$ids              = array_values( array_diff( $ids, $excluded ) );
+	$args['post__in'] = $ids ? $ids : array( 0 );
+
+	return $args;
+}
+
+/**
+ * Preserve public post-only, published-only, bounded query invariants.
+ *
+ * @param array $args Query arguments.
+ * @param int   $excluded_post_id Source article, if any.
+ * @return array
+ */
+function slateframe_discovery_bound_query_args( $args, $excluded_post_id = 0 ) {
+	$args['post_type']           = 'post';
+	$args['post_status']         = 'publish';
+	$args['posts_per_page']      = 3;
+	$args['nopaging']            = false;
+	$args['fields']              = 'all';
+	$args['no_found_rows']       = true;
+	$args['suppress_filters']    = false;
+	$args['ignore_sticky_posts'] = true;
+
+	$excluded = slateframe_discovery_positive_ids( isset( $args['post__not_in'] ) ? $args['post__not_in'] : array() );
+	if ( $excluded_post_id ) {
+		$excluded[] = absint( $excluded_post_id );
+	}
+	$args['post__not_in'] = array_values( array_unique( $excluded ) );
+
+	return slateframe_discovery_constrain_post_in( $args, $excluded_post_id );
+}
+
+/**
+ * Normalize taxonomy IDs returned by Core or public taxonomy adapters.
+ *
+ * WordPress normally returns integer IDs for a fields=ids request, but
+ * taxonomy filters can return a WP_Error, null, or mixed array. Ignore
+ * malformed members instead of allowing array_map() to throw or producing
+ * accidental term 1 from an object/array cast.
+ *
+ * @param mixed $candidates Taxonomy ID response.
+ * @return int[] Positive, unique term IDs in their original order.
+ */
+function slateframe_discovery_taxonomy_ids( $candidates ) {
+	return slateframe_discovery_positive_ids( $candidates );
 }
 
 /**
