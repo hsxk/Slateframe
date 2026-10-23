@@ -373,14 +373,15 @@ function slateframe_synced_form_assets( $blocks, $seen = array(), $depth = 0 ) {
  * Resolve patterns in the current singular post once per request.
  *
  * Shared by form, Photography, Portfolio, Knowledge, and Query Loop asset
- * detection. Does not render arbitrary blocks or execute shortcodes.
+ * detection. Never inspects locked Core post content before postpass.
+ * Does not render arbitrary blocks or execute shortcodes.
  *
  * @return string[] Published synced-pattern content.
  */
 function slateframe_singular_synced_pattern_contents() {
 	static $cache = array();
 
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return array();
 	}
 
@@ -453,7 +454,7 @@ function slateframe_footer_form_assets() {
 function slateframe_singular_synced_form_assets() {
 	static $cache = array();
 
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return slateframe_pattern_form_assets( array() );
 	}
 
@@ -534,7 +535,7 @@ function slateframe_form_content_styles_needed() {
 	$footer = slateframe_footer_form_assets();
 	$needed = $footer['form_content'] || slateframe_singular_synced_form_assets()['form_content'];
 
-	if ( is_singular() ) {
+	if ( is_singular() && ! post_password_required() ) {
 		$post = get_post();
 
 		if ( $post instanceof WP_Post ) {
@@ -585,7 +586,7 @@ function slateframe_blocks_have_lightbox( $blocks ) {
  * @return bool
  */
 function slateframe_photography_styles_needed() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return false;
 	}
 
@@ -616,7 +617,7 @@ function slateframe_photography_styles_needed() {
  * @return bool
  */
 function slateframe_content_modes_needed() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return false;
 	}
 
@@ -647,7 +648,7 @@ function slateframe_content_modes_needed() {
  * @return bool
  */
 function slateframe_query_loop_styles_needed() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return false;
 	}
 

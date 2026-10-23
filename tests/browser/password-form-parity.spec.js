@@ -79,3 +79,28 @@ test('Core password submission keeps discussion private until unlock and restore
   await expect(passwordForm).toHaveCount(0);
   await expect(comments).toBeVisible();
 });
+
+
+test('protected authored presentation stays unloaded until WordPress Core unlocks it', async ({ page }) => {
+  const protectedPath = process.env.SLATEFRAME_PROTECTED_PRESENTATION_PATH;
+  expect(protectedPath, 'The isolated WordPress fixture must create a protected presentation post').toBeTruthy();
+  await page.goto(protectedPath, { waitUntil: 'networkidle' });
+  const passwordForm = page.locator('form.post-password-form');
+  const hiddenCopy = page.getByText('Private visual fixture — hidden until unlocked');
+  const privateStyles = ['photography', 'content-modes', 'query-loop', 'form-content'];
+  await expect(passwordForm).toBeVisible();
+  await expect(hiddenCopy).toHaveCount(0);
+  await expect(page.locator('link[href*="/assets/css/forms.css"]')).toHaveCount(1);
+  for (const style of privateStyles) {
+    await expect(page.locator('link[href*="/assets/css/' + style + '.css"]'), style + ' must not reveal locked authored presentation').toHaveCount(0);
+  }
+  await passwordForm.locator('input[type="password"]').fill('slateframe-ci-presentation');
+  await passwordForm.locator('input[type="submit"]').click();
+  await expect(hiddenCopy).toBeVisible();
+  await expect(passwordForm).toHaveCount(0);
+  for (const style of privateStyles) {
+    await expect(page.locator('link[href*="/assets/css/' + style + '.css"]'), style + ' must return after Core unlocks the post').toHaveCount(1);
+  }
+  await page.reload({ waitUntil: 'networkidle' });
+  await expect(hiddenCopy).toBeVisible();
+});
