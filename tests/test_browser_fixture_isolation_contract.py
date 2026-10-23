@@ -22,8 +22,24 @@ class BrowserFixtureIsolationContractTest(unittest.TestCase):
             with self.subTest(name=name):
                 source = (BROWSER / name).read_text(encoding="utf-8")
                 self.assertIn("execFileSync(", source)
-                self.assertIn("wp_set_sidebars_widgets", source)
                 self.assertIn("finally {", source)
+                if name == "footer-core-search.spec.js":
+                    self.assertIn("footerWidgetMutation(fixtureId, 'install')", source)
+                    self.assertIn("footerWidgetMutation(fixtureId, 'remove')", source)
+                    helper = (BROWSER / "support/footer-widget-fixture.js").read_text(encoding="utf-8")
+                    self.assertIn("wp_set_sidebars_widgets", helper)
+                    self.assertIn("flock( $lock, LOCK_EX )", helper)
+                    self.assertIn("wp_cache_delete( 'alloptions', 'options' )", helper)
+                    self.assertIn("fixture ID already exists", helper)
+                else:
+                    self.assertIn("wp_set_sidebars_widgets", source)
+
+    def test_footer_widget_isolation_regression_is_executed(self):
+        workflow = WORKFLOW.read_text(encoding="utf-8")
+        self.assertIn("node tests/browser/test-footer-widget-fixture.cjs", workflow)
+        helper = (BROWSER / "support/footer-widget-fixture.js").read_text(encoding="utf-8")
+        self.assertIn("const viewports = [320, 375, 390, 412, 768, 1440, 1920]", helper)
+        self.assertIn("wp_cache_delete( 'sidebars_widgets', 'options' )", helper)
 
     def test_readonly_phase_preserves_every_other_browser_suite(self):
         specs = list(BROWSER.glob("*.spec.js"))
