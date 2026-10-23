@@ -939,7 +939,7 @@ function slateframe_brand_mark() {
 function slateframe_language_switcher() {
 	$html = apply_filters( 'slateframe_language_switcher_html', '' );
 
-	if ( ! $html ) {
+	if ( ! is_string( $html ) || '' === trim( $html ) ) {
 		return;
 	}
 

@@ -21,6 +21,7 @@ $slateframe_author_bio = get_the_author_meta( 'description', $slateframe_author_
  * @param int    $author_id   WordPress user ID.
  */
 $slateframe_author_avatar = apply_filters( 'slateframe_author_avatar_html', '', $slateframe_author_id );
+$slateframe_author_avatar = is_string( $slateframe_author_avatar ) ? $slateframe_author_avatar : '';
 ?>
 <main id="main-content" class="slateframe-main" tabindex="-1">
 	<header class="slateframe-page-header">
