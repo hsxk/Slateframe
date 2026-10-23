@@ -1,0 +1,76 @@
+<?php
+/** Isolated contract for related-post taxonomy inputs; no database or network. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+$GLOBALS['slateframe_discovery_tags']       = array();
+$GLOBALS['slateframe_discovery_categories'] = array();
+$GLOBALS['slateframe_discovery_success']    = 'recent';
+$GLOBALS['slateframe_discovery_queries']    = array();
+$GLOBALS['slateframe_discovery_filters']    = array();
+function absint( $value ) { return abs( (int) $value ); }
+function wp_get_post_tags( $id, $args ) { return $GLOBALS['slateframe_discovery_tags']; }
+function wp_get_post_categories( $id, $args ) { return $GLOBALS['slateframe_discovery_categories']; }
+function apply_filters( $hook, $value, ...$args ) {
+	return array_key_exists( $hook, $GLOBALS['slateframe_discovery_filters'] ) ? $GLOBALS['slateframe_discovery_filters'][ $hook ] : $value;
+}
+class WP_Query {
+	public $args;
+	public function __construct( $args ) {
+		$this->args = $args;
+		$GLOBALS['slateframe_discovery_queries'][] = $args;
+	}
+	public function have_posts() {
+		$tier = isset( $this->args['tag__in'] ) ? 'tag' : ( isset( $this->args['category__in'] ) ? 'category' : 'recent' );
+		return $tier === $GLOBALS['slateframe_discovery_success'];
+	}
+}
+require dirname( __DIR__, 2 ) . '/inc/content-discovery.php';
+$cases = 0;
+function check_case( $condition, $message ) {
+	global $cases;
+	if ( ! $condition ) { throw new RuntimeException( $message ); }
+	++$cases;
+}
+function run_case( $tags, $categories, $success, $filters = array() ) {
+	$GLOBALS['slateframe_discovery_tags']       = $tags;
+	$GLOBALS['slateframe_discovery_categories'] = $categories;
+	$GLOBALS['slateframe_discovery_success']    = $success;
+	$GLOBALS['slateframe_discovery_queries']    = array();
+	$GLOBALS['slateframe_discovery_filters']    = $filters;
+	return slateframe_related_posts_query( 19 );
+}
+check_case( slateframe_discovery_taxonomy_ids( array( 3, '04', 3, '0004' ) ) === array( 3, 4 ), 'Deduplicate and normalize decimal IDs' );
+check_case( slateframe_discovery_taxonomy_ids( new WP_Error() ) === array(), 'WP_Error is not an array' );
+check_case( slateframe_discovery_taxonomy_ids( null ) === array(), 'Null taxonomy response' );
+check_case( slateframe_discovery_taxonomy_ids( '3' ) === array(), 'String taxonomy response' );
+check_case( slateframe_discovery_taxonomy_ids( array( 0, -2, 'abc', '', '3.0' ) ) === array(), 'Invalid numeric forms' );
+check_case( slateframe_discovery_taxonomy_ids( array( array( 3 ), new WP_Error(), true, 7 ) ) === array( 7 ), 'Nested/object/bool ignored' );
+check_case( slateframe_discovery_taxonomy_ids( array( '9999999999999999999999999999999999', 5 ) ) === array( 5 ), 'Overflow ignored' );
+check_case( slateframe_discovery_taxonomy_ids( array( '001', '1e3', ' 2', '+2', '2\n', 2 ) ) === array( 1, 2 ), 'Strict decimal only' );
+run_case( array( 3, '04', 3 ), array( 9 ), 'tag' );
+$q = $GLOBALS['slateframe_discovery_queries'];
+check_case( count( $q ) === 1 && $q[0]['tag__in'] === array( 3, 4 ), 'Tag tier uses normalized IDs' );
+check_case( $q[0]['post_type'] === 'post' && $q[0]['post_status'] === 'publish', 'Post-only published-only' );
+check_case( $q[0]['posts_per_page'] === 3 && $q[0]['no_found_rows'] === true, 'Bounded query' );
+check_case( $q[0]['suppress_filters'] === false && $q[0]['ignore_sticky_posts'] === true, 'WordPress filters retained' );
+check_case( in_array( 19, $q[0]['post__not_in'], true ), 'Current post excluded' );
+run_case( new WP_Error(), array( 8 ), 'category' );
+$q = $GLOBALS['slateframe_discovery_queries'];
+check_case( count( $q ) === 1 && $q[0]['category__in'] === array( 8 ), 'WP_Error tags safely fall back to categories' );
+run_case( 'unexpected string', array( 6 ), 'category' );
+check_case( count( $GLOBALS['slateframe_discovery_queries'] ) === 1, 'String tags safely fall back to categories' );
+run_case( array( array( 5 ), 'bad' ), new WP_Error(), 'recent' );
+$q = $GLOBALS['slateframe_discovery_queries'];
+check_case( count( $q ) === 1 && ! isset( $q[0]['tag__in'] ) && ! isset( $q[0]['category__in'] ), 'Invalid taxonomy arrays fall back to recent' );
+run_case( array( 3 ), array( 8 ), 'category' );
+$q = $GLOBALS['slateframe_discovery_queries'];
+check_case( count( $q ) === 2 && isset( $q[0]['tag__in'] ) && isset( $q[1]['category__in'] ), 'Tag to category fallback order' );
+run_case( array( 3 ), array( 8 ), 'recent' );
+check_case( count( $GLOBALS['slateframe_discovery_queries'] ) === 3, 'Three-tier fallback preserved' );
+run_case( array( 3 ), array( 8 ), 'tag', array( 'slateframe_related_posts_args' => array( 'post__in' => array( 19, 4, 4, 'oops' ), 'post_status' => 'private', 'posts_per_page' => 500 ) ) );
+$q = $GLOBALS['slateframe_discovery_queries'];
+check_case( $q[0]['post__in'] === array( 4 ), 'Explicit candidate set excludes current and malformed IDs' );
+check_case( $q[0]['post_status'] === 'publish' && $q[0]['posts_per_page'] === 3, 'Adapter cannot widen visibility or page size' );
+run_case( array( 3 ), array( 8 ), 'tag', array( 'slateframe_related_posts_args' => new WP_Error() ) );
+check_case( isset( $GLOBALS['slateframe_discovery_queries'][0]['tag__in'] ), 'Malformed args filter retains Core tier' );
+echo "Discovery taxonomy boundaries: $cases cases passed\n";

@@ -80,6 +80,39 @@ function slateframe_discovery_bound_query_args( $args, $excluded_post_id = 0 ) {
 }
 
 /**
+ * Normalize taxonomy IDs returned by Core or public taxonomy adapters.
+ *
+ * WordPress normally returns integer IDs for a fields=ids request, but
+ * taxonomy filters can return a WP_Error, null, or mixed array. Ignore
+ * malformed members instead of allowing array_map() to throw or producing
+ * accidental term 1 from an object/array cast.
+ *
+ * @param mixed $candidates Taxonomy ID response.
+ * @return int[] Positive, unique term IDs in their original order.
+ */
+function slateframe_discovery_taxonomy_ids( $candidates ) {
+	if ( ! is_array( $candidates ) ) {
+		return array();
+	}
+
+	$ids = array();
+	foreach ( $candidates as $candidate ) {
+		if ( ! is_int( $candidate ) && ! is_string( $candidate ) ) {
+			continue;
+		}
+		if ( ! preg_match( '/^[0-9]+$/D', (string) $candidate ) ) {
+			continue;
+		}
+		$id = (int) $candidate;
+		if ( 0 < $id && ltrim( (string) $candidate, '0' ) === (string) $id ) {
+			$ids[] = $id;
+		}
+	}
+
+	return array_values( array_unique( $ids ) );
+}
+
+/**
  * Build a conservative related-post query for the current article.
  *
  * Tags are preferred, categories are the fallback, and recent posts are the
@@ -91,8 +124,8 @@ function slateframe_discovery_bound_query_args( $args, $excluded_post_id = 0 ) {
  */
 function slateframe_related_posts_query( $post_id ) {
 	$post_id = absint( $post_id );
-	$tag_ids = wp_get_post_tags( $post_id, array( 'fields' => 'ids' ) );
-	$cat_ids = wp_get_post_categories( $post_id, array( 'fields' => 'ids' ) );
+	$tag_ids = slateframe_discovery_taxonomy_ids( wp_get_post_tags( $post_id, array( 'fields' => 'ids' ) ) );
+	$cat_ids = slateframe_discovery_taxonomy_ids( wp_get_post_categories( $post_id, array( 'fields' => 'ids' ) ) );
 
 	$base_args = array(
 		'post_type'           => 'post',
@@ -107,11 +140,11 @@ function slateframe_related_posts_query( $post_id ) {
 	);
 
 	$scopes = array();
-	if ( ! is_wp_error( $tag_ids ) && ! empty( $tag_ids ) ) {
-		$scopes[] = array( 'tag__in' => array_map( 'absint', $tag_ids ) );
+	if ( $tag_ids ) {
+		$scopes[] = array( 'tag__in' => $tag_ids );
 	}
-	if ( ! is_wp_error( $cat_ids ) && ! empty( $cat_ids ) ) {
-		$scopes[] = array( 'category__in' => array_map( 'absint', $cat_ids ) );
+	if ( $cat_ids ) {
+		$scopes[] = array( 'category__in' => $cat_ids );
 	}
 	$scopes[] = array();
 
