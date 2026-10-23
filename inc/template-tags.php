@@ -21,7 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function slateframe_get_display_title( $post_id = 0 ) {
 	$title = get_the_title( $post_id );
 
-	if ( '' === trim( wp_strip_all_tags( (string) $title ) ) ) {
+	if ( ! is_string( $title ) || '' === trim( wp_strip_all_tags( $title ) ) ) {
 		return __( 'Untitled', 'slateframe' );
 	}
 
@@ -75,7 +75,7 @@ function slateframe_featured_media( $post_id = 0 ) {
 	// wp_get_attachment_image() escapes its responsive image markup; attributes above are set through Core's HTML processor.
 	echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-	if ( '' !== trim( (string) $caption ) ) {
+	if ( is_string( $caption ) && '' !== trim( $caption ) ) {
 		printf( '<figcaption class="wp-caption-text">%s</figcaption>', wp_kses_post( $caption ) );
 	}
 
@@ -328,6 +328,6 @@ function slateframe_menu_fallback() {
 		'<ul class="slateframe-menu-fallback"><li class="page_item slateframe-home-link"><a href="%1$s">%2$s</a></li>%3$s</ul>',
 		esc_url( home_url( '/' ) ),
 		esc_html__( 'Home', 'slateframe' ),
-		wp_kses_post( $pages )
+		wp_kses_post( is_string( $pages ) ? $pages : '' )
 	);
 }
