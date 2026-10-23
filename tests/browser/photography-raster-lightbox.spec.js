@@ -635,6 +635,19 @@ test('real WordPress raster Gallery exercises sequence caption geometry at RTL 4
     // A 400% text-only zoom combined with a short landscape viewport must
     // widen the caption instead of forcing 64px text into a 90px image width.
     await page.setViewportSize({ width: 360, height: 225 });
+    // Core lightbox resize callbacks, responsive media, and fallback fonts can
+    // settle on a later frame. Keep the exact geometry threshold; wait for
+    // the actual WordPress layout instead of asserting on a transient frame.
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    });
+    await expect.poll(async () => figure.evaluate(node => {
+      const fig = node.getBoundingClientRect();
+      const caption = node.querySelector('figcaption').getBoundingClientRect();
+      return Math.abs(caption.width - fig.width);
+    }), { message: 'RTL 400% short landscape caption must match its figure after resize', timeout: 5000 })
+      .toBeLessThanOrEqual(4);
     await inspect('RTL long caption 400% / short landscape viewport');
     for (const img of await page.locator('#main-content img').all()) {
       await img.scrollIntoViewIfNeeded();
