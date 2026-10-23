@@ -54,18 +54,22 @@ function slateframe_featured_media( $post_id = 0 ) {
 		)
 	);
 
-	if ( '' === $image_html ) {
+	// Attachment filters may return false, objects or non-image markup. Never
+	// pass those values to Core's HTML processor or emit an empty hero figure.
+	if ( ! is_string( $image_html ) || '' === trim( $image_html ) ) {
 		return;
 	}
 
 	$image_processor = new WP_HTML_Tag_Processor( $image_html );
 
-	if ( $image_processor->next_tag( 'img' ) ) {
-		$image_processor->set_attribute( 'loading', 'eager' );
-		$image_processor->set_attribute( 'decoding', 'async' );
-		$image_processor->set_attribute( 'fetchpriority', 'high' );
-		$image_html = $image_processor->get_updated_html();
+	if ( ! $image_processor->next_tag( 'img' ) ) {
+		return;
 	}
+
+	$image_processor->set_attribute( 'loading', 'eager' );
+	$image_processor->set_attribute( 'decoding', 'async' );
+	$image_processor->set_attribute( 'fetchpriority', 'high' );
+	$image_html = $image_processor->get_updated_html();
 
 	echo '<figure class="slateframe-shell slateframe-entry-hero">';
 	// wp_get_attachment_image() escapes its responsive image markup; attributes above are set through Core's HTML processor.

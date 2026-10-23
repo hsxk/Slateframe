@@ -1,0 +1,63 @@
+<?php
+/** Isolated featured-media adapter boundary regression. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+$GLOBALS['slateframe_media_case'] = array();
+$GLOBALS['slateframe_media_calls'] = 0;
+function absint( $value ) { return abs( (int) $value ); }
+function get_the_ID() { return 17; }
+function has_post_thumbnail( $id ) { return ! empty( $GLOBALS['slateframe_media_case']['thumbnail'] ); }
+function get_post_thumbnail_id( $id ) { return 31; }
+function wp_get_attachment_caption( $id ) { return isset( $GLOBALS['slateframe_media_case']['caption'] ) ? $GLOBALS['slateframe_media_case']['caption'] : ''; }
+function wp_get_attachment_image( $id, $size, $icon, $attrs ) {
+	++$GLOBALS['slateframe_media_calls'];
+	return $GLOBALS['slateframe_media_case']['html'];
+}
+function wp_kses_post( $value ) { return $value; }
+class WP_HTML_Tag_Processor {
+	private $html;
+	private $matched = false;
+	public function __construct( $html ) {
+		if ( ! is_string( $html ) ) { throw new TypeError( 'Processor requires string' ); }
+		$this->html = $html;
+	}
+	public function next_tag( $name ) {
+		$this->matched = 1 === preg_match( '/<img(?:\\s|\\/?>)/i', $this->html );
+		return $this->matched;
+	}
+	public function set_attribute( $name, $value ) {
+		if ( ! $this->matched ) { throw new RuntimeException( 'No image selected' ); }
+		$this->html = preg_replace( '/<img\\b/i', '<img ' . $name . '="' . $value . '"', $this->html, 1 );
+	}
+	public function get_updated_html() { return $this->html; }
+}
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+$cases = 0;
+function check_case( $condition, $message ) {
+	global $cases;
+	if ( ! $condition ) { throw new RuntimeException( $message ); }
+	++$cases;
+}
+function render_case( $case ) {
+	$GLOBALS['slateframe_media_case'] = $case;
+	$GLOBALS['slateframe_media_calls'] = 0;
+	ob_start();
+	slateframe_featured_media( 17 );
+	return ob_get_clean();
+}
+check_case( '' === render_case( array( 'thumbnail' => false ) ), 'No thumbnail must not render a figure' );
+check_case( 0 === $GLOBALS['slateframe_media_calls'], 'No thumbnail must not fetch an image' );
+foreach ( array( false, null, 0, array( 'html' ), new WP_Error(), '', " \\t\\n", 'not an image', '<p>Text only</p>' ) as $bad ) {
+	check_case( '' === render_case( array( 'thumbnail' => true, 'html' => $bad ) ), 'Malformed adapter image must not render' );
+}
+$valid = render_case( array( 'thumbnail' => true, 'html' => '<img src="/photo.jpg" alt="花">' ) );
+check_case( false !== strpos( $valid, '<figure class="slateframe-shell slateframe-entry-hero">' ), 'Valid figure' );
+check_case( false !== strpos( $valid, 'fetchpriority="high"' ), 'Priority on real image' );
+check_case( false !== strpos( $valid, 'loading="eager"' ), 'Eager loading on real image' );
+check_case( false !== strpos( $valid, 'decoding="async"' ), 'Async decoding on real image' );
+check_case( false !== strpos( $valid, 'alt="花"' ), 'Unicode alt preserved' );
+check_case( false === strpos( $valid, '<figcaption' ), 'No empty caption' );
+$caption = render_case( array( 'thumbnail' => true, 'html' => '<img src="/photo.jpg">', 'caption' => '<em>写真の説明</em>' ) );
+check_case( false !== strpos( $caption, '<figcaption class="wp-caption-text"><em>写真の説明</em></figcaption>' ), 'CJK caption preserved' );
+check_case( 1 === substr_count( $caption, '<figure' ) && 1 === substr_count( $caption, '</figure>' ), 'Balanced figure' );
+echo "Featured media boundaries: {$cases} cases passed\\n";
