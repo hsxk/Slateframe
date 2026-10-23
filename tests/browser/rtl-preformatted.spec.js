@@ -19,10 +19,9 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
     verse.textContent = 'قصيدة عربية\n日本語の詩\n中文诗歌';
     const code = document.createElement('pre');
     code.className = 'wp-block-code';
-    code.textContent = 'const source = "' + 'source-'.repeat(90) + '";';
-    prose.tabIndex = 0;
-    verse.tabIndex = 0;
-    code.tabIndex = 0;
+    const codeText = document.createElement('code');
+    codeText.textContent = 'const source = "' + 'source-'.repeat(90) + '";';
+    code.append(codeText);
     fixture.append(prose, verse, code);
     root.append(fixture);
   });
@@ -38,7 +37,9 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
         proseOverflow: getComputedStyle(root.querySelector('.wp-block-preformatted')).overflowX,
         codeOverflow: getComputedStyle(root.querySelector('.wp-block-code')).overflowX,
         codeAlign: getComputedStyle(root.querySelector('.wp-block-code')).textAlign,
-        codeScrollable: root.querySelector('.wp-block-code').scrollWidth > root.querySelector('.wp-block-code').clientWidth,
+        codeWhiteSpace: getComputedStyle(root.querySelector('.wp-block-code code')).whiteSpace,
+        codeScrollWidth: root.querySelector('.wp-block-code').scrollWidth,
+        codeClientWidth: root.querySelector('.wp-block-code').clientWidth,
         pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       }));
       expect(result.proseDirection, `${width}px ${dir}`).toBe(dir);
@@ -46,7 +47,8 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
       expect(result.codeDirection).toBe('ltr');
       expect(result.codeAlign).toBe('left');
       expect(result.codeOverflow).toBe('auto');
-      expect(result.codeScrollable, `${width}px ${dir} code must scroll inside its own box`).toBe(true);
+      expect(result.codeWhiteSpace).not.toBe('pre');
+      expect(result.codeScrollWidth, `${width}px ${dir} Core Code should wrap, not add a keyboard stop`).toBeLessThanOrEqual(result.codeClientWidth + 2);
       expect(result.proseOverflow).toBe('auto');
       expect(result.pageOverflow).toBeLessThanOrEqual(1);
     }
@@ -57,8 +59,7 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
   expect(await fixture.locator('.wp-block-preformatted').evaluate(node => getComputedStyle(node).direction)).toBe('rtl');
   expect(await fixture.locator('.wp-block-verse').evaluate(node => getComputedStyle(node).direction)).toBe('rtl');
   expect(await fixture.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-  await fixture.locator('.wp-block-verse').focus();
-  await page.keyboard.press('Tab');
-  await expect(fixture.locator('.wp-block-code')).toBeFocused();
+  await expect(fixture.locator('.wp-block-code')).not.toHaveAttribute('tabindex', '0');
+  await expect(fixture.locator('.wp-block-preformatted')).not.toHaveAttribute('tabindex', '0');
   await fixture.screenshot({ path: 'test-artifacts/screenshots/rtl-preformatted-390-zoom-forced-colors.png' });
 });
