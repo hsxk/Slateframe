@@ -401,7 +401,7 @@ function slateframe_singular_synced_pattern_contents() {
 	}
 
 	$post = get_post();
-	if ( ! $post instanceof WP_Post || ! has_block( 'core/block', $post->post_content ) ) {
+	if ( ! $post instanceof WP_Post || ! is_string( $post->post_content ) || ! has_block( 'core/block', $post->post_content ) ) {
 		return array();
 	}
 
@@ -474,7 +474,7 @@ function slateframe_singular_synced_form_assets() {
 	}
 
 	$post = get_post();
-	if ( ! $post instanceof WP_Post ) {
+	if ( ! $post instanceof WP_Post || ! is_string( $post->post_content ) ) {
 		return slateframe_pattern_form_assets( array() );
 	}
 
