@@ -8,7 +8,7 @@
 <form role="search" aria-label="<?php esc_attr_e( 'Site search', 'slateframe' ); ?>" method="get" class="slateframe-search-form" action="<?php echo esc_url( home_url( '/' ) ); ?>">
 	<label>
 		<span class="screen-reader-text"><?php esc_html_e( 'Search for:', 'slateframe' ); ?></span>
-		<input type="search" name="s" enterkeyhint="search" value="<?php echo esc_attr( get_search_query( false ) ); ?>" placeholder="<?php echo esc_attr__( 'Search…', 'slateframe' ); ?>">
+		<input type="search" name="s" dir="auto" enterkeyhint="search" value="<?php echo esc_attr( get_search_query( false ) ); ?>" placeholder="<?php echo esc_attr__( 'Search…', 'slateframe' ); ?>">
 	</label>
 	<button type="submit"><?php esc_html_e( 'Search', 'slateframe' ); ?></button>
 </form>

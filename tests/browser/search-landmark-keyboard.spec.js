@@ -18,6 +18,7 @@ test('theme Search and 404 recovery expose a named native search landmark', asyn
     await expect(page.getByRole('search', { name, exact: true }).first()).toBeVisible();
     const input = form.locator('input[type="search"][name="s"]');
     await expect(input).toHaveAttribute('enterkeyhint', 'search');
+    await expect(input).toHaveAttribute('dir', 'auto');
     expect(await input.evaluate((node) => node.labels?.length || 0)).toBeGreaterThan(0);
     await input.focus();
     await expect(input).toBeFocused();
@@ -38,11 +39,16 @@ test('theme Search and 404 recovery expose a named native search landmark', asyn
 test('keyboard Search submits mixed CJK/RTL text through native GET', async ({ page }, info) => {
   test.skip(!widths.includes(viewportWidth(info)), 'Representative mobile and desktop search keyboard widths.');
   await page.goto('/?s=Slateframe', { waitUntil: 'networkidle' });
-  const query = '日本語 & العربية';
+  const query = 'العربية & 日本語';
   const input = page.locator('.slateframe-search-form input[name="s"]').first();
   await input.fill(query);
+  expect(await input.evaluate((node) => getComputedStyle(node).direction)).toBe('rtl');
   await input.press('Enter');
   await expect.poll(() => new URL(page.url()).searchParams.get('s')).toBe(query);
   await expect(page.locator('.slateframe-page-title bdi')).toHaveText(query);
   await expect(page.locator('.slateframe-search-form input[name="s"]').first()).toHaveValue(query);
+  await page.locator('html').evaluate((node) => node.setAttribute('dir', 'rtl'));
+  const searchInput = page.locator('.slateframe-search-form input[name="s"]').first();
+  await searchInput.fill('English العربية');
+  expect(await searchInput.evaluate((node) => getComputedStyle(node).direction)).toBe('ltr');
 });

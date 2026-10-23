@@ -14,7 +14,7 @@ class SearchLandmarkContract(unittest.TestCase):
 
     def test_native_search_keyboard_and_label_are_preserved(self):
         source = (ROOT / 'searchform.php').read_text(encoding='utf-8')
-        self.assertIn('type="search" name="s" enterkeyhint="search"', source)
+        self.assertIn('type="search" name="s" dir="auto" enterkeyhint="search"', source)
         self.assertIn('esc_html_e( \'Search for:\', \'slateframe\' )', source)
         self.assertIn('esc_attr( get_search_query( false ) )', source)
         self.assertIn('method="get"', source)
@@ -22,8 +22,8 @@ class SearchLandmarkContract(unittest.TestCase):
 
     def test_real_wordpress_browser_coverage(self):
         spec = (ROOT / 'tests/browser/search-landmark-keyboard.spec.js').read_text(encoding='utf-8')
-        for token in ('getByRole', 'aria-label', 'enterkeyhint', 'node.labels',
-                      "input.press('Enter')", '日本語 & العربية',
+        for token in ('getByRole', 'aria-label', 'enterkeyhint', 'node.labels', 'dir',
+                      "input.press('Enter')", 'العربية & 日本語',
                       '320, 390, 1440', 'slateframe-browser-missing',
                       'search-landmark-viewport-'):
             with self.subTest(token=token):
