@@ -38,6 +38,7 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
         codeOverflow: getComputedStyle(root.querySelector('.wp-block-code')).overflowX,
         codeAlign: getComputedStyle(root.querySelector('.wp-block-code')).textAlign,
         codeWhiteSpace: getComputedStyle(root.querySelector('.wp-block-code code')).whiteSpace,
+        codeOverflowWrap: getComputedStyle(root.querySelector('.wp-block-code code')).overflowWrap,
         codeScrollWidth: root.querySelector('.wp-block-code').scrollWidth,
         codeClientWidth: root.querySelector('.wp-block-code').clientWidth,
         pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -47,7 +48,8 @@ test('RTL Core Preformatted follows prose while Code remains LTR at all widths',
       expect(result.codeDirection).toBe('ltr');
       expect(result.codeAlign).toBe('left');
       expect(result.codeOverflow).toBe('auto');
-      expect(result.codeWhiteSpace).not.toBe('pre');
+      expect(result.codeWhiteSpace).toBe('pre-wrap');
+      expect(result.codeOverflowWrap).toBe('anywhere');
       expect(result.codeScrollWidth, `${width}px ${dir} Core Code should wrap, not add a keyboard stop`).toBeLessThanOrEqual(result.codeClientWidth + 2);
       expect(result.proseOverflow).toBe('auto');
       expect(result.pageOverflow).toBeLessThanOrEqual(1);

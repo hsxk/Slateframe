@@ -18,6 +18,7 @@ class RtlPreformattedContract(unittest.TestCase):
         # Core Code is source text in either writing direction. Core Preformatted
         # and Verse remain authored prose, including in Arabic and CJK content.
         self.assertIn('.wp-block-code{direction:ltr;text-align:left}', reading)
+        self.assertIn('.wp-block-code code{white-space:pre-wrap;overflow-wrap:anywhere}', reading)
         self.assertIn('.editor-styles-wrapper .wp-block-code{direction:ltr;text-align:left}', editor)
         self.assertNotIn('.wp-block-preformatted{direction:ltr', reading)
         self.assertNotIn('.wp-block-verse{direction:ltr', reading)
