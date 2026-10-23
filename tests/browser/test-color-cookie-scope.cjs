@@ -7,12 +7,13 @@ const vm = require('node:vm');
 
 const runtime = fs.readFileSync(path.resolve(__dirname, '../../assets/js/theme.js'), 'utf8');
 
-function fixture(homePath, protocol = 'https:', showToggle = true) {
+function fixture(homePath, protocol = 'https:', showToggle = true, brandPath = homePath) {
   const cookies = [];
   const attributes = {};
   const listeners = {};
   const root = { classList: { add() {} }, dataset: {} };
   const toggle = {
+    dataset: { cookiePath: homePath },
     setAttribute(name, value) { attributes[name] = value; },
     addEventListener(name, listener) { listeners[name] = listener; },
   };
@@ -20,7 +21,7 @@ function fixture(homePath, protocol = 'https:', showToggle = true) {
     documentElement: root,
     querySelector(selector) {
       if (selector === '[data-color-toggle]') return showToggle ? toggle : null;
-      if (selector === '.slateframe-brand') return { pathname: homePath };
+      if (selector === '.slateframe-brand') return { pathname: brandPath };
       return null;
     },
     set cookie(value) { cookies.push(value); },
@@ -55,6 +56,13 @@ test('subdirectory installation does not write a root-scoped cookie', () => {
   page.click();
   assert.match(page.cookies[0], /; Path=\/journal\/;/);
   assert.doesNotMatch(page.cookies[0], /; Path=\/;/);
+});
+
+test('language-specific home links cannot split a site-wide visitor preference', () => {
+  const page = fixture('/', 'https:', true, '/ja/');
+  page.click();
+  assert.match(page.cookies[0], /; Path=\\/;/);
+  assert.doesNotMatch(page.cookies[0], /; Path=\\/ja\\/;/);
 });
 
 test('nested WordPress home path remains intact', () => {
