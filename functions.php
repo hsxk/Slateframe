@@ -680,8 +680,11 @@ function slateframe_assets() {
 	$forms_needed         = slateframe_forms_styles_needed();
 	$form_content_needed  = slateframe_form_content_styles_needed();
 	$search_form_needed   = slateframe_search_form_styles_needed();
+	// Closed comment threads still render history and need their form CSS dependency.
+	$comments_open        = is_singular() && comments_open();
+	$comments_needed      = $comments_open || ( is_singular() && (bool) get_comments_number() );
 	// Preserve CSS dependency closure even when extension filters disagree.
-	$forms_needed = $forms_needed || $form_content_needed || $search_form_needed;
+	$forms_needed = $forms_needed || $form_content_needed || $search_form_needed || $comments_needed;
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 	wp_enqueue_style(
@@ -783,7 +786,7 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( is_singular() && ( comments_open() || get_comments_number() ) ) {
+	if ( $comments_needed ) {
 		wp_enqueue_style(
 			'slateframe-comments',
 			get_template_directory_uri() . '/assets/css/comments.css',
@@ -792,7 +795,7 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+	if ( $comments_open && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
 

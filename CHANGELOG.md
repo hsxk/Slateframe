@@ -27,6 +27,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Preserve shared form-control CSS for open and historical comment threads even when an integration opts out of general form styles; retain selective loading and threaded-reply gating.
+
 - Align native numbered-step badge positioning with inherited RTL direction in both published content and Gutenberg, and assert the badge's physical inset against the list text gutter rather than checking padding alone.
 
 - Preserve the native Knowledge Steps badge gutter in the Gutenberg canvas at narrow RTL widths; assert editor badge/text separation and keep the editor stylesheet under its existing 5000-byte budget.
