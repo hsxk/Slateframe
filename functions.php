@@ -166,7 +166,7 @@ function slateframe_query_loop_marker_classes() {
  * @return bool
  */
 function slateframe_content_has_class_marker( $content, $markers, $parse_blocks = true ) {
-	if ( '' === trim( (string) $content ) || ! is_array( $markers ) || empty( $markers ) ) {
+	if ( ! is_string( $content ) || '' === trim( $content ) || ! is_array( $markers ) || empty( $markers ) ) {
 		return false;
 	}
 
@@ -211,7 +211,8 @@ function slateframe_blocks_have_class_marker( $blocks, $markers ) {
 		if ( ! is_array( $block ) ) {
 			continue;
 		}
-		$class_name = isset( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
+		$attrs      = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$class_name = isset( $attrs['className'] ) ? $attrs['className'] : '';
 		if ( is_string( $class_name ) && '' !== trim( $class_name ) ) {
 			$classes = preg_split( '/\\s+/', trim( $class_name ) );
 			foreach ( $markers as $marker ) {
@@ -235,7 +236,7 @@ function slateframe_blocks_have_class_marker( $blocks, $markers ) {
  */
 function slateframe_content_has_form( $content ) {
 	// Avoid constructing the HTML processor for ordinary text and block markup.
-	if ( false === stripos( (string) $content, '<form' ) ) {
+	if ( ! is_string( $content ) || false === stripos( $content, '<form' ) ) {
 		return false;
 	}
 
@@ -251,10 +252,18 @@ function slateframe_content_has_form( $content ) {
  * @return bool
  */
 function slateframe_blocks_have_legacy_search( $blocks ) {
+	if ( ! is_array( $blocks ) ) {
+		return false;
+	}
+
 	foreach ( $blocks as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
+		$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
 		if (
 			'core/legacy-widget' === ( isset( $block['blockName'] ) ? $block['blockName'] : '' ) &&
-			'search' === ( isset( $block['attrs']['idBase'] ) ? $block['attrs']['idBase'] : '' )
+			'search' === ( isset( $attrs['idBase'] ) ? $attrs['idBase'] : '' )
 		) {
 			return true;
 		}
@@ -558,12 +567,21 @@ function slateframe_form_content_styles_needed() {
  * @return bool
  */
 function slateframe_blocks_have_lightbox( $blocks ) {
+	if ( ! is_array( $blocks ) ) {
+		return false;
+	}
+
 	foreach ( $blocks as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
 		$block_name = isset( $block['blockName'] ) ? $block['blockName'] : '';
+		$attrs      = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$lightbox   = isset( $attrs['lightbox'] ) && is_array( $attrs['lightbox'] ) ? $attrs['lightbox'] : array();
 
 		if (
 			in_array( $block_name, array( 'core/image', 'core/gallery' ), true ) &&
-			! empty( $block['attrs']['lightbox']['enabled'] )
+			isset( $lightbox['enabled'] ) && true === $lightbox['enabled']
 		) {
 			return true;
 		}
@@ -600,7 +618,7 @@ function slateframe_photography_styles_needed() {
 
 	$contents = array_merge( array( $post->post_content ), slateframe_singular_synced_pattern_contents() );
 	foreach ( $contents as $content ) {
-		if ( is_array( $markers ) && slateframe_content_has_class_marker( $content, array_unique( $markers ) ) ) {
+		if ( is_array( $markers ) && slateframe_content_has_class_marker( $content, $markers ) ) {
 			return true;
 		}
 		if ( slateframe_blocks_have_lightbox( parse_blocks( $content ) ) ) {
