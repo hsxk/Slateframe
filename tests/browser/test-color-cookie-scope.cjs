@@ -61,8 +61,8 @@ test('subdirectory installation does not write a root-scoped cookie', () => {
 test('language-specific home links cannot split a site-wide visitor preference', () => {
   const page = fixture('/', 'https:', true, '/ja/');
   page.click();
-  assert.match(page.cookies[0], /; Path=\\/;/);
-  assert.doesNotMatch(page.cookies[0], /; Path=\\/ja\\/;/);
+  assert.match(page.cookies[0], /; Path=\/;/);
+  assert.doesNotMatch(page.cookies[0], /; Path=\/ja\/;/);
 });
 
 test('nested WordPress home path remains intact', () => {
