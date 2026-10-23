@@ -52,6 +52,7 @@ test('site identity preserves CJK tracking and focus at responsive widths', asyn
       document.documentElement.lang = 'ja';
       const node = document.querySelector('.slateframe-brand-title');
       node.removeAttribute('lang');
+      node.textContent = '風景と物語';
     });
     await expect.poll(() => brand.evaluate(node => getComputedStyle(node).letterSpacing)).toBe('normal');
     for (const width of [390, 1440]) {
