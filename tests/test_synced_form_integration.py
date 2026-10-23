@@ -49,6 +49,7 @@ function is_home() {return false;}
 function is_archive() {return false;}
 function is_author() {return false;}
 function comments_open() {return false;}
+function post_password_required() {return false;}
 function get_comments_number() {return 0;}
 require_once getcwd().'/functions.php';
 function pattern($id,$content,$status='publish',$type='wp_block') {$GLOBALS['pattern_posts'][$id]=new WP_Post($id,$content,$status,$type);}

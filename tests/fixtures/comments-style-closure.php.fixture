@@ -40,6 +40,7 @@ function is_author() { return false; }
 function is_404() { return false; }
 function is_rtl() { return fixture_flag( 'rtl' ); }
 function comments_open() { return fixture_flag( 'open' ); }
+function post_password_required() { return fixture_flag( 'locked' ); }
 function get_comments_number() { return isset( $GLOBALS['slateframe_fixture']['count'] ) ? $GLOBALS['slateframe_fixture']['count'] : 0; }
 function get_option( $name ) { return 'thread_comments' === $name && fixture_flag( 'thread' ); }
 function get_stylesheet_uri() { return '/themes/slateframe/style.css'; }

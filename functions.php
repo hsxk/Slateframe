@@ -506,7 +506,7 @@ function slateframe_forms_styles_needed() {
 	$needed = slateframe_search_form_styles_needed() || $footer['forms'] || slateframe_singular_synced_form_assets()['forms'];
 
 	if ( ! $needed && is_singular() ) {
-		$needed = comments_open() || (bool) get_comments_number();
+		$needed = post_password_required() || comments_open() || (bool) get_comments_number();
 		$post   = get_post();
 
 		if ( ! $needed && $post instanceof WP_Post ) {
@@ -680,11 +680,16 @@ function slateframe_assets() {
 	$forms_needed         = slateframe_forms_styles_needed();
 	$form_content_needed  = slateframe_form_content_styles_needed();
 	$search_form_needed   = slateframe_search_form_styles_needed();
-	// Closed comment threads still render history and need their form CSS dependency.
-	$comments_open   = is_singular() && comments_open();
-	$comments_needed = $comments_open || ( is_singular() && (bool) get_comments_number() );
+	// Core replaces protected content with a password form. Hidden comments
+	// must not load their CSS or reply script until the password is accepted.
+	$password_form_needed = is_singular() && post_password_required();
+	$comments_visible     = is_singular() && ! $password_form_needed;
+	$comments_open        = $comments_visible && comments_open();
+	// Closed but unlocked threads still render their historical comments.
+	$comments_needed = $comments_open || ( $comments_visible && (bool) get_comments_number() );
 	// Preserve CSS dependency closure even when extension filters disagree.
 	$forms_needed = $forms_needed || $form_content_needed || $search_form_needed || $comments_needed;
+	$forms_needed = $forms_needed || $password_form_needed;
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 	wp_enqueue_style(

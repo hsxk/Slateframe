@@ -117,6 +117,7 @@ class AssetDependencyClosure(unittest.TestCase):
         "require_once getcwd() . '/functions.php';",
         r'''
 function is_singular() { return false; }
+function post_password_required() { return false; }
 function is_search() { return false; }
 function is_404() { return false; }
 function is_home() { return true; }
