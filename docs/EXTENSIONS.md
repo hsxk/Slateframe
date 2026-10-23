@@ -43,7 +43,7 @@ add_filter(
 );
 ```
 
-For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned in singular post content and in active footer widgets, including published Core synced patterns, so footer presentation also works on archives and search results. Inactive widgets and unpublished pattern references do not opt in. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. All marker filters must return arrays.
+For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned in singular post content and in active footer widgets, including published Core synced patterns, so footer presentation also works on archives and search results. Inactive widgets and unpublished pattern references do not opt in. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. All marker filters must return arrays of exact CSS class strings. Slateframe ignores malformed marker entries defensively, without changing valid classes or activating styles for prose-only mentions.
 
 ## Compatibility policy
 
