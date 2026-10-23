@@ -309,7 +309,8 @@ function slateframe_synced_pattern_contents( $blocks, &$seen, $depth = 0 ) {
 			continue;
 		}
 
-		$raw_ref = isset( $block['attrs']['ref'] ) ? $block['attrs']['ref'] : null;
+		$attrs   = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$raw_ref = isset( $attrs['ref'] ) ? $attrs['ref'] : null;
 		$ref     = ( is_int( $raw_ref ) || ( is_string( $raw_ref ) && ctype_digit( $raw_ref ) ) ) ? (int) $raw_ref : 0;
 		if ( $ref <= 0 || ( isset( $seen[ $ref ] ) && $seen[ $ref ] <= $depth ) ) {
 			continue;
@@ -318,6 +319,11 @@ function slateframe_synced_pattern_contents( $blocks, &$seen, $depth = 0 ) {
 		$seen[ $ref ] = $depth;
 		$post         = get_post( $ref );
 		if ( ! $post instanceof WP_Post || 'wp_block' !== $post->post_type || 'publish' !== $post->post_status ) {
+			continue;
+		}
+
+		// Filters and importers may supply malformed content; only inspect text.
+		if ( ! is_string( $post->post_content ) ) {
 			continue;
 		}
 
