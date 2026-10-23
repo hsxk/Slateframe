@@ -40,6 +40,7 @@ jobs:
           node tests/browser/test-visual-evidence-helper.cjs
           node tests/browser/test-wordpress-login.cjs
           node tests/browser/test-editor-login-helper.cjs
+          node tests/browser/test-footer-widget-fixture.cjs
       - name: Validate build script syntax
         run: bash -n bin/build-theme-zip.sh
       - name: Validate screenshot PNG and corruption regression
