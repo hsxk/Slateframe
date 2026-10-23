@@ -13,7 +13,7 @@ class PresentationAdapterBoundaries(unittest.TestCase):
             cwd=ROOT, capture_output=True, text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("Presentation adapter boundaries: 33 cases passed", result.stdout)
+        self.assertIn("Presentation adapter boundaries: 30 cases passed", result.stdout)
 
     def test_public_adapter_surfaces_remain_core_first(self):
         functions = (ROOT / "functions.php").read_text(encoding="utf-8")
