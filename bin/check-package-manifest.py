@@ -70,7 +70,7 @@ def validate(root, theme_dir):
                 "\\" in component
                 or ":" in component
                 or component.rstrip(" .") != component
-                or any(ord(character) < 32 or ord(character) == 127 for character in component)
+                or any(unicodedata.category(character) in ("Cc", "Cf", "Cs") for character in component)
                 or component.split(".", 1)[0].casefold() in reserved_stems
             ):
                 raise ValueError(f"Refusing nonportable package path: {name!r}")
