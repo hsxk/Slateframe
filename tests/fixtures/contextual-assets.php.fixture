@@ -31,10 +31,19 @@ function add_action() {}
 function add_filter() {}
 function is_singular() { return true; }
 function post_password_required() { return false; }
+function is_search() { return false; }
+function is_404() { return false; }
+function is_home() { return false; }
+function is_archive() { return false; }
+function is_author() { return false; }
+function comments_open() { return false; }
+function get_comments_number() { return 0; }
+function wp_get_sidebars_widgets() { return array(); }
 function get_post() { $post = new WP_Post(); if ( array_key_exists( 'context_content', $GLOBALS ) ) { $post->post_content = $GLOBALS['context_content']; } return $post; }
 function has_block( $name, $content ) {
-    if ( ! is_string( $content ) && ! $content instanceof WP_Post ) { throw new TypeError( 'Core has_block requires post text or WP_Post' ); }
-    return false;
+    if ( $content instanceof WP_Post ) { $content = $content->post_content; }
+    if ( ! is_string( $content ) ) { throw new TypeError( 'Core has_block requires string post content' ); }
+    return 'core/search' === $name && false !== strpos( $content, '<!-- wp:search' );
 }
 function parse_blocks( $content ) {
     if ( ! is_string( $content ) ) { throw new TypeError( 'parse_blocks requires string' ); }
@@ -133,5 +142,23 @@ foreach ( array( array( 'invalid post content' ), new stdClass() ) as $bad_conte
     $flags = slateframe_singular_synced_form_assets();
     check_marker( false === $flags['forms'] && false === $flags['search_form'] && false === $flags['form_content'], 'Malformed singular form content' );
 }
+/* Malformed filtered pattern content must not reach Core has_block(). */
+$empty_forms = array( 'forms' => false, 'search_form' => false, 'form_content' => false );
+foreach ( array( null, false, new WP_Error(), new stdClass(), 'invalid' ) as $bad_contents ) {
+    check_marker( $empty_forms === slateframe_pattern_form_assets( $bad_contents ), 'Malformed pattern content collection' );
+}
+foreach ( array( array( new WP_Error() ), array( 42 ), array( false ), array( new stdClass() ) ) as $bad_entries ) {
+    check_marker( $empty_forms === slateframe_pattern_form_assets( $bad_entries ), 'Malformed pattern content entry' );
+}
+$valid_forms = slateframe_pattern_form_assets( array( new WP_Error(), '<!-- wp:search /-->', '<form action="/"><input></form>', 42 ) );
+check_marker( $valid_forms['forms'] && $valid_forms['form_content'] && ! $valid_forms['search_form'], 'Valid mixed pattern form content lost' );
+foreach ( array( array( 'not text' ), new stdClass(), false, null ) as $bad_content ) {
+    $GLOBALS['context_content'] = $bad_content;
+    check_marker( false === slateframe_forms_styles_needed(), 'Malformed singular Core search content' );
+}
+$GLOBALS['context_content'] = '<!-- wp:search /-->';
+check_marker( true === slateframe_forms_styles_needed(), 'Valid Core Search block omitted' );
+$GLOBALS['context_content'] = '<form action="/"><input></form>';
+check_marker( true === slateframe_forms_styles_needed(), 'Valid authored form omitted' );
 unset( $GLOBALS['context_content'] );
 echo "Contextual assets: {$checks} assertions passed\n";

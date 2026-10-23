@@ -7,6 +7,7 @@ Slateframe discovers contextual CSS for **published** WordPress Core synced patt
 - A parsed block must be an array. A `core/block` reference is read only when `attrs` is an array and `ref` is a positive integer or a decimal digit string.
 - Invalid attributes (including objects), invalid references and unpublished/non-`wp_block` targets are ignored rather than passed to Core APIs.
 - A referenced `WP_Post` must have **string** `post_content` before Slateframe stores or parses it. Singular post content is likewise validated before `has_block()` and cache-key hashing.
+- The form-asset collector accepts only an array of string pattern contents; malformed filtered entries are skipped before invoking Core `has_block()`. The singular form fallback also checks `post_content` before Core Search detection, without losing valid Core Search or authored `<form>` detection.
 - Only nested `core/block` references consume the eight-reference depth budget. Core Group/Columns nesting does not. The shallowest visited depth per reference prevents cycles while allowing a shorter path to discover descendants.
 - Password-protected singular content is not inspected for contextual assets. Public footer content is resolved independently.
 
@@ -14,6 +15,6 @@ This is defensive handling for malformed imports and filtered data; normal WordP
 
 ## Regression and release gate
 
-`python3 -m unittest tests/test_contextual_asset_guards.py` executes the **actual theme PHP functions** with a Core stub that rejects non-string `has_block()` input. The fixture covers malformed block trees, attrs, references, published content, singular form caches, nested groups, deduplication and depth limits.
+`python3 -m unittest tests/test_contextual_asset_guards.py` executes the **actual theme PHP functions** with a Core stub that rejects non-string `has_block()` input. The fixture covers malformed block trees, attrs, references, published content, singular form caches, mixed invalid pattern content collections, valid Core Search and authored forms, nested groups, deduplication and depth limits.
 
 The fixture is test-only and excluded from the WordPress.org ZIP. Exact-HEAD GitHub Actions (WP/PHP compatibility, WPCS, Theme Check, static budgets, real WordPress+Chromium and accessibility) remain the acceptance authority; local unit checks alone do not establish release readiness.
