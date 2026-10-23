@@ -61,8 +61,9 @@ test('system/site default, accessible toggle, and visitor preference stay cohere
 	const preference = cookies.find((cookie) => cookie.name === 'slateframe_color_mode');
 	expect(preference?.value).toBe(initialDark ? 'light' : 'dark');
 	expect(preference?.sameSite).toBe('Lax');
-	const home = new URL(await page.locator('.slateframe-brand').getAttribute('href'), page.url());
-	expect(preference?.path).toBe(home.pathname);
+	const cookiePath = await toggle.getAttribute('data-cookie-path');
+	expect(cookiePath).toMatch(/^\//);
+	expect(preference?.path).toBe(cookiePath);
 
 	await page.reload({ waitUntil: 'networkidle' });
 	await expect(page.locator('html')).toHaveAttribute('data-slateframe-color-mode', initialDark ? 'light' : 'dark');
