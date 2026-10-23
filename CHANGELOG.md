@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Keep the strict 2px Core File forced-colors focus assertion while waiting for Chromium's computed outline to settle after focus and media changes.
+
 - Cover standalone Core Gallery Photo sequence rendering and responsive image proportions in the Photography runtime suite.
 
 - Assert native Gutenberg content/wide layout variables follow bounded Appearance widths at default, compact and spacious settings; retain mobile/desktop screenshots and verify opaque sticky-header rendering.
@@ -26,6 +28,8 @@ All notable changes to Slateframe will be documented here.
 - Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
 
 ### Fixed
+
+- Preserve shared form-control CSS for open and historical comment threads even when an integration opts out of general form styles; retain selective loading and threaded-reply gating.
 
 - Align native numbered-step badge positioning with inherited RTL direction in both published content and Gutenberg, and assert the badge's physical inset against the list text gutter rather than checking padding alone.
 
