@@ -4,6 +4,8 @@ define( 'ABSPATH', __DIR__ . '/' );
 class WP_Error {}
 class WP_Post {
     public $ID = 17;
+    public $post_type = 'wp_block';
+    public $post_status = 'publish';
     public $post_content = '<div class="slateframe-gallery-sequence"></div>';
 }
 class WP_HTML_Tag_Processor {
@@ -89,4 +91,38 @@ check_photo_parse( '<!-- wp:image {"lightbox":{"enabled":true}} /-->', true, 1, 
 check_photo_parse( '<!-- wp:image {"lightbox":{"enabled":false}} /-->', false, 1, 'Disabled lightbox' );
 check_photo_parse( '<div class="slateframe-gallery-sequence"></div>', true, 0, 'Photography marker' );
 check_photo_parse( array( 'malformed' ), false, 0, 'Malformed stored content' );
+
+/* Core synced-pattern references may come from imported or filtered blocks. */
+$GLOBALS['context_content'] = '<p>Published synced pattern</p>';
+foreach ( array( new WP_Error(), new stdClass(), 'invalid', false, null ) as $bad_attrs ) {
+    $seen = array();
+    check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => $bad_attrs ) ), $seen ), 'Malformed synced attrs' );
+}
+foreach ( array( array(), new WP_Error(), -3, 'bad', '0' ) as $bad_ref ) {
+    $seen = array();
+    check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => $bad_ref ) ) ), $seen ), 'Malformed synced ref' );
+}
+$seen = array();
+check_marker( array( '<p>Published synced pattern</p>' ) === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 31 ) ) ), $seen ), 'Published synced pattern omitted' );
+$seen = array();
+check_marker( array( '<p>Published synced pattern</p>' ) === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => '32' ) ) ), $seen ), 'Numeric string synced ref omitted' );
+$GLOBALS['context_content'] = array( 'not text' );
+$seen = array();
+check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 33 ) ) ), $seen ), 'Malformed synced content array' );
+$GLOBALS['context_content'] = new stdClass();
+$seen = array();
+check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 34 ) ) ), $seen ), 'Malformed synced content object' );
+$GLOBALS['context_content'] = '<p>Published synced pattern</p>';
+$seen = array();
+$repeated = array(
+    array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 35 ) ),
+    array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 35 ) ),
+);
+check_marker( 1 === count( slateframe_synced_pattern_contents( $repeated, $seen ) ) && 0 === $seen[35], 'Repeated synced reference not deduplicated' );
+$seen = array();
+$nested = array( array( 'blockName' => 'core/group', 'innerBlocks' => array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 36 ) ) ) ) );
+check_marker( 1 === count( slateframe_synced_pattern_contents( $nested, $seen ) ) && 0 === $seen[36], 'Nested Core group consumed reference depth' );
+$seen = array();
+check_marker( array() === slateframe_synced_pattern_contents( $nested, $seen, 8 ), 'Synced reference depth limit ignored' );
+unset( $GLOBALS['context_content'] );
 echo "Contextual assets: {$checks} assertions passed\n";
