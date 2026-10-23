@@ -6,9 +6,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CoreFileLinkContract(unittest.TestCase):
-    def test_filename_link_is_bounded_in_frontend_and_editor(self):
+    def test_file_links_are_bounded_in_frontend_and_editor(self):
         css = (ROOT / 'style.css').read_text()
-        selector = ':is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a:first-of-type'
+        selector = ':is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a'
         self.assertEqual(css.count(selector), 1)
         self.assertNotIn('.wp-block-file>a:first-child', css)
         rule = css.split(selector + '{', 1)[1].split('}', 1)[0]
@@ -17,6 +17,7 @@ class CoreFileLinkContract(unittest.TestCase):
             'align-items:center',
             'min-block-size:var(--slateframe-control)',
             'max-inline-size:100%',
+            'overflow-wrap:anywhere',
         ):
             with self.subTest(property_value=property_value):
                 self.assertIn(property_value, rule)
