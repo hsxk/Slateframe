@@ -17,7 +17,7 @@ class CoreButtonsReflowContract(unittest.TestCase):
         self.assertIn("background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important", block_css)
         self.assertIn("&:focus-visible{outline-color:Highlight}", block_css)
         self.assertIn("@media(max-width:480px){.is-nowrap>.wp-block-button:not(.has-custom-width){flex:1 1 0}}", block_css)
-        self.assertIn(".is-nowrap:has(>:nth-child(2):last-child):not(:has(>.has-custom-width))>.wp-block-button{min-inline-size:min(8rem,44%)}", block_css)
+        self.assertIn(".is-nowrap:has(>:nth-child(2):last-child):not(:has(>.has-custom-width))>.wp-block-button{min-inline-size:min(8rem,35%)}", block_css)
         self.assertNotIn("background:ButtonFace!important", css)
         self.assertLessEqual(len(block_css.encode("utf-8")), 400)
         self.assertIn("wp_enqueue_block_style(", php)
