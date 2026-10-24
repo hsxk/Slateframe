@@ -6,16 +6,14 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CoreMediaTextParity(unittest.TestCase):
-    def test_shared_core_containment_does_not_override_core_grid(self):
+    def test_core_grid_shrink_is_shared_without_overriding_wordpress(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
-        scope = ":is(.slateframe-prose,.editor-styles-wrapper) "
-        for name in (".wp-block-media-text", ".wp-block-media-text__media", ".wp-block-media-text__content"):
-            self.assertIn(scope + name + "{min-inline-size:0;", css)
-        self.assertIn(".wp-block-media-text__content{min-inline-size:0;overflow-wrap:anywhere}", css)
-        self.assertIn(".wp-block-media-text__media :is(img,video,iframe){max-inline-size:100%}", css)
-        tail = css.split("/* Core Media & Text:", 1)[1]
-        for override in ("grid-template-columns", "grid-column", "grid-row", "!important"):
-            self.assertNotIn(override, tail)
+        self.assertIn(".wp-block-media-text>*{min-inline-size:0}", css)
+        self.assertEqual(css.count(".wp-block-media-text>*{min-inline-size:0}"), 1)
+        self.assertIn("overflow-wrap:anywhere", css)
+        self.assertIn("img,svg,video{display:block;max-width:100%;height:auto}", css)
+        self.assertIn("overflow-wrap: anywhere;", (ROOT / "assets/css/editor.css").read_text())
+        self.assertIn(".slateframe-prose :is(figure,audio,iframe,embed,object,.wp-video,.mejs-container){max-width:100%}", (ROOT / "assets/css/reading.css").read_text())
         self.assertLessEqual((ROOT / "style.css").stat().st_size, 16000)
 
     def test_wordpress_browser_and_editor_evidence(self):
