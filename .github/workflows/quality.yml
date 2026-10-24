@@ -932,6 +932,13 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA" || { echo "Browser evidence does not match PR HEAD" >&2; exit 1; }
           printf "%s\n" "$SLATEFRAME_EVIDENCE_SHA" > test-artifacts/screenshots/HEAD_SHA.txt
+          for width in 390 1440; do
+            for direction in ltr rtl; do
+              screenshot="test-artifacts/screenshots/core-photography-sequence-${width}-${direction}.png"
+              test -s "$screenshot" || { echo "Missing registered Photography sequence evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          test -s test-artifacts/screenshots/core-photography-sequence-390-rtl-200-forced-colors.png || { echo "Missing Photography sequence forced-colors evidence" >&2; exit 1; }
           for profile in default compact spacious; do
             for viewport in 390 1440; do
               for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge editorial-pathways empty-author not-found photography-lightbox content-pagination; do

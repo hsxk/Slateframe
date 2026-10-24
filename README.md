@@ -84,7 +84,7 @@ Slateframe currently ships 24 site-neutral starter patterns across publishing, p
 13. **Photography diptych** — two natural-ratio frames that collapse cleanly on narrow screens.
 14. **Project outcomes** — a portable three-column metrics summary without a custom project model.
 15. **Knowledge definition** — a semantic term-and-explanation callout for reference material.
-16. **Photography sequence** — an establishing frame plus paired detail rhythm with natural-ratio imagery and captions.
+16. **Photography sequence** — three replaceable local sample images in a native natural-ratio Gallery, with optional Core lightbox and caption guidance.
 17. **Project grid** — a native Query Loop portfolio index with responsive cards, site-local date formatting, empty state, and pagination.
 18. **Knowledge checklist** — a compact Understand → Practise checkpoint built from core Columns, Lists, and Quote blocks.
 19. **Project decision log** — a constraint → decision → consequence trail with an explicit evidence prompt.
