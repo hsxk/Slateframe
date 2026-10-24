@@ -5,7 +5,11 @@ async function openArticle(page) {
   await page.goto('/', { waitUntil: 'networkidle' });
   const post = page.locator('.slateframe-card-title a').first();
   await expect(post).toBeVisible();
-  await post.click();
+  const href = await post.getAttribute('href');
+  expect(href).toBeTruthy();
+  // A click can resolve before Core/theme stylesheets finish loading. The
+  // geometry contract must run against the styled article, not a FOUC frame.
+  await page.goto(href, { waitUntil: 'networkidle' });
   await expect(page.locator('.slateframe-prose').first()).toBeVisible();
   // The CI WordPress locale is LTR; explicitly load the actual RTL stylesheet.
   await page.addStyleTag({ path: 'rtl.css' });
@@ -73,6 +77,11 @@ test('native Core File and Verse preserve geometry and writing direction at seve
   await expect(file.locator('a')).toHaveCount(2);
   await expect(file.locator('a').first()).toHaveAttribute('href', '#native-file');
   await expect(file.locator('.wp-block-file__button')).toHaveAttribute('download', 'reference.pdf');
+  // Assert the actual theme CSS has applied before the responsive matrix;
+  // a missing stylesheet must fail rather than silently pass on UA defaults.
+  await expect.poll(() => file.locator('a').first().evaluate(node =>
+    getComputedStyle(node).overflowWrap
+  )).toBe('anywhere');
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     for (const dir of ['ltr', 'rtl']) {

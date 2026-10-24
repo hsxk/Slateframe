@@ -45,25 +45,73 @@ while ( have_posts() ) :
 					);
 					$slateframe_image_valid = false;
 					if ( is_string( $slateframe_image_html ) && '' !== trim( $slateframe_image_html ) ) {
+						// Core image filters can replace already-escaped markup. Sanitize
+						// first, then restore only fixed, safe image priority attributes.
+						$slateframe_image_html      = wp_kses_post( $slateframe_image_html );
 						$slateframe_image_processor = new WP_HTML_Tag_Processor( $slateframe_image_html );
 						$slateframe_image_valid     = $slateframe_image_processor->next_tag( 'img' );
+						if ( $slateframe_image_valid ) {
+							$slateframe_image_processor->set_attribute( 'loading', 'eager' );
+							$slateframe_image_processor->set_attribute( 'decoding', 'async' );
+							$slateframe_image_processor->set_attribute( 'fetchpriority', 'high' );
+							$slateframe_image_html = $slateframe_image_processor->get_updated_html();
+						}
 					}
 					?>
 					<?php if ( $slateframe_image_valid ) : ?>
 						<figure class="alignwide">
-							<?php echo wp_kses_post( $slateframe_image_html ); ?>
+							<?php echo $slateframe_image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
 								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
 							<?php endif; ?>
 						</figure>
 					<?php endif; ?>
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'video/' ) && $slateframe_file_url ) : ?>
-					<?php echo wp_kses_post( wp_video_shortcode( array( 'src' => $slateframe_file_url ) ) ); ?>
+					<?php
+					$slateframe_video_html  = wp_video_shortcode( array( 'src' => $slateframe_file_url ) );
+					$slateframe_video_html  = is_string( $slateframe_video_html ) ? wp_kses_post( $slateframe_video_html ) : '';
+					$slateframe_video_valid = false;
+					if ( '' !== trim( $slateframe_video_html ) ) {
+						$slateframe_video_processor = new WP_HTML_Tag_Processor( $slateframe_video_html );
+						$slateframe_video_valid     = $slateframe_video_processor->next_tag( 'video' );
+					}
+					if ( $slateframe_video_valid ) :
+						?>
+						<figure class="alignwide">
+							<?php echo $slateframe_video_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
+							<?php endif; ?>
+						</figure>
+						<?php
+					endif;
+					?>
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'audio/' ) && $slateframe_file_url ) : ?>
-					<?php echo wp_kses_post( wp_audio_shortcode( array( 'src' => $slateframe_file_url ) ) ); ?>
+					<?php
+					$slateframe_audio_html  = wp_audio_shortcode( array( 'src' => $slateframe_file_url ) );
+					$slateframe_audio_html  = is_string( $slateframe_audio_html ) ? wp_kses_post( $slateframe_audio_html ) : '';
+					$slateframe_audio_valid = false;
+					if ( '' !== trim( $slateframe_audio_html ) ) {
+						$slateframe_audio_processor = new WP_HTML_Tag_Processor( $slateframe_audio_html );
+						$slateframe_audio_valid     = $slateframe_audio_processor->next_tag( 'audio' );
+					}
+					if ( $slateframe_audio_valid ) :
+						?>
+						<figure class="alignwide">
+							<?php echo $slateframe_audio_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
+							<?php endif; ?>
+						</figure>
+						<?php
+					endif;
+					?>
 				<?php endif; ?>
 
-				<?php if ( '' !== trim( (string) get_the_content() ) ) : ?>
+				<?php
+				$slateframe_raw_content = get_the_content();
+				if ( is_string( $slateframe_raw_content ) && '' !== trim( $slateframe_raw_content ) ) :
+					?>
 					<?php the_content(); ?>
 				<?php endif; ?>
 			</div>

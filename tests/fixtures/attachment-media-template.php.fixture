@@ -21,10 +21,20 @@ function wp_get_attachment_image( $id, $size, $icon, $attrs ) {
     $GLOBALS['slateframe_attachment_attrs'] = $attrs;
     return $GLOBALS['slateframe_attachment_case']['image_html'];
 }
-function wp_video_shortcode( $args ) { return '<video src="' . htmlspecialchars( $args['src'], ENT_QUOTES, 'UTF-8' ) . '"></video>'; }
-function wp_audio_shortcode( $args ) { return '<audio src="' . htmlspecialchars( $args['src'], ENT_QUOTES, 'UTF-8' ) . '"></audio>'; }
-function get_the_content() { return ''; }
-function the_content() {}
+function wp_video_shortcode( $args ) {
+    if ( array_key_exists( 'video_shortcode', $GLOBALS['slateframe_attachment_case'] ) ) {
+        return $GLOBALS['slateframe_attachment_case']['video_shortcode'];
+    }
+    return '<video src="' . htmlspecialchars( $args['src'], ENT_QUOTES, 'UTF-8' ) . '"></video>';
+}
+function wp_audio_shortcode( $args ) {
+    if ( array_key_exists( 'audio_shortcode', $GLOBALS['slateframe_attachment_case'] ) ) {
+        return $GLOBALS['slateframe_attachment_case']['audio_shortcode'];
+    }
+    return '<audio src="' . htmlspecialchars( $args['src'], ENT_QUOTES, 'UTF-8' ) . '"></audio>';
+}
+function get_the_content() { return $GLOBALS['slateframe_attachment_case']['content']; }
+function the_content() { echo $GLOBALS['slateframe_attachment_case']['content']; }
 function esc_attr_e( $text, $domain ) { echo htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
 function esc_html_e( $text, $domain ) { echo htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
 function esc_html__( $text, $domain ) { return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
@@ -37,15 +47,30 @@ function esc_url_raw( $url ) {
 function esc_url( $url ) { return htmlspecialchars( esc_url_raw( $url ), ENT_QUOTES, 'UTF-8' ); }
 function wp_kses_post( $value ) {
     if ( ! is_string( $value ) ) { throw new TypeError( 'Nonstring HTML' ); }
-    return $value;
+    $value = preg_replace( '~<script\\b[^>]*>.*?</script>~is', '', $value );
+    $value = preg_replace( '~\\s+onerror\\s*=\\s*"[^"]*"~i', '', $value );
+    // Mirror Core post KSES: priority and decoding must be restored after sanitization.
+    return preg_replace( '~\\s+(?:fetchpriority|decoding)\\s*=\\s*"[^"]*"~i', '', $value );
 }
 function get_permalink( $id ) { return '/parent/' . $id; }
 function comments_open() { return false; }
 function get_comments_number() { return 0; }
 class WP_HTML_Tag_Processor {
     private $html;
+    private $matched = false;
     public function __construct( $html ) { $this->html = $html; }
-    public function next_tag( $name ) { return 1 === preg_match( '/<img(?:\\s|\\/?>)/i', $this->html ); }
+    public function next_tag( $name ) {
+        $this->matched = 1 === preg_match( '/<' . preg_quote( $name, '/' ) . '(?:\\s|\\/?>)/i', $this->html );
+        return $this->matched;
+    }
+    public function set_attribute( $name, $value ) {
+        if ( ! $this->matched ) { throw new RuntimeException( 'No image selected' ); }
+        $this->html = preg_replace_callback( '/<img\\b[^>]*>/i', static function ( $match ) use ( $name, $value ) {
+            $tag = preg_replace( '/\\s+' . preg_quote( $name, '/' ) . '="[^"]*"/i', '', $match[0] );
+            return preg_replace( '/<img\\b/i', '<img ' . $name . '="' . $value . '"', $tag, 1 );
+        }, $this->html, 1 );
+    }
+    public function get_updated_html() { return $this->html; }
 }
 function slateframe_attachment_check( $ok, $message ) {
     if ( ! $ok ) { throw new RuntimeException( $message ); }
@@ -53,7 +78,7 @@ function slateframe_attachment_check( $ok, $message ) {
 }
 function slateframe_attachment_render( $case ) {
     $GLOBALS['slateframe_attachment_case'] = array_merge(
-        array( 'url' => '', 'mime' => '', 'caption' => '', 'image' => false, 'image_html' => '', 'parent' => false ),
+        array( 'url' => '', 'mime' => '', 'caption' => '', 'image' => false, 'image_html' => '', 'parent' => false, 'content' => '' ),
         $case
     );
     $GLOBALS['slateframe_attachment_loop'] = 0;
@@ -80,6 +105,21 @@ slateframe_attachment_check( false !== strpos( $valid, 'srcset="/small.jpg 1x, /
 slateframe_attachment_check( false !== strpos( $valid, 'href="/parent/27"' ), 'Public parent recovery link lost' );
 slateframe_attachment_check( false !== strpos( $valid, 'href="https://example.org/uploads/photo.jpg"' ), 'Original file link lost' );
 slateframe_attachment_check( 'high' === $GLOBALS['slateframe_attachment_attrs']['fetchpriority'], 'Hero priority lost' );
+slateframe_attachment_check( false !== strpos( $valid, 'fetchpriority="high"' ), 'Rendered attachment priority lost after KSES' );
+slateframe_attachment_check( false !== strpos( $valid, 'decoding="async"' ), 'Rendered attachment decoding lost after KSES' );
+slateframe_attachment_check( false !== strpos( $valid, 'loading="eager"' ), 'Rendered attachment loading lost after KSES' );
+$unsafe = slateframe_attachment_render( array(
+    'image' => true, 'image_html' => '<img src="/photo.jpg" alt="花" srcset="/small.jpg 1x, /large.jpg 2x" loading="lazy" decoding="sync" fetchpriority="low" onerror="alert(1)"><script>alert(2)</script>',
+    'caption' => '<em>照片说明</em>',
+) );
+slateframe_attachment_check( false === strpos( $unsafe, '<script' ), 'Filtered image script leaked' );
+slateframe_attachment_check( false === strpos( $unsafe, 'onerror' ), 'Filtered image event handler leaked' );
+slateframe_attachment_check( false !== strpos( $unsafe, 'fetchpriority="high"' ) && false === strpos( $unsafe, 'fetchpriority="low"' ), 'Filtered priority not replaced' );
+slateframe_attachment_check( false !== strpos( $unsafe, 'decoding="async"' ) && false === strpos( $unsafe, 'decoding="sync"' ), 'Filtered decoding not replaced' );
+slateframe_attachment_check( false !== strpos( $unsafe, 'loading="eager"' ) && false === strpos( $unsafe, 'loading="lazy"' ), 'Filtered loading not replaced' );
+slateframe_attachment_check( false !== strpos( $unsafe, 'srcset="/small.jpg 1x, /large.jpg 2x"' ), 'Filtered responsive srcset lost' );
+slateframe_attachment_check( false !== strpos( $unsafe, 'alt="花"' ), 'Filtered CJK alt lost' );
+slateframe_attachment_check( false !== strpos( $unsafe, '<em>照片说明</em>' ), 'Filtered CJK caption lost' );
 foreach ( array( false, null, 0, array( 'img' ), new stdClass(), '', ' ', '<p>not an image</p>' ) as $bad ) {
     $html = slateframe_attachment_render( array( 'image' => true, 'image_html' => $bad, 'caption' => '<em>Hidden caption</em>' ) );
     slateframe_attachment_check( false === strpos( $html, '<figure class="alignwide">' ), 'Malformed image created empty figure' );
@@ -99,4 +139,56 @@ slateframe_attachment_check( false !== strpos( $video, '<video src="https://exam
 $audio = slateframe_attachment_render( array( 'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg' ) );
 slateframe_attachment_check( false !== strpos( $audio, '<audio src="https://example.org/audio.mp3"' ), 'Native audio preview lost' );
 slateframe_attachment_check( false === strpos( $audio, 'href="/parent/27"' ), 'Orphan attachment acquired a parent link' );
+$bad_video = slateframe_attachment_render( array( 'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4', 'video_shortcode' => array( 'unsafe' ) ) );
+slateframe_attachment_check( false === strpos( $bad_video, '<video' ), 'Malformed video shortcode output reached HTML' );
+slateframe_attachment_check( false !== strpos( $bad_video, 'Open original file' ), 'Malformed video shortcode removed safe original link' );
+$bad_audio = slateframe_attachment_render( array( 'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg', 'audio_shortcode' => new stdClass() ) );
+slateframe_attachment_check( false === strpos( $bad_audio, '<audio' ), 'Malformed audio shortcode output reached HTML' );
+slateframe_attachment_check( false !== strpos( $bad_audio, 'Open original file' ), 'Malformed audio shortcode removed safe original link' );
+$bad_content = slateframe_attachment_render( array( 'content' => array( 'invalid' ) ) );
+slateframe_attachment_check( false === strpos( $bad_content, 'invalid' ), 'Malformed content was coerced into output' );
+$valid_content = slateframe_attachment_render( array( 'content' => '<p>Portable article text.</p>' ) );
+slateframe_attachment_check( false !== strpos( $valid_content, '<p>Portable article text.</p>' ), 'Valid article body lost' );
+$captioned_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4', 'caption' => '<em>動画说明 العربية</em>',
+) );
+slateframe_attachment_check( false !== strpos( $captioned_video, '<figure class="alignwide">' ), 'Video preview lacks semantic figure' );
+slateframe_attachment_check( false !== strpos( $captioned_video, '<figcaption class="wp-caption-text"><em>動画说明 العربية</em></figcaption>' ), 'CJK/RTL video caption lost' );
+slateframe_attachment_check( false !== strpos( $captioned_video, '<video src="https://example.org/video.mp4"' ), 'Captioned video lost native player' );
+$captioned_audio = slateframe_attachment_render( array(
+    'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg', 'caption' => '<em>音声 شرح</em>',
+) );
+slateframe_attachment_check( false !== strpos( $captioned_audio, '<figure class="alignwide">' ), 'Audio preview lacks semantic figure' );
+slateframe_attachment_check( false !== strpos( $captioned_audio, '<figcaption class="wp-caption-text"><em>音声 شرح</em></figcaption>' ), 'CJK/RTL audio caption lost' );
+slateframe_attachment_check( false !== strpos( $captioned_audio, '<audio src="https://example.org/audio.mp3"' ), 'Captioned audio lost native player' );
+$script_only_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4',
+    'video_shortcode' => '<script>alert(1)</script>', 'caption' => 'Orphan video caption',
+) );
+slateframe_attachment_check( false === strpos( $script_only_video, '<figure class="alignwide">' ), 'Sanitized-empty video created figure' );
+slateframe_attachment_check( false === strpos( $script_only_video, 'Orphan video caption' ), 'Sanitized-empty video leaked caption' );
+$empty_audio = slateframe_attachment_render( array(
+    'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg',
+    'audio_shortcode' => '', 'caption' => 'Orphan audio caption',
+) );
+slateframe_attachment_check( false === strpos( $empty_audio, '<figure class="alignwide">' ), 'Empty audio created figure' );
+slateframe_attachment_check( false === strpos( $empty_audio, 'Orphan audio caption' ), 'Empty audio leaked caption' );
+$filtered_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4',
+    'video_shortcode' => '<video controls></video><script>alert(1)</script>', 'caption' => '<em>Safe caption</em>',
+) );
+slateframe_attachment_check( false === strpos( $filtered_video, '<script' ), 'Filtered video script leaked' );
+slateframe_attachment_check( false !== strpos( $filtered_video, '<figcaption class="wp-caption-text"><em>Safe caption</em></figcaption>' ), 'Filtered video lost safe caption' );
+$nonmedia_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4',
+    'video_shortcode' => '<p>Not a native player</p>', 'caption' => 'Orphan filtered video caption',
+) );
+slateframe_attachment_check( false === strpos( $nonmedia_video, '<figure class="alignwide">' ), 'Non-video HTML created video figure' );
+slateframe_attachment_check( false === strpos( $nonmedia_video, 'Orphan filtered video caption' ), 'Non-video HTML leaked caption' );
+$nonmedia_audio = slateframe_attachment_render( array(
+    'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg',
+    'audio_shortcode' => '<video controls></video>', 'caption' => 'Orphan filtered audio caption',
+) );
+slateframe_attachment_check( false === strpos( $nonmedia_audio, '<figure class="alignwide">' ), 'Wrong media element created audio figure' );
+slateframe_attachment_check( false === strpos( $nonmedia_audio, 'Orphan filtered audio caption' ), 'Wrong media element leaked caption' );
 echo 'Attachment media template: ' . $GLOBALS['slateframe_attachment_checks'] . " assertions passed\n";
