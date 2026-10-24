@@ -123,6 +123,8 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         await fs.mkdir('test-artifacts/screenshots', { recursive: true });
         // A viewport capture stays inside the strict visual-inventory 20,000px height cap;
         // offscreen element geometry above records the entire document overflow.
+        // Show the actual two-action reflow, not the oversized article heading.
+        await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').last().scrollIntoViewIfNeeded();
         await page.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-rtl-400-zoom.png' });
       }
       expect(overflow.delta, zoom + ' offscreen elements: ' + JSON.stringify(overflow.offenders)).toBeLessThanOrEqual(1);
