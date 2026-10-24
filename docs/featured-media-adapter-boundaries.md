@@ -7,3 +7,7 @@ A valid image is still processed by Core's `WP_HTML_Tag_Processor` to preserve i
 The `wp_get_attachment_image` filter may be extended by other code. When it returns `false`, `null`, an array, an error object, blank text, or text with no `img` element, the theme now renders no hero rather than passing a non-string to the HTML processor or outputting an empty figure. The post's normal content is unaffected.
 
 Run `python3 -m unittest tests/test_featured_media_boundaries.py` or `php tests/fixtures/featured-media-boundaries.php.fixture` for isolated regression checks. These tests do not access a database or production site. Exact-head Actions, real WordPress+Chromium browser checks, PHP compatibility, WPCS, Theme Check, and packaging remain required before merge.
+
+## Filtered image HTML and output safety
+
+WordPress filters can replace `wp_get_attachment_image()` output after Core has escaped its original attributes. The hero therefore passes the **updated HTML** through Core `wp_kses_post()` before output, rather than trusting arbitrary filter-provided event handlers or script elements. This keeps Core `srcset`, `sizes`, translated `alt`, eager loading, asynchronous decoding, and high fetch priority without introducing a new media abstraction. The isolated PHP fixture now verifies this output boundary with intentionally unsafe filtered HTML; it is not a replacement for the real WordPress browser gate.

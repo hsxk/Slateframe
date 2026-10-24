@@ -92,11 +92,10 @@ function slateframe_featured_media( $post_id = 0 ) {
 	$image_processor->set_attribute( 'loading', 'eager' );
 	$image_processor->set_attribute( 'decoding', 'async' );
 	$image_processor->set_attribute( 'fetchpriority', 'high' );
-	$image_html = $image_processor->get_updated_html();
-
 	echo '<figure class="slateframe-shell slateframe-entry-hero">';
-	// wp_get_attachment_image() escapes its responsive image markup; attributes above are set through Core's HTML processor.
-	echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	// Plugins may filter Core image HTML after Core has escaped it. Sanitize
+	// the complete result, while retaining Core's responsive image attributes.
+	echo wp_kses_post( $image_processor->get_updated_html() );
 
 	if ( is_string( $caption ) && '' !== trim( $caption ) ) {
 		printf( '<figcaption class="wp-caption-text">%s</figcaption>', wp_kses_post( $caption ) );
