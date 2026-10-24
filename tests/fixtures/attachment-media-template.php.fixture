@@ -1,0 +1,102 @@
+<?php
+/** Execute the real attachment template against malformed Core media adapters. */
+define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
+$GLOBALS['slateframe_attachment_case'] = array();
+$GLOBALS['slateframe_attachment_checks'] = 0;
+$GLOBALS['slateframe_attachment_loop'] = 0;
+function get_header() {}
+function get_footer() {}
+function have_posts() { return 0 === $GLOBALS['slateframe_attachment_loop']; }
+function the_post() { ++$GLOBALS['slateframe_attachment_loop']; }
+function get_the_ID() { return 42; }
+function post_class( $class ) { echo 'class="' . $class . '"'; }
+function slateframe_public_attachment_parent_id( $id ) { return ! empty( $GLOBALS['slateframe_attachment_case']['parent'] ) ? 27 : 0; }
+function slateframe_get_display_title( $id = 0 ) { return 27 === $id ? '親ページ' : '写真と記事'; }
+function wp_get_attachment_url( $id ) { return $GLOBALS['slateframe_attachment_case']['url']; }
+function get_post_mime_type( $id ) { return $GLOBALS['slateframe_attachment_case']['mime']; }
+function wp_get_attachment_caption( $id ) { return $GLOBALS['slateframe_attachment_case']['caption']; }
+function slateframe_attachment_details( $id ) { return array( 'Dimensions' => '1920 × 1080 px' ); }
+function wp_attachment_is_image( $id ) { return ! empty( $GLOBALS['slateframe_attachment_case']['image'] ); }
+function wp_get_attachment_image( $id, $size, $icon, $attrs ) {
+    $GLOBALS['slateframe_attachment_attrs'] = $attrs;
+    return $GLOBALS['slateframe_attachment_case']['image_html'];
+}
+function wp_video_shortcode( $args ) { return '<video src="' . htmlspecialchars( $args['src'], ENT_QUOTES, 'UTF-8' ) . '"></video>'; }
+function wp_audio_shortcode( $args ) { return '<audio src="' . htmlspecialchars( $args['src'], ENT_QUOTES, 'UTF-8' ) . '"></audio>'; }
+function get_the_content() { return ''; }
+function the_content() {}
+function esc_attr_e( $text, $domain ) { echo htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
+function esc_html_e( $text, $domain ) { echo htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
+function esc_html__( $text, $domain ) { return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
+function esc_html( $text ) { return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' ); }
+function esc_url_raw( $url ) {
+    if ( ! is_string( $url ) ) { throw new TypeError( 'Unsafe URL type' ); }
+    if ( '' === trim( $url ) || 0 === stripos( $url, 'javascript:' ) ) { return ''; }
+    return trim( $url );
+}
+function esc_url( $url ) { return htmlspecialchars( esc_url_raw( $url ), ENT_QUOTES, 'UTF-8' ); }
+function wp_kses_post( $value ) {
+    if ( ! is_string( $value ) ) { throw new TypeError( 'Nonstring HTML' ); }
+    return $value;
+}
+function get_permalink( $id ) { return '/parent/' . $id; }
+function comments_open() { return false; }
+function get_comments_number() { return 0; }
+class WP_HTML_Tag_Processor {
+    private $html;
+    public function __construct( $html ) { $this->html = $html; }
+    public function next_tag( $name ) { return 1 === preg_match( '/<img(?:\\s|\\/?>)/i', $this->html ); }
+}
+function slateframe_attachment_check( $ok, $message ) {
+    if ( ! $ok ) { throw new RuntimeException( $message ); }
+    ++$GLOBALS['slateframe_attachment_checks'];
+}
+function slateframe_attachment_render( $case ) {
+    $GLOBALS['slateframe_attachment_case'] = array_merge(
+        array( 'url' => '', 'mime' => '', 'caption' => '', 'image' => false, 'image_html' => '', 'parent' => false ),
+        $case
+    );
+    $GLOBALS['slateframe_attachment_loop'] = 0;
+    ob_start();
+    try {
+        include dirname( __DIR__, 2 ) . '/attachment.php';
+        return ob_get_clean();
+    } catch ( Throwable $error ) {
+        ob_end_clean();
+        throw $error;
+    }
+}
+set_error_handler( function( $severity, $message ) { throw new ErrorException( $message, 0, $severity ); } );
+$valid = slateframe_attachment_render( array(
+    'url' => 'https://example.org/uploads/photo.jpg', 'mime' => 'image/jpeg',
+    'caption' => '<em>花の写真</em>', 'image' => true,
+    'image_html' => '<img src="/photo.jpg" alt="花" srcset="/small.jpg 1x, /large.jpg 2x">',
+    'parent' => true,
+) );
+slateframe_attachment_check( 1 === substr_count( $valid, '<figure class="alignwide">' ), 'Valid image figure missing' );
+slateframe_attachment_check( false !== strpos( $valid, 'alt="花"' ), 'CJK alt lost' );
+slateframe_attachment_check( false !== strpos( $valid, '<figcaption class="wp-caption-text"><em>花の写真</em></figcaption>' ), 'CJK caption lost' );
+slateframe_attachment_check( false !== strpos( $valid, 'srcset="/small.jpg 1x, /large.jpg 2x"' ), 'Core srcset lost' );
+slateframe_attachment_check( false !== strpos( $valid, 'href="/parent/27"' ), 'Public parent recovery link lost' );
+slateframe_attachment_check( false !== strpos( $valid, 'href="https://example.org/uploads/photo.jpg"' ), 'Original file link lost' );
+slateframe_attachment_check( 'high' === $GLOBALS['slateframe_attachment_attrs']['fetchpriority'], 'Hero priority lost' );
+foreach ( array( false, null, 0, array( 'img' ), new stdClass(), '', ' ', '<p>not an image</p>' ) as $bad ) {
+    $html = slateframe_attachment_render( array( 'image' => true, 'image_html' => $bad, 'caption' => '<em>Hidden caption</em>' ) );
+    slateframe_attachment_check( false === strpos( $html, '<figure class="alignwide">' ), 'Malformed image created empty figure' );
+    slateframe_attachment_check( false === strpos( $html, 'Hidden caption' ), 'Orphan caption escaped without image' );
+}
+$bad = slateframe_attachment_render( array( 'url' => array( 'https://example.org/secret' ), 'mime' => array( 'video/mp4' ), 'caption' => array( 'private' ) ) );
+slateframe_attachment_check( false === strpos( $bad, 'Open original file</a>' ), 'Array URL leaked a link' );
+slateframe_attachment_check( false === strpos( $bad, '<video' ), 'Array MIME triggered video' );
+slateframe_attachment_check( false === strpos( $bad, 'private' ), 'Array caption leaked' );
+$bad = slateframe_attachment_render( array( 'url' => new stdClass(), 'mime' => new stdClass(), 'caption' => new stdClass() ) );
+slateframe_attachment_check( false === strpos( $bad, 'Open original file</a>' ), 'Object URL leaked a link' );
+$bad = slateframe_attachment_render( array( 'url' => 'javascript:alert(1)', 'mime' => 'video/mp4' ) );
+slateframe_attachment_check( false === strpos( $bad, '<video' ), 'Unsafe URL triggered video shortcode' );
+slateframe_attachment_check( false === strpos( $bad, 'Open original file</a>' ), 'Unsafe original file link leaked' );
+$video = slateframe_attachment_render( array( 'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4' ) );
+slateframe_attachment_check( false !== strpos( $video, '<video src="https://example.org/video.mp4"' ), 'Native video preview lost' );
+$audio = slateframe_attachment_render( array( 'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg' ) );
+slateframe_attachment_check( false !== strpos( $audio, '<audio src="https://example.org/audio.mp3"' ), 'Native audio preview lost' );
+slateframe_attachment_check( false === strpos( $audio, 'href="/parent/27"' ), 'Orphan attachment acquired a parent link' );
+echo 'Attachment media template: ' . $GLOBALS['slateframe_attachment_checks'] . " assertions passed\n";
