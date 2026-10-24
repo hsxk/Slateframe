@@ -23,10 +23,10 @@ test('Core Search button-inside reflows without losing native semantics', async 
     await expect(button).toHaveAccessibleName('Find 日本語 中文 العربية long localized label');
     expect(await form.evaluate(node => new FormData(node).has('s'))).toBe(true);
     await fs.mkdir('test-artifacts/screenshots', { recursive:true });
-    for (const width of [320,375,390,412,768,1440,1920]) {
+    for (const width of [320,375,390,412,640,768,1440,1920]) {
       await page.setViewportSize({ width, height:900 });
       for (const dir of ['ltr','rtl']) {
-        for (const font of (width <= 412 ? [16,32,64] : [16,32])) {
+        for (const font of (width <= 640 ? [16,32,64] : [16,32])) {
           await page.locator('html').evaluate((node, state) => {
             node.dir=state.dir; node.style.fontSize=state.font+'px';
           }, {dir,font});
@@ -48,7 +48,7 @@ test('Core Search button-inside reflows without losing native semantics', async 
             expect(g[key].height,label+' '+key+' target').toBeGreaterThanOrEqual(43);
             expect(g[key].width,label+' '+key+' target').toBeGreaterThanOrEqual(43);
           }
-          if (width<=412) {
+          if (width<=640) {
             expect(g.display,label+' stacked layout').toBe('grid');
             expect(g.button.width,label+' full-width action').toBeGreaterThanOrEqual(g.wrapper.width-2);
             expect(g.button.left,label+' alignment').toBeGreaterThanOrEqual(g.input.left-2);
