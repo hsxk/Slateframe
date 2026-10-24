@@ -15,7 +15,7 @@ class CoreMetadataBoundaries(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        match = re.search(r"Core metadata boundaries: (\\d+) cases passed", result.stdout)
+        match = re.search(r"Core metadata boundaries: (\d+) cases passed", result.stdout)
         self.assertIsNotNone(match, result.stdout)
         self.assertGreaterEqual(int(match.group(1)), 60)
 
