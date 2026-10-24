@@ -747,9 +747,9 @@ function slateframe_assets() {
 		$query_loop_needed
 	) || $query_loop_needed;
 
-	$forms_needed         = slateframe_forms_styles_needed();
-	$form_content_needed  = slateframe_form_content_styles_needed();
-	$search_form_needed   = slateframe_search_form_styles_needed();
+	$forms_needed        = slateframe_forms_styles_needed();
+	$form_content_needed = slateframe_form_content_styles_needed();
+	$search_form_needed  = slateframe_search_form_styles_needed();
 	// Core replaces protected content with a password form. Hidden comments
 	// must not load their CSS or reply script until the password is accepted.
 	$password_form_needed = is_singular() && post_password_required();
