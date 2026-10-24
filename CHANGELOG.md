@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Balance two uncustomized native nowrap actions on 320–412px mobile rather than compressing the short translated action into a 44px vertical text column; preserve author widths and natural desktop layout, and add readable-width geometry plus 320px LTR/RTL screenshots.
+
+
 - Restore native Core Button foreground/background contrast and visible system focus colors under forced-colors mode, including custom inline palettes; require real Chromium Axe checks for the previously failing RTL 200% reflow fixture and the five-button color/outline fixture.
 
 
