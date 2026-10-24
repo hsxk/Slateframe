@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -60,6 +60,27 @@ function slateframe_setup() {
 	);
 }
 add_action( 'after_setup_theme', 'slateframe_setup' );
+
+/**
+ * Load Core Button enhancements only for rendered native Button blocks.
+ *
+ * Keep the universal runtime below its existing strict CSS budgets while
+ * letting WordPress enqueue the small block stylesheet in content, synced
+ * patterns, and block widget areas. The editor also receives this stylesheet
+ * through add_editor_style() for consistent appearance.
+ */
+function slateframe_register_core_button_styles() {
+	wp_enqueue_block_style(
+		'core/button',
+		array(
+			'handle' => 'slateframe-core-buttons',
+			'src'    => get_template_directory_uri() . '/assets/css/core-buttons.css',
+			'path'   => get_template_directory() . '/assets/css/core-buttons.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_button_styles', 20 );
 
 /**
  * Register optional block/widget regions.
