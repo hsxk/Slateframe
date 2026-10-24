@@ -79,7 +79,12 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
     return { active: style.backgroundColor, inactive: link ? getComputedStyle(link).backgroundColor : '' };
   });
   expect(currentBeforeForced.active).not.toBe(currentBeforeForced.inactive);
+  // Apply the OS contrast preference before document load, as in the dedicated
+  // native-pagination forced-colors regression. Chromium may retain adjusted
+  // colors when a live page toggles the preference after extensive reflow.
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
   const current = numbers.locator('.page-numbers.current');
   const contrast = await current.evaluate(node => {
     const s = getComputedStyle(node);
