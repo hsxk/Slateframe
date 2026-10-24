@@ -19,9 +19,15 @@ class PatternDocumentationCount(unittest.TestCase):
         self.assertEqual(int(declared.group(1)), len(patterns))
         self.assertEqual(numbers, list(range(1, len(patterns) + 1)))
 
+    def test_editorial_pullquote_has_public_inventory_entry(self):
+        readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+        self.assertIn('24. **Editorial pullquote**', readme)
+        self.assertTrue((ROOT / 'patterns/editorial-pullquote.php').is_file())
+
     def test_wordpress_readme_mentions_native_faq(self):
         readme = (ROOT / 'readme.txt').read_text(encoding='utf-8')
         self.assertIn('knowledge outlines/definitions/checkpoints/procedures/comparisons/questions-and-answers', readme)
+        self.assertIn('editorial openings/notes/pathways/pullquotes', readme)
 
 
 if __name__ == '__main__':

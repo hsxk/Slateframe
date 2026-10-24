@@ -67,7 +67,7 @@ Slateframe treats ordinary WordPress content as a complete product surface: unti
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships 23 site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
+Slateframe currently ships 24 site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
@@ -92,6 +92,7 @@ Slateframe currently ships 23 site-neutral starter patterns across publishing, p
 21. **Knowledge comparison** — a two-option editorial comparison organized around fit, limits, and a decision rule.
 22. **Editorial pathways** — a Core-native reading, project, and visual discovery overview without predefined links.
 23. **Knowledge questions and answers** — three editable, keyboard-operable Core Details disclosures without proprietary blocks or FAQ schema ownership.
+24. **Editorial pullquote** — a native Core Pullquote with editable multilingual-ready quotation and attribution, without custom rendering or content lock-in.
 
 Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers. Photography layouts load their own contextual CSS only when Photography or Core-lightbox content needs it, share a readable 0.875rem/1.55-line-height caption rhythm with Gutenberg editor parity, preserve natural image geometry, and use WordPress Core's native lightbox with Slateframe's shared control geometry, dynamic-viewport containment, safe-area handling, keyboard focus, forced-colors, RTL/200%-text, scroll-lock, and reduced-motion safeguards. Focused runtime CI uses real generated landscape, portrait, and square raster attachments rather than SVG-only geometry, and retains reviewable page plus lightbox screenshots. Portfolio and knowledge patterns deliberately compose shared styles instead of introducing one-off component CSS.
 
