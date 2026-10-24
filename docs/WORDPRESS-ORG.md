@@ -6,7 +6,7 @@ Slateframe validates the distributable theme rather than treating the developmen
 
 The public quality workflow currently requires:
 
-- release metadata consistency across `style.css`, `readme.txt`, and `package.json`;
+- release metadata consistency across `style.css`, `readme.txt`, and `package.json`, including WordPress Core's 8 KB theme-header parsing: `Tags` must terminate before the closing CSS comment and may contain only comma-separated tag slugs;
 - WordPress Coding Standards;
 - a clean install and activation on the primary runtime;
 - compatibility smoke coverage for WordPress 6.7 and current WordPress across PHP 7.4 and PHP 8.3;

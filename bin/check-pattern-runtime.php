@@ -130,6 +130,7 @@ function slateframe_ci_validate_pattern_runtime() {
 
 		$photography_slots        = array(
 			'slateframe/photography-diptych'       => 2,
+			'slateframe/photography-sequence'      => 3,
 			'slateframe/photography-contact-sheet' => 4,
 			'slateframe/photo-essay'               => 3,
 		);
@@ -137,6 +138,11 @@ function slateframe_ci_validate_pattern_runtime() {
 			'slateframe/photography-diptych'       => array(
 				'pattern-placeholder-landscape.svg',
 				'pattern-placeholder-portrait.svg',
+			),
+			'slateframe/photography-sequence'      => array(
+				'pattern-placeholder-landscape.svg',
+				'pattern-placeholder-portrait.svg',
+				'pattern-placeholder-square.svg',
 			),
 			'slateframe/photography-contact-sheet' => array(
 				'pattern-placeholder-portrait.svg',
@@ -152,6 +158,7 @@ function slateframe_ci_validate_pattern_runtime() {
 		);
 		$photography_styles       = array(
 			'slateframe/photography-diptych'       => 'is-style-slateframe-diptych',
+			'slateframe/photography-sequence'      => 'slateframe-gallery-sequence is-style-slateframe-photo-sequence',
 			'slateframe/photography-contact-sheet' => 'is-style-slateframe-contact-sheet',
 			'slateframe/photo-essay'               => 'is-style-slateframe-photo-sequence',
 		);
@@ -190,7 +197,7 @@ function slateframe_ci_validate_pattern_runtime() {
 			) {
 				throw new RuntimeException( esc_html( sprintf( 'Photography Gallery attributes are unsafe: %s', $name ) ) );
 			}
-			if ( 'slateframe/photography-diptych' === $name && 2 !== ( $gallery_attrs['columns'] ?? null ) ) {
+			if ( in_array( $name, array( 'slateframe/photography-diptych', 'slateframe/photography-sequence' ), true ) && 2 !== ( $gallery_attrs['columns'] ?? null ) ) {
 				throw new RuntimeException( esc_html( sprintf( 'Photography diptych column contract failed: %s', $name ) ) );
 			}
 
