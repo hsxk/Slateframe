@@ -74,6 +74,33 @@ class CommentAssetDependencyClosure(unittest.TestCase):
         self.assertEqual(data['styles'].count('slateframe-forms'), 1)
         self.assertEqual(data['styles'].count('slateframe-comments'), 1)
 
+    def test_dynamic_photo_opt_in_is_contextual(self):
+        data = self.run_case(singular=True, photo_opt_in=True)
+        self.assertIn('slateframe-photography', data['styles'])
+        self.assertNotIn('slateframe-content-modes', data['styles'])
+        self.assertNotIn('slateframe-query-loop', data['styles'])
+
+    def test_dynamic_knowledge_opt_in_does_not_force_query_loop(self):
+        data = self.run_case(singular=True, content_opt_in=True)
+        self.assertIn('slateframe-content-modes', data['styles'])
+        self.assertNotIn('slateframe-query-loop', data['styles'])
+        self.assertNotIn('slateframe-photography', data['styles'])
+
+    def test_dynamic_query_loop_opt_in_preserves_dependency_closure(self):
+        data = self.run_case(singular=True, query_opt_in=True)
+        self.assertIn('slateframe-query-loop', data['styles'])
+        self.assertIn('slateframe-content-modes', data['styles'])
+        self.assertNotIn('slateframe-photography', data['styles'])
+
+    def test_false_plugin_filter_cannot_suppress_native_photo(self):
+        data = self.run_case(singular=True, native_photo=True, filter_force_false=True)
+        self.assertIn('slateframe-photography', data['styles'])
+
+    def test_false_plugin_filter_cannot_suppress_native_query_loop(self):
+        data = self.run_case(singular=True, native_query=True, filter_force_false=True)
+        self.assertIn('slateframe-query-loop', data['styles'])
+        self.assertIn('slateframe-content-modes', data['styles'])
+
     def test_comment_assets_keep_existing_core_first_dependencies(self):
         source = (ROOT / 'functions.php').read_text(encoding='utf-8')
         self.assertIn('$forms_needed || $form_content_needed || $search_form_needed || $comments_needed', source)

@@ -714,9 +714,42 @@ function slateframe_assets() {
 	$photography_needed   = slateframe_photography_styles_needed() || $footer_presentation['photography'];
 	$content_modes_needed = slateframe_content_modes_needed() || $footer_presentation['content_modes'];
 	$query_loop_needed    = slateframe_query_loop_styles_needed() || $footer_presentation['query_loop'];
-	$forms_needed         = slateframe_forms_styles_needed();
-	$form_content_needed  = slateframe_form_content_styles_needed();
-	$search_form_needed   = slateframe_search_form_styles_needed();
+	// Dynamic plugin output (for example, a shortcode) is not present in
+	// stored Core blocks. These opt-in filters cannot suppress required native
+	// assets: a false plugin result must never override detected content.
+	/**
+	 * Filters whether dynamically rendered Photography needs its CSS layer.
+	 *
+	 * @param bool $photography_needed Existing native-content requirement.
+	 */
+	$photography_needed = (bool) apply_filters(
+		'slateframe_photography_styles_needed',
+		$photography_needed
+	) || $photography_needed;
+
+	/**
+	 * Filters whether dynamically rendered Knowledge/Portfolio needs its CSS.
+	 *
+	 * @param bool $content_modes_needed Existing native-content requirement.
+	 */
+	$content_modes_needed = (bool) apply_filters(
+		'slateframe_content_modes_styles_needed',
+		$content_modes_needed
+	) || $content_modes_needed;
+
+	/**
+	 * Filters whether a dynamically rendered Core Query Loop needs its CSS.
+	 *
+	 * @param bool $query_loop_needed Existing native-content requirement.
+	 */
+	$query_loop_needed = (bool) apply_filters(
+		'slateframe_query_loop_styles_needed',
+		$query_loop_needed
+	) || $query_loop_needed;
+
+	$forms_needed        = slateframe_forms_styles_needed();
+	$form_content_needed = slateframe_form_content_styles_needed();
+	$search_form_needed  = slateframe_search_form_styles_needed();
 	// Core replaces protected content with a password form. Hidden comments
 	// must not load their CSS or reply script until the password is accepted.
 	$password_form_needed = is_singular() && post_password_required();

@@ -6,6 +6,10 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Preserve the real enqueue dependency-closure contract in isolated PHP fixtures by stubbing WordPress filter semantics; add five additive-plugin opt-in/false-opt-out regression cases instead of weakening the existing eleven comment tests.
+
+- Exercise real disposable WordPress MU-plugin shortcodes for dynamic forms, Photography and Portfolio presentation, checking five route-isolation cases, 320–1920px LTR/RTL, 200%/400% zoom, forced colors, Axe, native-marker precedence and exact-SHA screenshots.
+
 - Regress WordPress Core's 8 KB theme-header extraction so `Tags` never swallows minified CSS, and reject malformed comment termination in release metadata validation.
 
 
