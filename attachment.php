@@ -12,9 +12,14 @@ while ( have_posts() ) :
 
 	$slateframe_attachment_id = get_the_ID();
 	$slateframe_parent_id     = slateframe_public_attachment_parent_id( $slateframe_attachment_id );
-	$slateframe_file_url      = wp_get_attachment_url( $slateframe_attachment_id );
-	$slateframe_mime_type     = (string) get_post_mime_type( $slateframe_attachment_id );
-	$slateframe_caption       = wp_get_attachment_caption( $slateframe_attachment_id );
+	// Core normally returns strings, but attachment filters can supply invalid
+	// values. Do not cast arrays/objects into visible metadata or unsafe links.
+	$slateframe_raw_url       = wp_get_attachment_url( $slateframe_attachment_id );
+	$slateframe_file_url      = is_string( $slateframe_raw_url ) ? esc_url_raw( $slateframe_raw_url ) : '';
+	$slateframe_raw_mime      = get_post_mime_type( $slateframe_attachment_id );
+	$slateframe_mime_type     = is_string( $slateframe_raw_mime ) ? $slateframe_raw_mime : '';
+	$slateframe_raw_caption   = wp_get_attachment_caption( $slateframe_attachment_id );
+	$slateframe_caption       = is_string( $slateframe_raw_caption ) ? $slateframe_raw_caption : '';
 	$slateframe_details       = slateframe_attachment_details( $slateframe_attachment_id );
 	?>
 	<main id="main-content" class="slateframe-main" tabindex="-1">
@@ -27,25 +32,31 @@ while ( have_posts() ) :
 
 			<div class="slateframe-prose">
 				<?php if ( wp_attachment_is_image( $slateframe_attachment_id ) ) : ?>
-					<figure class="alignwide">
-						<?php
-						echo wp_kses_post(
-							wp_get_attachment_image(
-								$slateframe_attachment_id,
-								'full',
-								false,
-								array(
-									'loading'       => 'eager',
-									'decoding'      => 'async',
-									'fetchpriority' => 'high',
-								)
-							)
-						);
-						?>
-						<?php if ( '' !== trim( (string) $slateframe_caption ) ) : ?>
-							<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
-						<?php endif; ?>
-					</figure>
+					<?php
+					$slateframe_image_html = wp_get_attachment_image(
+						$slateframe_attachment_id,
+						'full',
+						false,
+						array(
+							'loading'       => 'eager',
+							'decoding'      => 'async',
+							'fetchpriority' => 'high',
+						)
+					);
+					$slateframe_image_valid = false;
+					if ( is_string( $slateframe_image_html ) && '' !== trim( $slateframe_image_html ) ) {
+						$slateframe_image_processor = new WP_HTML_Tag_Processor( $slateframe_image_html );
+						$slateframe_image_valid     = $slateframe_image_processor->next_tag( 'img' );
+					}
+					?>
+					<?php if ( $slateframe_image_valid ) : ?>
+						<figure class="alignwide">
+							<?php echo wp_kses_post( $slateframe_image_html ); ?>
+							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
+							<?php endif; ?>
+						</figure>
+					<?php endif; ?>
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'video/' ) && $slateframe_file_url ) : ?>
 					<?php echo wp_kses_post( wp_video_shortcode( array( 'src' => $slateframe_file_url ) ) ); ?>
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'audio/' ) && $slateframe_file_url ) : ?>
