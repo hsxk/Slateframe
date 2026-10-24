@@ -51,6 +51,12 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         expect(geometry.groups).toHaveLength(2);
         expect(geometry.nowrap.wrap).toBe('nowrap');
         expect(geometry.nowrap.shrink).toEqual(['1', '1']);
+        if (width <= 412) {
+          const [primary, secondary] = geometry.buttons;
+          expect(primary.width, width + ' ' + dir + ' primary readable width').toBeGreaterThanOrEqual(100);
+          expect(secondary.width, width + ' ' + dir + ' secondary readable width').toBeGreaterThanOrEqual(100);
+          expect(Math.abs(primary.width - secondary.width), width + ' ' + dir + ' balanced actions').toBeLessThanOrEqual(2);
+        }
         for (const rect of geometry.groups) {
           expect(rect.left, width + ' ' + dir + ' group left').toBeGreaterThanOrEqual(-1);
           expect(rect.right, width + ' ' + dir + ' group right').toBeLessThanOrEqual(width + 1);
