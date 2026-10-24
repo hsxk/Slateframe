@@ -1,0 +1,2 @@
+@media(forced-colors:active){.wp-block-button__link{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important}.wp-block-button__link:focus-visible{outline-color:Highlight}}
+@media(max-width:480px){.wp-block-buttons.is-nowrap>.wp-block-button:not(.has-custom-width){flex:1 1 0}}
