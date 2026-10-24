@@ -21,6 +21,10 @@ The browser CI runner uses two workers to execute independent viewport projects 
 
 WordPress Core Code and Preformatted blocks receive a focusable root `<pre>` at render time, including when authors preserve fixed-width lines. Existing `:focus-visible` styling exposes the scroll stop; author-provided tabindex is respected and Gutenberg storage stays unchanged. Real WordPress responsive/RTL/zoom coverage and manual Safari/VoiceOver acceptance limits are documented in [Core code scrolling](CORE-CODE-SCROLL.md).
 
+## Core Classic/Freeform keyboard scrolling
+
+Core Freeform's native `<pre>` and `<table>` can also scroll at narrow widths and enlarged text. The narrow render filter makes these containers keyboard reachable without changing authored HTML, a supplied tabindex, or wrapping Verse; it does not rewrite arbitrary HTML blocks. See [Core Freeform scrolling](CORE-FREEFORM-SCROLL.md) for responsive/RTL/zoom tests and manual screen-reader release checks.
+
 ## Core Knowledge list semantics
 
 The native Steps and Checklist block styles replace only visual markers. Their root Core List receives `role="list"` at render time when no author role is present, preserving WebKit/VoiceOver list announcements without changing Gutenberg storage or nested list semantics. The real WordPress `core-list-semantics.spec.js` suite covers exact class matching, author roles, seven responsive widths, RTL/CJK, 200% zoom, forced colors and Axe. Manual Safari/VoiceOver verification remains part of release readiness; see [Core List semantics](CORE-LIST-SEMANTICS.md).

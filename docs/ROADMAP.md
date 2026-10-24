@@ -9,7 +9,7 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 - Expand WordPress.org readiness from the current required-check baseline to final submission review.
 - Extend browser fixtures beyond the current CJK/RTL/long-string/table/gallery/comment/content-mode and real Gutenberg coverage, especially plugin coexistence and more destructive authoring edge cases.
 - Continue manual WCAG 2.2 review beyond the automated Axe, focus, accessible-name, and touch-target regression baseline, including Safari/VoiceOver announcements for markerless Core List styles (see [Core List semantics](CORE-LIST-SEMANTICS.md)).
-- Verify keyboard and screen-reader handling of native Core Code/Preformatted horizontal scroll stops in Safari/VoiceOver and Firefox; automated Chromium evidence is tracked in [Core code scrolling](CORE-CODE-SCROLL.md).
+- Verify keyboard and screen-reader handling of native Core Code/Preformatted and Classic/Freeform horizontal scroll stops in Safari/VoiceOver and Firefox; automated Chromium evidence is tracked in [Core code scrolling](CORE-CODE-SCROLL.md) and [Core Freeform scrolling](CORE-FREEFORM-SCROLL.md).
 - Finish visual regression baselines and a representative `screenshot.png`.
 - Replace the pre-release fixture screenshot with the final polished WordPress.org showcase.
 - Document tested plugin coexistence where evidence exists.

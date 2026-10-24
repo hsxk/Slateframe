@@ -1050,6 +1050,48 @@ add_filter( 'render_block_core/preformatted', 'slateframe_focusable_preformatted
 
 
 /**
+ * Keep scrollable Classic blocks accessible without changing saved markup.
+ *
+ * Core Freeform preserves author HTML rather than generating block wrappers.
+ * Its native PRE and TABLE elements can overflow at narrow widths and zoom,
+ * so expose the scroll container to keyboard users. Preserve author tabindex
+ * and avoid making Verse a redundant focus stop (Verse wraps in Slateframe).
+ *
+ * @param string $block_content Rendered Core Freeform markup.
+ * @return string
+ */
+function slateframe_focusable_freeform_scrollers( $block_content ) {
+	if (
+		! is_string( $block_content ) ||
+		'' === $block_content ||
+		( false === stripos( $block_content, '<pre' ) && false === stripos( $block_content, '<table' ) )
+	) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	while ( $processor->next_tag() ) {
+		$tag = $processor->get_tag();
+		if ( 'PRE' !== $tag && 'TABLE' !== $tag ) {
+			continue;
+		}
+
+		if ( 'PRE' === $tag && $processor->has_class( 'wp-block-verse' ) ) {
+			continue;
+		}
+
+		if ( null === $processor->get_attribute( 'tabindex' ) ) {
+			$processor->set_attribute( 'tabindex', '0' );
+		}
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/freeform', 'slateframe_focusable_freeform_scrollers' );
+
+
+/**
  * Render only the custom-logo image inside Slateframe's own brand link.
  *
  * Core get_custom_logo() includes its own anchor. Rendering the attachment
