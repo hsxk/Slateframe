@@ -61,6 +61,39 @@ class AttachmentParentVisibility(unittest.TestCase):
         self.assertEqual(data['result'], 0)
         self.assertEqual(data['calls']['public'], 0)
 
+    def test_decimal_string_parent_uses_exact_public_id(self):
+        data = self.render(parent="184", public=True)
+        self.assertEqual(data['result'], 184)
+        self.assertEqual(data['checked_parent'], 184)
+        self.assertEqual(data['calls']['public'], 1)
+
+    def test_malformed_parent_never_checks_an_unrelated_public_post(self):
+        malformed = (
+            True, False, 7.0, [7], {"ID": 7}, "7.0", "7e0",
+            "+7", " 7", "7 ", "9999999999999999999999999999999999",
+        )
+        for parent in malformed:
+            with self.subTest(parent=parent):
+                data = self.render(parent=parent, public=True)
+                self.assertEqual(data['result'], 0)
+                self.assertEqual(data['calls']['public'], 0)
+                self.assertIsNone(data['checked_parent'])
+
+    def test_parent_filter_does_not_coerce_boolean_to_post_one(self):
+        data = self.render(parent=True, public=True)
+        self.assertEqual(data['result'], 0)
+        self.assertEqual(data['calls']['public'], 0)
+
+    def test_parent_filter_does_not_coerce_array_to_post_one(self):
+        data = self.render(parent=[1], public=True)
+        self.assertEqual(data['result'], 0)
+        self.assertEqual(data['calls']['public'], 0)
+
+    def test_parent_filter_does_not_saturate_overflow_to_max_int(self):
+        data = self.render(parent="999999999999999999999999999999", public=True)
+        self.assertEqual(data['result'], 0)
+        self.assertEqual(data['calls']['public'], 0)
+
     def test_public_check_uses_exact_parent_id(self):
         data = self.render(parent=184, public=True)
         self.assertEqual(data['checked_parent'], 184)
