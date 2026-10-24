@@ -8,11 +8,11 @@ ROOT = Path(__file__).resolve().parents[1]
 class CoreButtonColorParity(unittest.TestCase):
     def test_theme_defaults_do_not_override_author_colors(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
-        self.assertIn(".wp-block-button .wp-block-button__link.wp-element-button:not(.has-background){background:var(--slateframe-text)}", css)
-        self.assertIn(".wp-block-button .wp-block-button__link.wp-element-button:not(.has-text-color){color:var(--slateframe-bg)}", css)
-        self.assertIn(".wp-block-button.is-style-outline .wp-block-button__link.wp-element-button:not(.has-background){background:transparent}", css)
-        self.assertIn(".wp-block-button.is-style-outline .wp-block-button__link.wp-element-button:not(.has-text-color){color:var(--slateframe-text)}", css)
-        self.assertIn(".wp-block-button.is-style-outline .wp-block-button__link.wp-element-button{border-width:2px}", css)
+        self.assertIn("&:not(.has-background){background:var(--slateframe-text)}", css)
+        self.assertIn("&:not(.has-text-color){color:var(--slateframe-bg)}", css)
+        self.assertIn("&:not(.has-background){background:transparent}", css)
+        self.assertIn("&:not(.has-text-color){color:var(--slateframe-text)}", css)
+        self.assertIn("&.is-style-outline .wp-block-button__link.wp-element-button{border-width:2px", css)
         self.assertIn(".wp-block-buttons,.wp-block-button{min-inline-size:0}", css)
         self.assertIn(".wp-block-button{max-inline-size:100%}", css)
         self.assertIn("overflow-wrap:anywhere", css)
