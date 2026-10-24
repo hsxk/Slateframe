@@ -121,7 +121,9 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       });
       if (zoom === '400%') {
         await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-        await page.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-rtl-400-zoom.png', fullPage: true });
+        // A viewport capture stays inside the strict visual-inventory 20,000px height cap;
+        // offscreen element geometry above records the entire document overflow.
+        await page.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-rtl-400-zoom.png' });
       }
       expect(overflow.delta, zoom + ' offscreen elements: ' + JSON.stringify(overflow.offenders)).toBeLessThanOrEqual(1);
       for (const link of await root.locator('.wp-block-button__link').all()) {
