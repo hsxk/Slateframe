@@ -1,0 +1,7 @@
+# Native authored-form validation presentation
+
+Slateframe's conditional authored-form stylesheet now supports **native browser `:user-invalid`** and explicitly declared `aria-invalid="true"` fields, without owning validation rules, submitting data, or introducing JavaScript. Untouched required fields stay neutral: the theme does not use `:invalid` to paint errors before interaction. Authors and integrations remain responsible for error messages, `aria-describedby`, and server-side validation.
+
+The shared danger token and a two-pixel border distinguish invalid controls without a decorative box-shadow dependency. Keyboard focus keeps its separate global focus ring. Forced-colors mode uses a double border, which remains distinguishable without custom color. Existing Core checkbox/radio appearance and bounded 44px targets remain untouched. This is scoped to **authored forms**, where `form-content.css` is conditionally enqueued, rather than loading extra validation styles on pages without forms.
+
+`tests/browser/form-validation-states.spec.js` publishes a temporary real WordPress Page with native controls and deletes it after the test. It checks actual conditional CSS enqueueing, untouched versus interacted controls, explicit and native errors, CJK/Arabic labels, 320/390/1440px, LTR/RTL, 200% text, keyboard focus, forced colors, axe WCAG checks, no horizontal overflow, and screenshots. It is presentation only, not a form plugin or client-side validation framework.
