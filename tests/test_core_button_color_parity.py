@@ -14,7 +14,7 @@ class CoreButtonColorParity(unittest.TestCase):
         self.assertIn("&:not(.has-text-color){color:var(--slateframe-text)}", css)
         self.assertIn("&.is-style-outline .wp-block-button__link.wp-element-button{border-width:2px", css)
         self.assertIn(".wp-block-buttons,.wp-block-button{min-inline-size:0}", css)
-        self.assertIn(".wp-block-button{max-inline-size:100%}", css)
+        self.assertIn(".wp-block-button{max-inline-size:100%;& .wp-block-button__link.wp-element-button{", css)
         self.assertIn("overflow-wrap:anywhere", css)
         self.assertLessEqual(len(css.encode("utf-8")), 16000)
 
