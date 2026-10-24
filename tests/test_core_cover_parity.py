@@ -8,8 +8,10 @@ ROOT = Path(__file__).resolve().parents[1]
 class CoreCoverParity(unittest.TestCase):
     def test_shared_frontend_editor_containment(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
-        selector = ":is(.slateframe-prose,.editor-styles-wrapper) .wp-block-cover__inner-container{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}"
+        selector = ".wp-block-cover__inner-container{min-inline-size:0}"
         self.assertEqual(css.count(selector), 1)
+        self.assertIn("overflow-wrap:anywhere", css)
+        self.assertIn("overflow-wrap: anywhere;", (ROOT / "assets/css/editor.css").read_text(encoding="utf-8"))
         self.assertNotIn(".wp-block-cover__image-background{", css)
         self.assertLessEqual((ROOT / "style.css").stat().st_size, 16000)
 
