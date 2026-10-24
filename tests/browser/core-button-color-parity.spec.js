@@ -75,7 +75,8 @@ test('real Core Button colors, outline and long labels survive responsive RTL an
       await expect(buttons.nth(1)).toBeFocused();
       const focused = await color(buttons.nth(1));
       expect(focused.outline).not.toBe('none');
-      expect(focused.outlineWidth).toBeGreaterThanOrEqual(2);
+      await expect.poll(() => color(buttons.nth(1)).then((metrics) => metrics.outlineWidth),
+        { message: 'Core Button forced-colors focus outline must reach 2px', timeout: 5000 }).toBeGreaterThanOrEqual(2);
       expect((await color(buttons.nth(1))).borderWidth).toBeGreaterThanOrEqual(2);
       if ([390, 1440].includes(width)) {
         const dir = path.resolve('test-artifacts/screenshots');
