@@ -90,6 +90,10 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     await expect(first).toBeFocused();
     expect(await first.evaluate(node => node.matches(':focus-visible'))).toBe(true);
     expect(await first.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth))).toBeGreaterThanOrEqual(2);
+    for (const link of await root.locator('.wp-block-button__link').all()) {
+      const colors = await link.evaluate(node => { const s = getComputedStyle(node); return { foreground: s.color, background: s.backgroundColor }; });
+      expect(colors.foreground).not.toBe(colors.background);
+    }
     const a11y = await new AxeBuilder({ page }).include('.slateframe-core-buttons-fixture')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(a11y.violations).toEqual([]);
