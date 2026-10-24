@@ -84,7 +84,6 @@ function slateframe_validate_release_metadata() {
 		}
 	}
 
-
 	if ( ! preg_match( '/\A[a-z0-9-]+(?:,[a-z0-9-]+)*\z/', $style_fields['Tags'] ) || ! preg_match( '/^Tags:[^\r\n]+\r?\n\*\/\r?\n/m', $style ) ) {
 		throw new RuntimeException( 'Theme Tags must be comma-separated slugs on their own metadata line before the closing comment.' );
 	}
