@@ -1015,6 +1015,41 @@ function slateframe_focusable_calendar_block( $block_content ) {
 add_filter( 'render_block_core/calendar', 'slateframe_focusable_calendar_block' );
 
 /**
+ * Keep native Code and Preformatted scroll containers keyboard reachable.
+ *
+ * Their rendered PRE can scroll at narrow widths or increased text size. Add a
+ * focus stop to the exact Core root without changing saved Gutenberg markup,
+ * nested PRE elements, or an author-provided tabindex.
+ *
+ * @param string $block_content Rendered Core code/preformatted block markup.
+ * @return string
+ */
+function slateframe_focusable_preformatted_block( $block_content ) {
+	if ( ! is_string( $block_content ) || '' === $block_content || false === strpos( $block_content, 'wp-block-' ) ) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	if ( ! $processor->next_tag() || 'PRE' !== $processor->get_tag() ) {
+		return $block_content;
+	}
+
+	if ( ! $processor->has_class( 'wp-block-code' ) && ! $processor->has_class( 'wp-block-preformatted' ) ) {
+		return $block_content;
+	}
+
+	if ( null === $processor->get_attribute( 'tabindex' ) ) {
+		$processor->set_attribute( 'tabindex', '0' );
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/code', 'slateframe_focusable_preformatted_block' );
+add_filter( 'render_block_core/preformatted', 'slateframe_focusable_preformatted_block' );
+
+
+/**
  * Render only the custom-logo image inside Slateframe's own brand link.
  *
  * Core get_custom_logo() includes its own anchor. Rendering the attachment
