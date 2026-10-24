@@ -195,6 +195,7 @@ Repository documentation:
 - [WordPress.org readiness](docs/WORDPRESS-ORG.md)
 - [Core code and preformatted keyboard scrolling](docs/CORE-CODE-SCROLL.md)
 - [Core Classic/Freeform keyboard scrolling](docs/CORE-FREEFORM-SCROLL.md)
+- [Native Core Buttons reflow](docs/CORE-BUTTON-GROUP-REFLOW.md)
 - [Migration audit](docs/MIGRATION.md)
 - [Portable integration boundaries](docs/INTEGRATION-BOUNDARIES.md)
 - [Changelog](CHANGELOG.md)

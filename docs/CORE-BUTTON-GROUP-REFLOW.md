@@ -1,0 +1,7 @@
+# Native Core Buttons: responsive reflow
+
+WordPress Core owns Buttons layout, alignment, order, width presets, vertical orientation, and Gutenberg serialization. Slateframe does not register a replacement block or add JavaScript. The shared publishing/editor rule only allows a Buttons group and its direct Button flex items to shrink within the available inline size, and allows very long translated action labels to wrap inside the native 44px-minimum link. The rule does **not** replace `is-nowrap`, vertical layouts, justification, or authored inline styles.
+
+The real disposable WordPress fixture publishes two Core groups: a deliberately non-wrapping row with a long CJK/Arabic/unbroken action, and a vertical group. The Chromium suite checks seven viewports (320/375/390/412/768/1440/1920), both text directions, bounded button and link geometry, 44px targets, 200%/400% text zoom, forced-colors focus, Axe and screenshots at 390/1440 plus 320 RTL/200% forced colors. A separate authenticated Gutenberg test checks native layout attributes and child Button serialization without modifying the existing editor post. Only exact-HEAD Actions evidence counts as release validation.
+
+Manual release acceptance still requires Safari/VoiceOver, Firefox keyboard order, actual long translated call-to-action copy, and native mobile browser text enlargement. Theme styling must not hide, disable, or replace Core links or authored Button color settings.
