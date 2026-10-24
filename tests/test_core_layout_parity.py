@@ -19,6 +19,8 @@ class ResponsiveCoreContracts(unittest.TestCase):
         bootstrap = (ROOT / "functions.php").read_text()
         self.assertIn(".wp-block-post-template{list-style:none;", query)
         self.assertIn("padding-inline:0", query)
+        self.assertIn(".wp-block-post-template{list-style:none;margin-inline:0;padding-inline:0", query)
+        self.assertIn("&>.wp-block-post{list-style:none}", query)
         self.assertIn("margin-inline:0", query)
         self.assertIn("'assets/css/query-loop.css'", bootstrap)
         self.assertLessEqual(len(query.encode("utf-8")), 3000)
