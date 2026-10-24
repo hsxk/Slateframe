@@ -8,7 +8,7 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 - Continue expanding Portfolio and Knowledge composition coverage after adding portable project metrics, Query Loop grids, decision trails, evidence prompts, lesson verification, procedures, comparisons, definitions, checkpoints, and authenticated Gutenberg rendering checks; next focus is deeper realistic empty/long authoring states and plugin coexistence without introducing custom content ownership.
 - Expand WordPress.org readiness from the current required-check baseline to final submission review.
 - Extend browser fixtures beyond the current CJK/RTL/long-string/table/gallery/comment/content-mode and real Gutenberg coverage, especially plugin coexistence and more destructive authoring edge cases.
-- Continue manual WCAG 2.2 review beyond the automated Axe, focus, accessible-name, and touch-target regression baseline.
+- Continue manual WCAG 2.2 review beyond the automated Axe, focus, accessible-name, and touch-target regression baseline, including Safari/VoiceOver announcements for markerless Core List styles (see [Core List semantics](CORE-LIST-SEMANTICS.md)).
 - Finish visual regression baselines and a representative `screenshot.png`.
 - Replace the pre-release fixture screenshot with the final polished WordPress.org showcase.
 - Document tested plugin coexistence where evidence exists.

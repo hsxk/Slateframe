@@ -16,3 +16,7 @@ Slateframe uses one translated **Skip to content** link before the site header. 
 `tests/test_skip_link_destination.py` verifies all seven public template targets. `tests/browser/theme.spec.js` checks Enter focus and next-Tab ownership in Chromium at each supported viewport. Final release still requires real-browser keyboard, screen-reader, zoom, forced-colors and visual inspection; static markup checks alone do not establish accessibility compliance.
 
 The browser CI runner uses two workers to execute independent viewport projects without dropping tests, reducing single-worker latency while preserving the same assertions, artifacts and WordPress fixture.
+
+## Core Knowledge list semantics
+
+The native Steps and Checklist block styles replace only visual markers. Their root Core List receives `role="list"` at render time when no author role is present, preserving WebKit/VoiceOver list announcements without changing Gutenberg storage or nested list semantics. The real WordPress `core-list-semantics.spec.js` suite covers exact class matching, author roles, seven responsive widths, RTL/CJK, 200% zoom, forced colors and Axe. Manual Safari/VoiceOver verification remains part of release readiness; see [Core List semantics](CORE-LIST-SEMANTICS.md).

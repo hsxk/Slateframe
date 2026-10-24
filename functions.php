@@ -905,6 +905,50 @@ function slateframe_assets() {
 add_action( 'wp_enqueue_scripts', 'slateframe_assets' );
 
 /**
+ * Preserve native list semantics for markerless Slateframe Core List styles.
+ *
+ * WebKit can omit list semantics when CSS removes the native marker. Only the
+ * two explicitly markerless Core List styles need a role; ordinary lists and
+ * author-provided roles must remain untouched. This changes rendered HTML,
+ * not Gutenberg's stored block attributes or nested list markup.
+ *
+ * @param string $block_content Rendered Core List markup.
+ * @return string
+ */
+function slateframe_preserve_styled_list_semantics( $block_content ) {
+	if ( ! is_string( $block_content ) || '' === $block_content ) {
+		return $block_content;
+	}
+
+	if (
+		false === strpos( $block_content, 'is-style-slateframe-steps' ) &&
+		false === strpos( $block_content, 'is-style-slateframe-checklist' )
+	) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	if ( ! $processor->next_tag() || ! in_array( $processor->get_tag(), array( 'OL', 'UL' ), true ) ) {
+		return $block_content;
+	}
+
+	if (
+		! $processor->has_class( 'is-style-slateframe-steps' ) &&
+		! $processor->has_class( 'is-style-slateframe-checklist' )
+	) {
+		return $block_content;
+	}
+
+	if ( null === $processor->get_attribute( 'role' ) ) {
+		$processor->set_attribute( 'role', 'list' );
+	}
+
+	return $processor->get_updated_html();
+}
+add_filter( 'render_block_core/list', 'slateframe_preserve_styled_list_semantics' );
+
+/**
  * Keep potentially scrollable Core table blocks reachable from the keyboard.
  *
  * The wrapper owns horizontal overflow at narrow widths and text zoom, so it
