@@ -121,3 +121,33 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   await back.click();
   await expect(page.locator('.browser-project-grid .wp-block-query-pagination .page-numbers.current')).toHaveText('1');
 });
+
+test('Core Query Pagination retains native emphasis without the Portfolio presentation wrapper', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One WordPress fixture exercises generic Core styling');
+  await page.goto(projectPath, { waitUntil: 'networkidle' });
+  const wrapper = page.locator('.browser-project-grid').first();
+  await expect(wrapper).toBeVisible();
+  await wrapper.evaluate(node => node.classList.remove('slateframe-project-grid'));
+  const nav = wrapper.locator('.wp-block-query-pagination').first();
+  const current = nav.locator('.page-numbers.current');
+  const next = nav.locator('a.wp-block-query-pagination-next');
+  await expect(current).toBeVisible();
+  await expect(next).toBeVisible();
+  for (const direction of ['ltr', 'rtl']) {
+    await page.locator('html').evaluate((node, dir) => { node.dir = dir; node.style.fontSize = '32px'; }, direction);
+    const state = await current.evaluate(node => {
+      const css = getComputedStyle(node);
+      const box = node.getBoundingClientRect();
+      return { background: css.backgroundColor, color: css.color, numerals: css.fontVariantNumeric,
+        width: box.width, height: box.height, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    });
+    expect(state.background, direction + ' selected background').not.toBe('rgba(0, 0, 0, 0)');
+    expect(state.numerals, direction + ' tabular numerals').toContain('tabular-nums');
+    expect(state.width, direction + ' current target').toBeGreaterThanOrEqual(44);
+    expect(state.height, direction + ' current target').toBeGreaterThanOrEqual(44);
+    expect(state.overflow, direction + ' reflow').toBeLessThanOrEqual(1);
+    const nextBox = await next.boundingBox();
+    expect(nextBox?.width || 0).toBeGreaterThanOrEqual(44);
+    expect(nextBox?.height || 0).toBeGreaterThanOrEqual(44);
+  }
+});
