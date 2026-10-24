@@ -14,7 +14,7 @@ class FeaturedMediaBoundaries(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("Featured media boundaries: 28 cases passed", result.stdout)
+        self.assertIn("Featured media boundaries: 41 cases passed", result.stdout)
 
     def test_core_image_processor_contract(self):
         source = (ROOT / "inc/template-tags.php").read_text(encoding="utf-8")
@@ -26,6 +26,9 @@ class FeaturedMediaBoundaries(unittest.TestCase):
             source.index("$image_html      = wp_kses_post( $image_html );"),
             source.index("$image_processor = new WP_HTML_Tag_Processor( $image_html );"),
         )
+        self.assertIn("get_attribute( 'src' )", source)
+        self.assertIn("get_attribute( 'srcset' )", source)
+        self.assertIn("if ( ! $has_source )", source)
         self.assertIn("$image_html = $image_processor->get_updated_html();", source)
         self.assertNotIn("time2log", source.lower())
 

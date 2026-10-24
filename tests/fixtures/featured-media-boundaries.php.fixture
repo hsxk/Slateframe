@@ -32,6 +32,12 @@ class WP_HTML_Tag_Processor {
 		$this->matched = 1 === preg_match( '/<img(?:\\s|\\/?>)/i', $this->html );
 		return $this->matched;
 	}
+	public function get_attribute( $name ) {
+		if ( ! $this->matched ) { return null; }
+		if ( ! preg_match( '/<img\\b[^>]*>/i', $this->html, $tag ) ) { return null; }
+		if ( ! preg_match( '/\\s' . preg_quote( $name, '/' ) . '="([^"]*)"/i', $tag[0], $value ) ) { return null; }
+		return html_entity_decode( $value[1], ENT_QUOTES, 'UTF-8' );
+	}
 	public function set_attribute( $name, $value ) {
 		if ( ! $this->matched ) { throw new RuntimeException( 'No image selected' ); }
 		$this->html = preg_replace( '/<img\\b/i', '<img ' . $name . '="' . $value . '"', $this->html, 1 );
@@ -82,4 +88,23 @@ check_case( false !== strpos( $unsafe, 'loading="eager"' ), 'Eager loading survi
 check_case( false !== strpos( $unsafe, 'decoding="async"' ), 'Async decoding survives sanitization' );
 check_case( false !== strpos( $unsafe, '<em>说明</em>' ), 'CJK caption survives sanitization' );
 check_case( 2 === $GLOBALS['slateframe_media_kses_calls'], 'Both filtered hero and caption must pass through KSES' );
+// Filtered images without a source must not emit an empty hero or orphan caption.
+foreach ( array(
+	'<img alt="missing source">',
+	'<img src="" alt="empty source">',
+	'<img src="   " alt="blank source">',
+	'<img srcset="   " alt="blank candidates">',
+	'<img src=" " srcset="  " alt="blank both">',
+) as $source_less ) {
+	$invalid = render_case( array( 'thumbnail' => true, 'html' => $source_less, 'caption' => 'Orphan hero caption' ) );
+	check_case( '' === $invalid, 'Source-less filtered image must not render a hero' );
+	check_case( false === strpos( $invalid, 'Orphan hero caption' ), 'Source-less hero leaked caption' );
+}
+$srcset_only = render_case( array(
+	'thumbnail' => true,
+	'html'      => '<img srcset="/small.jpg 1x, /large.jpg 2x" alt="响应式图片">',
+) );
+check_case( false !== strpos( $srcset_only, '<figure class="slateframe-shell slateframe-entry-hero">' ), 'Valid srcset-only hero lost figure' );
+check_case( false !== strpos( $srcset_only, 'srcset="/small.jpg 1x, /large.jpg 2x"' ), 'Valid srcset-only hero lost candidates' );
+check_case( false !== strpos( $srcset_only, 'fetchpriority="high"' ), 'Valid srcset-only hero lost priority' );
 echo "Featured media boundaries: {$cases} cases passed\\n";
