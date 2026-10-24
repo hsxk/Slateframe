@@ -35,6 +35,10 @@ class CoreButtonsReflowContract(unittest.TestCase):
         js = (ROOT / "tests/browser/core-buttons-reflow.spec.js").read_text(encoding="utf-8")
         for width in (320, 375, 390, 412, 768, 1440, 1920):
             self.assertIn(str(width), js)
+        # A 400% full-page screenshot can exceed the 20,000px inventory cap;
+        # keep the viewport evidence while retaining document-wide geometry.
+        self.assertIn("core-buttons-320-rtl-400-zoom.png' });", js)
+        self.assertNotIn("core-buttons-320-rtl-400-zoom.png', fullPage: true", js)
         for needle in ("'ltr', 'rtl'", "'200%', '400%'", "forcedColors: 'active'",
                        "AxeBuilder", "openAuthenticatedEditor", "blocks.parse(serialized)",
                        "wp('post', 'delete'", "is-nowrap", "is-vertical", "43",
