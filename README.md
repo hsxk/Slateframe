@@ -193,6 +193,7 @@ Repository documentation:
 - [Public extension points](docs/EXTENSIONS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [WordPress.org readiness](docs/WORDPRESS-ORG.md)
+- [Core code and preformatted keyboard scrolling](docs/CORE-CODE-SCROLL.md)
 - [Migration audit](docs/MIGRATION.md)
 - [Portable integration boundaries](docs/INTEGRATION-BOUNDARIES.md)
 - [Changelog](CHANGELOG.md)

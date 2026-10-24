@@ -48,6 +48,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Make native WordPress Core Code and Preformatted scroll containers keyboard reachable with a narrowly scoped root-`pre` render filter. Preserve author tabindex and Gutenberg storage, RTL/CJK wrapping, seven responsive widths, 200%/400% text zoom, forced-colors focus and existing scroll-containment regression coverage.
+
 - Remove browser-default bullets from plugin-rendered semantic Core Query Loop lists inside the Portfolio presentation layer. Preserve zero inline indentation, responsive grid tracks, RTL/CJK long-title wrapping, 44px focusable project links, and 400% forced-colors evidence without increasing CSS budgets.
 
 
