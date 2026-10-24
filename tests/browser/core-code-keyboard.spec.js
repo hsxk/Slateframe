@@ -5,7 +5,7 @@ const path = require('node:path');
 const showcasePath = process.env.SLATEFRAME_SHOWCASE_PATH;
 const width = info => info.project.use.viewport?.width || 1440;
 
-test('native Core Code and Preformatted wrap long tokens without stealing keyboard focus', async ({ page }, info) => {
+test('native Core Code and Preformatted wrap long tokens with keyboard focus', async ({ page }, info) => {
   test.skip(!showcasePath, 'Requires the real WordPress showcase.');
   await page.goto(showcasePath, { waitUntil: 'networkidle' });
   await page.addStyleTag({ path: 'rtl.css' });
@@ -18,7 +18,9 @@ test('native Core Code and Preformatted wrap long tokens without stealing keyboa
   for (const dir of ['ltr', 'rtl']) {
     await page.evaluate(direction => { document.documentElement.dir = direction; }, dir);
     for (const block of [code, pre]) {
-      await expect(block).not.toHaveAttribute('tabindex', '0');
+      await expect(block).toHaveAttribute('tabindex', '0');
+      await block.focus();
+      await expect(block).toBeFocused();
       const metrics = await block.evaluate(node => {
         const rect = node.getBoundingClientRect();
         const parent = node.parentElement.getBoundingClientRect();
