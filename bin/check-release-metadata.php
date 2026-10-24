@@ -47,6 +47,11 @@ function slateframe_validate_release_metadata() {
 		exit( 1 );
 	}
 
+	$header_close = strpos( $style, '*/' );
+	if ( false === $header_close || $header_close >= 8192 ) {
+		throw new RuntimeException( 'Theme metadata comment must close within WordPress Core first 8 KB.' );
+	}
+
 	$style_fields = array(
 		'Theme Name'        => slateframe_release_field( $style, 'Theme Name' ),
 		'Author'            => slateframe_release_field( $style, 'Author' ),

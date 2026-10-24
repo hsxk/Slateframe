@@ -1,5 +1,8 @@
 """Regression for WordPress Core's first-8-KB style.css metadata parser."""
 import re
+import shutil
+import subprocess
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -41,6 +44,43 @@ class ThemeHeaderMetadata(unittest.TestCase):
         self.assertNotIn("time2log", header.lower())
         self.assertNotIn("license key", header.lower())
         self.assertIn("Text Domain: slateframe", header)
+
+
+    def _run_release_validator(self, style):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / "bin").mkdir()
+            (root / "style.css").write_text(style, encoding="utf-8")
+            (root / "bin/check-release-metadata.php").write_text(self.validator, encoding="utf-8")
+            for name in ("readme.txt", "package.json"):
+                shutil.copyfile(ROOT / name, root / name)
+            return subprocess.run(
+                ["php", str(root / "bin/check-release-metadata.php")],
+                text=True, capture_output=True, check=False,
+            )
+
+    def test_actual_php_release_validator_accepts_clean_header(self):
+        result = self._run_release_validator(self.style)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("release metadata OK", result.stdout)
+
+    def test_actual_php_release_validator_rejects_css_in_tags(self):
+        corrupt = self.style.replace("wide-blocks\n*/\n:root{", "wide-blocks*/:root{", 1)
+        result = self._run_release_validator(corrupt)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Theme Tags must be comma-separated slugs", result.stderr)
+
+    def test_actual_php_release_validator_rejects_non_slug_tag(self):
+        corrupt = self.style.replace("wide-blocks\n*/", "wide-blocks,untrusted{css}\n*/", 1)
+        result = self._run_release_validator(corrupt)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Theme Tags must be comma-separated slugs", result.stderr)
+
+    def test_actual_php_release_validator_rejects_header_beyond_core_limit(self):
+        corrupt = self.style.replace("Theme Name: Slateframe\n", "Theme Name: Slateframe\n" + (" " * 8200), 1)
+        result = self._run_release_validator(corrupt)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("first 8 KB", result.stderr)
 
 
 if __name__ == "__main__":
