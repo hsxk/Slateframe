@@ -79,6 +79,8 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         expect(r.height).toBeGreaterThanOrEqual(43);
         expect(r.x).toBeGreaterThanOrEqual(-1);
         expect(r.x + r.width).toBeLessThanOrEqual(321);
+        expect(await link.evaluate(node => parseFloat(getComputedStyle(node).paddingInlineStart)))
+          .toBeLessThanOrEqual(12.5);
       }
     }
     await page.locator('html').evaluate(node => { node.style.fontSize = '200%'; });
