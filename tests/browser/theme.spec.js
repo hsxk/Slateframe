@@ -1041,6 +1041,10 @@ test('attachment pages expose media, metadata, original file, and parent recover
 	await page.goto(attachmentPath, { waitUntil: 'networkidle' });
 	await expect(page.locator('.slateframe-entry-title')).toHaveText('Slateframe Media Attachment');
 	await expect(page.locator('.slateframe-prose img')).toBeVisible();
+	const attachmentImage = page.locator('.slateframe-prose img').first();
+	await expect(attachmentImage).toHaveAttribute('loading', 'eager');
+	await expect(attachmentImage).toHaveAttribute('decoding', 'async');
+	await expect(attachmentImage).toHaveAttribute('fetchpriority', 'high');
 	await expect(page.locator('.slateframe-prose figcaption')).toHaveText('A reusable featured image caption.');
 	await expect(page.locator('.slateframe-entry-footer')).toContainText('image/png');
 	await expect(page.locator('.slateframe-entry-footer')).toContainText('1,200 × 900 px');
