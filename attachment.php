@@ -14,13 +14,13 @@ while ( have_posts() ) :
 	$slateframe_parent_id     = slateframe_public_attachment_parent_id( $slateframe_attachment_id );
 	// Core normally returns strings, but attachment filters can supply invalid
 	// values. Do not cast arrays/objects into visible metadata or unsafe links.
-	$slateframe_raw_url       = wp_get_attachment_url( $slateframe_attachment_id );
-	$slateframe_file_url      = is_string( $slateframe_raw_url ) ? esc_url_raw( $slateframe_raw_url ) : '';
-	$slateframe_raw_mime      = get_post_mime_type( $slateframe_attachment_id );
-	$slateframe_mime_type     = is_string( $slateframe_raw_mime ) ? $slateframe_raw_mime : '';
-	$slateframe_raw_caption   = wp_get_attachment_caption( $slateframe_attachment_id );
-	$slateframe_caption       = is_string( $slateframe_raw_caption ) ? $slateframe_raw_caption : '';
-	$slateframe_details       = slateframe_attachment_details( $slateframe_attachment_id );
+	$slateframe_raw_url     = wp_get_attachment_url( $slateframe_attachment_id );
+	$slateframe_file_url    = is_string( $slateframe_raw_url ) ? esc_url_raw( $slateframe_raw_url ) : '';
+	$slateframe_raw_mime    = get_post_mime_type( $slateframe_attachment_id );
+	$slateframe_mime_type   = is_string( $slateframe_raw_mime ) ? $slateframe_raw_mime : '';
+	$slateframe_raw_caption = wp_get_attachment_caption( $slateframe_attachment_id );
+	$slateframe_caption     = is_string( $slateframe_raw_caption ) ? $slateframe_raw_caption : '';
+	$slateframe_details     = slateframe_attachment_details( $slateframe_attachment_id );
 	?>
 	<main id="main-content" class="slateframe-main" tabindex="-1">
 		<article <?php post_class( 'slateframe-entry' ); ?>>
@@ -33,7 +33,7 @@ while ( have_posts() ) :
 			<div class="slateframe-prose">
 				<?php if ( wp_attachment_is_image( $slateframe_attachment_id ) ) : ?>
 					<?php
-					$slateframe_image_html = wp_get_attachment_image(
+					$slateframe_image_html  = wp_get_attachment_image(
 						$slateframe_attachment_id,
 						'full',
 						false,
