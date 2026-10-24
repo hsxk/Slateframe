@@ -85,7 +85,7 @@ class PackageTests(unittest.TestCase):
     def test_required_runtime_files(self):
         _, (_, contents) = self.successful()
         for name in ("style.css", "functions.php", "theme.json",
-                     "readme.txt", "LICENSE", "screenshot.png"):
+                     "readme.txt", "LICENSE", "screenshot.png", "assets/css/core-buttons.css"):
             with self.subTest(name=name):
                 self.assertTrue(contents["slateframe/" + name])
 
