@@ -30,6 +30,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     expect(wp('post', 'get', id, '--field=post_content')).toContain('is-nowrap');
     await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-core-buttons-fixture');
+    await expect(page.locator('link[href*="/assets/css/core-buttons.css"]')).toHaveCount(1);
     await expect(root.locator('.wp-block-buttons')).toHaveCount(2);
     await expect(root.locator('.wp-block-button__link')).toHaveCount(3);
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
@@ -104,6 +105,9 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(a11y.violations).toEqual([]);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-rtl-200-forced-colors.png' });
+    // A native Core Button page loads its scoped stylesheet; an unrelated 404 does not.
+    await page.goto('/?p=999999', { waitUntil: 'networkidle' });
+    await expect(page.locator('link[href*="/assets/css/core-buttons.css"]')).toHaveCount(0);
   } finally {
     wp('post', 'delete', id, '--force');
   }
