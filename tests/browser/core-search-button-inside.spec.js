@@ -50,7 +50,8 @@ test('Core Search button-inside reflows without losing native semantics', async 
           }
           if (width<=640) {
             expect(g.display,label+' stacked layout').toBe('grid');
-            expect(g.button.width,label+' full-width action').toBeGreaterThanOrEqual(g.wrapper.width-2);
+            // Core button-inside adds a native padded border; fill its content track, not its border box.
+            expect(g.button.width,label+' full-width action').toBeGreaterThanOrEqual(g.input.width-2);
             expect(g.button.left,label+' alignment').toBeGreaterThanOrEqual(g.input.left-2);
             expect(g.button.right,label+' alignment').toBeLessThanOrEqual(g.input.right+2);
           }
