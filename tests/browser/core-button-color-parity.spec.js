@@ -47,7 +47,7 @@ test('real Core Button colors, outline and long labels survive responsive RTL an
     expect(outline.text).not.toBe(plain.text);
     expect(outline.borderWidth).toBeGreaterThanOrEqual(2);
     expect(preset.background).not.toBe(plain.background);
-    expect(preset.text).not.toBe(plain.text);
+    expect(preset.text).toBe(plain.text); // Paper preset intentionally equals the filled button's paper foreground.
     expect(custom.background).toBe('rgb(52, 86, 120)');
     expect(custom.text).toBe('rgb(250, 245, 240)');
     expect(outlinedPreset.background).toBe('rgba(0, 0, 0, 0)');
