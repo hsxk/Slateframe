@@ -13,6 +13,16 @@ class ResponsiveCoreContracts(unittest.TestCase):
         self.assertIn("max-width:none", editor)
         self.assertIn(".slateframe-project-card :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date)", editor)
 
+    def test_plugin_query_loop_list_reset_and_editor_asset_parity(self):
+        """Core-compatible plugin markup must not expose browser list bullets."""
+        query = (ROOT / "assets/css/query-loop.css").read_text()
+        bootstrap = (ROOT / "functions.php").read_text()
+        self.assertIn(".wp-block-post-template{list-style:none;", query)
+        self.assertIn("padding-inline:0", query)
+        self.assertIn("margin-inline:0", query)
+        self.assertIn("'assets/css/query-loop.css'", bootstrap)
+        self.assertLessEqual(len(query.encode("utf-8")), 3000)
+
     def test_comment_form_and_thread_depth(self):
         css = (ROOT / "assets/css/comments.css").read_text()
         self.assertIn(".comment-form-url,.comment-form-comment)", css)
