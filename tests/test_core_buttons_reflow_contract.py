@@ -14,9 +14,10 @@ class CoreButtonsReflowContract(unittest.TestCase):
         self.assertIn(".wp-block-buttons.is-nowrap>.wp-block-button:not(.has-custom-width){min-inline-size:auto;flex-shrink:1}", css)
         self.assertNotIn("html{scroll-behavior:smooth}", css)
         self.assertIn("--slateframe-control-padding-inline:12px", css)
-        self.assertIn(".wp-block-button__link{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important}", block_css)
-        self.assertIn(".wp-block-button__link:focus-visible{outline-color:Highlight}", block_css)
-        self.assertIn("@media(max-width:480px){.wp-block-buttons.is-nowrap>.wp-block-button:not(.has-custom-width){flex:1 1 0}}", block_css)
+        self.assertIn("background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important", block_css)
+        self.assertIn("&:focus-visible{outline-color:Highlight}", block_css)
+        self.assertIn("@media(max-width:480px){.is-nowrap>.wp-block-button:not(.has-custom-width){flex:1 1 0}}", block_css)
+        self.assertIn(".is-nowrap:has(>:nth-child(2):last-child):not(:has(>.has-custom-width))>.wp-block-button{min-inline-size:min(8rem,44%)}", block_css)
         self.assertNotIn("background:ButtonFace!important", css)
         self.assertLessEqual(len(block_css.encode("utf-8")), 400)
         self.assertIn("wp_enqueue_block_style(", php)
@@ -37,7 +38,7 @@ class CoreButtonsReflowContract(unittest.TestCase):
         for needle in ("'ltr', 'rtl'", "'200%', '400%'", "forcedColors: 'active'",
                        "AxeBuilder", "openAuthenticatedEditor", "blocks.parse(serialized)",
                        "wp('post', 'delete'", "is-nowrap", "is-vertical", "43",
-                       "core-buttons-320-rtl-200-forced-colors.png", "balanced actions", "primary readable width", "core-buttons.css"):
+                       "core-buttons-320-rtl-200-forced-colors.png", "balanced actions", "primary readable width", "desktop readable width", "custom width bypass", "core-buttons.css"):
             self.assertIn(needle, js)
 
 
