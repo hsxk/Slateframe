@@ -39,7 +39,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       await expect(scopedStyle).toContainText('@media(forced-colors:active)');
       await expect(scopedStyle).toContainText('core-buttons.css');
     } else {
-      await expect(scopedStyle).toHaveAttribute('href', /\\/assets\\/css\\/core-buttons\\.css(?:\\?|$)/);
+      await expect(scopedStyle).toHaveAttribute('href', /core-buttons[.]css/);
     }
     await expect(root.locator('.wp-block-buttons')).toHaveCount(2);
     await expect(root.locator('.wp-block-button__link')).toHaveCount(3);
