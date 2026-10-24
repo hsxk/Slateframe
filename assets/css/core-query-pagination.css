@@ -1,0 +1,1 @@
+.wp-block-query-pagination :is(a,.page-numbers){overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.wp-block-query-pagination .current{background:var(--slateframe-text);color:var(--slateframe-bg);font-weight:700}@media(forced-colors:active){.wp-block-query-pagination .current{outline:2px solid Highlight;outline-offset:0}}

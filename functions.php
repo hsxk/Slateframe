@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -81,6 +81,27 @@ function slateframe_register_core_button_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_button_styles', 20 );
+
+/**
+ * Enqueue Core Query Pagination refinements only where WordPress renders it.
+ *
+ * The base theme already provides 44px targets. Keep active-page and
+ * multilingual refinements out of the universal stylesheet and preserve
+ * Gutenberg parity through add_editor_style().
+ */
+function slateframe_register_core_query_pagination_styles() {
+	wp_enqueue_block_style(
+		'core/query-pagination',
+		array(
+			'handle' => 'slateframe-core-query-pagination',
+			'src'    => get_template_directory_uri() . '/assets/css/core-query-pagination.css',
+			'path'   => get_template_directory() . '/assets/css/core-query-pagination.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_query_pagination_styles', 20 );
+
 
 /**
  * Register optional block/widget regions.
