@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Regress WordPress Core's 8 KB theme-header extraction so `Tags` never swallows minified CSS, and reject malformed comment termination in release metadata validation.
+
+
 - Verify the registered Photography sequence itself in real WordPress/Chromium at seven widths, RTL, 200%/400% text, forced colors, Axe and authenticated Gutenberg; require exact-SHA 390/1440 screenshots and static Core-image serialization contracts.
 
 - Keep native Core Social Links palettes, shapes, labels and Gutenberg serialization while enforcing shared 44px targets and responsive wrapping. Cover seven widths, RTL/CJK, 200%/400% text, forced-colors focus, Axe and real screenshots without a new runtime dependency.
@@ -38,6 +41,9 @@ All notable changes to Slateframe will be documented here.
 - Replace the synthetic Portfolio thumbnail with reproducible landscape and portrait WordPress media imports; assert decoded responsive sources, alternative text, orientation diversity and native 4:3 crop geometry across browser viewports.
 
 ### Fixed
+
+- Terminate the `style.css` theme header on a separate line before minified rules: previously the last `Tags` field swallowed thousands of bytes of CSS under WordPress Core's header parser despite Theme Check passing.
+
 
 - Replace three source-free Photography sequence starter Image blocks with local landscape/portrait/square Core images, native optional lightbox, natural-ratio composition, shared pattern spacing and translated replacement/alt-text guidance; no new runtime assets.
 

@@ -55,6 +55,7 @@ function slateframe_validate_release_metadata() {
 		'Tested up to'      => slateframe_release_field( $style, 'Tested up to' ),
 		'Requires PHP'      => slateframe_release_field( $style, 'Requires PHP' ),
 		'Text Domain'       => slateframe_release_field( $style, 'Text Domain' ),
+		'Tags'              => slateframe_release_field( $style, 'Tags' ),
 		'License URI'       => slateframe_release_field( $style, 'License URI' ),
 	);
 
@@ -76,6 +77,11 @@ function slateframe_validate_release_metadata() {
 		if ( $style_fields[ $field ] !== $value ) {
 			throw new RuntimeException( sprintf( '%s must be %s.', $field, $value ) );
 		}
+	}
+
+
+	if ( ! preg_match( '/\A[a-z0-9-]+(?:,[a-z0-9-]+)*\z/', $style_fields['Tags'] ) || ! preg_match( '/^Tags:[^\r\n]+\r?\n\*\/\r?\n/m', $style ) ) {
+		throw new RuntimeException( 'Theme Tags must be comma-separated slugs on their own metadata line before the closing comment.' );
 	}
 
 	$package_version = (string) ( $package['version'] ?? '' );
