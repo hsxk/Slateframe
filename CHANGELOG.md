@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Restore native Core Button foreground/background contrast and visible system focus colors under forced-colors mode, including custom inline palettes; require real Chromium Axe checks for the previously failing RTL 200% reflow fixture and the five-button color/outline fixture.
+
+
 - Keep Core Buttons groups, non-wrapping/vertical author layouts, and very long multilingual labels bounded at 320–1920px without a custom renderer; shrink only uncustomized nowrap children to their automatic content minimum (preserve author-set widths), cap enlarged-text inline padding, retain 44px targets, and add real WordPress RTL/400%/forced-colors/Axe/Gutenberg visual regression. Avoid forced smooth scrolling; consolidate redundant mobile kicker tracking without changing Core markup.
 
 - Keep native Core Classic/Freeform preformatted text and tables keyboard-scrollable without altering saved HTML; preserve authored tabindex, skip wrapping Verse, and cover seven responsive widths, RTL/CJK, 200%/400% zoom, forced-colors focus, and 390/1440 Chromium screenshots.
