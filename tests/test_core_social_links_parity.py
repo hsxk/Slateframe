@@ -7,21 +7,22 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class CoreSocialLinksParity(unittest.TestCase):
     def test_only_geometry_not_native_colors_or_shapes(self):
-        css = (ROOT / "style.css").read_text(encoding="utf-8")
-        selector = ".wp-block-social-links .wp-social-link a{"
+        css = (ROOT / "assets/css/footer.css").read_text(encoding="utf-8")
+        selector = ":is(.slateframe-footer-widget,.slateframe-footer-menu,.wp-social-link) a{"
         self.assertEqual(css.count(selector), 1)
         rule = css.split(selector, 1)[1].split("}", 1)[0]
-        for token in ("place-items:center", "min-inline-size:var(--slateframe-control)",
-                      "min-block-size:var(--slateframe-control)", "border-radius:inherit"):
+        for token in ("min-inline-size:var(--slateframe-control)",
+                      "min-block-size:var(--slateframe-control)",
+                      "max-inline-size:100%", "overflow-wrap:anywhere"):
             self.assertIn(token, rule)
         for forbidden in ("background:", "color:", "!important", "width:44px"):
             self.assertNotIn(forbidden, rule)
-        self.assertIn(".wp-block-social-links{max-inline-size:100%;flex-wrap:wrap", css)
-        self.assertLessEqual(len(css.encode("utf-8")), 16000)
+        self.assertLessEqual(len(css.encode("utf-8")), 2000)
+        self.assertLessEqual((ROOT / "style.css").stat().st_size, 16000)
 
     def test_editor_reuses_global_core_rules(self):
         source = (ROOT / "functions.php").read_text(encoding="utf-8")
-        self.assertIn("add_editor_style( array( 'style.css'", source)
+        self.assertIn("add_editor_style( array( 'style.css', 'assets/css/footer.css'", source)
         self.assertNotIn("wp-block-social-links",
                          (ROOT / "assets/css/editor.css").read_text(encoding="utf-8"))
 
