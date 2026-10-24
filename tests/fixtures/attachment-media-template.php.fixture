@@ -149,4 +149,34 @@ $bad_content = slateframe_attachment_render( array( 'content' => array( 'invalid
 slateframe_attachment_check( false === strpos( $bad_content, 'invalid' ), 'Malformed content was coerced into output' );
 $valid_content = slateframe_attachment_render( array( 'content' => '<p>Portable article text.</p>' ) );
 slateframe_attachment_check( false !== strpos( $valid_content, '<p>Portable article text.</p>' ), 'Valid article body lost' );
+$captioned_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4', 'caption' => '<em>動画说明 العربية</em>',
+) );
+slateframe_attachment_check( false !== strpos( $captioned_video, '<figure class="alignwide">' ), 'Video preview lacks semantic figure' );
+slateframe_attachment_check( false !== strpos( $captioned_video, '<figcaption class="wp-caption-text"><em>動画说明 العربية</em></figcaption>' ), 'CJK/RTL video caption lost' );
+slateframe_attachment_check( false !== strpos( $captioned_video, '<video src="https://example.org/video.mp4"' ), 'Captioned video lost native player' );
+$captioned_audio = slateframe_attachment_render( array(
+    'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg', 'caption' => '<em>音声 شرح</em>',
+) );
+slateframe_attachment_check( false !== strpos( $captioned_audio, '<figure class="alignwide">' ), 'Audio preview lacks semantic figure' );
+slateframe_attachment_check( false !== strpos( $captioned_audio, '<figcaption class="wp-caption-text"><em>音声 شرح</em></figcaption>' ), 'CJK/RTL audio caption lost' );
+slateframe_attachment_check( false !== strpos( $captioned_audio, '<audio src="https://example.org/audio.mp3"' ), 'Captioned audio lost native player' );
+$script_only_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4',
+    'video_shortcode' => '<script>alert(1)</script>', 'caption' => 'Orphan video caption',
+) );
+slateframe_attachment_check( false === strpos( $script_only_video, '<figure class="alignwide">' ), 'Sanitized-empty video created figure' );
+slateframe_attachment_check( false === strpos( $script_only_video, 'Orphan video caption' ), 'Sanitized-empty video leaked caption' );
+$empty_audio = slateframe_attachment_render( array(
+    'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg',
+    'audio_shortcode' => '', 'caption' => 'Orphan audio caption',
+) );
+slateframe_attachment_check( false === strpos( $empty_audio, '<figure class="alignwide">' ), 'Empty audio created figure' );
+slateframe_attachment_check( false === strpos( $empty_audio, 'Orphan audio caption' ), 'Empty audio leaked caption' );
+$filtered_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4',
+    'video_shortcode' => '<video controls></video><script>alert(1)</script>', 'caption' => '<em>Safe caption</em>',
+) );
+slateframe_attachment_check( false === strpos( $filtered_video, '<script' ), 'Filtered video script leaked' );
+slateframe_attachment_check( false !== strpos( $filtered_video, '<figcaption class="wp-caption-text"><em>Safe caption</em></figcaption>' ), 'Filtered video lost safe caption' );
 echo 'Attachment media template: ' . $GLOBALS['slateframe_attachment_checks'] . " assertions passed\n";

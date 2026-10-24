@@ -69,16 +69,32 @@ while ( have_posts() ) :
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'video/' ) && $slateframe_file_url ) : ?>
 					<?php
 					$slateframe_video_html = wp_video_shortcode( array( 'src' => $slateframe_file_url ) );
-					if ( is_string( $slateframe_video_html ) ) {
-						echo wp_kses_post( $slateframe_video_html );
-					}
+					$slateframe_video_html = is_string( $slateframe_video_html ) ? wp_kses_post( $slateframe_video_html ) : '';
+					if ( '' !== trim( $slateframe_video_html ) ) :
+						?>
+						<figure class="alignwide">
+							<?php echo $slateframe_video_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
+							<?php endif; ?>
+						</figure>
+						<?php
+					endif;
 					?>
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'audio/' ) && $slateframe_file_url ) : ?>
 					<?php
 					$slateframe_audio_html = wp_audio_shortcode( array( 'src' => $slateframe_file_url ) );
-					if ( is_string( $slateframe_audio_html ) ) {
-						echo wp_kses_post( $slateframe_audio_html );
-					}
+					$slateframe_audio_html = is_string( $slateframe_audio_html ) ? wp_kses_post( $slateframe_audio_html ) : '';
+					if ( '' !== trim( $slateframe_audio_html ) ) :
+						?>
+						<figure class="alignwide">
+							<?php echo $slateframe_audio_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
+							<?php endif; ?>
+						</figure>
+						<?php
+					endif;
 					?>
 				<?php endif; ?>
 
