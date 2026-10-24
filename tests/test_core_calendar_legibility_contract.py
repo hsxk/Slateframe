@@ -14,7 +14,8 @@ class CoreCalendarLegibilityContract(unittest.TestCase):
 
     def test_native_media_deduplication_and_strict_budgets(self):
         front = (ROOT / 'assets/css/reading.css').read_text(encoding='utf-8')
-        self.assertIn(':is(figure,audio,iframe,embed,object){max-width:100%}', front)
+        self.assertIn(':is(figure,audio,iframe,embed,object,.wp-video,.mejs-container){max-width:100%}', front)
+        self.assertEqual(front.count(':is(figure,audio,iframe,embed,object,.wp-video,.mejs-container){max-width:100%}'), 1)
         self.assertLessEqual((ROOT / 'assets/css/reading.css').stat().st_size, 7000)
         self.assertLessEqual((ROOT / 'assets/css/editor.css').stat().st_size, 5000)
         p = ['style.css','assets/css/navigation.css','assets/css/footer.css','assets/js/theme.js','assets/css/reading.css','assets/css/publishing.css','assets/css/forms.css','assets/css/comments.css','assets/css/form-content.css']
