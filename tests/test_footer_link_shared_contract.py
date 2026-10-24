@@ -6,9 +6,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class FooterLinkSharedContract(unittest.TestCase):
-    def test_widget_and_menu_targets_share_geometry_without_changing_display(self):
+    def test_widget_menu_and_core_social_targets_share_geometry_without_changing_display(self):
         css = (ROOT / 'assets/css/footer.css').read_text()
-        shared = ':is(.slateframe-footer-widget,.slateframe-footer-menu) a{'
+        shared = ':is(.slateframe-footer-widget,.slateframe-footer-menu,.wp-social-link) a{'
         self.assertEqual(css.count(shared), 1)
         common = css.split(shared, 1)[1].split('}', 1)[0]
         for declaration in (

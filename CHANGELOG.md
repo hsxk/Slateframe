@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Keep native Core Social Links palettes, shapes, labels and Gutenberg serialization while enforcing shared 44px targets and responsive wrapping. Cover seven widths, RTL/CJK, 200%/400% text, forced-colors focus, Axe and real screenshots without a new runtime dependency.
+
 - Correct the Gutenberg Quote parity fixture to use the current Core Quote nested Paragraph structure: a legacy `value` attribute silently dropped quotation text. Assert both native paragraph and citation survive round-trip on mobile and desktop, while Pullquote retains its Core attributes.
 
 - Keep the public README pattern inventory and WordPress.org readme aligned with the 24 distributable native patterns, including the Core editorial pullquote; enforce both with a regression test.
