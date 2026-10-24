@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Exercise native Core Quote and Pullquote in seven responsive widths, LTR/RTL, CJK/Arabic long citations, 200%/400% text, forced-colors keyboard focus, Axe, print, authenticated Gutenberg serialization, and exact-SHA screenshots.
+
 - Keep the strict 2px Core File forced-colors focus assertion while waiting for Chromium's computed outline to settle after focus and media changes.
 
 - Cover standalone Core Gallery Photo sequence rendering and responsive image proportions in the Photography runtime suite.
@@ -54,6 +56,8 @@ All notable changes to Slateframe will be documented here.
 - At narrow mobile widths, long CJK/RTL/mixed-script site identities and 200% zoom now move color and navigation controls to a separate row instead of vertically centering them against an oversized brand. Short names still share one row; contextual Search CSS no longer duplicates the global mobile rule.
 
 ### Added
+
+- Add a translatable, content-portable Editorial pullquote pattern using WordPress Core Pullquote and an editable source citation; no theme-owned quote renderer or runtime script.
 
 - Introduce a portable, translatable Knowledge FAQ composition using native Core Details, with real WordPress keyboard, RTL/zoom, forced-colors and print evidence.
 
