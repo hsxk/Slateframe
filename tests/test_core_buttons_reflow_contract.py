@@ -9,6 +9,8 @@ class CoreButtonsReflowContract(unittest.TestCase):
     def test_shared_styles_are_scoped_and_do_not_override_core_layout(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
         self.assertIn(".wp-block-buttons>.wp-block-button{min-inline-size:0}", css)
+        self.assertIn(".wp-block-buttons.is-nowrap>.wp-block-button:not(.has-custom-width){flex-shrink:1}", css)
+        self.assertNotIn("html{scroll-behavior:smooth}", css)
         self.assertIn(".wp-block-button__link{min-inline-size:var(--slateframe-control)", css)
         self.assertIn("max-width:100%", css)
         self.assertIn("overflow-wrap:anywhere", css)
