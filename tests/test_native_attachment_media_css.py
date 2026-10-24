@@ -13,6 +13,10 @@ class NativeAttachmentMediaCSS(unittest.TestCase):
         self.assertIn('.editor-styles-wrapper :is(audio,iframe,embed,object,.wp-video,.mejs-container){max-inline-size:100%}', editor)
         self.assertLessEqual(len(reading.encode('utf-8')), 7000)
         self.assertLessEqual(len(editor.encode('utf-8')), 5000)
+        browser = (ROOT / 'tests/browser/attachment-native-media.spec.js').read_text(encoding='utf-8')
+        self.assertNotIn('test.skip(', browser)
+        for width in (320, 375, 390, 412, 768, 1440, 1920):
+            self.assertIn(str(width), browser)
 
 
 if __name__ == '__main__':

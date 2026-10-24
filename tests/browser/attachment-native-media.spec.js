@@ -6,7 +6,7 @@ const path = require('node:path');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8' }).trim();
 
 test('real WordPress native video/audio attachment captions and responsive Core players', async ({ page }, info) => {
-  test.skip(info.project.use.viewport?.width !== 390, 'Run one isolated WordPress attachment matrix across seven widths.');
+  expect([320, 375, 390, 412, 768, 1440, 1920]).toContain(info.project.use.viewport?.width);
   for (const kind of ['video', 'audio']) {
     const mime = kind === 'video' ? 'video/mp4' : 'audio/mpeg';
     const ext = kind === 'video' ? 'mp4' : 'mp3';
@@ -26,7 +26,7 @@ test('real WordPress native video/audio attachment captions and responsive Core 
       await expect(figure.locator('figcaption')).toHaveText('日本語 العربية native caption');
       await expect(page.getByRole('link', { name: 'Open original file' })).toBeVisible();
       await page.addStyleTag({ path: 'rtl.css' });
-      for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+      for (const width of [info.project.use.viewport.width]) {
         await page.setViewportSize({ width, height: 900 });
         for (const direction of ['ltr', 'rtl']) {
           await page.locator('html').evaluate((root, dir) => { root.dir = dir; }, direction);
