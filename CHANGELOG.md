@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Keep the public README pattern inventory and WordPress.org readme aligned with the 24 distributable native patterns, including the Core editorial pullquote; enforce both with a regression test.
+
 - Exercise native Core Quote and Pullquote in seven responsive widths, LTR/RTL, CJK/Arabic long citations, 200%/400% text, forced-colors keyboard focus, Axe, print, authenticated Gutenberg serialization, and exact-SHA screenshots.
 
 - Keep the strict 2px Core File forced-colors focus assertion while waiting for Chromium's computed outline to settle after focus and media changes.
