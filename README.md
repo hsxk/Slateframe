@@ -67,7 +67,7 @@ Slateframe treats ordinary WordPress content as a complete product surface: unti
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships twenty-two site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
+Slateframe currently ships 23 site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
@@ -91,6 +91,7 @@ Slateframe currently ships twenty-two site-neutral starter patterns across publi
 20. **Knowledge procedure** — a goal → action → verification workflow with a recovery checkpoint.
 21. **Knowledge comparison** — a two-option editorial comparison organized around fit, limits, and a decision rule.
 22. **Editorial pathways** — a Core-native reading, project, and visual discovery overview without predefined links.
+23. **Knowledge questions and answers** — three editable, keyboard-operable Core Details disclosures without proprietary blocks or FAQ schema ownership.
 
 Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers. Photography layouts load their own contextual CSS only when Photography or Core-lightbox content needs it, share a readable 0.875rem/1.55-line-height caption rhythm with Gutenberg editor parity, preserve natural image geometry, and use WordPress Core's native lightbox with Slateframe's shared control geometry, dynamic-viewport containment, safe-area handling, keyboard focus, forced-colors, RTL/200%-text, scroll-lock, and reduced-motion safeguards. Focused runtime CI uses real generated landscape, portrait, and square raster attachments rather than SVG-only geometry, and retains reviewable page plus lightbox screenshots. Portfolio and knowledge patterns deliberately compose shared styles instead of introducing one-off component CSS.
 
@@ -141,7 +142,7 @@ Public GitHub Actions currently enforce:
 - WordPress.org Theme Check against the built production ZIP in a real WordPress installation with `WP_DEBUG` enabled; REQUIRED findings block the build while advisory recommendations remain visible in the report.
 - WordPress/PHP compatibility smoke coverage for the minimum PHP target and modern PHP runtime.
 - `theme.json`, theme metadata, required files, and pattern metadata.
-- Public namespace / Text Domain rules and guards against private Time2Log runtime identifiers.
+- Public namespace / Text Domain rules and guards against site-specific runtime identifiers.
 - Guards against hard-coded locale paths and a required Polylang dependency.
 - JavaScript syntax and explicit budgets for the base stylesheet, always-loaded navigation, contextual publishing/reading/comments/content-mode CSS, the Portfolio Query Loop layer, and JavaScript, including route-level aggregate budgets so moving CSS between requests cannot hide runtime growth.
 - Real WordPress + MariaDB installation and theme activation.
@@ -191,7 +192,7 @@ Repository documentation:
 - [Roadmap](docs/ROADMAP.md)
 - [WordPress.org readiness](docs/WORDPRESS-ORG.md)
 - [Migration audit](docs/MIGRATION.md)
-- [WPCode migration boundary](docs/WPCODE-MIGRATION.md)
+- [Portable integration boundaries](docs/INTEGRATION-BOUNDARIES.md)
 - [Changelog](CHANGELOG.md)
 
 ## Theme boundaries

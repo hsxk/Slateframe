@@ -1,0 +1,45 @@
+<?php
+/**
+ * Exercise the real attachment parent helper without a WordPress database.
+ *
+ * @package Slateframe
+ */
+
+define( 'ABSPATH', __DIR__ . '/' );
+$case = json_decode( getenv( 'SLATEFRAME_ATTACHMENT_PARENT_CASE' ), true );
+if ( ! is_array( $case ) ) {
+	fwrite( STDERR, "Missing fixture input.\n" );
+	exit( 1 );
+}
+$GLOBALS['slateframe_case'] = $case;
+$GLOBALS['slateframe_calls'] = array( 'parent' => 0, 'public' => 0 );
+
+function absint( $value ) {
+	return abs( (int) $value );
+}
+function wp_get_post_parent_id( $attachment_id ) {
+	++$GLOBALS['slateframe_calls']['parent'];
+	$GLOBALS['slateframe_attachment_id'] = $attachment_id;
+	return isset( $GLOBALS['slateframe_case']['parent'] ) ? $GLOBALS['slateframe_case']['parent'] : false;
+}
+function is_post_publicly_viewable( $post_id ) {
+	++$GLOBALS['slateframe_calls']['public'];
+	$GLOBALS['slateframe_checked_parent'] = $post_id;
+	// The Core visibility API accounts for both post status and post type.
+	return ! empty( $GLOBALS['slateframe_case']['public'] );
+}
+
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+
+$result = slateframe_public_attachment_parent_id(
+	isset( $case['attachment'] ) ? $case['attachment'] : 42
+);
+echo json_encode(
+	array(
+		'result'             => $result,
+		'calls'              => $GLOBALS['slateframe_calls'],
+		'attachment_id'      => $GLOBALS['slateframe_attachment_id'],
+		'checked_parent'     => isset( $GLOBALS['slateframe_checked_parent'] ) ? $GLOBALS['slateframe_checked_parent'] : null,
+	),
+	JSON_THROW_ON_ERROR
+);

@@ -2,6 +2,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { settlePhotographyImagesForEvidence } = require('./visual-evidence');
 
 const rasterPath = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
 const representativeWidths = [320, 390, 768, 1440, 1920];
@@ -470,7 +471,9 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	await openRasterPhotography(page);
 	const screenshotDir = path.resolve('test-artifacts/photography-lightbox');
 	await fs.mkdir(screenshotDir, { recursive: true });
-	await page.screenshot({ path: path.join(screenshotDir, `photography-page-${testInfo.project.name}.png`), fullPage: true });
+	// Force all lazy Core images to load, decode and settle before full-page evidence.
+	await settlePhotographyImagesForEvidence(page);
+	await page.screenshot({ path: path.join(screenshotDir, `photography-page-${testInfo.project.name}.png`), fullPage: true, animations: 'disabled' });
 
 	const feature = await openLightbox(page, 'keyboard');
 	await expectLightboxSettled(feature.dialog, feature.enlarged, 'landscape screenshot evidence should capture the settled lightbox');
@@ -493,4 +496,179 @@ test('native lightbox captures representative mobile and desktop evidence', asyn
 	await expect(portrait.enlarged).toBeVisible();
 	await expectLightboxSettled(portrait.dialog, portrait.enlarged, 'portrait screenshot evidence should capture the settled lightbox');
 	await page.screenshot({ path: path.join(screenshotDir, `lightbox-portrait-${testInfo.project.name}.png`), fullPage: false });
+});
+
+
+test('native WordPress Core Gallery can switch to the independent photo-sequence style', async ({ page }) => {
+	await openRasterPhotography(page);
+	const gallery = page.locator('#main-content .browser-raster-gallery');
+	await expect(gallery).toBeVisible();
+	// Use the real WordPress-rendered Gallery; exercise the independent block style.
+	await gallery.evaluate((node) => {
+		node.classList.remove('is-style-slateframe-contact-sheet');
+		node.classList.add('is-style-slateframe-photo-sequence');
+	});
+	await expect(gallery).toHaveClass(/is-style-slateframe-photo-sequence/);
+	const images = gallery.locator('img');
+	await expect(images).toHaveCount(2);
+	for (const img of await images.all()) {
+		await img.scrollIntoViewIfNeeded();
+		await expect.poll(() => img.evaluate((node) => node.complete && node.naturalWidth > 0)).toBe(true);
+	}
+	const details = await gallery.evaluate((node) => ({
+		display: getComputedStyle(node).display,
+		columns: getComputedStyle(node).gridTemplateColumns.split(' ').filter(Boolean).length,
+		firstSpan: getComputedStyle(node.querySelector('figure.wp-block-image')).gridColumnEnd,
+		captions: [...node.querySelectorAll('figcaption')].map((caption) => ({
+			position: getComputedStyle(caption).position,
+			shadow: getComputedStyle(caption).textShadow,
+		})),
+		images: [...node.querySelectorAll('img')].map((img) => ({
+			alt: img.alt,
+			fit: getComputedStyle(img).objectFit,
+			aspect: getComputedStyle(img).aspectRatio,
+		})),
+	}));
+	expect(details.display).toBe('grid');
+	expect(details.columns).toBe(page.viewportSize().width <= 640 ? 1 : 2);
+	if (page.viewportSize().width > 640) expect(details.firstSpan).toBe('-1');
+	for (const caption of details.captions) {
+		expect(caption.position).toBe('static');
+		expect(caption.shadow).toBe('none');
+	}
+	for (const image of details.images) {
+		expect(image.alt).toBeTruthy();
+		expect(image.fit).toBe('contain');
+		expect(image.aspect).toBe('auto');
+	}
+	await fs.mkdir(path.join('test-artifacts', 'photography-lightbox'), { recursive: true });
+	await gallery.screenshot({
+		path: path.join('test-artifacts', 'photography-lightbox', 'core-sequence-' + page.viewportSize().width + '.png'),
+	});
+});
+
+test('native photo sequence preserves RTL and zoomed captions', async ({ page }) => {
+	await openRasterPhotography(page);
+	await page.evaluate(() => {
+		document.documentElement.dir = 'rtl';
+		document.documentElement.style.fontSize = '200%';
+		const gallery = document.querySelector('.browser-raster-gallery');
+		gallery.classList.remove('is-style-slateframe-contact-sheet');
+		gallery.classList.add('is-style-slateframe-photo-sequence');
+	});
+	await expect(page.locator('.browser-raster-gallery figcaption')).toHaveCount(2);
+	await expect.poll(() => page.evaluate(() =>
+		document.documentElement.scrollWidth - document.documentElement.clientWidth
+	)).toBeLessThanOrEqual(1);
+});
+
+
+test('real WordPress raster Gallery exercises sequence caption geometry at RTL 400% text', async ({ page }, testInfo) => {
+  await openRasterPhotography(page);
+  const gallery = page.locator('#main-content .browser-raster-gallery');
+  await expect(gallery).toBeVisible();
+  // Supplemental CSS contract on a real WordPress Gallery; separate serialized
+  // native/class-only fixtures remain required for release acceptance.
+  await gallery.evaluate(node => {
+    node.classList.remove('is-style-slateframe-contact-sheet');
+    node.classList.add('is-style-slateframe-photo-sequence');
+  });
+  const figure = gallery.locator(':scope > figure.wp-block-image').first();
+  const image = figure.locator('img');
+  await expect.poll(() => image.evaluate(n => n.complete && n.naturalWidth > 0)).toBe(true);
+  const inspect = async label => {
+    const m = await figure.evaluate(node => {
+      const fig = node.getBoundingClientRect();
+      const media = node.querySelector('img').getBoundingClientRect();
+      const caption = node.querySelector('figcaption').getBoundingClientRect();
+      return {figWidth:fig.width,mediaWidth:media.width,captionWidth:caption.width,
+        mediaStart:media.left,captionStart:caption.left,
+        mediaCenter:(media.left+media.right)/2,figCenter:(fig.left+fig.right)/2,
+        captionHeight:caption.height,
+        overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth};
+    });
+    expect(m.mediaWidth, label).toBeGreaterThan(0);
+    expect(m.captionHeight, label).toBeGreaterThan(0);
+    expect(Math.abs(m.captionWidth-m.figWidth), label).toBeLessThanOrEqual(4);
+    if (label === 'normal') {
+      expect(Math.abs(m.figWidth-m.mediaWidth), label).toBeLessThanOrEqual(4);
+      expect(Math.abs(m.captionStart-m.mediaStart), label).toBeLessThanOrEqual(4);
+    } else {
+      // At 400% text sizing a 90px portrait must not force an unreadable
+      // 90px caption. Allow the figure to widen while centering its media.
+      expect(m.captionWidth, label).toBeGreaterThanOrEqual(
+        Math.min(240, page.viewportSize().width - 24)
+      );
+      expect(Math.abs(m.mediaCenter-m.figCenter), label).toBeLessThanOrEqual(4);
+    }
+    expect(m.overflow, label).toBeLessThanOrEqual(1);
+  };
+  await inspect('normal');
+  await figure.locator('figcaption').evaluate(node => {
+    node.textContent = '日本語 العربية 中文 — Long caption that must stay attached to the portrait photograph instead of expanding to the grid track. '.repeat(3);
+  });
+  await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
+  await page.evaluate(() => {document.documentElement.dir='rtl';document.documentElement.style.fontSize='64px';});
+  await inspect('RTL long caption 400%');
+  if ([390,1440,1920].includes(projectWidth(testInfo))) {
+    const dir=path.resolve('test-artifacts/photography-lightbox');
+    await fs.mkdir(dir,{recursive:true});
+    // The full-page capture must contain decoded media and the site footer.
+    for (const img of await page.locator('#main-content img').all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect.poll(() => img.evaluate(n => n.complete && n.naturalWidth > 0)).toBe(true);
+    }
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      window.scrollTo(0, 0);
+    });
+    const footerBottom = await page.locator('footer').last().evaluate(
+      el => el.getBoundingClientRect().bottom + window.scrollY
+    );
+    const screenshot = await page.screenshot({path:path.join(dir,`sequence-caption-rtl-zoom-${projectWidth(testInfo)}.png`),fullPage:true,animations:'disabled'});
+    expect(footerBottom).toBeGreaterThan(0);
+    expect(screenshot.readUInt32BE(16)).toBe(projectWidth(testInfo));
+    expect(screenshot.readUInt32BE(20)).toBeGreaterThanOrEqual(Math.ceil(footerBottom)-2);
+  }
+  if (projectWidth(testInfo) === 390) {
+    // A 400% text-only zoom combined with a short landscape viewport must
+    // widen the caption instead of forcing 64px text into a 90px image width.
+    await page.setViewportSize({ width: 360, height: 225 });
+    // Core lightbox resize callbacks, responsive media, and fallback fonts can
+    // settle on a later frame. Keep the exact geometry threshold; wait for
+    // the actual WordPress layout instead of asserting on a transient frame.
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    });
+    await expect.poll(async () => figure.evaluate(node => {
+      const fig = node.getBoundingClientRect();
+      const caption = node.querySelector('figcaption').getBoundingClientRect();
+      return Math.abs(caption.width - fig.width);
+    }), { message: 'RTL 400% short landscape caption must match its figure after resize', timeout: 5000 })
+      .toBeLessThanOrEqual(4);
+    await inspect('RTL long caption 400% / short landscape viewport');
+    for (const img of await page.locator('#main-content img').all()) {
+      await img.scrollIntoViewIfNeeded();
+      await expect.poll(() => img.evaluate(n => n.complete && n.naturalWidth > 0)).toBe(true);
+    }
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      window.scrollTo(0, 0);
+    });
+    const footerBottom = await page.locator('footer').last().evaluate(
+      el => el.getBoundingClientRect().bottom + window.scrollY
+    );
+    const out = path.resolve('test-artifacts/photography-lightbox');
+    await fs.mkdir(out, { recursive: true });
+    const image = await page.screenshot({
+      path: path.join(out, 'sequence-caption-textzoom-360x225.png'),
+      fullPage: true,
+      animations: 'disabled',
+    });
+    expect(image.readUInt32BE(16)).toBe(360);
+    expect(image.readUInt32BE(20)).toBeGreaterThanOrEqual(Math.ceil(footerBottom)-2);
+  }
 });

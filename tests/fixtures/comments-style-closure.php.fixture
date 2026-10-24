@@ -1,0 +1,77 @@
+<?php
+/**
+ * Exercise the real Slateframe asset enqueue function without WordPress writes.
+ *
+ * @package Slateframe
+ */
+$source = file_get_contents( dirname( __DIR__, 2 ) . '/functions.php' );
+$begin = strpos( $source, 'function slateframe_assets() {' );
+$end = strpos( $source, "add_action( 'wp_enqueue_scripts', 'slateframe_assets' );", $begin );
+if ( false === $begin || false === $end ) {
+    fwrite( STDERR, "Missing asset enqueue function.\n" );
+    exit( 1 );
+}
+$temporary = tempnam( sys_get_temp_dir(), 'slateframe-assets-' );
+if ( false === $temporary || false === file_put_contents( $temporary, '<?php ' . substr( $source, $begin, $end - $begin ) ) ) {
+    fwrite( STDERR, "Could not isolate asset enqueue function.\n" );
+    exit( 1 );
+}
+try {
+    require $temporary;
+} finally {
+    unlink( $temporary );
+}
+$flags = json_decode( getenv( 'SLATEFRAME_COMMENTS_CASE' ), true );
+if ( ! is_array( $flags ) ) {
+    fwrite( STDERR, "Missing fixture flags.\n" );
+    exit( 1 );
+}
+$GLOBALS['slateframe_fixture'] = $flags;
+$GLOBALS['slateframe_styles'] = array();
+$GLOBALS['slateframe_scripts'] = array();
+$GLOBALS['wp_query'] = (object) array( 'post_count' => 3 );
+
+function fixture_flag( $name ) { return ! empty( $GLOBALS['slateframe_fixture'][ $name ] ); }
+function is_singular() { return fixture_flag( 'singular' ); }
+function is_home() { return false; }
+function is_archive() { return false; }
+function is_search() { return false; }
+function is_author() { return false; }
+function is_404() { return false; }
+function is_rtl() { return fixture_flag( 'rtl' ); }
+function comments_open() { return fixture_flag( 'open' ); }
+function post_password_required() { return fixture_flag( 'locked' ); }
+function get_comments_number() { return isset( $GLOBALS['slateframe_fixture']['count'] ) ? $GLOBALS['slateframe_fixture']['count'] : 0; }
+function get_option( $name ) { return 'thread_comments' === $name && fixture_flag( 'thread' ); }
+function get_stylesheet_uri() { return '/themes/slateframe/style.css'; }
+function get_template_directory_uri() { return '/themes/slateframe'; }
+function wp_get_theme() {
+    return new class() {
+        public function get( $key ) { return 'Version' === $key ? '0.1.0' : ''; }
+    };
+}
+function slateframe_footer_presentation_assets() { return array( 'photography' => false, 'content_modes' => false, 'query_loop' => false ); }
+function slateframe_photography_styles_needed() { return false; }
+function slateframe_content_modes_needed() { return false; }
+function slateframe_query_loop_styles_needed() { return false; }
+function slateframe_forms_styles_needed() { return fixture_flag( 'forms' ); }
+function slateframe_form_content_styles_needed() { return fixture_flag( 'form_content' ); }
+function slateframe_search_form_styles_needed() { return fixture_flag( 'search_form' ); }
+function wp_enqueue_style( $handle, $src, $dependencies, $version, $media = 'all' ) {
+    $GLOBALS['slateframe_styles'][ $handle ] = array( 'dependencies' => $dependencies, 'media' => $media );
+}
+function wp_enqueue_script( $handle ) { $GLOBALS['slateframe_scripts'][] = $handle; }
+
+slateframe_assets();
+foreach ( $GLOBALS['slateframe_styles'] as $handle => $style ) {
+    foreach ( $style['dependencies'] as $dependency ) {
+        if ( ! isset( $GLOBALS['slateframe_styles'][ $dependency ] ) ) {
+            fwrite( STDERR, "Missing CSS dependency $dependency for $handle\n" );
+            exit( 2 );
+        }
+    }
+}
+echo json_encode( array(
+    'styles' => array_keys( $GLOBALS['slateframe_styles'] ),
+    'scripts' => $GLOBALS['slateframe_scripts'],
+), JSON_THROW_ON_ERROR );

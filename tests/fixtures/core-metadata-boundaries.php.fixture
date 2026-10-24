@@ -1,0 +1,89 @@
+<?php
+/**
+ * Exercise real Core-facing author and attachment metadata boundaries.
+ *
+ * @package Slateframe
+ */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+$GLOBALS['slateframe_id']   = 3;
+$GLOBALS['slateframe_name'] = 'Writer';
+$GLOBALS['slateframe_metadata'] = array();
+$GLOBALS['slateframe_mime'] = 'image/jpeg';
+function get_post_type() { return 'post'; }
+function get_the_author_meta( $key ) { return $GLOBALS['slateframe_id']; }
+function get_the_author() { return $GLOBALS['slateframe_name']; }
+function get_author_posts_url( $id ) { return '/author/' . $id . '/'; }
+function get_the_date( $format = '' ) { return '2026-10-24'; }
+function get_post_mime_type( $id ) { return $GLOBALS['slateframe_mime']; }
+function wp_get_attachment_metadata( $id ) { return $GLOBALS['slateframe_metadata']; }
+function apply_filters( $hook, $value, ...$args ) { return $value; }
+function __( $text, $domain ) { return $text; }
+function esc_html__( $text, $domain ) { return $text; }
+function esc_html( $value ) { return htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' ); }
+function esc_attr( $value ) { return esc_html( $value ); }
+function esc_url_raw( $value ) { return $value; }
+function esc_url( $value ) { return esc_html( $value ); }
+function absint( $value ) { return abs( (int) $value ); }
+function number_format_i18n( $number ) { return number_format( $number ); }
+function size_format( $bytes ) { return $bytes . ' B'; }
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+set_error_handler( function ( $severity, $message ) {
+    throw new ErrorException( $message, 0, $severity );
+} );
+$cases = 0;
+function slateframe_verify( $condition, $message ) {
+    global $cases;
+    if ( ! $condition ) {
+        throw new RuntimeException( $message );
+    }
+    ++$cases;
+}
+function slateframe_render_author() {
+    ob_start();
+    slateframe_entry_meta();
+    return ob_get_clean();
+}
+slateframe_verify( false !== strpos( slateframe_render_author(), 'href="/author/3/"' ), 'Valid Core author link missing' );
+foreach ( array( 3, '3', '0003' ) as $valid ) {
+    $GLOBALS['slateframe_id'] = $valid;
+    slateframe_verify( false !== strpos( slateframe_render_author(), 'href="/author/3/"' ), 'Valid numeric author ID rejected' );
+}
+foreach ( array( null, false, true, -3, '-3', 3.5, '3.5', '3e0', '9223372036854775808', array( 3 ), new WP_Error(), new stdClass() ) as $bad ) {
+    $GLOBALS['slateframe_id'] = $bad;
+    $html = slateframe_render_author();
+    slateframe_verify( false === strpos( $html, '<a ' ), 'Malformed author ID created an unrelated link' );
+    slateframe_verify( false !== strpos( $html, 'Writer' ), 'Malformed author ID hid a valid author name' );
+}
+$GLOBALS['slateframe_id'] = 3;
+foreach ( array( null, false, true, 3, array( 'Writer' ), new WP_Error(), new stdClass() ) as $bad ) {
+    $GLOBALS['slateframe_name'] = $bad;
+    $html = slateframe_render_author();
+    slateframe_verify( false === strpos( $html, 'slateframe-byline' ), 'Malformed author name rendered byline' );
+    slateframe_verify( false !== strpos( $html, '<time ' ), 'Malformed author name removed published date' );
+}
+$GLOBALS['slateframe_name'] = '日本語 & 中文';
+slateframe_verify( false !== strpos( slateframe_render_author(), '日本語 &amp; 中文' ), 'Valid multilingual author name lost escaping' );
+$GLOBALS['slateframe_metadata'] = array( 'width' => 1920, 'height' => '1080', 'filesize' => 2048 );
+$details = slateframe_attachment_details( 42 );
+slateframe_verify( '1,920 × 1,080 px' === $details['Dimensions'], 'Valid image dimensions lost' );
+slateframe_verify( '2048 B' === $details['File size'], 'Valid file size lost' );
+slateframe_verify( 'image/jpeg' === $details['File type'], 'Valid MIME type lost' );
+$GLOBALS['slateframe_metadata'] = array( 'width' => '0008', 'height' => '0009', 'filesize' => '0002' );
+$details = slateframe_attachment_details( 42 );
+slateframe_verify( '8 × 9 px' === $details['Dimensions'], 'Padded integer dimensions rejected' );
+slateframe_verify( '2 B' === $details['File size'], 'Padded integer size rejected' );
+foreach ( array( array( 100 ), new WP_Error(), -10, '10.5', 10.5, '9223372036854775808', false, true, '1e3' ) as $bad ) {
+    $GLOBALS['slateframe_metadata'] = array( 'width' => $bad, 'height' => 100, 'filesize' => $bad );
+    $details = slateframe_attachment_details( 42 );
+    slateframe_verify( ! isset( $details['Dimensions'] ), 'Invalid width invented dimensions' );
+    slateframe_verify( ! isset( $details['File size'] ), 'Invalid size invented byte count' );
+}
+$GLOBALS['slateframe_metadata'] = array( 'width' => 100, 'height' => array( 200 ), 'filesize' => 0 );
+$details = slateframe_attachment_details( 42 );
+slateframe_verify( ! isset( $details['Dimensions'] ), 'Invalid height invented dimensions' );
+slateframe_verify( ! isset( $details['File size'] ), 'Zero size invented byte count' );
+$GLOBALS['slateframe_metadata'] = new WP_Error();
+$GLOBALS['slateframe_mime'] = new WP_Error();
+slateframe_verify( array() === slateframe_attachment_details( 42 ), 'Malformed metadata or MIME leaked' );
+echo "Core metadata boundaries: {$cases} cases passed\n";

@@ -15,6 +15,6 @@
 <!-- wp:group {"className":"slateframe-project-card","layout":{"type":"constrained"}} --><div class="wp-block-group slateframe-project-card"><!-- wp:post-featured-image {"isLink":true,"aspectRatio":"4/3"} /--><!-- wp:post-title {"isLink":true,"fontSize":"lead"} /--><!-- wp:post-excerpt {"moreText":""} /--><!-- wp:post-date /--></div><!-- /wp:group -->
 <!-- /wp:post-template -->
 <!-- wp:query-pagination {"layout":{"type":"flex","justifyContent":"space-between"}} --><!-- wp:query-pagination-previous /--><!-- wp:query-pagination-numbers /--><!-- wp:query-pagination-next /--><!-- /wp:query-pagination -->
-<!-- wp:query-no-results --><!-- wp:paragraph --><p><?php echo esc_html_x( 'Publish some work to populate this project grid.', 'Empty project grid message', 'slateframe' ); ?></p><!-- /wp:paragraph --><!-- /wp:query-no-results -->
+<!-- wp:query-no-results --><!-- wp:paragraph --><p><?php echo esc_html_x( 'No projects are available yet.', 'Empty project grid message', 'slateframe' ); ?></p><!-- /wp:paragraph --><!-- /wp:query-no-results -->
 </div><!-- /wp:query -->
 </div><!-- /wp:group -->

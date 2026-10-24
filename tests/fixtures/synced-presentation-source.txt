@@ -89,6 +89,8 @@ function is_404() { return false; }
 function is_home() { return false; }
 function is_archive() { return false; }
 function is_author() { return false; }
+// The synced-pattern fixture models a public, unlocked document; Core owns this predicate.
+function post_password_required() { return false; }
 function comments_open() { return false; }
 function get_comments_number() { return 0; }
 require_once get_template_directory() . '/functions.php';

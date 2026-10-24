@@ -6,6 +6,10 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Keep the strict 2px Core File forced-colors focus assertion while waiting for Chromium's computed outline to settle after focus and media changes.
+
+- Cover standalone Core Gallery Photo sequence rendering and responsive image proportions in the Photography runtime suite.
+
 - Assert native Gutenberg content/wide layout variables follow bounded Appearance widths at default, compact and spacious settings; retain mobile/desktop screenshots and verify opaque sticky-header rendering.
 - Verify 320/390px real-raster Photography contact sheets switch to a readable single-column layout with portrait/square image containment.
 
@@ -25,6 +29,18 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Preserve natural letter spacing for Chinese, Japanese and Korean site titles while keeping Latin brand tracking and the existing bounded navigation CSS budget; verify RTL, 400% text, keyboard focus and responsive widths in real WordPress Chromium.
+
+- Preserve shared form-control CSS for open and historical comment threads even when an integration opts out of general form styles; retain selective loading and threaded-reply gating.
+
+- Align native numbered-step badge positioning with inherited RTL direction in both published content and Gutenberg, and assert the badge's physical inset against the list text gutter rather than checking padding alone.
+
+- Preserve the native Knowledge Steps badge gutter in the Gutenberg canvas at narrow RTL widths; assert editor badge/text separation and keep the editor stylesheet under its existing 5000-byte budget.
+
+- Load the optional Photography stylesheet for a Core Gallery using the `slateframe-gallery-sequence` class without a lightbox, and bound portrait images to the same non-cropping height as the registered Photo sequence style.
+
+- Align standalone Core Gallery Photo sequence layout, captions, Gutenberg styling and reduced-motion hover behavior with the bundled Photography patterns.
+
 - Synchronize WordPress constrained/wide block layout variables with Slateframe reading/canvas Appearance settings on the front end and in the block editor.
 - Replace the translucent blurred sticky header with a quiet opaque surface, reducing compositing work while keeping light/dark contrast.
 - Give narrow Photography contact sheets full-width media and multilingual captions instead of cramped two-column thumbnails, while removing redundant physical image-sizing declarations in favor of equivalent logical properties to preserve the original runtime asset budget.
@@ -36,6 +52,8 @@ All notable changes to Slateframe will be documented here.
 - At narrow mobile widths, long CJK/RTL/mixed-script site identities and 200% zoom now move color and navigation controls to a separate row instead of vertically centering them against an oversized brand. Short names still share one row; contextual Search CSS no longer duplicates the global mobile rule.
 
 ### Added
+
+- Introduce a portable, translatable Knowledge FAQ composition using native Core Details, with real WordPress keyboard, RTL/zoom, forced-colors and print evidence.
 
 - Native multipage post and Page navigation now has a labelled landmark, shared touch-sized controls, RTL-safe wrapping, and compact/default/spacious browser screenshot coverage.
 - Mobile site identity and header controls now stay in one aligned row for ordinary titles while preserving translated-title wrapping and keyboard access.
@@ -73,7 +91,7 @@ All notable changes to Slateframe will be documented here.
 - Optional native `footer-content` block/widget region for portable rich footers without site-specific template injection.
 - Responsive footer-widget grid and deterministic multilingual footer fixture with shared 44px control targets and overflow coverage.
 - Portfolio regression fixture for a real no-featured-image project with mixed CJK/RTL long-title wrapping.
-- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, opt-in local author media, and TOC compatibility migrated from recurring site-level WPCode needs.
+- Site-neutral content discovery layer with filterable related reading, 404 recent-content recovery, author destinations, taxonomy presentation hooks, optional post-navigation control, opt-in local author media, and TOC compatibility migrated from recurring site-level presentation needs.
 - Public Slateframe hybrid-theme baseline.
 - WordPress-native template hierarchy and `theme.json` design system.
 - Accessible responsive navigation with a no-JavaScript fallback and mobile focus containment.

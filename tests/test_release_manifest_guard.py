@@ -322,6 +322,59 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         self.assertIn("Output directory", result.stderr)
         self.assertFalse((self.root / "releases").exists())
 
+    def test_default_dist_symlink_preserves_external_files(self):
+        outside = Path(self.temp.name) / "external-default"
+        target = outside / "slateframe"
+        target.mkdir(parents=True)
+        marker = target / "do-not-delete.txt"
+        marker.write_text("keep")
+        (self.root / "dist").symlink_to(outside, target_is_directory=True)
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Output directory must not traverse symbolic links", result.stderr)
+        self.assertEqual("keep", marker.read_text())
+
+    def test_custom_output_symlink_preserves_external_files(self):
+        outside = Path(self.temp.name) / "external-custom"
+        target = outside / "slateframe"
+        target.mkdir(parents=True)
+        marker = target / "do-not-delete.txt"
+        marker.write_text("keep")
+        alias = self.root / "custom-out"
+        alias.symlink_to(outside, target_is_directory=True)
+        result = self.build(alias)
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Output directory must not traverse symbolic links", result.stderr)
+        self.assertEqual("keep", marker.read_text())
+
+    def test_nested_symlinked_output_parent_preserves_external_files(self):
+        outside = Path(self.temp.name) / "external-parent"
+        target = outside / "build" / "slateframe"
+        target.mkdir(parents=True)
+        marker = target / "do-not-delete.txt"
+        marker.write_text("keep")
+        alias = self.root / "alias"
+        alias.symlink_to(outside, target_is_directory=True)
+        result = self.build(alias / "build")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Output directory must not traverse symbolic links", result.stderr)
+        self.assertEqual("keep", marker.read_text())
+
+    def test_symlink_then_parent_traversal_preserves_external_files(self):
+        outside = Path(self.temp.name) / "external-traversal"
+        target = outside / "slateframe"
+        target.mkdir(parents=True)
+        marker = target / "do-not-delete.txt"
+        marker.write_text("keep")
+        nested = outside / "nested"
+        nested.mkdir()
+        alias = self.root / "alias"
+        alias.symlink_to(nested, target_is_directory=True)
+        result = self.build(str(alias) + "/../")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Output directory must not traverse symbolic links", result.stderr)
+        self.assertEqual("keep", marker.read_text())
+
     def test_external_and_default_archives_match(self):
         self.assertEqual(0, self.build().returncode)
         expected = hashlib.sha256((self.root / "dist" / "slateframe.zip").read_bytes()).hexdigest()

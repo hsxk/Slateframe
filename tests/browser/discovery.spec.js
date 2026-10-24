@@ -67,20 +67,24 @@ test('author archives expose a native avatar surface without fixed media URLs', 
 	await expectNoRootOverflow(page);
 });
 
-test('common TOC controls inherit Slateframe touch sizing without plugin ownership', async ({ page }) => {
+test('native Core TOC links inherit bounded touch targets and keyboard focus', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
-
-	const toc = page.locator('.slateframe-prose').first();
-	await toc.evaluate((node) => {
+	const prose = page.locator('.slateframe-prose').first();
+	await expect(prose).toBeVisible();
+	await prose.evaluate((node) => {
 		const fixture = document.createElement('nav');
-		fixture.className = 'ez-toc-container';
-		fixture.innerHTML = '<div class="ez-toc-title-container"><button class="ez-toc-toggle" type="button">Contents</button></div><ol><li><a href="#main-content">Overview</a></li></ol>';
+		fixture.className = 'wp-block-table-of-contents';
+		fixture.setAttribute('aria-label', 'Contents');
+		fixture.dataset.slateframeQaToc = 'true';
+		fixture.innerHTML = '<ol><li><a href="#main-content">Overview — 中文 日本語</a></li></ol>';
 		node.prepend(fixture);
 	});
-
-	const toggle = page.locator('.ez-toc-toggle');
-	await expect(toggle).toBeVisible();
-	expect((await toggle.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	const link = prose.locator('[data-slateframe-qa-toc] a');
+	await expect(link).toHaveCount(1);
+	await expect(link).toBeVisible();
+	expect((await link.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	await link.focus();
+	await expect(link).toBeFocused();
 	await expectNoRootOverflow(page);
 });
 
@@ -194,20 +198,39 @@ test('global shell styles load exactly once across ordinary and specialized rout
 	}
 });
 
-test('common TOC links keep the shared touch-target baseline', async ({ page }) => {
+test('native Core TOC captions reflow in RTL and at 200 percent text size', async ({ page }, testInfo) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const prose = page.locator('.slateframe-prose').first();
+	await expect(prose).toBeVisible();
 	await prose.evaluate((node) => {
 		const fixture = document.createElement('nav');
-		fixture.className = 'ez-toc-container';
-		fixture.innerHTML = '<div class="ez-toc-title-container"><button class="ez-toc-toggle" type="button">Contents</button></div><ol><li><a class="ez-toc-link" href="#main-content">Overview</a></li></ol>';
+		fixture.className = 'wp-block-table-of-contents';
+		fixture.setAttribute('aria-label', 'Contents');
+		fixture.dataset.slateframeQaToc = 'true';
+		fixture.innerHTML = '<ol><li><a href="#main-content">中文 日本語 العربية — Long translated heading without truncation</a></li></ol>';
 		node.prepend(fixture);
 	});
-	const link = page.locator('.ez-toc-link');
+	await page.evaluate(() => {
+		document.documentElement.dir = 'rtl';
+		document.documentElement.style.fontSize = '200%';
+	});
+	const link = prose.locator('[data-slateframe-qa-toc] a');
+	await expect(link).toHaveCount(1);
 	await expect(link).toBeVisible();
-	expect((await link.boundingBox())?.height || 0).toBeGreaterThanOrEqual(44);
+	const bounds = await link.boundingBox();
+	expect(bounds?.height || 0).toBeGreaterThanOrEqual(44);
+	expect(bounds?.x || 0).toBeGreaterThanOrEqual(-1);
+	expect((bounds?.x || 0) + (bounds?.width || 0)).toBeLessThanOrEqual(page.viewportSize().width + 1);
+	await link.focus();
+	await expect(link).toBeFocused();
+	await expectNoRootOverflow(page);
+	const width = testInfo.project.use.viewport?.width;
+	if ([390, 1440].includes(width)) {
+		const dir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(dir, { recursive: true });
+		await page.screenshot({ path: path.join(dir, 'core-toc-rtl-zoom-' + width + '.png'), fullPage: true });
+	}
 });
-
 
 test('empty discovery states remain actionable without empty pagination chrome', async ({ page }) => {
 	const routes = [

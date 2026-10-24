@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const { settlePortfolioImagesForEvidence, settlePhotographyImagesForEvidence, settleLightboxImageForEvidence } = require('./visual-evidence');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const pagePath = process.env.SLATEFRAME_PAGE_PATH || '/';
@@ -19,7 +20,7 @@ const near = (received, expected, tolerance = 1) => expect(Math.abs(received - e
  */
 async function expectLightboxSettled(dialog) {
 	const image = dialog.locator('img[sizes="100vw"]').last();
-	await expect(image).toBeVisible();
+	await settleLightboxImageForEvidence(image);
 	await expect.poll(() => dialog.evaluate((node) =>
 		node.getAnimations({ subtree: true }).filter((animation) => animation.playState === 'running').length
 	), { message: 'native lightbox animations must finish before visual evidence', timeout: 5_000 }).toBe(0);
@@ -118,7 +119,10 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		await expect(locator).toBeVisible();
 		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
-		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+		// Shared native form controls bound inline padding at 12px to remain readable
+		// at 400% text zoom; the underlying Appearance spacing token still scales.
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+			Math.min(12 * profile.spacing, 12), 1);
 	}
 	await page.locator('.slateframe-main').evaluate((node) => {
 		const fixture = document.createElement('div');
@@ -134,7 +138,11 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		await expect(locator).toBeVisible();
 		expect((await locator.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
-		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+		// The native Core Search controls use the bounded form padding; the
+		// independent Core Button link still follows the Appearance token.
+		const isFormControl = await locator.evaluate((node) => Boolean(node.closest('form')));
+		near(await locator.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+			isFormControl ? Math.min(12 * profile.spacing, 12) : 12 * profile.spacing, 1);
 	}
 
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
@@ -151,12 +159,15 @@ test('bounded appearance profile drives semantic design tokens and real controls
 		await expect(field).toBeVisible();
 		expect((await field.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
-		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)), 12 * profile.spacing, 1);
+		near(await field.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+			Math.min(12 * profile.spacing, 12), 1);
 	}
 	const semanticButton = page.locator('#browser-form-action');
 	await expect(semanticButton).toBeVisible();
 	expect((await semanticButton.boundingBox())?.height || 0).toBeGreaterThanOrEqual(profile.control - 1);
 	near(await semanticButton.evaluate((node) => Number.parseFloat(getComputedStyle(node).borderRadius)), profile.radius, 1);
+	near(await semanticButton.evaluate((node) => Number.parseFloat(getComputedStyle(node).paddingInlineStart)),
+		Math.min(12 * profile.spacing, 12), 1);
 	const imageSubmit = page.locator('#browser-image-submit');
 	await expect(imageSubmit).toBeVisible();
 	const imageSubmitMetrics = await imageSubmit.evaluate((node) => ({
@@ -447,6 +458,42 @@ test('appearance profile stays contained across content modes and captures revie
 				expect(['contain', 'fill']).toContain(image.objectFit);
 			}
 		}
+		if (name === 'portfolio') await settlePortfolioImagesForEvidence(page);
+		if (name === 'photography') await settlePhotographyImagesForEvidence(page);
 		await page.screenshot({ path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-${name}.png`), fullPage: true });
 	}
+});
+
+
+test('appearance profile keeps Core Footnote return controls within bounded dimensions', async ({ page }, testInfo) => {
+	await page.goto(process.env.SLATEFRAME_POST_PATH || showcasePath, { waitUntil: 'networkidle' });
+	const prose = page.locator('.slateframe-prose').first();
+	await expect(prose).toBeVisible();
+	await prose.evaluate(node => {
+		const region = document.createElement('section');
+		region.className = 'slateframe-appearance-footnotes';
+		region.innerHTML = '<p>Reference <sup id="fnref-appearance"><a href="#fn-appearance">1</a></sup></p><ol class="wp-block-footnotes"><li id="fn-appearance">Native Core Footnote <a href="#fnref-appearance" aria-label="Return to reference">↩</a></li></ol>';
+		node.append(region);
+	});
+	const target = prose.locator('.slateframe-appearance-footnotes a[href="#fnref-appearance"]');
+	const metrics = await target.evaluate(node => {
+		const rect = node.getBoundingClientRect();
+		return {
+			width: rect.width,
+			height: rect.height,
+			control: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
+			overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+		};
+	});
+	near(metrics.control, profile.control, 1);
+	expect(metrics.width).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(metrics.height).toBeGreaterThanOrEqual(profile.control - 1);
+	expect(metrics.overflow).toBeLessThanOrEqual(1);
+	await prose.locator('a[href="#fn-appearance"]').click();
+	await expect(prose.locator('#fn-appearance')).toHaveCSS('outline-style', 'solid');
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await prose.locator('.slateframe-appearance-footnotes').screenshot({
+		path: path.join(screenshotDir, `appearance-${profileName}-${testInfo.project.name}-footnotes.png`),
+	});
 });

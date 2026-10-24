@@ -10,6 +10,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Accept only positive, non-overflowing integer values from Core metadata.
+ *
+ * Never cast arrays, objects, booleans, fractions or overflowing strings to
+ * a different valid-looking post ID, image dimension or byte count.
+ *
+ * @param mixed $value Value from Core or an integration filter.
+ * @return int Positive integer or zero when invalid.
+ */
+function slateframe_positive_int( $value ) {
+	if ( ! is_int( $value ) && ! is_string( $value ) ) {
+		return 0;
+	}
+
+	$digits = (string) $value;
+	if ( ! preg_match( '/^[0-9]+$/D', $digits ) ) {
+		return 0;
+	}
+
+	$number = (int) $digits;
+	return $number > 0 && ltrim( $digits, '0' ) === (string) $number ? $number : 0;
+}
+
+/**
  * Return a resilient display title for frontend discovery surfaces.
  *
  * WordPress permits untitled content. Theme navigation must still expose a
@@ -21,7 +44,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function slateframe_get_display_title( $post_id = 0 ) {
 	$title = get_the_title( $post_id );
 
-	if ( '' === trim( wp_strip_all_tags( (string) $title ) ) ) {
+	if ( ! is_string( $title ) || '' === trim( wp_strip_all_tags( $title ) ) ) {
 		return __( 'Untitled', 'slateframe' );
 	}
 
@@ -54,28 +77,56 @@ function slateframe_featured_media( $post_id = 0 ) {
 		)
 	);
 
-	if ( '' === $image_html ) {
+	// Attachment filters may return false, objects or non-image markup. Never
+	// pass those values to Core's HTML processor or emit an empty hero figure.
+	if ( ! is_string( $image_html ) || '' === trim( $image_html ) ) {
 		return;
 	}
 
 	$image_processor = new WP_HTML_Tag_Processor( $image_html );
 
-	if ( $image_processor->next_tag( 'img' ) ) {
-		$image_processor->set_attribute( 'loading', 'eager' );
-		$image_processor->set_attribute( 'decoding', 'async' );
-		$image_processor->set_attribute( 'fetchpriority', 'high' );
-		$image_html = $image_processor->get_updated_html();
+	if ( ! $image_processor->next_tag( 'img' ) ) {
+		return;
 	}
+
+	$image_processor->set_attribute( 'loading', 'eager' );
+	$image_processor->set_attribute( 'decoding', 'async' );
+	$image_processor->set_attribute( 'fetchpriority', 'high' );
+	$image_html = $image_processor->get_updated_html();
 
 	echo '<figure class="slateframe-shell slateframe-entry-hero">';
 	// wp_get_attachment_image() escapes its responsive image markup; attributes above are set through Core's HTML processor.
 	echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-	if ( '' !== trim( (string) $caption ) ) {
+	if ( is_string( $caption ) && '' !== trim( $caption ) ) {
 		printf( '<figcaption class="wp-caption-text">%s</figcaption>', wp_kses_post( $caption ) );
 	}
 
 	echo '</figure>';
+}
+
+/**
+ * Return the public parent of an attachment, if one exists.
+ *
+ * Attachment pages can be reached independently of their parent. Never
+ * expose a private, draft, scheduled, trashed, or non-viewable parent's
+ * title and permalink in the attachment recovery navigation. Core decides
+ * public visibility for built-in and registered custom post types.
+ *
+ * @param int $attachment_id Attachment post ID.
+ * @return int Public parent post ID, or zero when no public parent exists.
+ */
+function slateframe_public_attachment_parent_id( $attachment_id ) {
+	// Core returns an integer, but filtered post objects may expose malformed
+	// parent IDs. Casting arrays, booleans or overflowing strings could turn
+	// them into an unrelated public post and expose its recovery link.
+	$parent_id = slateframe_positive_int( wp_get_post_parent_id( absint( $attachment_id ) ) );
+
+	if ( 0 >= $parent_id || ! is_post_publicly_viewable( $parent_id ) ) {
+		return 0;
+	}
+
+	return $parent_id;
 }
 
 /**
@@ -90,21 +141,24 @@ function slateframe_attachment_details( $attachment_id ) {
 	$details       = array();
 	$mime_type     = get_post_mime_type( $attachment_id );
 
-	if ( $mime_type ) {
+	if ( is_string( $mime_type ) && '' !== $mime_type ) {
 		$details[ __( 'File type', 'slateframe' ) ] = $mime_type;
 	}
 
-	if ( is_array( $metadata ) && ! empty( $metadata['width'] ) && ! empty( $metadata['height'] ) ) {
+	$width  = is_array( $metadata ) ? slateframe_positive_int( isset( $metadata['width'] ) ? $metadata['width'] : null ) : 0;
+	$height = is_array( $metadata ) ? slateframe_positive_int( isset( $metadata['height'] ) ? $metadata['height'] : null ) : 0;
+	if ( $width && $height ) {
 		$details[ __( 'Dimensions', 'slateframe' ) ] = sprintf(
 			/* translators: 1: image width, 2: image height. */
 			__( '%1$s × %2$s px', 'slateframe' ),
-			number_format_i18n( (int) $metadata['width'] ),
-			number_format_i18n( (int) $metadata['height'] )
+			number_format_i18n( $width ),
+			number_format_i18n( $height )
 		);
 	}
 
-	if ( is_array( $metadata ) && ! empty( $metadata['filesize'] ) ) {
-		$details[ __( 'File size', 'slateframe' ) ] = size_format( (int) $metadata['filesize'] );
+	$filesize = is_array( $metadata ) ? slateframe_positive_int( isset( $metadata['filesize'] ) ? $metadata['filesize'] : null ) : 0;
+	if ( $filesize ) {
+		$details[ __( 'File size', 'slateframe' ) ] = size_format( $filesize );
 	}
 
 	/**
@@ -113,7 +167,25 @@ function slateframe_attachment_details( $attachment_id ) {
 	 * @param array<string,string> $details       Label/value metadata.
 	 * @param int                  $attachment_id Attachment post ID.
 	 */
-	return apply_filters( 'slateframe_attachment_details', $details, $attachment_id );
+	$filtered = apply_filters( 'slateframe_attachment_details', $details, $attachment_id );
+	if ( ! is_array( $filtered ) ) {
+		return $details;
+	}
+
+	$safe_details = array();
+	foreach ( $filtered as $label => $value ) {
+		if (
+			! is_string( $label ) ||
+			'' === trim( $label ) ||
+			! is_string( $value ) ||
+			'' === trim( $value )
+		) {
+			continue;
+		}
+		$safe_details[ $label ] = $value;
+	}
+
+	return $safe_details;
 }
 
 /**
@@ -135,8 +207,9 @@ function slateframe_entry_meta() {
 		return;
 	}
 
-	$author_id   = (int) get_the_author_meta( 'ID' );
-	$author_name = trim( (string) get_the_author() );
+	$author_id   = slateframe_positive_int( get_the_author_meta( 'ID' ) );
+	$raw_author  = get_the_author();
+	$author_name = is_string( $raw_author ) ? trim( $raw_author ) : '';
 	$author_url  = $author_id ? get_author_posts_url( $author_id ) : '';
 
 	/**
@@ -149,6 +222,9 @@ function slateframe_entry_meta() {
 	 * @param int    $author_id  WordPress user ID.
 	 */
 	$author_url = apply_filters( 'slateframe_author_url', $author_url, $author_id );
+	// Extensions may intentionally suppress a byline link or return invalid data.
+	// Sanitize before deciding whether to render an anchor at all.
+	$author_url = is_string( $author_url ) ? esc_url_raw( $author_url ) : '';
 
 	echo '<div class="slateframe-entry-meta">';
 	slateframe_posted_on();
@@ -204,6 +280,11 @@ function slateframe_entry_footer() {
 	 * @param int    $post_id Current post ID.
 	 */
 	$tags = apply_filters( 'slateframe_entry_tags_html', $tags, get_the_ID() );
+
+	// The public hooks accept HTML strings. Ignore malformed plugin returns
+	// instead of passing arrays or WP_Error objects to wp_kses_post().
+	$categories = is_string( $categories ) ? $categories : '';
+	$tags       = is_string( $tags ) ? $tags : '';
 
 	if ( ! $categories && ! $tags ) {
 		return;
@@ -277,6 +358,6 @@ function slateframe_menu_fallback() {
 		'<ul class="slateframe-menu-fallback"><li class="page_item slateframe-home-link"><a href="%1$s">%2$s</a></li>%3$s</ul>',
 		esc_url( home_url( '/' ) ),
 		esc_html__( 'Home', 'slateframe' ),
-		wp_kses_post( $pages )
+		wp_kses_post( is_string( $pages ) ? $pages : '' )
 	);
 }

@@ -45,7 +45,7 @@
 			?>
 		</nav>
 
-		<button class="slateframe-color-toggle" type="button" aria-pressed="false" data-color-toggle>
+		<button class="slateframe-color-toggle" type="button" aria-pressed="false" data-color-toggle data-cookie-path="<?php echo esc_attr( COOKIEPATH ); ?>">
 			<span class="screen-reader-text"><?php esc_html_e( 'Dark mode', 'slateframe' ); ?></span>
 			<svg class="slateframe-color-icon slateframe-color-icon-sun" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
 				<circle cx="12" cy="12" r="3.5" fill="currentColor"></circle>

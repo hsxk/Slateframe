@@ -95,6 +95,7 @@ function slateframe_photography_marker_classes() {
 		'is-style-slateframe-photo-feature',
 		'is-style-slateframe-photo-sequence',
 		'slateframe-photography-sequence',
+		'slateframe-gallery-sequence',
 	);
 	$legacy_markers = apply_filters( 'slateframe_content_mode_markers', array() );
 	if ( is_array( $legacy_markers ) ) {
@@ -165,7 +166,7 @@ function slateframe_query_loop_marker_classes() {
  * @return bool
  */
 function slateframe_content_has_class_marker( $content, $markers, $parse_blocks = true ) {
-	if ( '' === trim( (string) $content ) || ! is_array( $markers ) || empty( $markers ) ) {
+	if ( ! is_string( $content ) || '' === trim( $content ) || ! is_array( $markers ) || empty( $markers ) ) {
 		return false;
 	}
 
@@ -210,7 +211,8 @@ function slateframe_blocks_have_class_marker( $blocks, $markers ) {
 		if ( ! is_array( $block ) ) {
 			continue;
 		}
-		$class_name = isset( $block['attrs']['className'] ) ? $block['attrs']['className'] : '';
+		$attrs      = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$class_name = isset( $attrs['className'] ) ? $attrs['className'] : '';
 		if ( is_string( $class_name ) && '' !== trim( $class_name ) ) {
 			$classes = preg_split( '/\\s+/', trim( $class_name ) );
 			foreach ( $markers as $marker ) {
@@ -234,7 +236,7 @@ function slateframe_blocks_have_class_marker( $blocks, $markers ) {
  */
 function slateframe_content_has_form( $content ) {
 	// Avoid constructing the HTML processor for ordinary text and block markup.
-	if ( false === stripos( (string) $content, '<form' ) ) {
+	if ( ! is_string( $content ) || false === stripos( $content, '<form' ) ) {
 		return false;
 	}
 
@@ -250,10 +252,18 @@ function slateframe_content_has_form( $content ) {
  * @return bool
  */
 function slateframe_blocks_have_legacy_search( $blocks ) {
+	if ( ! is_array( $blocks ) ) {
+		return false;
+	}
+
 	foreach ( $blocks as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
+		$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
 		if (
 			'core/legacy-widget' === ( isset( $block['blockName'] ) ? $block['blockName'] : '' ) &&
-			'search' === ( isset( $block['attrs']['idBase'] ) ? $block['attrs']['idBase'] : '' )
+			'search' === ( isset( $attrs['idBase'] ) ? $attrs['idBase'] : '' )
 		) {
 			return true;
 		}
@@ -299,8 +309,14 @@ function slateframe_synced_pattern_contents( $blocks, &$seen, $depth = 0 ) {
 			continue;
 		}
 
-		$raw_ref = isset( $block['attrs']['ref'] ) ? $block['attrs']['ref'] : null;
+		$attrs   = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$raw_ref = isset( $attrs['ref'] ) ? $attrs['ref'] : null;
 		$ref     = ( is_int( $raw_ref ) || ( is_string( $raw_ref ) && ctype_digit( $raw_ref ) ) ) ? (int) $raw_ref : 0;
+		// Decimal strings outside PHP's integer range must never resolve to a
+		// different published pattern ID after a saturating integer cast.
+		if ( is_string( $raw_ref ) && $ref > 0 && ltrim( $raw_ref, '0' ) !== (string) $ref ) {
+			continue;
+		}
 		if ( $ref <= 0 || ( isset( $seen[ $ref ] ) && $seen[ $ref ] <= $depth ) ) {
 			continue;
 		}
@@ -308,6 +324,11 @@ function slateframe_synced_pattern_contents( $blocks, &$seen, $depth = 0 ) {
 		$seen[ $ref ] = $depth;
 		$post         = get_post( $ref );
 		if ( ! $post instanceof WP_Post || 'wp_block' !== $post->post_type || 'publish' !== $post->post_status ) {
+			continue;
+		}
+
+		// Filters and importers may supply malformed content; only inspect text.
+		if ( ! is_string( $post->post_content ) ) {
 			continue;
 		}
 
@@ -336,7 +357,14 @@ function slateframe_pattern_form_assets( $contents ) {
 		'form_content' => false,
 	);
 
+	if ( ! is_array( $contents ) ) {
+		return $needed;
+	}
+
 	foreach ( $contents as $content ) {
+		if ( ! is_string( $content ) ) {
+			continue;
+		}
 		if ( has_block( 'core/search', $content ) ) {
 			$needed['forms'] = true;
 		}
@@ -372,19 +400,20 @@ function slateframe_synced_form_assets( $blocks, $seen = array(), $depth = 0 ) {
  * Resolve patterns in the current singular post once per request.
  *
  * Shared by form, Photography, Portfolio, Knowledge, and Query Loop asset
- * detection. Does not render arbitrary blocks or execute shortcodes.
+ * detection. Never inspects locked Core post content before postpass.
+ * Does not render arbitrary blocks or execute shortcodes.
  *
  * @return string[] Published synced-pattern content.
  */
 function slateframe_singular_synced_pattern_contents() {
 	static $cache = array();
 
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return array();
 	}
 
 	$post = get_post();
-	if ( ! $post instanceof WP_Post || ! has_block( 'core/block', $post->post_content ) ) {
+	if ( ! $post instanceof WP_Post || ! is_string( $post->post_content ) || ! has_block( 'core/block', $post->post_content ) ) {
 		return array();
 	}
 
@@ -452,12 +481,12 @@ function slateframe_footer_form_assets() {
 function slateframe_singular_synced_form_assets() {
 	static $cache = array();
 
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return slateframe_pattern_form_assets( array() );
 	}
 
 	$post = get_post();
-	if ( ! $post instanceof WP_Post ) {
+	if ( ! $post instanceof WP_Post || ! is_string( $post->post_content ) ) {
 		return slateframe_pattern_form_assets( array() );
 	}
 
@@ -505,11 +534,11 @@ function slateframe_forms_styles_needed() {
 	$needed = slateframe_search_form_styles_needed() || $footer['forms'] || slateframe_singular_synced_form_assets()['forms'];
 
 	if ( ! $needed && is_singular() ) {
-		$needed = comments_open() || (bool) get_comments_number();
+		$needed = post_password_required() || comments_open() || (bool) get_comments_number();
 		$post   = get_post();
 
-		if ( ! $needed && $post instanceof WP_Post ) {
-			$needed = has_block( 'core/search', $post ) || slateframe_content_has_form( $post->post_content );
+		if ( ! $needed && $post instanceof WP_Post && is_string( $post->post_content ) ) {
+			$needed = has_block( 'core/search', $post->post_content ) || slateframe_content_has_form( $post->post_content );
 		}
 	}
 
@@ -533,7 +562,7 @@ function slateframe_form_content_styles_needed() {
 	$footer = slateframe_footer_form_assets();
 	$needed = $footer['form_content'] || slateframe_singular_synced_form_assets()['form_content'];
 
-	if ( is_singular() ) {
+	if ( is_singular() && ! post_password_required() ) {
 		$post = get_post();
 
 		if ( $post instanceof WP_Post ) {
@@ -556,12 +585,21 @@ function slateframe_form_content_styles_needed() {
  * @return bool
  */
 function slateframe_blocks_have_lightbox( $blocks ) {
+	if ( ! is_array( $blocks ) ) {
+		return false;
+	}
+
 	foreach ( $blocks as $block ) {
+		if ( ! is_array( $block ) ) {
+			continue;
+		}
 		$block_name = isset( $block['blockName'] ) ? $block['blockName'] : '';
+		$attrs      = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+		$lightbox   = isset( $attrs['lightbox'] ) && is_array( $attrs['lightbox'] ) ? $attrs['lightbox'] : array();
 
 		if (
 			in_array( $block_name, array( 'core/image', 'core/gallery' ), true ) &&
-			! empty( $block['attrs']['lightbox']['enabled'] )
+			isset( $lightbox['enabled'] ) && true === $lightbox['enabled']
 		) {
 			return true;
 		}
@@ -584,7 +622,7 @@ function slateframe_blocks_have_lightbox( $blocks ) {
  * @return bool
  */
 function slateframe_photography_styles_needed() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return false;
 	}
 
@@ -598,10 +636,10 @@ function slateframe_photography_styles_needed() {
 
 	$contents = array_merge( array( $post->post_content ), slateframe_singular_synced_pattern_contents() );
 	foreach ( $contents as $content ) {
-		if ( is_array( $markers ) && slateframe_content_has_class_marker( $content, array_unique( $markers ) ) ) {
+		if ( is_array( $markers ) && slateframe_content_has_class_marker( $content, $markers ) ) {
 			return true;
 		}
-		if ( slateframe_blocks_have_lightbox( parse_blocks( $content ) ) ) {
+		if ( is_string( $content ) && false !== strpos( $content, '"lightbox"' ) && slateframe_blocks_have_lightbox( parse_blocks( $content ) ) ) {
 			return true;
 		}
 	}
@@ -615,7 +653,7 @@ function slateframe_photography_styles_needed() {
  * @return bool
  */
 function slateframe_content_modes_needed() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return false;
 	}
 
@@ -646,7 +684,7 @@ function slateframe_content_modes_needed() {
  * @return bool
  */
 function slateframe_query_loop_styles_needed() {
-	if ( ! is_singular() ) {
+	if ( ! is_singular() || post_password_required() ) {
 		return false;
 	}
 
@@ -679,8 +717,16 @@ function slateframe_assets() {
 	$forms_needed         = slateframe_forms_styles_needed();
 	$form_content_needed  = slateframe_form_content_styles_needed();
 	$search_form_needed   = slateframe_search_form_styles_needed();
+	// Core replaces protected content with a password form. Hidden comments
+	// must not load their CSS or reply script until the password is accepted.
+	$password_form_needed = is_singular() && post_password_required();
+	$comments_visible     = is_singular() && ! $password_form_needed;
+	$comments_open        = $comments_visible && comments_open();
+	// Closed but unlocked threads still render their historical comments.
+	$comments_needed = $comments_open || ( $comments_visible && (bool) get_comments_number() );
 	// Preserve CSS dependency closure even when extension filters disagree.
-	$forms_needed = $forms_needed || $form_content_needed || $search_form_needed;
+	$forms_needed = $forms_needed || $form_content_needed || $search_form_needed || $comments_needed;
+	$forms_needed = $forms_needed || $password_form_needed;
 
 	wp_enqueue_style( 'slateframe-style', get_stylesheet_uri(), array(), $version );
 	wp_enqueue_style(
@@ -782,7 +828,7 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( is_singular() && ( comments_open() || get_comments_number() ) ) {
+	if ( $comments_needed ) {
 		wp_enqueue_style(
 			'slateframe-comments',
 			get_template_directory_uri() . '/assets/css/comments.css',
@@ -791,7 +837,7 @@ function slateframe_assets() {
 		);
 	}
 
-	if ( is_singular() && comments_open() && get_option( 'thread_comments' ) ) {
+	if ( $comments_open && get_option( 'thread_comments' ) ) {
 		wp_enqueue_script( 'comment-reply' );
 	}
 
@@ -842,7 +888,7 @@ function slateframe_focusable_table_block( $block_content ) {
 
 	$processor = new WP_HTML_Tag_Processor( $block_content );
 
-	while ( $processor->next_tag() ) {
+	while ( $processor->next_tag( array( 'tag_name' => 'FIGURE' ) ) ) {
 		if ( ! $processor->has_class( 'wp-block-table' ) ) {
 			continue;
 		}
@@ -859,36 +905,37 @@ function slateframe_focusable_table_block( $block_content ) {
 add_filter( 'render_block_core/table', 'slateframe_focusable_table_block' );
 
 /**
- * Keep direct TablePress output reachable when the table itself becomes the
- * horizontal scroll owner inside Slateframe's reading measure.
+ * Make Core Calendar's horizontal scroll container keyboard reachable.
  *
- * TablePress shortcodes are expanded before this priority. The fast string
- * guard avoids parsing ordinary content and the theme does not depend on the
- * plugin being installed.
+ * Calendar renders a seven-column table inside a Core-owned wrapper. At
+ * narrow widths or text zoom, the wrapper scrolls instead of changing the
+ * table semantics. Keep author-supplied tabindex values untouched.
  *
- * @param string $content Rendered post content.
+ * @param string $block_content Rendered Core Calendar markup.
  * @return string
  */
-function slateframe_focusable_tablepress_tables( $content ) {
-	if ( false === strpos( $content, 'tablepress' ) ) {
-		return $content;
+function slateframe_focusable_calendar_block( $block_content ) {
+	if ( '' === $block_content || false === strpos( $block_content, 'wp-block-calendar' ) ) {
+		return $block_content;
 	}
 
-	$processor = new WP_HTML_Tag_Processor( $content );
+	$processor = new WP_HTML_Tag_Processor( $block_content );
 
-	while ( $processor->next_tag( 'table' ) ) {
-		if ( ! $processor->has_class( 'tablepress' ) ) {
+	while ( $processor->next_tag( array( 'tag_name' => 'DIV' ) ) ) {
+		if ( ! $processor->has_class( 'wp-block-calendar' ) ) {
 			continue;
 		}
 
 		if ( null === $processor->get_attribute( 'tabindex' ) ) {
 			$processor->set_attribute( 'tabindex', '0' );
 		}
+
+		break;
 	}
 
 	return $processor->get_updated_html();
 }
-add_filter( 'the_content', 'slateframe_focusable_tablepress_tables', 20 );
+add_filter( 'render_block_core/calendar', 'slateframe_focusable_calendar_block' );
 
 /**
  * Render only the custom-logo image inside Slateframe's own brand link.
@@ -928,7 +975,7 @@ function slateframe_brand_mark() {
 function slateframe_language_switcher() {
 	$html = apply_filters( 'slateframe_language_switcher_html', '' );
 
-	if ( ! $html ) {
+	if ( ! is_string( $html ) || '' === trim( $html ) ) {
 		return;
 	}
 

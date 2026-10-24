@@ -46,6 +46,15 @@
 	line-height: 1.55;
 }
 
+.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-contact-sheet, .is-style-slateframe-diptych, .is-style-slateframe-photo-sequence, .slateframe-gallery-sequence) .wp-block-image figcaption {
+	position: static;
+	background: none;
+	color: var(--slateframe-muted);
+	text-shadow: none;
+	font-weight: 400;
+	text-align: start;
+}
+
 .editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
 	height: auto;
 	aspect-ratio: auto;
@@ -107,4 +116,25 @@
 	overscroll-behavior-inline: contain;
 }
 
-.editor-styles-wrapper .slateframe-project-grid .wp-block-post-title{max-width:14em}
+.editor-styles-wrapper .slateframe-project-grid .wp-block-post-title{max-width:none}
+.editor-styles-wrapper .slateframe-project-grid .slateframe-project-card :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date){inline-size:100%;min-inline-size:0;overflow-wrap:anywhere}
+
+/* Keep native Core media bounded in the editing canvas. */
+.editor-styles-wrapper :is(audio,iframe,embed,object){max-inline-size:100%}
+
+/* Preserve native Core Calendar table semantics inside the editor canvas. */
+.editor-styles-wrapper .wp-block-calendar{max-inline-size:100%;overflow-x:auto}
+.editor-styles-wrapper .wp-block-calendar th{white-space:nowrap}
+
+/* Native File control parity with the published canvas. */
+.editor-styles-wrapper .wp-block-file__button{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;padding:var(--slateframe-control-padding-block) var(--slateframe-control-padding-inline);border-radius:var(--slateframe-radius);white-space:normal}
+
+.editor-styles-wrapper .wp-block-verse{font-family:inherit;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;max-inline-size:100%}
+
+/* Code keeps LTR syntax in an RTL editor; native Verse inherits direction. */
+.editor-styles-wrapper .wp-block-code{direction:ltr;text-align:left}
+
+/* Natural tracking for CJK Gutenberg post titles. */
+.editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
+
+.editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(2.15rem + var(--slateframe-component-gap))}

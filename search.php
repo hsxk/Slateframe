@@ -16,7 +16,7 @@ global $wp_query;
 				printf(
 					/* translators: %s: search query. */
 					esc_html__( 'Search results for: %s', 'slateframe' ),
-					esc_html( get_search_query() )
+					'<bdi>' . esc_html( get_search_query( false ) ) . '</bdi>'
 				);
 				?>
 			</h1>

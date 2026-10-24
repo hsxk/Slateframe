@@ -1,0 +1,164 @@
+<?php
+/** Isolated Core marker and lightbox regression against actual theme functions. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+class WP_Post {
+    public $ID = 17;
+    public $post_type = 'wp_block';
+    public $post_status = 'publish';
+    public $post_content = '<div class="slateframe-gallery-sequence"></div>';
+}
+class WP_HTML_Tag_Processor {
+    private $html;
+    private $offset = 0;
+    private $classes = '';
+    public function __construct( $html ) {
+        if ( ! is_string( $html ) ) { throw new TypeError( 'HTML must be a string' ); }
+        $this->html = $html;
+    }
+    public function next_tag( $options = null ) {
+        $tag = is_array( $options ) && isset( $options['tag_name'] ) ? preg_quote( $options['tag_name'], '~' ) : '[a-z][a-z0-9-]*';
+        if ( ! preg_match( '~<(' . $tag . ')\b([^>]*)>~i', $this->html, $match, PREG_OFFSET_CAPTURE, $this->offset ) ) { return false; }
+        $this->offset = $match[0][1] + strlen( $match[0][0] );
+        $this->classes = '';
+        if ( preg_match( '~\bclass=["\x27]([^"\x27]*)["\x27]~i', $match[2][0], $attrs ) ) { $this->classes = $attrs[1]; }
+        return true;
+    }
+    public function has_class( $name ) { return in_array( $name, preg_split( '/\s+/', $this->classes ), true ); }
+}
+function get_template_directory() { return dirname( __DIR__, 2 ); }
+function add_action() {}
+function add_filter() {}
+function is_singular() { return true; }
+function post_password_required() { return false; }
+function is_search() { return false; }
+function is_404() { return false; }
+function is_home() { return false; }
+function is_archive() { return false; }
+function is_author() { return false; }
+function comments_open() { return false; }
+function get_comments_number() { return 0; }
+function wp_get_sidebars_widgets() { return array(); }
+function get_post() { $post = new WP_Post(); if ( array_key_exists( 'context_content', $GLOBALS ) ) { $post->post_content = $GLOBALS['context_content']; } return $post; }
+function has_block( $name, $content ) {
+    if ( $content instanceof WP_Post ) { $content = $content->post_content; }
+    if ( ! is_string( $content ) ) { throw new TypeError( 'Core has_block requires string post content' ); }
+    return 'core/search' === $name && false !== strpos( $content, '<!-- wp:search' );
+}
+function parse_blocks( $content ) {
+    if ( ! is_string( $content ) ) { throw new TypeError( 'parse_blocks requires string' ); }
+    $GLOBALS['parse_calls'] = isset( $GLOBALS['parse_calls'] ) ? $GLOBALS['parse_calls'] + 1 : 1;
+    if ( false !== strpos( $content, '<!-- wp:image' ) && false !== strpos( $content, '"lightbox"' ) && false !== strpos( $content, '"enabled":true' ) ) {
+        return array( array( 'blockName' => 'core/image', 'attrs' => array( 'lightbox' => array( 'enabled' => true ) ) ) );
+    }
+    if ( is_string( $content ) && false !== strpos( $content, '<!-- wp:group' ) ) {
+        return array( array( 'blockName' => 'core/group', 'attrs' => array( 'className' => 'slateframe-gallery-sequence' ) ) );
+    }
+    return array();
+}
+function apply_filters( $name, $value ) {
+    if ( 'slateframe_photography_markers' === $name ) {
+        return array_merge( $value, array( array( 'invalid' ), new WP_Error(), 'slateframe-gallery-sequence' ) );
+    }
+    return $value;
+}
+require dirname( __DIR__, 2 ) . '/functions.php';
+set_error_handler( function( $severity, $message ) { throw new ErrorException( $message, 0, $severity ); } );
+$checks = 0;
+function check_marker( $ok, $message ) {
+    global $checks;
+    if ( ! $ok ) { throw new RuntimeException( $message ); }
+    ++$checks;
+}
+foreach ( array( null, false, array( 'bad' ), new stdClass(), new WP_Error() ) as $bad ) {
+    check_marker( false === slateframe_content_has_class_marker( $bad, array( 'slateframe-gallery-sequence' ) ), 'Malformed class content' );
+    check_marker( false === slateframe_content_has_form( $bad ), 'Malformed form content' );
+}
+check_marker( true === slateframe_content_has_class_marker( '<div class="slateframe-gallery-sequence"></div>', array( array( 'bad' ), new WP_Error(), 'slateframe-gallery-sequence' ) ), 'Valid marker lost' );
+check_marker( false === slateframe_content_has_class_marker( '<p>slateframe-gallery-sequence</p>', array( 'slateframe-gallery-sequence' ) ), 'Prose false positive' );
+check_marker( false === slateframe_content_has_class_marker( '<div class="slateframe-gallery-sequence-more"></div>', array( 'slateframe-gallery-sequence' ) ), 'Substring false positive' );
+check_marker( true === slateframe_content_has_class_marker( '<!-- wp:group {"className":"slateframe-gallery-sequence"} /-->', array( 'slateframe-gallery-sequence' ) ), 'Gutenberg marker lost' );
+check_marker( true === slateframe_content_has_form( '<form action="/"><input></form>' ), 'Real form lost' );
+check_marker( false === slateframe_content_has_form( '<formidable></formidable>' ), 'Form-like tag false positive' );
+foreach ( array( null, false, new WP_Error() ) as $bad ) {
+    check_marker( false === slateframe_blocks_have_legacy_search( $bad ), 'Malformed legacy tree' );
+    check_marker( false === slateframe_blocks_have_lightbox( $bad ), 'Malformed lightbox tree' );
+}
+check_marker( false === slateframe_blocks_have_class_marker( array( array( 'attrs' => new WP_Error() ) ), array( 'slateframe-gallery-sequence' ) ), 'Malformed Gutenberg attrs' );
+check_marker( false === slateframe_blocks_have_legacy_search( array( array( 'blockName' => 'core/legacy-widget', 'attrs' => new WP_Error() ) ) ), 'Malformed legacy attrs' );
+check_marker( false === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/image', 'attrs' => new WP_Error() ) ) ), 'Malformed lightbox attrs' );
+check_marker( true === slateframe_blocks_have_legacy_search( array( array( 'blockName' => 'core/group', 'innerBlocks' => array( array( 'blockName' => 'core/legacy-widget', 'attrs' => array( 'idBase' => 'search' ) ) ) ) ) ), 'Nested Core search lost' );
+check_marker( true === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/gallery', 'attrs' => array( 'lightbox' => array( 'enabled' => true ) ) ) ) ), 'Core lightbox lost' );
+check_marker( false === slateframe_blocks_have_lightbox( array( array( 'blockName' => 'core/image', 'attrs' => array( 'lightbox' => array( 'enabled' => 'false' ) ) ) ) ), 'String false enabled lightbox' );
+check_marker( true === slateframe_photography_styles_needed(), 'Mixed marker filter lost valid class' );
+function check_photo_parse( $content, $expected, $expected_parses, $label ) {
+    $GLOBALS['context_content'] = $content;
+    $GLOBALS['parse_calls'] = 0;
+    check_marker( $expected === slateframe_photography_styles_needed(), $label . ' result' );
+    check_marker( $expected_parses === $GLOBALS['parse_calls'], $label . ' parse budget' );
+}
+check_photo_parse( '<p>Ordinary article content</p>', false, 0, 'Plain article' );
+check_photo_parse( '<p>Literal "lightbox" in prose</p>', false, 1, 'Quoted prose' );
+check_photo_parse( '<!-- wp:image {"lightbox":{"enabled":true}} /-->', true, 1, 'Core Image lightbox' );
+check_photo_parse( '<!-- wp:image {"lightbox":{"enabled":false}} /-->', false, 1, 'Disabled lightbox' );
+check_photo_parse( '<div class="slateframe-gallery-sequence"></div>', true, 0, 'Photography marker' );
+check_photo_parse( array( 'malformed' ), false, 0, 'Malformed stored content' );
+
+/* Core synced-pattern references may come from imported or filtered blocks. */
+$GLOBALS['context_content'] = '<p>Published synced pattern</p>';
+foreach ( array( new WP_Error(), new stdClass(), 'invalid', false, null ) as $bad_attrs ) {
+    $seen = array();
+    check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => $bad_attrs ) ), $seen ), 'Malformed synced attrs' );
+}
+foreach ( array( array(), new WP_Error(), -3, 'bad', '0' ) as $bad_ref ) {
+    $seen = array();
+    check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => $bad_ref ) ) ), $seen ), 'Malformed synced ref' );
+}
+$seen = array();
+check_marker( array( '<p>Published synced pattern</p>' ) === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 31 ) ) ), $seen ), 'Published synced pattern omitted' );
+$seen = array();
+check_marker( array( '<p>Published synced pattern</p>' ) === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => '32' ) ) ), $seen ), 'Numeric string synced ref omitted' );
+$GLOBALS['context_content'] = array( 'not text' );
+$seen = array();
+check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 33 ) ) ), $seen ), 'Malformed synced content array' );
+$GLOBALS['context_content'] = new stdClass();
+$seen = array();
+check_marker( array() === slateframe_synced_pattern_contents( array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 34 ) ) ), $seen ), 'Malformed synced content object' );
+$GLOBALS['context_content'] = '<p>Published synced pattern</p>';
+$seen = array();
+$repeated = array(
+    array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 35 ) ),
+    array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 35 ) ),
+);
+check_marker( 1 === count( slateframe_synced_pattern_contents( $repeated, $seen ) ) && 0 === $seen[35], 'Repeated synced reference not deduplicated' );
+$seen = array();
+$nested = array( array( 'blockName' => 'core/group', 'innerBlocks' => array( array( 'blockName' => 'core/block', 'attrs' => array( 'ref' => 36 ) ) ) ) );
+check_marker( 1 === count( slateframe_synced_pattern_contents( $nested, $seen ) ) && 0 === $seen[36], 'Nested Core group consumed reference depth' );
+$seen = array();
+check_marker( array() === slateframe_synced_pattern_contents( $nested, $seen, 8 ), 'Synced reference depth limit ignored' );
+foreach ( array( array( 'invalid post content' ), new stdClass() ) as $bad_content ) {
+    $GLOBALS['context_content'] = $bad_content;
+    check_marker( array() === slateframe_singular_synced_pattern_contents(), 'Malformed singular synced content' );
+    $flags = slateframe_singular_synced_form_assets();
+    check_marker( false === $flags['forms'] && false === $flags['search_form'] && false === $flags['form_content'], 'Malformed singular form content' );
+}
+/* Malformed filtered pattern content must not reach Core has_block(). */
+$empty_forms = array( 'forms' => false, 'search_form' => false, 'form_content' => false );
+foreach ( array( null, false, new WP_Error(), new stdClass(), 'invalid' ) as $bad_contents ) {
+    check_marker( $empty_forms === slateframe_pattern_form_assets( $bad_contents ), 'Malformed pattern content collection' );
+}
+foreach ( array( array( new WP_Error() ), array( 42 ), array( false ), array( new stdClass() ) ) as $bad_entries ) {
+    check_marker( $empty_forms === slateframe_pattern_form_assets( $bad_entries ), 'Malformed pattern content entry' );
+}
+$valid_forms = slateframe_pattern_form_assets( array( new WP_Error(), '<!-- wp:search /-->', '<form action="/"><input></form>', 42 ) );
+check_marker( $valid_forms['forms'] && $valid_forms['form_content'] && ! $valid_forms['search_form'], 'Valid mixed pattern form content lost' );
+foreach ( array( array( 'not text' ), new stdClass(), false, null ) as $bad_content ) {
+    $GLOBALS['context_content'] = $bad_content;
+    check_marker( false === slateframe_forms_styles_needed(), 'Malformed singular Core search content' );
+}
+$GLOBALS['context_content'] = '<!-- wp:search /-->';
+check_marker( true === slateframe_forms_styles_needed(), 'Valid Core Search block omitted' );
+$GLOBALS['context_content'] = '<form action="/"><input></form>';
+check_marker( true === slateframe_forms_styles_needed(), 'Valid authored form omitted' );
+unset( $GLOBALS['context_content'] );
+echo "Contextual assets: {$checks} assertions passed\n";

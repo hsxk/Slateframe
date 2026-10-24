@@ -1,0 +1,73 @@
+<?php
+/** Isolate actual content-asset selectors without a WordPress installation. */
+$source = file_get_contents( dirname( __DIR__, 2 ) . '/functions.php' );
+$names = array(
+    'slateframe_singular_synced_pattern_contents',
+    'slateframe_singular_synced_form_assets',
+    'slateframe_form_content_styles_needed',
+    'slateframe_photography_styles_needed',
+    'slateframe_content_modes_needed',
+    'slateframe_query_loop_styles_needed',
+);
+$code = '<?php' . "\n";
+foreach ( $names as $name ) {
+    $start = strpos( $source, 'function ' . $name . '() {' );
+    $end = false === $start ? false : strpos( $source, "\n}\n", $start );
+    if ( false === $start || false === $end ) {
+        fwrite( STDERR, "Missing selector: $name\n" );
+        exit( 1 );
+    }
+    $code .= substr( $source, $start, $end + 2 - $start ) . "\n";
+}
+$tmp = tempnam( sys_get_temp_dir(), 'slateframe-hidden-' );
+if ( false === $tmp || false === file_put_contents( $tmp, $code ) ) {
+    fwrite( STDERR, "Could not prepare PHP fixture\n" );
+    exit( 1 );
+}
+try {
+    require $tmp;
+} finally {
+    unlink( $tmp );
+}
+$flags = json_decode( getenv( 'SLATEFRAME_HIDDEN_CASE' ), true );
+if ( ! is_array( $flags ) ) {
+    fwrite( STDERR, "Invalid fixture flags\n" );
+    exit( 1 );
+}
+$GLOBALS['locked'] = ! empty( $flags['locked'] );
+$GLOBALS['post_reads'] = 0;
+class WP_Post {
+    public $ID = 31;
+    public $post_content = '<div class="slateframe-gallery-sequence slateframe-project-grid"><form>Private form</form></div>';
+}
+function is_singular() { return true; }
+function post_password_required() { return $GLOBALS['locked']; }
+function get_post() { ++$GLOBALS['post_reads']; return new WP_Post(); }
+function slateframe_pattern_form_assets( $contents ) { return array( 'forms' => false, 'search_form' => false, 'form_content' => false ); }
+function slateframe_footer_form_assets() { return array( 'forms' => false, 'search_form' => false, 'form_content' => false ); }
+function slateframe_content_has_form( $content ) { return false !== strpos( $content, '<form' ); }
+function slateframe_photography_marker_classes() { return array( 'slateframe-gallery-sequence' ); }
+function slateframe_content_mode_marker_classes() { return array( 'slateframe-project-grid' ); }
+function slateframe_query_loop_marker_classes() { return array( 'slateframe-project-grid' ); }
+function slateframe_content_has_class_marker( $content, $markers ) {
+    foreach ( $markers as $marker ) {
+        if ( false !== strpos( $content, '"' . $marker ) || false !== strpos( $content, ' ' . $marker . '"' ) ) {
+            return true;
+        }
+    }
+    return false;
+}
+function has_block( $name, $content ) { return false; }
+function apply_filters( $name, $value ) { return $value; }
+function slateframe_blocks_have_lightbox( $blocks ) { return false; }
+function parse_blocks( $content ) { return array(); }
+$results = array(
+    'synced' => slateframe_singular_synced_pattern_contents(),
+    'forms' => slateframe_singular_synced_form_assets(),
+    'form_content' => slateframe_form_content_styles_needed(),
+    'photography' => slateframe_photography_styles_needed(),
+    'content_modes' => slateframe_content_modes_needed(),
+    'query_loop' => slateframe_query_loop_styles_needed(),
+    'post_reads' => $GLOBALS['post_reads'],
+);
+echo json_encode( $results );

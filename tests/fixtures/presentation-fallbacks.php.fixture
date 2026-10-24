@@ -1,0 +1,81 @@
+<?php
+/** Disposable Core-filter output stubs for theme fallback regression. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+$GLOBALS['slateframe_case'] = array();
+function get_the_title( $id = 0 ) { return $GLOBALS['slateframe_case']['title']; }
+function __( $text, $domain ) { return $text; }
+function wp_strip_all_tags( $text ) {
+    if ( ! is_string( $text ) ) { throw new TypeError( 'Invalid title' ); }
+    return strip_tags( $text );
+}
+function absint( $value ) { return abs( (int) $value ); }
+function get_the_ID() { return 17; }
+function has_post_thumbnail( $id ) { return true; }
+function get_post_thumbnail_id( $id ) { return 31; }
+function wp_get_attachment_caption( $id ) { return $GLOBALS['slateframe_case']['caption']; }
+function wp_get_attachment_image( $id, $size, $icon, $attrs ) {
+    return '<img src="/photo.jpg" srcset="/photo.jpg 1x, /photo-2x.jpg 2x" alt="花">';
+}
+function wp_kses_post( $html ) {
+    if ( ! is_string( $html ) ) { throw new TypeError( 'Invalid markup' ); }
+    return $html;
+}
+function wp_list_pages( $args ) { return $GLOBALS['slateframe_case']['pages']; }
+function home_url( $path ) { return '/'; }
+function esc_url( $url ) { return $url; }
+function esc_html__( $text, $domain ) { return $text; }
+class WP_HTML_Tag_Processor {
+    private $html;
+    public function __construct( $html ) { $this->html = $html; }
+    public function next_tag( $tag ) { return false !== stripos( $this->html, '<img' ); }
+    public function set_attribute( $name, $value ) {
+        $this->html = preg_replace( '/<img\b/i', '<img ' . $name . '="' . $value . '"', $this->html, 1 );
+    }
+    public function get_updated_html() { return $this->html; }
+}
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+set_error_handler( function( $severity, $message ) { throw new ErrorException( $message, 0, $severity ); } );
+$cases = 0;
+function verify_case( $ok, $message ) {
+    global $cases;
+    if ( ! $ok ) { throw new RuntimeException( $message ); }
+    ++$cases;
+}
+function render_method( $method ) {
+    ob_start();
+    try { $method(); return ob_get_clean(); }
+    catch ( Throwable $error ) { ob_end_clean(); throw $error; }
+}
+$GLOBALS['slateframe_case']['title'] = 'Valid Title';
+verify_case( 'Valid Title' === slateframe_get_display_title(), 'Valid title lost' );
+foreach ( array( '日本語のタイトル', '中文标题', 'عنوان عربي', '<em>Inline</em> Title' ) as $title ) {
+    $GLOBALS['slateframe_case']['title'] = $title;
+    verify_case( $title === slateframe_get_display_title(), 'Valid translated/HTML title changed' );
+}
+foreach ( array( '', "  \t ", '<span></span>', false, null, 0, array( 'invalid' ), new stdClass(), new WP_Error() ) as $bad ) {
+    $GLOBALS['slateframe_case']['title'] = $bad;
+    verify_case( 'Untitled' === slateframe_get_display_title(), 'Malformed/empty title not localized' );
+}
+foreach ( array( false, null, '', " \t ", array( 'invalid' ), new stdClass(), new WP_Error(), 0 ) as $bad ) {
+    $GLOBALS['slateframe_case']['caption'] = $bad;
+    $html = render_method( 'slateframe_featured_media' );
+    verify_case( false === strpos( $html, '<figcaption' ), 'Malformed caption leaked' );
+    verify_case( 1 === substr_count( $html, '<figure' ), 'Valid image lost on malformed caption' );
+}
+$GLOBALS['slateframe_case']['caption'] = '<em>写真の説明</em>';
+$html = render_method( 'slateframe_featured_media' );
+verify_case( false !== strpos( $html, '<figcaption class="wp-caption-text"><em>写真の説明</em></figcaption>' ), 'CJK caption lost' );
+verify_case( false !== strpos( $html, 'srcset="/photo.jpg 1x, /photo-2x.jpg 2x"' ), 'Core responsive srcset lost' );
+verify_case( false !== strpos( $html, 'fetchpriority="high"' ), 'Hero priority lost' );
+verify_case( 1 === substr_count( $html, '</figure>' ), 'Hero figure unbalanced' );
+foreach ( array( null, false, array( 'bad' ), new WP_Error() ) as $bad ) {
+    $GLOBALS['slateframe_case']['pages'] = $bad;
+    $html = render_method( 'slateframe_menu_fallback' );
+    verify_case( false !== strpos( $html, 'slateframe-home-link' ), 'Fallback home link lost' );
+    verify_case( false === strpos( $html, 'Array' ), 'Invalid page markup leaked' );
+}
+$GLOBALS['slateframe_case']['pages'] = '<li class="page_item"><a href="/about">About</a></li>';
+$html = render_method( 'slateframe_menu_fallback' );
+verify_case( false !== strpos( $html, 'href="/about"' ), 'Valid Core page fallback lost' );
+echo "Presentation fallbacks: {$cases} assertions passed\n";

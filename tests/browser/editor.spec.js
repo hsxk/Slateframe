@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const { openAuthenticatedEditor } = require('./support/editor-login');
 
 const editorPostId = process.env.SLATEFRAME_EDITOR_POST_ID;
 const projectWidth = (testInfo) => testInfo.project.use.viewport?.width || 1440;
@@ -11,19 +12,7 @@ test.beforeEach(({}, testInfo) => {
 });
 
 async function loginAndOpenEditor(page) {
-	await page.goto('/wp-login.php', { waitUntil: 'domcontentloaded' });
-	await page.locator('#user_login').fill('admin');
-	await page.locator('#user_pass').fill('ci-password');
-	await Promise.all([
-		page.waitForURL(/\/wp-admin\//),
-		page.locator('#wp-submit').click(),
-	]);
-
-	await page.goto(`/wp-admin/post.php?post=${editorPostId}&action=edit`, { waitUntil: 'domcontentloaded' });
-	await page.waitForFunction(() => {
-		const select = window.wp?.data?.select?.('core/block-editor');
-		return Boolean(select?.getBlocks?.().length);
-	});
+	await openAuthenticatedEditor(page, editorPostId);
 
 	const welcomeGuide = page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i }).first();
 	try {
@@ -283,6 +272,39 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	expect(rtlMetrics.direction).toBe('rtl');
 	expect(rtlMetrics.rootOverflow).toBeLessThanOrEqual(1);
 
+	const editorStepMetrics = await knowledge.locator('ol.is-style-slateframe-steps > li').evaluateAll(nodes =>
+		nodes.map(node => {
+			const item = getComputedStyle(node);
+			const badge = getComputedStyle(node, '::before');
+			const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+			let textNode;
+			while ((textNode = walker.nextNode()) && !textNode.textContent.trim()) {}
+			if (!textNode) throw new Error('Missing Core list step text');
+			const range = document.createRange();
+			range.selectNodeContents(textNode);
+			const textBox = range.getBoundingClientRect();
+			const itemBox = node.getBoundingClientRect();
+			const badgeWidth = parseFloat(badge.width);
+			const textGap = item.direction === 'rtl'
+				? itemBox.right - badgeWidth - textBox.right
+				: textBox.left - itemBox.left - badgeWidth;
+			return {
+				padding: parseFloat(item.paddingInlineStart),
+				badgeWidth,
+				badgeDirection: badge.direction,
+				badgeInset: item.direction === 'rtl' ? badge.right : badge.left,
+				itemDirection: item.direction,
+				textGap,
+			};
+		}));
+	expect(editorStepMetrics).toHaveLength(3);
+	for (const step of editorStepMetrics) {
+		expect(step.badgeDirection).toBe(step.itemDirection);
+		expect(step.badgeInset).toBe('0px');
+		expect(step.padding).toBeGreaterThanOrEqual(step.badgeWidth + 8);
+		expect(step.textGap).toBeGreaterThanOrEqual(0);
+	}
+
 	await expect(page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i })).toBeHidden();
 
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
@@ -358,4 +380,45 @@ test('real Gutenberg canvas keeps Slateframe patterns valid, readable, and conta
 	});
 
 	await expect(page.locator('.interface-interface-skeleton__header, .editor-header').first()).toBeVisible();
+});
+
+test('real Gutenberg canvas applies native Core Footnote return control geometry', async ({ page }, testInfo) => {
+	const canvas = await loginAndOpenEditor(page);
+	const root = canvas.locator('.editor-styles-wrapper').first();
+	const fixture = root.locator('.slateframe-editor-footnote-qa');
+	await root.evaluate((node) => {
+		const section = document.createElement('section');
+		section.className = 'slateframe-editor-footnote-qa';
+		section.innerHTML = '<p>Core reference <sup id="fnref-editor-qa"><a href="#fn-editor-qa">1</a></sup></p><ol class="wp-block-footnotes"><li id="fn-editor-qa">Editor note 日本語 中文 العربية <a href="#fnref-editor-qa" aria-label="Return to reference">↩</a></li></ol>';
+		node.append(section);
+	});
+	try {
+		const backreference = fixture.locator('.wp-block-footnotes a[href="#fnref-editor-qa"]');
+		await expect(backreference).toBeVisible();
+		const metrics = await backreference.evaluate((node) => {
+			const box = node.getBoundingClientRect();
+			return {
+				width: box.width,
+				height: box.height,
+				control: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
+				inlineDisplay: getComputedStyle(document.querySelector('.slateframe-editor-footnote-qa sup a')).display,
+				rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			};
+		});
+		expect(metrics.control).toBeGreaterThanOrEqual(44);
+		expect(metrics.width).toBeGreaterThanOrEqual(metrics.control - 1);
+		expect(metrics.height).toBeGreaterThanOrEqual(metrics.control - 1);
+		expect(metrics.inlineDisplay).not.toBe('inline-flex');
+		expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
+		await fixture.evaluate((node) => { node.dir = 'rtl'; });
+		await page.emulateMedia({ forcedColors: 'active' });
+		await backreference.focus();
+		await expect(backreference).toBeFocused();
+		expect(await backreference.evaluate((node) => getComputedStyle(node).outlineStyle)).not.toBe('none');
+		const screenshotDir = path.resolve('test-artifacts/screenshots');
+		await fs.mkdir(screenshotDir, { recursive: true });
+		await fixture.screenshot({ path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-core-footnote-control.png`) });
+	} finally {
+		await fixture.evaluate((node) => node.remove()).catch(() => {});
+	}
 });

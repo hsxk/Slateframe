@@ -26,7 +26,7 @@ Highlights include:
 * Published synced patterns also receive conditional Photography/Core lightbox, Portfolio Query Loop, and Knowledge presentation in posts and Pages; unpublished and cyclic references do not cause unbounded asset discovery.
 * Native comments, archives, author pages, search, pagination, and 404 handling.
 * Lightweight code, table, gallery, caption, footnote, pullquote, disclosure, editorial lead, table-of-contents, and print presentation.
-* Starter patterns for photo essays, photography contact sheets/features/diptychs/sequences, project case studies/indexes/briefs/outcomes/query grids/decision logs, learning paths/lesson chapters/knowledge outlines/definitions/checkpoints/procedures/comparisons, editorial openings/notes/pathways, and curated reading lists.
+* Starter patterns for photo essays, photography contact sheets/features/diptychs/sequences, project case studies/indexes/briefs/outcomes/query grids/decision logs, learning paths/lesson chapters/knowledge outlines/definitions/checkpoints/procedures/comparisons/questions-and-answers, editorial openings/notes/pathways, and curated reading lists.
 * Block styles for editorial notes/leads, framed images, photo sequences, contact sheets/diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, disclosures, numbered steps, checklists, key facts, and editorial ledgers.
 * An editorial system-font type scale with Small, Body, Lead, Heading, and Display presets and no required third-party font request.
 * A coherent spatial system for control sizing, component and reading rhythm, page gutters, reading/wide widths, section whitespace, and corner radius, with bounded controls in Appearance > Customize that are mirrored into the block-editor canvas.
@@ -58,6 +58,10 @@ No. Slateframe is designed around WordPress core templates, blocks, patterns, me
 = Does Slateframe require a multilingual plugin? =
 
 No. The theme is language-agnostic and works with normal WordPress locales. Multilingual plugins may integrate through public hooks without becoming core dependencies.
+
+= Can I use the Photo sequence style without a Slateframe pattern? =
+
+Yes. Apply Photo sequence to a native Core Gallery in the block Styles panel. The first image spans the two-column desktop grid; narrow screens use one column. Images keep their natural proportions, even with the Core crop option enabled. Core lightbox remains optional.
 
 = Does Slateframe support RTL and CJK content? =
 

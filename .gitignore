@@ -9,3 +9,9 @@ dist/
 playwright-report/
 test-results/
 test-artifacts/
+# Generated Python caches must never become theme source.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

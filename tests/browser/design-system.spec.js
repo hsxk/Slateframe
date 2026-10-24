@@ -315,66 +315,34 @@ test('ordinary reading children remain on the shared content measure', async ({ 
 	}
 });
 
-test('plugin-style tables scroll locally and remain keyboard reachable', async ({ page }) => {
+test('plugin-owned tables preserve native semantics without theme-injected tabindex', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const table = page.locator('.browser-tablepress');
 	await expect(table).toBeVisible();
-	await expect(table).toHaveAttribute('tabindex', '0');
-
-	const readableCellWidths = await table.locator('td').evaluateAll((cells) => cells.map((cell) => cell.getBoundingClientRect().width));
-	expect(readableCellWidths.length).toBeGreaterThan(0);
-	expect(Math.min(...readableCellWidths)).toBeGreaterThanOrEqual(120);
-
-	await table.evaluate((node) => {
-		node.style.whiteSpace = 'nowrap';
-	});
-
-	const metrics = await table.evaluate((node) => {
-		const rect = node.getBoundingClientRect();
-		return {
-			clientWidth: node.clientWidth,
-			scrollWidth: node.scrollWidth,
-			left: rect.left,
-			right: rect.right,
-			viewport: document.documentElement.clientWidth,
-			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-			overflowX: getComputedStyle(node).overflowX,
-		};
-	});
-
-	expect(metrics.overflowX).toBe('auto');
-	expect(metrics.scrollWidth).toBeGreaterThanOrEqual(metrics.clientWidth);
-	expect(metrics.left).toBeGreaterThanOrEqual(-1);
-	expect(metrics.right).toBeLessThanOrEqual(metrics.viewport + 1);
-	expect(metrics.rootOverflow).toBeLessThanOrEqual(1);
-
-	await table.focus();
-	await expect(table).toBeFocused();
-	const focus = await table.evaluate((node) => {
-		const styles = getComputedStyle(node);
-		return { style: styles.outlineStyle, width: Number.parseFloat(styles.outlineWidth) };
-	});
-	expect(focus.style).not.toBe('none');
-	expect(focus.width).toBeGreaterThanOrEqual(2);
-
-	const zoomed = await page.evaluate(() => {
-		document.documentElement.dir = 'rtl';
-		document.documentElement.style.fontSize = '32px';
-		const node = document.querySelector('.browser-tablepress');
-		const rect = node.getBoundingClientRect();
-		return {
-			clientWidth: node.clientWidth,
-			scrollWidth: node.scrollWidth,
-			left: rect.left,
-			right: rect.right,
-			viewport: document.documentElement.clientWidth,
-			rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-		};
-	});
-	expect(zoomed.scrollWidth).toBeGreaterThanOrEqual(zoomed.clientWidth);
-	expect(zoomed.left).toBeGreaterThanOrEqual(-1);
-	expect(zoomed.right).toBeLessThanOrEqual(zoomed.viewport + 1);
-	expect(zoomed.rootOverflow).toBeLessThanOrEqual(1);
+	// Plugin markup is not a Core Table; do not add an authored-focus surrogate.
+	expect(await table.getAttribute('tabindex')).toBeNull();
+	const cellCount = await table.locator('td').count();
+	expect(cellCount).toBeGreaterThan(0);
+	for (const dir of ['ltr', 'rtl']) {
+		await page.evaluate(value => {
+			document.documentElement.dir = value;
+			document.documentElement.style.fontSize = '32px';
+		}, dir);
+		const m = await table.evaluate(node => {
+			const rect = node.getBoundingClientRect();
+			return {
+				tag: node.tagName,
+				left: rect.left,
+				right: rect.right,
+				viewport: document.documentElement.clientWidth,
+				pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+			};
+		});
+		expect(m.tag).toBe('TABLE');
+		expect(m.left, dir).toBeGreaterThanOrEqual(-1);
+		expect(m.right, dir).toBeLessThanOrEqual(m.viewport + 1);
+		expect(m.pageOverflow, dir).toBeLessThanOrEqual(1);
+	}
 });
 
 test('mobile navigation stays inside the viewport when content grows', async ({ page }, testInfo) => {
@@ -543,4 +511,47 @@ test('Core search, buttons, and Query Pagination inherit the shared control fami
 	expect(disabledState.cursor).toBe('not-allowed');
 	expect(disabledState.opacity).toBeLessThan(1);
 	expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
+test('compact navigation remains scrollable in short landscape and RTL', async ({ page }, testInfo) => {
+  const width = testInfo.project.use.viewport?.width || 1440;
+  test.skip(width !== 390, 'Run explicit short-height viewports once rather than multiplying all projects.');
+  for (const [viewportWidth, viewportHeight] of [[568, 320], [667, 375], [812, 375]]) {
+    await page.setViewportSize({ width: viewportWidth, height: viewportHeight });
+    for (const direction of ['ltr', 'rtl']) {
+      await page.goto('/', { waitUntil: 'networkidle' });
+      await page.evaluate((dir) => { document.documentElement.dir = dir; }, direction);
+      const toggle = page.locator('[data-menu-toggle]');
+      const nav = page.locator('[data-primary-nav]');
+      await expect(toggle).toBeVisible();
+      await toggle.click();
+      await expect(nav).toBeVisible();
+      await nav.locator(':scope > ul').evaluate((list) => {
+        for (let i = 0; i < 18; i += 1) {
+          const item = document.createElement('li');
+          const anchor = document.createElement('a');
+          anchor.href = '#main-content';
+          anchor.textContent = 'Translated navigation item ' + i + ' 日本語 العربية';
+          item.append(anchor);
+          list.append(item);
+        }
+      });
+      const state = await nav.evaluate((node) => {
+        const rect = node.getBoundingClientRect();
+        return { top: rect.top, bottom: rect.bottom, viewportHeight: innerHeight,
+          clientHeight: node.clientHeight, scrollHeight: node.scrollHeight,
+          overflowY: getComputedStyle(node).overflowY,
+          rootOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+      });
+      expect(state.top).toBeGreaterThanOrEqual(0);
+      expect(state.bottom, viewportWidth + 'x' + viewportHeight + ' ' + direction).toBeLessThanOrEqual(state.viewportHeight + 1);
+      expect(state.scrollHeight).toBeGreaterThan(state.clientHeight);
+      expect(state.overflowY).toBe('auto');
+      expect(state.rootOverflow).toBeLessThanOrEqual(1);
+      const last = nav.locator(':scope > ul > li > a').last();
+      await last.focus();
+      await expect(last).toBeFocused();
+      expect(await nav.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+    }
+  }
 });

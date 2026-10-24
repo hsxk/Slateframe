@@ -1,0 +1,95 @@
+<?php
+/** Runtime contract for public, plugin-neutral presentation filter boundaries. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+$GLOBALS['slateframe_filters'] = array();
+$GLOBALS['slateframe_metadata'] = array( 'width' => 800, 'height' => 600, 'filesize' => 1234 );
+$GLOBALS['slateframe_mime'] = 'image/png';
+function get_template_directory() { return dirname( __DIR__, 2 ); }
+function add_action( ...$args ) {}
+function add_filter( ...$args ) {}
+function apply_filters( $hook, $value, ...$args ) {
+	return array_key_exists( $hook, $GLOBALS['slateframe_filters'] ) ? $GLOBALS['slateframe_filters'][ $hook ] : $value;
+}
+function absint( $value ) { return abs( (int) $value ); }
+function wp_get_attachment_metadata( $id ) { return $GLOBALS['slateframe_metadata']; }
+function get_post_mime_type( $id ) { return $GLOBALS['slateframe_mime']; }
+function __( $message, $domain ) { return $message; }
+function number_format_i18n( $number ) { return (string) $number; }
+function size_format( $number ) { return $number . ' bytes'; }
+function wp_kses_post( $html ) {
+	if ( ! is_string( $html ) ) { throw new TypeError( 'Non-string passed to Core HTML sanitizer' ); }
+	return $html;
+}
+function esc_html( $value ) {
+	if ( ! is_string( $value ) ) { throw new TypeError( 'Non-string passed to Core HTML escape' ); }
+	return htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' );
+}
+function get_header() {}
+function get_footer() {}
+function get_queried_object_id() { return 1; }
+function get_the_author_meta( $key, $id ) { return 'display_name' === $key ? 'Author' : 'Biography'; }
+function have_posts() { return false; }
+function get_template_part( $a, $b ) { echo '<p>Empty</p>'; }
+$wp_query = (object) array( 'max_num_pages' => 0 );
+require dirname( __DIR__, 2 ) . '/functions.php';
+$cases = 0;
+function check_case( $ok, $message ) {
+	global $cases;
+	if ( ! $ok ) { throw new RuntimeException( $message ); }
+	++$cases;
+}
+function render_author() {
+	ob_start();
+	include dirname( __DIR__, 2 ) . '/author.php';
+	return ob_get_clean();
+}
+function render_language() {
+	ob_start();
+	slateframe_language_switcher();
+	return ob_get_clean();
+}
+$default = slateframe_attachment_details( 3 );
+check_case( count( $default ) === 3, 'Core metadata should retain three rows' );
+check_case( $default['File type'] === 'image/png', 'Core MIME metadata' );
+check_case( $default['Dimensions'] === '800 × 600 px', 'Core dimensions' );
+check_case( $default['File size'] === '1234 bytes', 'Core filesize' );
+foreach ( array( new WP_Error(), null, false, 'unexpected', 12 ) as $invalid ) {
+	$GLOBALS['slateframe_filters']['slateframe_attachment_details'] = $invalid;
+	check_case( slateframe_attachment_details( 3 ) === $default, 'Invalid adapter must fall back to Core metadata' );
+}
+$GLOBALS['slateframe_filters']['slateframe_attachment_details'] = array();
+check_case( slateframe_attachment_details( 3 ) === array(), 'Explicit empty array hides metadata' );
+$GLOBALS['slateframe_filters']['slateframe_attachment_details'] = array(
+	'First' => 'one', 'Bad object' => new WP_Error(), 'Bad array' => array( 1 ),
+	'Bad bool' => true, 'Bad int' => 42, 'Blank' => '', '  ' => 'value',
+	9 => 'numeric key', 'Zero' => '0', 'Markup' => '<strong>escaped by template</strong>',
+	'日本語' => '寸法',
+);
+$filtered = slateframe_attachment_details( 3 );
+check_case( count( $filtered ) === 4, 'Only string label/value rows survive' );
+check_case( array_keys( $filtered ) === array( 'First', 'Zero', 'Markup', '日本語' ), 'Order and Unicode labels preserved' );
+check_case( $filtered['Zero'] === '0', 'Zero string remains meaningful' );
+check_case( $filtered['Markup'] === '<strong>escaped by template</strong>', 'Final template still owns HTML escaping' );
+$GLOBALS['slateframe_filters']['slateframe_attachment_details'] = new WP_Error();
+$GLOBALS['slateframe_mime'] = new WP_Error();
+$without_mime = slateframe_attachment_details( 3 );
+check_case( ! isset( $without_mime['File type'] ), 'Malformed MIME metadata is ignored' );
+$GLOBALS['slateframe_mime'] = 'image/png';
+foreach ( array( new WP_Error(), array( '<img>' ), true, 42, null ) as $invalid ) {
+	$GLOBALS['slateframe_filters']['slateframe_author_avatar_html'] = $invalid;
+	check_case( ! str_contains( render_author(), 'slateframe-author-avatar' ), 'Malformed author avatar must not render' );
+}
+$GLOBALS['slateframe_filters']['slateframe_author_avatar_html'] = '<img class="local-avatar" alt="">';
+check_case( str_contains( render_author(), 'slateframe-author-avatar' ), 'Valid local author avatar survives' );
+check_case( str_contains( render_author(), 'local-avatar' ), 'Valid avatar markup preserved' );
+foreach ( array( new WP_Error(), array( '<a>' ), true, 42, null ) as $invalid ) {
+	$GLOBALS['slateframe_filters']['slateframe_language_switcher_html'] = $invalid;
+	check_case( '' === render_language(), 'Malformed language adapter must not render' );
+}
+$GLOBALS['slateframe_filters']['slateframe_language_switcher_html'] = '<a href="/ja">日本語</a>';
+check_case( str_contains( render_language(), 'slateframe-language-slot' ), 'Valid language slot survives' );
+check_case( str_contains( render_language(), '日本語' ), 'Unicode switcher copy preserved' );
+$GLOBALS['slateframe_filters']['slateframe_language_switcher_html'] = '   ';
+check_case( '' === render_language(), 'Whitespace-only language adapter is ignored' );
+echo "Presentation adapter boundaries: {$cases} cases passed\n";

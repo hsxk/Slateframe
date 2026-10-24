@@ -90,7 +90,10 @@ class SharedFooterSources(unittest.TestCase):
     def test_footer_grid_is_one_column_without_changing_main_grid(self):
         css = (ROOT / 'assets/css/query-loop.css').read_text()
         self.assertIn('.slateframe-footer-content .wp-block-post-template{grid-template-columns:1fr}', css)
-        self.assertIn('.slateframe-project-grid .wp-block-post-template{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))', css)
+        self.assertIn('.wp-block-post-template:where(:not(.is-layout-grid)){--slateframe-project-columns:3;display:grid!important;grid-template-columns:repeat(var(--slateframe-project-columns),minmax(0,1fr))', css)
+        for count in range(1, 7):
+            self.assertIn(f'&.columns-{count}{{--slateframe-project-columns:{count}}}', css)
+        self.assertIn('repeat(min(2,var(--slateframe-project-columns)),minmax(0,1fr))', css)
         self.assertIn(':is(.wp-block-post-excerpt,.wp-block-post-date){color:var(--slateframe-muted)}', css)
         self.assertLessEqual(len(css.encode('utf-8')), 3000)
 
@@ -114,6 +117,7 @@ class AssetDependencyClosure(unittest.TestCase):
         "require_once getcwd() . '/functions.php';",
         r'''
 function is_singular() { return false; }
+function post_password_required() { return false; }
 function is_search() { return false; }
 function is_404() { return false; }
 function is_home() { return true; }

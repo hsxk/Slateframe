@@ -43,7 +43,7 @@ add_filter(
 );
 ```
 
-For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned in singular post content and in active footer widgets, including published Core synced patterns, so footer presentation also works on archives and search results. Inactive widgets and unpublished pattern references do not opt in. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. All marker filters must return arrays.
+For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned in singular post content and in active footer widgets, including published Core synced patterns, so footer presentation also works on archives and search results. Inactive widgets and unpublished pattern references do not opt in. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. All marker filters must return arrays of exact CSS class strings. Slateframe ignores malformed marker entries defensively, without changing valid classes or activating styles for prose-only mentions.
 
 ## Compatibility policy
 
@@ -131,10 +131,10 @@ A site or avatar plugin may return local-media markup here. Slateframe sanitizes
 
 ## Table of contents compatibility
 
-Slateframe provides restrained presentation for Core's Table of Contents block and common `.ez-toc-container` output, including the shared control-height baseline for TOC actions. The theme does not generate TOC structure, rewrite plugin strings, or own SEO/schema behavior.
+Slateframe styles WordPress Core's `.wp-block-table-of-contents` markup with shared reading rhythm and bounded control targets. The theme does not generate TOC structure, rewrite plugin strings, or own SEO/schema behavior. Third-party TOC presentation belongs in plugins or child themes, not Slateframe core.
 
 ## Footer content region
 
-Slateframe registers an optional `footer-content` widget area above the compact brand/navigation/copyright row. It accepts Core block widgets and normal WordPress widgets, so sites can build multi-column project links, subscriptions, or multilingual footer content without template overrides or WPCode.
+Slateframe registers an optional `footer-content` widget area above the compact brand/navigation/copyright row. It accepts Core block widgets and normal WordPress widgets, so sites can build multi-column project links, subscriptions, or multilingual footer content without template overrides or custom snippet injection.
 
 The region is empty by default and emits no wrapper when unused. Contextual Photography, Portfolio/Knowledge, and Query Loop styles load only when active widget content requires them, including native Core lightbox settings; see `docs/FOOTER-PRESENTATION.md`. Content ownership, language visibility, subscription behavior, and external links remain with WordPress/plugins rather than theme runtime.

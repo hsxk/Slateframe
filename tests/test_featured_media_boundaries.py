@@ -1,0 +1,28 @@
+"""Exercise real featured-media helper against malformed Core adapter output."""
+from pathlib import Path
+import subprocess
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+
+
+class FeaturedMediaBoundaries(unittest.TestCase):
+    def test_php_runtime_boundaries(self):
+        fixture = ROOT / "tests/fixtures/featured-media-boundaries.php.fixture"
+        result = subprocess.run(
+            ["php", str(fixture)], cwd=ROOT, capture_output=True,
+            text=True, check=False, timeout=20,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
+        self.assertIn("Featured media boundaries: 19 cases passed", result.stdout)
+
+    def test_core_image_processor_contract(self):
+        source = (ROOT / "inc/template-tags.php").read_text(encoding="utf-8")
+        self.assertIn("! is_string( $image_html )", source)
+        self.assertIn("! $image_processor->next_tag( 'img' )", source)
+        self.assertIn("$image_processor->set_attribute( 'fetchpriority', 'high' );", source)
+        self.assertNotIn("time2log", source.lower())
+
+
+if __name__ == "__main__":
+    unittest.main()
