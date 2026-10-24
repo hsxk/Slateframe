@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -101,6 +101,27 @@ function slateframe_register_core_query_pagination_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_query_pagination_styles', 20 );
+
+/**
+ * Give authored Core Navigation links and overlays bounded touch targets.
+ *
+ * Keep WordPress in charge of menu structure and interactivity, and avoid
+ * loading the stylesheet on pages without a native Navigation block.
+ */
+function slateframe_register_core_navigation_styles() {
+	wp_enqueue_block_style(
+		'core/navigation',
+		array(
+			'handle' => 'slateframe-core-navigation',
+			'src'    => get_template_directory_uri() . '/assets/css/core-navigation.css',
+			'path'   => get_template_directory() . '/assets/css/core-navigation.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_navigation_styles', 20 );
+
+
 
 
 /**
