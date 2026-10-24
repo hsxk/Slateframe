@@ -29,7 +29,7 @@ class CoreButtonsReflowContract(unittest.TestCase):
         for needle in ("'ltr', 'rtl'", "'200%', '400%'", "forcedColors: 'active'",
                        "AxeBuilder", "openAuthenticatedEditor", "blocks.parse(serialized)",
                        "wp('post', 'delete'", "is-nowrap", "is-vertical", "43",
-                       "core-buttons-320-rtl-200-forced-colors.png"):
+                       "core-buttons-320-rtl-200-forced-colors.png", "balanced actions", "primary readable width"):
             self.assertIn(needle, js)
 
 
