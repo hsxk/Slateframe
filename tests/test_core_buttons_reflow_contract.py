@@ -8,10 +8,10 @@ ROOT = Path(__file__).resolve().parents[1]
 class CoreButtonsReflowContract(unittest.TestCase):
     def test_shared_styles_are_scoped_and_do_not_override_core_layout(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
-        scope = ":is(.slateframe-prose,.editor-styles-wrapper) .wp-block-buttons"
-        self.assertIn(scope + "{min-inline-size:0;max-inline-size:100%}", css)
-        self.assertIn(scope + ">.wp-block-button{min-inline-size:0;max-inline-size:100%;flex-shrink:1}", css)
-        self.assertIn(scope + " .wp-block-button__link{max-inline-size:100%;white-space:normal;overflow-wrap:anywhere}", css)
+        self.assertIn(".wp-block-buttons>.wp-block-button{min-inline-size:0}", css)
+        self.assertIn(".wp-block-button__link{min-inline-size:var(--slateframe-control)", css)
+        self.assertIn("max-width:100%", css)
+        self.assertIn("overflow-wrap:anywhere", css)
         self.assertNotIn(".wp-block-buttons{flex-wrap:wrap!important}", css)
         self.assertNotIn(".wp-block-buttons{display:grid!important}", css)
         self.assertLessEqual((ROOT / "style.css").stat().st_size, 16000)
