@@ -27,7 +27,11 @@ class KnowledgeFaqEditorEvidenceTests(unittest.TestCase):
         self.assertIn("if (await guide.isVisible().catch(() => false)) throw error", self.source)
 
     def test_screenshots_require_modal_hidden(self):
-        self.assertGreaterEqual(self.source.count("toBeHidden()"), 3)
+        # The helper verifies the native dialog is hidden after each dismissal.
+        # Assert all three evidence boundaries call it, not a stale count of
+        # duplicated raw assertions that could leave Core's modal reopened.
+        self.assertIn("await expect(guide).toBeHidden()", self.source)
+        self.assertGreaterEqual(self.source.count("await dismissEditorWelcomeGuide(page)"), 3)
         for screenshot in (
             "gutenberg-knowledge-faq-390-rtl-200-forced-colors.png",
             "gutenberg-knowledge-faq-1440-ltr.png",
@@ -38,7 +42,7 @@ class KnowledgeFaqEditorEvidenceTests(unittest.TestCase):
             self.source.index("gutenberg-knowledge-faq-390-rtl-200-forced-colors.png"),
         )
         self.assertLess(
-            self.source.rindex("await expect(page.locator('[role=\"dialog\"]')"),
+            self.source.rindex("await dismissEditorWelcomeGuide(page)"),
             self.source.index("gutenberg-knowledge-faq-1440-ltr.png"),
         )
 
