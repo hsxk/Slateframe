@@ -30,7 +30,17 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     expect(wp('post', 'get', id, '--field=post_content')).toContain('is-nowrap');
     await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-core-buttons-fixture');
-    await expect(page.locator('link[href*="/assets/css/core-buttons.css"]')).toHaveCount(1);
+    // WordPress 7.1+ may inline registered block CSS on demand. Verify the
+    // actual native-block asset, not one particular transport mechanism.
+    const scopedStyle = page.locator('style#slateframe-core-buttons-inline-css, link#slateframe-core-buttons-css');
+    await expect(scopedStyle).toHaveCount(1);
+    if (await scopedStyle.evaluate(node => node.tagName === 'STYLE')) {
+      await expect(scopedStyle).toContainText('.wp-block-buttons.is-nowrap>');
+      await expect(scopedStyle).toContainText('@media(forced-colors:active)');
+      await expect(scopedStyle).toContainText('core-buttons.css');
+    } else {
+      await expect(scopedStyle).toHaveAttribute('href', /\\/assets\\/css\\/core-buttons\\.css(?:\\?|$)/);
+    }
     await expect(root.locator('.wp-block-buttons')).toHaveCount(2);
     await expect(root.locator('.wp-block-button__link')).toHaveCount(3);
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
@@ -107,7 +117,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     await root.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-rtl-200-forced-colors.png' });
     // A native Core Button page loads its scoped stylesheet; an unrelated 404 does not.
     await page.goto('/?p=999999', { waitUntil: 'networkidle' });
-    await expect(page.locator('link[href*="/assets/css/core-buttons.css"]')).toHaveCount(0);
+    await expect(page.locator('style#slateframe-core-buttons-inline-css, link#slateframe-core-buttons-css')).toHaveCount(0);
   } finally {
     wp('post', 'delete', id, '--force');
   }
