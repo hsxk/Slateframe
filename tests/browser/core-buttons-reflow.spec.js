@@ -40,12 +40,21 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           const bounds = element => { const r = element.getBoundingClientRect(); return { left:r.left,right:r.right,width:r.width,height:r.height }; };
           return { pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             groups: [...node.querySelectorAll('.wp-block-buttons')].map(bounds),
+            nowrap: { wrap: getComputedStyle(node.querySelector('.wp-block-buttons.is-nowrap')).flexWrap,
+              shrink: [...node.querySelectorAll('.wp-block-buttons.is-nowrap > .wp-block-button')]
+                .map(button => getComputedStyle(button).flexShrink) },
             buttons: [...node.querySelectorAll('.wp-block-button')].map(bounds),
             links: [...node.querySelectorAll('.wp-block-button__link')].map(bounds),
           };
         });
         expect(geometry.pageOverflow, width + ' ' + dir).toBeLessThanOrEqual(1);
         expect(geometry.groups).toHaveLength(2);
+        expect(geometry.nowrap.wrap).toBe('nowrap');
+        expect(geometry.nowrap.shrink).toEqual(['1', '1']);
+        for (const rect of geometry.groups) {
+          expect(rect.left, width + ' ' + dir + ' group left').toBeGreaterThanOrEqual(-1);
+          expect(rect.right, width + ' ' + dir + ' group right').toBeLessThanOrEqual(width + 1);
+        }
         expect(geometry.links).toHaveLength(3);
         for (const rect of [...geometry.buttons, ...geometry.links]) {
           expect(rect.left, width + ' ' + dir + ' left').toBeGreaterThanOrEqual(-1);
