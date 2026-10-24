@@ -1,2 +1,2 @@
 @media(forced-colors:active){.wp-block-button__link{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important;&:focus-visible{outline-color:Highlight}}}
-.wp-block-buttons.is-nowrap{&:has(>:nth-child(2):last-child):not(:has(.has-custom-width))>.wp-block-button{min-inline-size:min(8rem,35%)}@media(width<481px){&:not(:has(.has-custom-width)){flex-direction:column}}}
+.wp-block-buttons.is-nowrap:not(:has(.has-custom-width)){&:has(>:nth-child(2):last-child)>.wp-block-button{min-inline-size:min(8rem,35%)}@media(width<481px){flex-flow:column;align-items:stretch;& a{width:100%}}}

@@ -41,7 +41,8 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     if (await scopedStyle.evaluate(node => node.tagName === 'STYLE')) {
       // Playwright's visible-text matcher excludes <style>; inspect raw CSS.
       const cssText = await scopedStyle.evaluate(node => node.textContent || '');
-      expect(cssText).toContain('.wp-block-buttons.is-nowrap{');
+      expect(cssText).toContain('.wp-block-buttons.is-nowrap:not(:has(.has-custom-width)){');
+      expect(cssText).toContain('flex-flow:column;align-items:stretch;& a{width:100%}');
       expect(cssText).toContain('@media(width<481px)');
       expect(cssText).toContain('min-inline-size:min(8rem,35%)');
       expect(cssText).not.toMatch(/(^|[{}])\.is-nowrap(?=[:{])/);
@@ -64,6 +65,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
               direction: getComputedStyle(node.querySelector('.wp-block-buttons.is-nowrap')).flexDirection,
               shrink: [...node.querySelectorAll('.wp-block-buttons.is-nowrap > .wp-block-button')]
                 .map(button => getComputedStyle(button).flexShrink) },
+            vertical: getComputedStyle(node.querySelector('.wp-block-buttons.is-vertical')).flexDirection,
             buttons: [...node.querySelectorAll('.wp-block-button')].map(bounds),
             links: [...node.querySelectorAll('.wp-block-button__link')].map(bounds),
           };
@@ -79,12 +81,15 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         expect(unrelated.direction, width + ' ' + dir + ' unrelated flex axis').toBe('row');
         expect(unrelated.minimums, width + ' ' + dir + ' unrelated children').toEqual(['auto', 'auto']);
         expect(geometry.nowrap.wrap).toBe('nowrap');
+        expect(geometry.vertical, width + ' ' + dir + ' native vertical axis').toBe('column');
         expect(geometry.nowrap.shrink).toEqual(['1', '1']);
         if (width <= 412) {
           const [primary, secondary] = geometry.buttons;
           expect(geometry.nowrap.direction, width + ' ' + dir + ' native nowrap mobile axis').toBe('column');
           expect(primary.width, width + ' ' + dir + ' primary readable width').toBeGreaterThanOrEqual(width - 80);
           expect(secondary.width, width + ' ' + dir + ' secondary readable width').toBeGreaterThanOrEqual(width - 80);
+          expect(geometry.links[0].width, width + ' ' + dir + ' primary mobile link readable width').toBeGreaterThanOrEqual(width - 80);
+          expect(geometry.links[1].width, width + ' ' + dir + ' secondary mobile link readable width').toBeGreaterThanOrEqual(width - 80);
           expect(Math.abs(primary.left - secondary.left), width + ' ' + dir + ' stacked alignment').toBeLessThanOrEqual(2);
           expect(secondary.top, width + ' ' + dir + ' stacked order').toBeGreaterThanOrEqual(primary.bottom);
         }
@@ -123,8 +128,9 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     });
     expect(customProof.secondMin, "custom width bypass").toBe("auto");
     expect(customProof.direction, "author width preserves native horizontal layout").toBe("row");
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
-    for (const zoom of ['200%', '400%']) {
+    for (const dir of ['ltr', 'rtl']) {
+      await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = '200%'; }, dir);
+      for (const zoom of ['200%', '400%']) {
       await page.locator('html').evaluate((node, value) => { node.style.fontSize = value; }, zoom);
       // Capture the failing enlarged-text layout before asserting. A document-wide
       // overflow may originate in site chrome or the article heading, not Buttons.
@@ -150,11 +156,18 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         // offscreen element geometry above records the entire document overflow.
         // Show the actual two-action reflow, not the oversized article heading.
         await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').last().scrollIntoViewIfNeeded();
-        await page.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-rtl-400-zoom.png' });
+        await page.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-' + dir + '-400-zoom.png' });
       }
       expect(overflow.delta, zoom + ' offscreen elements: ' + JSON.stringify(overflow.offenders)).toBeLessThanOrEqual(1);
+      for (const button of await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').all()) {
+        const r = await button.boundingBox();
+        expect(r.width, dir + ' ' + zoom + ' stacked button readable width at text zoom').toBeGreaterThanOrEqual(240);
+      }
       for (const link of await root.locator('.wp-block-button__link').all()) {
         const r = await link.boundingBox();
+        if (await link.evaluate(node => node.closest('.wp-block-buttons.is-nowrap') !== null)) {
+          expect(r.width, dir + ' ' + zoom + ' mobile link readable width at text zoom').toBeGreaterThanOrEqual(240);
+        }
         expect(r.width).toBeGreaterThanOrEqual(43);
         expect(r.height).toBeGreaterThanOrEqual(43);
         expect(r.x).toBeGreaterThanOrEqual(-1);
@@ -162,8 +175,9 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         expect(await link.evaluate(node => parseFloat(getComputedStyle(node).paddingInlineStart)))
           .toBeLessThanOrEqual(12.5);
       }
+      }
     }
-    await page.locator('html').evaluate(node => { node.style.fontSize = '200%'; });
+    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     const first = root.locator('.wp-block-button__link').first();
     await first.focus();
