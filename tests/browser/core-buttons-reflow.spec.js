@@ -105,7 +105,25 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
     for (const zoom of ['200%', '400%']) {
       await page.locator('html').evaluate((node, value) => { node.style.fontSize = value; }, zoom);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth), zoom).toBeLessThanOrEqual(1);
+      // Capture the failing enlarged-text layout before asserting. A document-wide
+      // overflow may originate in site chrome or the article heading, not Buttons.
+      // Report exact off-screen boxes instead of weakening the root overflow gate.
+      const overflow = await page.evaluate(() => {
+        const viewport = document.documentElement.clientWidth;
+        const offenders = [...document.body.querySelectorAll('*')].map(node => {
+          const r = node.getBoundingClientRect();
+          return { tag: node.tagName.toLowerCase(), className: typeof node.className === 'string' ? node.className.slice(0, 100) : '',
+            left: Math.round(r.left), right: Math.round(r.right), width: Math.round(r.width),
+            scrollWidth: node.scrollWidth, clientWidth: node.clientWidth };
+        }).filter(r => r.left < -1 || r.right > viewport + 1)
+          .sort((a, b) => Math.max(b.right - viewport, -b.left) - Math.max(a.right - viewport, -a.left)).slice(0, 12);
+        return { delta: document.documentElement.scrollWidth - viewport, offenders };
+      });
+      if (zoom === '400%') {
+        await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+        await page.screenshot({ path: 'test-artifacts/screenshots/core-buttons-320-rtl-400-zoom.png', fullPage: true });
+      }
+      expect(overflow.delta, zoom + ' offscreen elements: ' + JSON.stringify(overflow.offenders)).toBeLessThanOrEqual(1);
       for (const link of await root.locator('.wp-block-button__link').all()) {
         const r = await link.boundingBox();
         expect(r.width).toBeGreaterThanOrEqual(43);
