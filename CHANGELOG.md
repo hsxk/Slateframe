@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
-- Keep Core Buttons groups, non-wrapping/vertical author layouts, and very long multilingual labels bounded at 320–1920px without a custom renderer; share editor/frontend shrink rules, retain 44px targets, and add real WordPress RTL/400%/forced-colors/Axe/Gutenberg visual regression.
+- Keep Core Buttons groups, non-wrapping/vertical author layouts, and very long multilingual labels bounded at 320–1920px without a custom renderer; shrink only uncustomized nowrap children (preserve author-set widths), retain 44px targets, and add real WordPress RTL/400%/forced-colors/Axe/Gutenberg visual regression. Avoid forced smooth scrolling and unnecessary text-rendering overrides.
 
 - Keep native Core Classic/Freeform preformatted text and tables keyboard-scrollable without altering saved HTML; preserve authored tabindex, skip wrapping Verse, and cover seven responsive widths, RTL/CJK, 200%/400% zoom, forced-colors focus, and 390/1440 Chromium screenshots.
 
