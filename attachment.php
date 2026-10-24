@@ -51,6 +51,14 @@ while ( have_posts() ) :
 						$slateframe_image_processor = new WP_HTML_Tag_Processor( $slateframe_image_html );
 						$slateframe_image_valid     = $slateframe_image_processor->next_tag( 'img' );
 						if ( $slateframe_image_valid ) {
+							// A filtered, source-less image must not create an empty figure or caption.
+							// Preserve valid srcset-only responsive markup supplied by Core filters.
+							$slateframe_image_src    = $slateframe_image_processor->get_attribute( 'src' );
+							$slateframe_image_srcset = $slateframe_image_processor->get_attribute( 'srcset' );
+							$slateframe_image_valid  = ( is_string( $slateframe_image_src ) && '' !== trim( $slateframe_image_src ) )
+								|| ( is_string( $slateframe_image_srcset ) && '' !== trim( $slateframe_image_srcset ) );
+						}
+						if ( $slateframe_image_valid ) {
 							$slateframe_image_processor->set_attribute( 'loading', 'eager' );
 							$slateframe_image_processor->set_attribute( 'decoding', 'async' );
 							$slateframe_image_processor->set_attribute( 'fetchpriority', 'high' );

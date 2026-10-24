@@ -63,6 +63,12 @@ class WP_HTML_Tag_Processor {
         $this->matched = 1 === preg_match( '/<' . preg_quote( $name, '/' ) . '(?:\\s|\\/?>)/i', $this->html );
         return $this->matched;
     }
+    public function get_attribute( $name ) {
+        if ( ! $this->matched ) { return null; }
+        if ( ! preg_match( '/<img\\b[^>]*>/i', $this->html, $tag ) ) { return null; }
+        if ( ! preg_match( '/\\s' . preg_quote( $name, '/' ) . '="([^"]*)"/i', $tag[0], $value ) ) { return null; }
+        return html_entity_decode( $value[1], ENT_QUOTES, 'UTF-8' );
+    }
     public function set_attribute( $name, $value ) {
         if ( ! $this->matched ) { throw new RuntimeException( 'No image selected' ); }
         $this->html = preg_replace_callback( '/<img\\b[^>]*>/i', static function ( $match ) use ( $name, $value ) {
@@ -120,6 +126,21 @@ slateframe_attachment_check( false !== strpos( $unsafe, 'loading="eager"' ) && f
 slateframe_attachment_check( false !== strpos( $unsafe, 'srcset="/small.jpg 1x, /large.jpg 2x"' ), 'Filtered responsive srcset lost' );
 slateframe_attachment_check( false !== strpos( $unsafe, 'alt="花"' ), 'Filtered CJK alt lost' );
 slateframe_attachment_check( false !== strpos( $unsafe, '<em>照片说明</em>' ), 'Filtered CJK caption lost' );
+// A filtered image without a usable src or srcset is not a preview.
+foreach ( array( '<img alt="missing source">', '<img src="" alt="empty source">', '<img src="   " alt="blank source">', '<img srcset="   " alt="blank candidates">' ) as $source_less ) {
+    $no_source = slateframe_attachment_render( array(
+        'url' => 'https://example.org/photo.jpg', 'image' => true,
+        'image_html' => $source_less, 'caption' => 'Orphan source-less caption',
+    ) );
+    slateframe_attachment_check( false === strpos( $no_source, '<figure class="alignwide">' ), 'Source-less image created a figure' );
+    slateframe_attachment_check( false === strpos( $no_source, 'Orphan source-less caption' ), 'Source-less image leaked caption' );
+    slateframe_attachment_check( false !== strpos( $no_source, 'Open original file' ), 'Source-less image lost safe original link' );
+}
+$srcset_only = slateframe_attachment_render( array(
+    'image' => true, 'image_html' => '<img srcset="/small.jpg 1x, /large.jpg 2x" alt="响应式图片">',
+) );
+slateframe_attachment_check( false !== strpos( $srcset_only, '<figure class="alignwide">' ), 'Valid srcset-only image lost figure' );
+slateframe_attachment_check( false !== strpos( $srcset_only, 'fetchpriority="high"' ), 'Srcset-only image lost priority' );
 foreach ( array( false, null, 0, array( 'img' ), new stdClass(), '', ' ', '<p>not an image</p>' ) as $bad ) {
     $html = slateframe_attachment_render( array( 'image' => true, 'image_html' => $bad, 'caption' => '<em>Hidden caption</em>' ) );
     slateframe_attachment_check( false === strpos( $html, '<figure class="alignwide">' ), 'Malformed image created empty figure' );
