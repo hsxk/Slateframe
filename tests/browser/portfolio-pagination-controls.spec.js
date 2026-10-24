@@ -12,8 +12,10 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   await expect(grid).toBeVisible();
   const pagination = grid.locator('.wp-block-query-pagination').first();
   await expect(pagination).toBeVisible();
-  await expect.poll(() => page.evaluate(() => [...document.styleSheets].some(sheet =>
-    (sheet.href || '').includes('/assets/css/core-query-pagination.css')))).toBe(true);
+  // WordPress may inline block styles instead of exposing a linked stylesheet.
+  // Assert the actual native block presentation, not its transport mechanism.
+  await expect.poll(() => pagination.locator('.page-numbers.current').evaluate(node =>
+    getComputedStyle(node).fontVariantNumeric)).toContain('tabular-nums');
   const next = pagination.locator('a.wp-block-query-pagination-next');
   await expect(next).toBeVisible();
   const numbers = pagination.locator('.wp-block-query-pagination-numbers');
@@ -81,10 +83,18 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   const current = numbers.locator('.page-numbers.current');
   const contrast = await current.evaluate(node => {
     const s = getComputedStyle(node);
-    return { outline: s.outlineStyle, width: parseFloat(s.outlineWidth) };
+    const probe = document.createElement('span');
+    probe.style.color = 'Highlight';
+    document.body.append(probe);
+    const highlight = getComputedStyle(probe).color;
+    probe.remove();
+    return { outline: s.outlineStyle, width: parseFloat(s.outlineWidth),
+      color: s.outlineColor, highlight, offset: parseFloat(s.outlineOffset) };
   });
   expect(contrast.outline).toBe('solid');
   expect(contrast.width).toBeGreaterThanOrEqual(2);
+  expect(contrast.color).toBe(contrast.highlight);
+  expect(contrast.offset).toBe(0);
   await next.focus();
   await expect(next).toBeFocused();
   const focus = await next.evaluate(node => ({
