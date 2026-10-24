@@ -87,16 +87,18 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css readme.txt LICENSE .distignore assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
-          wc -c style.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
+          wc -c style.css assets/css/core-buttons.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
           test "$(grep -Fo 'var(--slateframe-border-width) solid var(--slateframe-border)' style.css | wc -l | tr -d ' ')" -eq 1
           if grep -FRq 'var(--slateframe-border-width) solid var(--slateframe-border)' assets/css; then
             echo 'Component styles must consume --slateframe-rule instead of rebuilding the semantic border.' >&2
             exit 1
           fi
           test $(wc -c < style.css) -le 16000
+          # Scoped Core Button CSS is a separate, tightly capped block asset.
+          test $(wc -c < assets/css/core-buttons.css) -le 400
           test $(wc -c < assets/css/navigation.css) -le 4000
           test $(wc -c < assets/css/footer.css) -le 2000
           test $(wc -c < assets/css/forms.css) -le 1300
@@ -343,7 +345,7 @@ jobs:
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
           wp eval-file "$GITHUB_WORKSPACE/bin/check-pattern-runtime.php" --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
-          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/forms.css","assets/css/form-content.css","assets/css/reading.css","assets/css/photography.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
+          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/core-buttons.css","assets/css/forms.css","assets/css/form-content.css","assets/css/reading.css","assets/css/photography.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
       - name: Validate bounded Appearance settings
         shell: bash
         run: |

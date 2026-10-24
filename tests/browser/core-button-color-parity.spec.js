@@ -70,6 +70,13 @@ test('real Core Button colors, outline and long labels survive responsive RTL an
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
       expect(a11y.violations).toEqual([]);
       await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+      for (const link of await buttons.all()) {
+        const colors = await color(link);
+        expect(colors.background).not.toBe(colors.text);
+      }
+      const forcedColorsA11y = await new AxeBuilder({ page }).include('#slateframe-core-buttons-fixture')
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+      expect(forcedColorsA11y.violations).toEqual([]);
       await page.keyboard.press('Tab');
       await buttons.nth(1).focus();
       await expect(buttons.nth(1)).toBeFocused();

@@ -6,6 +6,25 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Fix a real 320px Chromium native Buttons failure: stacking the wrappers alone left the short action at 154.58px; stretch uncustomized mobile groups and their actual clickable links, preserve authored widths and unrelated `is-nowrap` layouts, and extend link/vertical/RTL/LTR/200%/400% browser assertions within the unchanged 400-byte block CSS budget.
+
+- Scope the optional native Buttons nowrap refinement to `wp-block-buttons`, not every Core/plugin `is-nowrap` flex container; protect non-Button layout and child minimum sizes at 320–1920px in RTL/LTR and enlarged text without relaxing the 400-byte stylesheet budget.
+
+- Correct a real exact-SHA 320px/400% visual regression: keep native Core nowrap actions in source order but stack uncustomized mobile groups instead of rendering one-character-wide vertical text columns. Assert full-width stacked geometry, RTL/LTR, enlarged text, author-width bypass, and unchanged desktop layout without increasing the 400-byte block CSS budget.
+
+- Keep both actions in a two-button native nowrap group readable on desktop when one translated label is exceptionally long; honor author custom widths, preserve the 400-byte scoped CSS budget, and add 768/1440/1920 geometry plus custom-width regression.
+
+- Keep the existing 15 route CSS+JS budgets unchanged by moving only native Core Button forced-colors/mobile refinements into a WordPress-enqueued `core/button` stylesheet; enforce its own 400-byte cap, editor parity, real-page/404 asset isolation, and deterministic release ZIP inclusion.
+
+
+- Balance two uncustomized native nowrap actions on 320–412px mobile rather than compressing the short translated action into a 44px vertical text column; preserve author widths and natural desktop layout, and add readable-width geometry plus 320px LTR/RTL screenshots.
+
+
+- Restore native Core Button foreground/background contrast and visible system focus colors under forced-colors mode, including custom inline palettes; require real Chromium Axe checks for the previously failing RTL 200% reflow fixture and the five-button color/outline fixture.
+
+
+- Keep Core Buttons groups, non-wrapping/vertical author layouts, and very long multilingual labels bounded at 320–1920px without a custom renderer; shrink only uncustomized nowrap children to their automatic content minimum (preserve author-set widths), cap enlarged-text inline padding, retain 44px targets, and add real WordPress RTL/400%/forced-colors/Axe/Gutenberg visual regression. Avoid forced smooth scrolling; consolidate redundant mobile kicker tracking without changing Core markup.
+
 - Keep native Core Classic/Freeform preformatted text and tables keyboard-scrollable without altering saved HTML; preserve authored tabindex, skip wrapping Verse, and cover seven responsive widths, RTL/CJK, 200%/400% zoom, forced-colors focus, and 390/1440 Chromium screenshots.
 
 - Preserve explicit Core `is-layout-grid` author tracks in plugin-rendered Portfolio shortcodes while resetting semantic `ul/li` list chrome; test two-card RTL/CJK/Arabic 320–1920px, 200% text, 44px links, no root overflow and exact-SHA screenshots without new runtime dependencies.
