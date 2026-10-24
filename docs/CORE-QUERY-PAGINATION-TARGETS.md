@@ -1,6 +1,6 @@
 # Native Core Query Pagination targets
 
-Slateframe keeps **Core Query Pagination** as native WordPress markup. It does not intercept navigation, replace the Query Loop, own post types, or add JavaScript. The generic Core selector applies in the frontend and Gutenberg editor because `style.css` is registered as an editor stylesheet.
+Slateframe keeps **Core Query Pagination** as native WordPress markup. It does not intercept navigation, replace the Query Loop, own post types, or add JavaScript. The generic Core selector is delivered only when WordPress renders `core/query-pagination`, via `wp_enqueue_block_style()`. Gutenberg also receives the same small block stylesheet through `add_editor_style()`. The existing 44px base geometry stays in `style.css`.
 
 ## Interaction and visual contract
 
@@ -14,4 +14,4 @@ Slateframe keeps **Core Query Pagination** as native WordPress markup. It does n
 
 Compare `core-query-pagination-390-ltr.png`, `core-query-pagination-1440-rtl.png`, `core-query-pagination-390-rtl-400.png`, and `core-query-pagination-390-rtl-200-forced-colors.png` from the exact-HEAD `slateframe-browser` artifact. Inspect the full-page Portfolio/Knowledge/Article and Appearance screenshots as well. An automated green check is not a substitute for inspecting those pixels or manual Safari/VoiceOver and Firefox verification.
 
-This change deliberately does not alter author-defined Query Loop page size, post visibility, search parameters, language routing, or pagination URL generation.
+The 400-byte block stylesheet is part of the reproducible theme ZIP; no universal CSS/JS runtime budget is increased. This change deliberately does not alter author-defined Query Loop page size, post visibility, search parameters, language routing, or pagination URL generation.

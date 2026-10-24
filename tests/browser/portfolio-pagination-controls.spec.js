@@ -12,6 +12,8 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   await expect(grid).toBeVisible();
   const pagination = grid.locator('.wp-block-query-pagination').first();
   await expect(pagination).toBeVisible();
+  await expect.poll(() => page.evaluate(() => [...document.styleSheets].some(sheet =>
+    (sheet.href || '').includes('/assets/css/core-query-pagination.css')))).toBe(true);
   const next = pagination.locator('a.wp-block-query-pagination-next');
   await expect(next).toBeVisible();
   const numbers = pagination.locator('.wp-block-query-pagination-numbers');
@@ -38,7 +40,8 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
             controls: controls.map(el => {
               const rect = el.getBoundingClientRect();
               return { tag: el.tagName, width: rect.width, height: rect.height, left: rect.left,
-                right: rect.right, text: el.textContent.trim(), display: getComputedStyle(el).display };
+                right: rect.right, text: el.textContent.trim(), display: getComputedStyle(el).display,
+                numeric: getComputedStyle(el).fontVariantNumeric };
             }),
             viewport: document.documentElement.clientWidth,
           };
@@ -53,6 +56,7 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
           expect(item.left, label + ' ' + item.text + ' left').toBeGreaterThanOrEqual(-1);
           expect(item.right, label + ' ' + item.text + ' right').toBeLessThanOrEqual(result.viewport + 1);
           expect(item.display, label + ' ' + item.text + ' display').toBe('grid');
+          expect(item.numeric, label + ' ' + item.text + ' numeric alignment').toContain('tabular-nums');
         }
         if (font === 16 && [390, 1440].includes(width)) {
           await pagination.screenshot({ path: 'test-artifacts/screenshots/core-query-pagination-' + width + '-' + dir + '.png' });
