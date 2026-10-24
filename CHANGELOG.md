@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Correct a real exact-SHA 320px/400% visual regression: keep native Core nowrap actions in source order but stack uncustomized mobile groups instead of rendering one-character-wide vertical text columns. Assert full-width stacked geometry, RTL/LTR, enlarged text, author-width bypass, and unchanged desktop layout without increasing the 400-byte block CSS budget.
+
 - Keep both actions in a two-button native nowrap group readable on desktop when one translated label is exceptionally long; honor author custom widths, preserve the 400-byte scoped CSS budget, and add 768/1440/1920 geometry plus custom-width regression.
 
 - Keep the existing 15 route CSS+JS budgets unchanged by moving only native Core Button forced-colors/mobile refinements into a WordPress-enqueued `core/button` stylesheet; enforce its own 400-byte cap, editor parity, real-page/404 asset isolation, and deterministic release ZIP inclusion.

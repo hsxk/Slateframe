@@ -51,10 +51,11 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       for (const dir of ['ltr', 'rtl']) {
         await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = ''; }, dir);
         const geometry = await root.evaluate(node => {
-          const bounds = element => { const r = element.getBoundingClientRect(); return { left:r.left,right:r.right,width:r.width,height:r.height }; };
+          const bounds = element => { const r = element.getBoundingClientRect(); return { left:r.left,right:r.right,top:r.top,bottom:r.bottom,width:r.width,height:r.height }; };
           return { pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             groups: [...node.querySelectorAll('.wp-block-buttons')].map(bounds),
             nowrap: { wrap: getComputedStyle(node.querySelector('.wp-block-buttons.is-nowrap')).flexWrap,
+              direction: getComputedStyle(node.querySelector('.wp-block-buttons.is-nowrap')).flexDirection,
               shrink: [...node.querySelectorAll('.wp-block-buttons.is-nowrap > .wp-block-button')]
                 .map(button => getComputedStyle(button).flexShrink) },
             buttons: [...node.querySelectorAll('.wp-block-button')].map(bounds),
@@ -67,11 +68,14 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         expect(geometry.nowrap.shrink).toEqual(['1', '1']);
         if (width <= 412) {
           const [primary, secondary] = geometry.buttons;
-          expect(primary.width, width + ' ' + dir + ' primary readable width').toBeGreaterThanOrEqual(100);
-          expect(secondary.width, width + ' ' + dir + ' secondary readable width').toBeGreaterThanOrEqual(100);
-          expect(Math.abs(primary.width - secondary.width), width + ' ' + dir + ' balanced actions').toBeLessThanOrEqual(2);
+          expect(geometry.nowrap.direction, width + ' ' + dir + ' native nowrap mobile axis').toBe('column');
+          expect(primary.width, width + ' ' + dir + ' primary readable width').toBeGreaterThanOrEqual(width - 80);
+          expect(secondary.width, width + ' ' + dir + ' secondary readable width').toBeGreaterThanOrEqual(width - 80);
+          expect(Math.abs(primary.left - secondary.left), width + ' ' + dir + ' stacked alignment').toBeLessThanOrEqual(2);
+          expect(secondary.top, width + ' ' + dir + ' stacked order').toBeGreaterThanOrEqual(primary.bottom);
         }
         if (width >= 768) {
+          expect(geometry.nowrap.direction, width + ' ' + dir + ' native desktop axis').toBe('row');
           const [primary, secondary] = geometry.buttons;
           expect(primary.width, width + " " + dir + " desktop readable width").toBeGreaterThanOrEqual(120);
           expect(secondary.width, width + " " + dir + " desktop readable width").toBeGreaterThanOrEqual(120);
@@ -93,15 +97,18 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         }
       }
     }
+    await page.setViewportSize({ width: 320, height: 900 });
     const customProof = await root.evaluate(node => {
-      const first = node.querySelector(".wp-block-buttons.is-nowrap > .wp-block-button");
+      const group = node.querySelector(".wp-block-buttons.is-nowrap");
+      const first = group.querySelector(".wp-block-button");
       first.classList.add("has-custom-width");
       const secondMin = getComputedStyle(first.nextElementSibling).minInlineSize;
+      const direction = getComputedStyle(group).flexDirection;
       first.classList.remove("has-custom-width");
-      return secondMin;
+      return { secondMin, direction };
     });
-    expect(customProof, "custom width bypass").toBe("auto");
-    await page.setViewportSize({ width: 320, height: 900 });
+    expect(customProof.secondMin, "custom width bypass").toBe("auto");
+    expect(customProof.direction, "author width preserves native horizontal layout").toBe("row");
     await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
     for (const zoom of ['200%', '400%']) {
       await page.locator('html').evaluate((node, value) => { node.style.fontSize = value; }, zoom);
@@ -119,6 +126,8 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           .sort((a, b) => Math.max(b.right - viewport, -b.left) - Math.max(a.right - viewport, -a.left)).slice(0, 12);
         return { delta: document.documentElement.scrollWidth - viewport, offenders };
       });
+      expect(await root.locator('.wp-block-buttons.is-nowrap').evaluate(node => getComputedStyle(node).flexDirection),
+        zoom + ' mobile reflow axis').toBe('column');
       if (zoom === '400%') {
         await fs.mkdir('test-artifacts/screenshots', { recursive: true });
         // A viewport capture stays inside the strict visual-inventory 20,000px height cap;
