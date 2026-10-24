@@ -45,6 +45,37 @@ add_filter(
 
 For compatibility, markers appended through the older broad `slateframe_content_mode_markers` filter also opt into the Photography layer; existing integrations therefore keep the pre-split broad behavior. New integrations should choose the narrower filter whenever only Photography presentation is needed. Markers are scanned in singular post content and in active footer widgets, including published Core synced patterns, so footer presentation also works on archives and search results. Inactive widgets and unpublished pattern references do not opt in. Use site-neutral class tokens; do not add locale paths, page IDs, plugin routing assumptions, or user data. All marker filters must return arrays of exact CSS class strings. Slateframe ignores malformed marker entries defensively, without changing valid classes or activating styles for prose-only mentions.
 
+## Dynamic plugin-owned presentation
+
+Shortcodes, custom render callbacks, and other plugin-generated markup may not
+exist in stored post content when Slateframe discovers contextual assets. A
+plugin can opt into the existing presentation layers on the current request
+without creating a proprietary block, registering a post type in the theme,
+or forcing those assets onto unrelated pages:
+
+```php
+add_filter( 'slateframe_photography_styles_needed', function ( $needed ) {
+	return $needed || is_singular( 'your_public_post_type' );
+} );
+add_filter( 'slateframe_content_modes_styles_needed', function ( $needed ) {
+	return $needed || your_plugin_has_knowledge_content();
+} );
+add_filter( 'slateframe_query_loop_styles_needed', function ( $needed ) {
+	return $needed || your_plugin_has_project_grid();
+} );
+```
+
+Each hook receives the already-detected Boolean requirement. These hooks are
+**additive**: returning `false` cannot disable presentation required by native
+Core blocks, saved class markers, synced patterns, or active footer widgets.
+Query Loop presentation automatically loads its shared content-mode dependency.
+Integrations must make their own request-specific decisions; the theme never
+hard-codes plugin names, routes, IDs, or locales. Dynamically rendered forms
+continue to use the existing `slateframe_forms_styles_needed` and
+`slateframe_form_content_styles_needed` filters. The theme does not parse or
+rewrite third-party shortcode output, register plugin data, or enqueue remote
+scripts on its behalf.
+
 ## Compatibility policy
 
 Public Slateframe hooks/filters are treated as compatibility surfaces once documented here. Renaming or removing a documented hook should include a deprecation path when practical.
