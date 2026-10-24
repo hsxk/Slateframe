@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Give native Core Query Pagination numeric, previous, and next controls the bounded 44px Appearance touch target in frontend and Gutenberg, preserve wrapping and RTL/CJK labels, and distinguish the active page in forced colors. Add real Portfolio pagination browser coverage for 320–1920px, keyboard, 200%/400% text and native navigation without JavaScript.
+
 - Restore native Core Search button-inside mobile readability with scoped 320–640px full-width controls, long CJK/RTL label wrapping, and real WordPress eight-width/400%/forced-colors/keyboard/Axe regressions without extra runtime JavaScript.
 
 
