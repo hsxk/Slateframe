@@ -14,6 +14,7 @@ class CoreButtonsReflowContract(unittest.TestCase):
         self.assertIn("--slateframe-control-padding-inline:12px", css)
         self.assertIn(".wp-block-button__link{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important}", css)
         self.assertIn(".wp-block-button__link:focus-visible{outline-color:Highlight}", css)
+        self.assertIn("@media(max-width:480px){.wp-block-buttons.is-nowrap>.wp-block-button:not(.has-custom-width){flex:1 1 0}}", css)
         self.assertIn(".wp-block-button__link{min-inline-size:var(--slateframe-control)", css)
         self.assertIn("max-width:100%", css)
         self.assertIn("overflow-wrap:anywhere", css)
