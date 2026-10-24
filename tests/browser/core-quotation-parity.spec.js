@@ -8,7 +8,7 @@ const { openAuthenticatedEditor } = require('./support/editor-login');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8' }).trim();
 const multilingual = '日本語 中文 العربية ' + 'UnbrokenResearchReference'.repeat(9);
 const fixture = '<!-- wp:group {"className":"slateframe-quotation-fixture"} --><div class="wp-block-group slateframe-quotation-fixture">' +
-  '<!-- wp:quote --><blockquote class="wp-block-quote"><p><a href="#quotation-end">' + multilingual + '</a></p><p>Source: 日本語 中文 العربية</p></blockquote><!-- /wp:quote -->' +
+  '<!-- wp:quote --><blockquote class="wp-block-quote"><!-- wp:paragraph --><p><a href="#quotation-end">' + multilingual + '</a></p><!-- /wp:paragraph --><cite>Source: 日本語 中文 العربية</cite></blockquote><!-- /wp:quote -->' +
   '<!-- wp:pullquote --><figure class="wp-block-pullquote"><blockquote><p>' + multilingual + '</p><cite>Author — 日本語 中文 العربية</cite></blockquote></figure><!-- /wp:pullquote -->' +
   '<p id="quotation-end">End of quotation.</p></div><!-- /wp:group -->';
 
@@ -87,13 +87,16 @@ test('Gutenberg preserves Core Quote and Pullquote serialized attributes without
     const blocks = window.wp.blocks;
     const before = blocks.serialize(editor.getBlocks());
     const cases = [
-      blocks.createBlock('core/quote', { value: '<p>日本語 中文 العربية</p>', citation: 'A multilingual source' }),
+      blocks.createBlock('core/quote', { citation: 'A multilingual source' }, [
+        blocks.createBlock('core/paragraph', { content: '日本語 中文 العربية' }),
+      ]),
       blocks.createBlock('core/pullquote', { value: '日本語 中文 العربية', citation: 'A multilingual source' }),
     ].map(block => {
       const serialized = blocks.serialize(block);
       const parsed = blocks.parse(serialized);
       return { name: block.name, serialized, second: blocks.serialize(parsed),
-        parsedName: parsed[0]?.name, valid: parsed[0]?.isValid, count: parsed.length };
+        parsedName: parsed[0]?.name, valid: parsed[0]?.isValid, count: parsed.length,
+        childNames: parsed[0]?.innerBlocks.map(child => child.name) };
     });
     return { before, after: blocks.serialize(editor.getBlocks()), cases };
   });
@@ -104,5 +107,10 @@ test('Gutenberg preserves Core Quote and Pullquote serialized attributes without
     expect(entry.valid).toBe(true);
     expect(entry.second).toBe(entry.serialized);
     expect(entry.serialized).toContain('日本語 中文 العربية');
+    expect(entry.serialized).toContain('<cite>A multilingual source</cite>');
+    if (entry.name === 'core/quote') {
+      expect(entry.childNames).toEqual(['core/paragraph']);
+      expect(entry.serialized).toContain('<!-- wp:paragraph -->');
+    }
   }
 });

@@ -33,8 +33,11 @@ class CoreQuotationParity(unittest.TestCase):
                          "core-quotations-390-rtl-200-forced-colors.png", "editorial-pullquote-", "core/quote",
                          "core/pullquote", "wp('post', 'delete'", "document.documentElement.scrollWidth"):
             self.assertIn(required, spec)
-        self.assertIn("blocks.createBlock('core/quote', { value:", spec)
-        self.assertNotIn("blocks.createBlock('core/quote', {}, [", spec)
+        self.assertIn("blocks.createBlock('core/quote', { citation:", spec)
+        self.assertIn("blocks.createBlock('core/paragraph', { content:", spec)
+        self.assertIn("expect(entry.childNames).toEqual(['core/paragraph'])", spec)
+        self.assertIn("<!-- wp:paragraph -->", spec)
+        self.assertNotIn("blocks.createBlock('core/quote', { value:", spec)
 
 
 if __name__ == "__main__":
