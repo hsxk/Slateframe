@@ -19,7 +19,7 @@ class CoreQueryPaginationTargets(unittest.TestCase):
         self.assertIn("overflow-wrap:anywhere", block_css)
         self.assertIn("font-variant-numeric:tabular-nums", block_css)
         self.assertIn(".wp-block-query-pagination .current{background:var(--slateframe-text);color:var(--slateframe-bg);font-weight:700}", block_css)
-        self.assertIn(".wp-block-query-pagination .current{outline:2px solid CanvasText", block_css)
+        self.assertIn(".wp-block-query-pagination .current{outline:2px solid Highlight;outline-offset:0", block_css)
         self.assertNotIn(".wp-block-query-pagination .current{background:", css)
         self.assertLessEqual(len(block_css.encode("utf-8")), 400)
         self.assertNotIn(".slateframe-project-grid " + selector, css)
