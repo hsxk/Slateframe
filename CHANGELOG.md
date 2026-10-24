@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Keep the existing 15 route CSS+JS budgets unchanged by moving only native Core Button forced-colors/mobile refinements into a WordPress-enqueued `core/button` stylesheet; enforce its own 400-byte cap, editor parity, real-page/404 asset isolation, and deterministic release ZIP inclusion.
+
+
 - Balance two uncustomized native nowrap actions on 320–412px mobile rather than compressing the short translated action into a 44px vertical text column; preserve author widths and natural desktop layout, and add readable-width geometry plus 320px LTR/RTL screenshots.
 
 
