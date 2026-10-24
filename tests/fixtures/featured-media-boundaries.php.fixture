@@ -4,6 +4,7 @@ define( 'ABSPATH', __DIR__ . '/' );
 class WP_Error {}
 $GLOBALS['slateframe_media_case'] = array();
 $GLOBALS['slateframe_media_calls'] = 0;
+$GLOBALS['slateframe_media_kses_calls'] = 0;
 function absint( $value ) { return abs( (int) $value ); }
 function get_the_ID() { return 17; }
 function has_post_thumbnail( $id ) { return ! empty( $GLOBALS['slateframe_media_case']['thumbnail'] ); }
@@ -13,7 +14,13 @@ function wp_get_attachment_image( $id, $size, $icon, $attrs ) {
 	++$GLOBALS['slateframe_media_calls'];
 	return $GLOBALS['slateframe_media_case']['html'];
 }
-function wp_kses_post( $value ) { return $value; }
+function wp_kses_post( $value ) {
+	++$GLOBALS['slateframe_media_kses_calls'];
+	$value = preg_replace( '~<script\b[^>]*>.*?</script>~is', '', $value );
+	$value = preg_replace( '~\s+onerror\s*=\s*"[^"]*"~i', '', $value );
+	// WordPress post KSES also strips image attributes not in its allowlist.
+	return preg_replace( '~\s+(?:fetchpriority|decoding)\s*=\s*"[^"]*"~i', '', $value );
+}
 class WP_HTML_Tag_Processor {
 	private $html;
 	private $matched = false;
@@ -41,6 +48,7 @@ function check_case( $condition, $message ) {
 function render_case( $case ) {
 	$GLOBALS['slateframe_media_case'] = $case;
 	$GLOBALS['slateframe_media_calls'] = 0;
+	$GLOBALS['slateframe_media_kses_calls'] = 0;
 	ob_start();
 	slateframe_featured_media( 17 );
 	return ob_get_clean();
@@ -60,4 +68,18 @@ check_case( false === strpos( $valid, '<figcaption' ), 'No empty caption' );
 $caption = render_case( array( 'thumbnail' => true, 'html' => '<img src="/photo.jpg">', 'caption' => '<em>写真の説明</em>' ) );
 check_case( false !== strpos( $caption, '<figcaption class="wp-caption-text"><em>写真の説明</em></figcaption>' ), 'CJK caption preserved' );
 check_case( 1 === substr_count( $caption, '<figure' ) && 1 === substr_count( $caption, '</figure>' ), 'Balanced figure' );
+$unsafe = render_case( array(
+	'thumbnail' => true,
+	'html' => '<img src="/photo.jpg" srcset="/photo-2.jpg 2x" alt="写真" fetchpriority="low" decoding="sync" onerror="alert(1)"><script>alert(2)</script>',
+	'caption' => '<em>说明</em>',
+) );
+check_case( false === strpos( $unsafe, 'onerror' ), 'Filtered event handlers must not reach the hero' );
+check_case( false === strpos( $unsafe, '<script' ), 'Filtered scripts must not reach the hero' );
+check_case( false !== strpos( $unsafe, 'srcset="/photo-2.jpg 2x"' ), 'Responsive srcset survives sanitization' );
+check_case( false !== strpos( $unsafe, 'alt="写真"' ), 'CJK alt survives sanitization' );
+check_case( false !== strpos( $unsafe, 'fetchpriority="high"' ), 'High priority survives sanitization' );
+check_case( false !== strpos( $unsafe, 'loading="eager"' ), 'Eager loading survives sanitization' );
+check_case( false !== strpos( $unsafe, 'decoding="async"' ), 'Async decoding survives sanitization' );
+check_case( false !== strpos( $unsafe, '<em>说明</em>' ), 'CJK caption survives sanitization' );
+check_case( 2 === $GLOBALS['slateframe_media_kses_calls'], 'Both filtered hero and caption must pass through KSES' );
 echo "Featured media boundaries: {$cases} cases passed\\n";

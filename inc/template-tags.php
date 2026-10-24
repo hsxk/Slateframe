@@ -83,6 +83,9 @@ function slateframe_featured_media( $post_id = 0 ) {
 		return;
 	}
 
+	// KSES strips untrusted filter markup before Core adds fixed, safe image
+	// attributes. Applying KSES afterward would strip fetchpriority/decoding.
+	$image_html      = wp_kses_post( $image_html );
 	$image_processor = new WP_HTML_Tag_Processor( $image_html );
 
 	if ( ! $image_processor->next_tag( 'img' ) ) {
@@ -95,7 +98,8 @@ function slateframe_featured_media( $post_id = 0 ) {
 	$image_html = $image_processor->get_updated_html();
 
 	echo '<figure class="slateframe-shell slateframe-entry-hero">';
-	// wp_get_attachment_image() escapes its responsive image markup; attributes above are set through Core's HTML processor.
+	// Filter-provided HTML passed KSES above; only fixed Core image attributes
+	// were added afterward. Preserve responsive and priority attributes.
 	echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 	if ( is_string( $caption ) && '' !== trim( $caption ) ) {
