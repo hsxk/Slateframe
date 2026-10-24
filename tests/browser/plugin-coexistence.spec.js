@@ -82,12 +82,50 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     const link = page.locator('.slateframe-project-grid .wp-block-post-title a');
     await expect(link).toContainText('日本語 中文');
     await link.focus(); await expect(link).toBeFocused();
-    for(const width of [390,1440]){
+    const list = page.locator('.slateframe-project-grid .wp-block-post-template');
+    // Plugin-generated lists do not inherit Core's block-support reset. No
+    // browser-default bullets or indentation may leak into the project grid.
+    for (const width of [320,375,390,412,768,1440,1920]) {
       await page.setViewportSize({width,height:900});
-      await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='200%';});
-      expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-      await page.screenshot({path:`test-artifacts/screenshots/plugin-coexistence-portfolio-${width}-rtl.png`,fullPage:true});
+      for (const direction of ['ltr','rtl']) {
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='200%';},direction);
+        const layout = await list.evaluate(n=>{
+          const css=getComputedStyle(n), a=n.querySelector('.wp-block-post-title a');
+          const rect=a.getBoundingClientRect();
+          return {
+            display:css.display, listStyle:css.listStyleType,
+            paddingStart:css.paddingInlineStart, marginStart:css.marginInlineStart,
+            tracks:css.gridTemplateColumns.split(' ').filter(Boolean).length,
+            overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+            linkLeft:rect.left, linkRight:rect.right, linkHeight:rect.height
+          };
+        });
+        expect(layout.display,`${width} ${direction} display`).toBe('grid');
+        expect(layout.listStyle,`${width} ${direction} marker`).toBe('none');
+        expect(layout.paddingStart,`${width} ${direction} padding`).toBe('0px');
+        expect(layout.marginStart,`${width} ${direction} margin`).toBe('0px');
+        expect(layout.tracks,`${width} ${direction} columns`).toBe(width<=640?1:width<=900?2:3);
+        expect(layout.overflow,`${width} ${direction} overflow`).toBeLessThanOrEqual(1);
+        expect(layout.linkLeft).toBeGreaterThanOrEqual(-1);
+        expect(layout.linkRight).toBeLessThanOrEqual(width+1);
+        expect(layout.linkHeight).toBeGreaterThanOrEqual(44);
+      }
+      if ([390,1440].includes(width)) {
+        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='200%';});
+        await link.focus();
+        await expect(link).toBeFocused();
+        await page.screenshot({path:`test-artifacts/screenshots/plugin-coexistence-portfolio-${width}-rtl.png`,fullPage:true});
+      }
     }
+    await page.setViewportSize({width:390,height:900});
+    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='400%';});
+    await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
+    await link.focus();
+    await expect(link).toBeFocused();
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await page.screenshot({path:'test-artifacts/screenshots/plugin-coexistence-portfolio-390-rtl-400-forced-colors.png',fullPage:true});
+    await page.emulateMedia({forcedColors:'none'});
+    await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.fontSize='';});
     await open('native');
     await styles({photography:1,'query-loop':0}); // A plugin cannot suppress required native presentation.
   } finally {
