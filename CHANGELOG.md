@@ -29,6 +29,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Keep native Core Cover content tracks shrinkable in frontend and Gutenberg, preserving WordPress background overlays, image focal positioning, and author-defined height without scripts; verify 7 responsive widths, RTL/CJK, enlarged text, forced-colors keyboard focus, Axe, and editor round-trip in disposable WordPress.
+
 - Preserve natural letter spacing for Chinese, Japanese and Korean site titles while keeping Latin brand tracking and the existing bounded navigation CSS budget; verify RTL, 400% text, keyboard focus and responsive widths in real WordPress Chromium.
 
 - Preserve shared form-control CSS for open and historical comment threads even when an integration opts out of general form styles; retain selective loading and threaded-reply gating.
