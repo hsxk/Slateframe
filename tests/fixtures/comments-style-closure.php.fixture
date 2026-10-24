@@ -51,9 +51,20 @@ function wp_get_theme() {
     };
 }
 function slateframe_footer_presentation_assets() { return array( 'photography' => false, 'content_modes' => false, 'query_loop' => false ); }
-function slateframe_photography_styles_needed() { return false; }
-function slateframe_content_modes_needed() { return false; }
-function slateframe_query_loop_styles_needed() { return false; }
+function slateframe_photography_styles_needed() { return fixture_flag( 'native_photo' ); }
+function slateframe_content_modes_needed() { return fixture_flag( 'native_content' ); }
+function slateframe_query_loop_styles_needed() { return fixture_flag( 'native_query' ); }
+function apply_filters( $name, $needed ) {
+    $flags = array(
+        'slateframe_photography_styles_needed'   => 'photo_opt_in',
+        'slateframe_content_modes_styles_needed' => 'content_opt_in',
+        'slateframe_query_loop_styles_needed'    => 'query_opt_in',
+    );
+    if ( fixture_flag( 'filter_force_false' ) ) {
+        return false;
+    }
+    return $needed || ( isset( $flags[ $name ] ) && fixture_flag( $flags[ $name ] ) );
+}
 function slateframe_forms_styles_needed() { return fixture_flag( 'forms' ); }
 function slateframe_form_content_styles_needed() { return fixture_flag( 'form_content' ); }
 function slateframe_search_form_styles_needed() { return fixture_flag( 'search_form' ); }
