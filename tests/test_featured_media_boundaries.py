@@ -21,8 +21,12 @@ class FeaturedMediaBoundaries(unittest.TestCase):
         self.assertIn("! is_string( $image_html )", source)
         self.assertIn("! $image_processor->next_tag( 'img' )", source)
         self.assertIn("$image_processor->set_attribute( 'fetchpriority', 'high' );", source)
-        self.assertIn("echo wp_kses_post( $image_processor->get_updated_html() );", source)
-        self.assertNotIn("echo $image_html; // phpcs:ignore", source)
+        self.assertIn("$image_html      = wp_kses_post( $image_html );", source)
+        self.assertLess(
+            source.index("$image_html      = wp_kses_post( $image_html );"),
+            source.index("$image_processor = new WP_HTML_Tag_Processor( $image_html );"),
+        )
+        self.assertIn("$image_html = $image_processor->get_updated_html();", source)
         self.assertNotIn("time2log", source.lower())
 
 

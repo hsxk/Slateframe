@@ -17,7 +17,9 @@ function wp_get_attachment_image( $id, $size, $icon, $attrs ) {
 function wp_kses_post( $value ) {
 	++$GLOBALS['slateframe_media_kses_calls'];
 	$value = preg_replace( '~<script\b[^>]*>.*?</script>~is', '', $value );
-	return preg_replace( '~\s+onerror\s*=\s*"[^"]*"~i', '', $value );
+	$value = preg_replace( '~\s+onerror\s*=\s*"[^"]*"~i', '', $value );
+	// WordPress post KSES also strips image attributes not in its allowlist.
+	return preg_replace( '~\s+(?:fetchpriority|decoding)\s*=\s*"[^"]*"~i', '', $value );
 }
 class WP_HTML_Tag_Processor {
 	private $html;
@@ -68,7 +70,7 @@ check_case( false !== strpos( $caption, '<figcaption class="wp-caption-text"><em
 check_case( 1 === substr_count( $caption, '<figure' ) && 1 === substr_count( $caption, '</figure>' ), 'Balanced figure' );
 $unsafe = render_case( array(
 	'thumbnail' => true,
-	'html' => '<img src="/photo.jpg" srcset="/photo-2.jpg 2x" alt="写真" onerror="alert(1)"><script>alert(2)</script>',
+	'html' => '<img src="/photo.jpg" srcset="/photo-2.jpg 2x" alt="写真" fetchpriority="low" decoding="sync" onerror="alert(1)"><script>alert(2)</script>',
 	'caption' => '<em>说明</em>',
 ) );
 check_case( false === strpos( $unsafe, 'onerror' ), 'Filtered event handlers must not reach the hero' );
