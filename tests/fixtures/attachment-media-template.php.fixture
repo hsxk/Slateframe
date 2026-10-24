@@ -60,7 +60,7 @@ class WP_HTML_Tag_Processor {
     private $matched = false;
     public function __construct( $html ) { $this->html = $html; }
     public function next_tag( $name ) {
-        $this->matched = 1 === preg_match( '/<img(?:\\s|\\/?>)/i', $this->html );
+        $this->matched = 1 === preg_match( '/<' . preg_quote( $name, '/' ) . '(?:\\s|\\/?>)/i', $this->html );
         return $this->matched;
     }
     public function set_attribute( $name, $value ) {
@@ -179,4 +179,16 @@ $filtered_video = slateframe_attachment_render( array(
 ) );
 slateframe_attachment_check( false === strpos( $filtered_video, '<script' ), 'Filtered video script leaked' );
 slateframe_attachment_check( false !== strpos( $filtered_video, '<figcaption class="wp-caption-text"><em>Safe caption</em></figcaption>' ), 'Filtered video lost safe caption' );
+$nonmedia_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4',
+    'video_shortcode' => '<p>Not a native player</p>', 'caption' => 'Orphan filtered video caption',
+) );
+slateframe_attachment_check( false === strpos( $nonmedia_video, '<figure class="alignwide">' ), 'Non-video HTML created video figure' );
+slateframe_attachment_check( false === strpos( $nonmedia_video, 'Orphan filtered video caption' ), 'Non-video HTML leaked caption' );
+$nonmedia_audio = slateframe_attachment_render( array(
+    'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg',
+    'audio_shortcode' => '<video controls></video>', 'caption' => 'Orphan filtered audio caption',
+) );
+slateframe_attachment_check( false === strpos( $nonmedia_audio, '<figure class="alignwide">' ), 'Wrong media element created audio figure' );
+slateframe_attachment_check( false === strpos( $nonmedia_audio, 'Orphan filtered audio caption' ), 'Wrong media element leaked caption' );
 echo 'Attachment media template: ' . $GLOBALS['slateframe_attachment_checks'] . " assertions passed\n";
