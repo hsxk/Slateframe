@@ -12,6 +12,13 @@ both the parent post status and the post type, including custom post types.
 Password-protected published parents remain publicly viewable and retain their
 link to Core's password prompt. Orphan attachments display no parent action.
 
+The parent ID is validated with `slateframe_positive_int()` **before** Core's
+visibility check. A filter returning a boolean, array, object, fraction,
+negative value, or overflowing decimal string cannot accidentally coerce to
+post ID `1` or `PHP_INT_MAX`. Valid integer and decimal-string IDs retain
+their exact public-only recovery link; malformed values produce no link.
+
+
 The theme does not attempt to restrict access to uploaded files, override
 WordPress capabilities, or replace a site's media privacy policy. Sites that
 need private media delivery must handle that separately at the application or

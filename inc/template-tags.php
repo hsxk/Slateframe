@@ -117,7 +117,10 @@ function slateframe_featured_media( $post_id = 0 ) {
  * @return int Public parent post ID, or zero when no public parent exists.
  */
 function slateframe_public_attachment_parent_id( $attachment_id ) {
-	$parent_id = (int) wp_get_post_parent_id( absint( $attachment_id ) );
+	// Core returns an integer, but filtered post objects may expose malformed
+	// parent IDs. Casting arrays, booleans or overflowing strings could turn
+	// them into an unrelated public post and expose its recovery link.
+	$parent_id = slateframe_positive_int( wp_get_post_parent_id( absint( $attachment_id ) ) );
 
 	if ( 0 >= $parent_id || ! is_post_publicly_viewable( $parent_id ) ) {
 		return 0;
