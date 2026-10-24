@@ -33,7 +33,7 @@ class CoreButtonColorParity(unittest.TestCase):
 
     def test_no_new_js_or_plugin_dependency(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
-        self.assertNotIn("!important", css.split(".wp-block-buttons,.wp-block-button{", 1)[1].split(".slateframe-pagination", 1)[0])
+        self.assertNotIn("!important", css.split(".wp-block-button__link{", 1)[1].split(".slateframe-pagination", 1)[0])
         self.assertNotIn("jquery", css.lower())
 
 
