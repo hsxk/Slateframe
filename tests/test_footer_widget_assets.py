@@ -164,10 +164,10 @@ class FooterWidgetAssetContract(unittest.TestCase):
         base = (ROOT / "style.css").read_text(encoding="utf-8")
         forms = (ROOT / "assets/css/forms.css").read_text(encoding="utf-8")
         self.assertIn(
-            "@media (max-width:640px){.alignleft,.alignright{float:none;margin-inline:auto}.wp-block-search__button-outside .wp-block-search__inside-wrapper{display:grid;grid-template-columns:minmax(0,1fr)}",
+            "@media(max-width:640px){.alignleft,.alignright{float:none;margin-inline:auto}.wp-block-search__button-outside,.wp-block-search__button-inside{& .wp-block-search__inside-wrapper{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--slateframe-component-gap)}",
             base,
         )
-        self.assertIn(".wp-block-search__button-outside .wp-block-search__button{margin:0;inline-size:100%;white-space:normal}", base)
+        self.assertIn("& .wp-block-search__button{margin:0;inline-size:100%;white-space:normal}", base)
         self.assertLessEqual(len(base.encode("utf-8")), 16000)
         self.assertLessEqual(len(forms.encode("utf-8")), 1300)
 
