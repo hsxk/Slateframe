@@ -43,6 +43,10 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
           }, { dir, font });
           const state = await nav.evaluate(node => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            offenders: [...document.querySelectorAll('.slateframe-core-navigation-fixture *')]
+              .map(el => ({ tag: el.tagName, className: typeof el.className === 'string' ? el.className : '',
+                left: el.getBoundingClientRect().left, right: el.getBoundingClientRect().right }))
+              .filter(el => el.left < -1 || el.right > document.documentElement.clientWidth + 1).slice(0, 5),
             viewport: document.documentElement.clientWidth,
             target: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
             links: [...node.querySelectorAll('a.wp-block-navigation-item__content')].map(link => {
@@ -52,7 +56,7 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
             }),
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
-          expect(state.overflow, label + ' document reflow').toBeLessThanOrEqual(1);
+          expect(state.overflow, label + ' document reflow: ' + JSON.stringify(state.offenders)).toBeLessThanOrEqual(1);
           expect(state.target, label + ' bounded token').toBeGreaterThanOrEqual(44);
           expect(state.links).toHaveLength(3);
           for (const link of state.links) {

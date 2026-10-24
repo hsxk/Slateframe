@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Fix a real 320px Core Navigation regression (454px document overflow) by bounding Core's flex container, not just individual links, within the existing 850-byte block asset cap. Preserve WordPress wrapping and RTL/CJK labels; also re-dismiss the native Gutenberg welcome guide when responsive media changes reopen it during Knowledge FAQ visual checks.
+
 - Give authored native Core Navigation links, submenus, overlays, and WordPress 7+ close controls bounded 44px targets with CJK/RTL wrapping; preserve Gutenberg parity and conditional block loading, and add real seven-width/400%/keyboard/Axe/forced-colors visual regression without theme JavaScript.
 
 - Make native Core Query Pagination current-page emphasis consistent outside Portfolio, protect long CJK/RTL page labels and numeric alignment, and expose a distinct active page in forced colors. Preserve the existing 44px Core targets and all global CSS+JS budgets by loading a tiny Core-only block stylesheet; add real WordPress 320–1920px, keyboard, 200%/400%, Axe and two-page navigation regression evidence without JavaScript.

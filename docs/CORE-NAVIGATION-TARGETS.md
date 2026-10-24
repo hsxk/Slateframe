@@ -6,6 +6,7 @@ Slateframe leaves WordPress Core Navigation, its overlay, submenu, and keyboard 
 
 - Native links, submenu toggles, and responsive open/close controls have minimum 44px targets through `--slateframe-control`, including the WordPress 7.0+ customizable overlay close block.
 - Logical inline/block dimensions and `overflow-wrap:anywhere` allow long Japanese, Chinese, Arabic, and unbroken labels to reflow in LTR and RTL. Items may shrink within Core flex containers without viewport-width hacks.
+- The native `wp-block-navigation__container` flex item must also have a zero inline minimum and a 100% maximum: without those bounds WordPress can retain a 774px min-content list on a 320px phone even when each link itself wraps. Keep Core's authored wrap/overlay semantics.
 - Existing theme `:focus-visible` remains the focus indicator. Core retains its own accessible names, menu semantics, and interactivity.
 - `wp_enqueue_block_style( 'core/navigation', ... )` conditionally loads the small CSS only when Core Navigation renders. Gutenberg receives the same CSS through `add_editor_style()`.
 

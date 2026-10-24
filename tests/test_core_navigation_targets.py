@@ -26,6 +26,7 @@ class CoreNavigationTargets(unittest.TestCase):
                       "overflow-wrap:anywhere", "min-inline-size:0"):
             with self.subTest(token=token):
                 self.assertIn(token, css)
+        self.assertIn(".wp-block-navigation__container{min-inline-size:0;max-inline-size:100%}", css)
         self.assertLessEqual(len(css.encode("utf-8")), 850)
         self.assertNotIn(".slateframe-primary-nav", css)
         self.assertNotIn("javascript", css.lower())
