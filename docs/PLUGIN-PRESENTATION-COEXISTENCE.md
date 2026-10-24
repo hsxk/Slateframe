@@ -36,6 +36,12 @@ Portfolio presentation layer, preserving the semantic list in the DOM while
 removing visible browser-default bullets. Its grid retains zero inline
 padding and margins; Core `is-layout-grid` track choices remain authoritative.
 
+A second disposable shortcode renders a two-card semantic Core `is-layout-grid`
+with explicit two-column author layout. The scoped reset removes both list
+item markers and list indentation without taking ownership of Core grid tracks.
+Both variants must remain readable with long CJK/Arabic labels and no featured
+media; the Core-grid fixture records 390/1440px RTL screenshots.
+
 The disposable Portfolio fixture now checks computed list-style, indentation,
 track counts, 44px keyboard targets and root containment at 320, 375, 390,
 412, 768, 1440 and 1920px in both LTR and RTL at 200% text. It additionally
