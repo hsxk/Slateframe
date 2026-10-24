@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Restore native Core Search button-inside mobile readability with scoped 320–412px full-width controls, long CJK/RTL label wrapping, and real WordPress seven-width/400%/forced-colors/keyboard/Axe regressions without extra runtime JavaScript.
+
+
 - Fix a real 320px Chromium native Buttons failure: stacking the wrappers alone left the short action at 154.58px; stretch uncustomized mobile groups and their actual clickable links, preserve authored widths and unrelated `is-nowrap` layouts, and extend link/vertical/RTL/LTR/200%/400% browser assertions within the unchanged 400-byte block CSS budget.
 
 - Scope the optional native Buttons nowrap refinement to `wp-block-buttons`, not every Core/plugin `is-nowrap` flex container; protect non-Button layout and child minimum sizes at 320–1920px in RTL/LTR and enlarged text without relaxing the 400-byte stylesheet budget.
