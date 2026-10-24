@@ -22,7 +22,7 @@ class PhotographySequenceStarter(unittest.TestCase):
             self.assertTrue((ROOT/('assets/images/pattern-placeholder-'+name+'.svg')).is_file())
     def test_core_first_localized_natural_ratio_and_boundary(self):
         s=self.source
-        for token in ('"imageCrop":false','"columns":2','"linkTo":"none"',
+        for token in ('"imageCrop":false','"columns":2','"linkTo":"none"','"align":"wide"',
                       'slateframe-pattern slateframe-photography-sequence',
                       'is-style-slateframe-photo-sequence',
                       "'Pattern introduction', 'slateframe'",'alternative text and captions',
@@ -42,6 +42,9 @@ class PhotographySequenceStarter(unittest.TestCase):
                       'openAuthenticatedEditor','blocks.parse(markup)','data.valid',
                       'data.stable','data.lightboxes',"wp('post','delete',id,'--force')"):
             self.assertIn(token,s)
+        runtime=(ROOT/'bin/check-pattern-runtime.php').read_text()
+        self.assertIn("'slateframe/photography-sequence'      => 3",runtime)
+        self.assertIn("'slateframe-gallery-sequence is-style-slateframe-photo-sequence'",runtime)
         quality=(ROOT/'.github/workflows/quality.yml').read_text()
         self.assertIn('core-photography-sequence-390-rtl-200-forced-colors.png',quality)
 if __name__=='__main__':
