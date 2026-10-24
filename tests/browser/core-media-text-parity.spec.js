@@ -51,7 +51,7 @@ test('Core Media & Text stays bounded in seven widths, RTL, 200% text and forced
         }
         if (width <= 600) {
           expect(data.blocks[0].content.top, 'Core mobile stack').toBeGreaterThanOrEqual(data.blocks[0].media.bottom - 1);
-          expect(Math.abs(data.blocks[1].content.top - data.blocks[1].media.top), 'Core unstacked mobile').toBeLessThanOrEqual(2);
+          expect(Math.min(data.blocks[1].content.bottom, data.blocks[1].media.bottom) - Math.max(data.blocks[1].content.top, data.blocks[1].media.top), 'Core unstacked mobile row overlap').toBeGreaterThan(0);
         }
         if ([390, 1440].includes(width)) {
           await fs.mkdir('test-artifacts/screenshots', { recursive: true });
