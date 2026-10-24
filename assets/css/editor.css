@@ -120,7 +120,7 @@
 .editor-styles-wrapper .slateframe-project-grid .slateframe-project-card :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date){inline-size:100%;min-inline-size:0;overflow-wrap:anywhere}
 
 /* Keep native Core media bounded in the editing canvas. */
-.editor-styles-wrapper :is(audio,iframe,embed,object){max-inline-size:100%}
+.editor-styles-wrapper :is(audio,iframe,embed,object,.wp-video,.mejs-container){max-inline-size:100%}
 
 /* Preserve native Core Calendar table semantics inside the editor canvas. */
 .editor-styles-wrapper .wp-block-calendar{max-inline-size:100%;overflow-x:auto}
