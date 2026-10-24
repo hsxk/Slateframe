@@ -10,6 +10,29 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Accept only positive, non-overflowing integer values from Core metadata.
+ *
+ * Never cast arrays, objects, booleans, fractions or overflowing strings to
+ * a different valid-looking post ID, image dimension or byte count.
+ *
+ * @param mixed $value Value from Core or an integration filter.
+ * @return int Positive integer or zero when invalid.
+ */
+function slateframe_positive_int( $value ) {
+	if ( ! is_int( $value ) && ! is_string( $value ) ) {
+		return 0;
+	}
+
+	$digits = (string) $value;
+	if ( ! preg_match( '/^[0-9]+$/D', $digits ) ) {
+		return 0;
+	}
+
+	$number = (int) $digits;
+	return $number > 0 && ltrim( $digits, '0' ) === (string) $number ? $number : 0;
+}
+
+/**
  * Return a resilient display title for frontend discovery surfaces.
  *
  * WordPress permits untitled content. Theme navigation must still expose a
@@ -119,17 +142,20 @@ function slateframe_attachment_details( $attachment_id ) {
 		$details[ __( 'File type', 'slateframe' ) ] = $mime_type;
 	}
 
-	if ( is_array( $metadata ) && ! empty( $metadata['width'] ) && ! empty( $metadata['height'] ) ) {
+	$width  = is_array( $metadata ) ? slateframe_positive_int( isset( $metadata['width'] ) ? $metadata['width'] : null ) : 0;
+	$height = is_array( $metadata ) ? slateframe_positive_int( isset( $metadata['height'] ) ? $metadata['height'] : null ) : 0;
+	if ( $width && $height ) {
 		$details[ __( 'Dimensions', 'slateframe' ) ] = sprintf(
 			/* translators: 1: image width, 2: image height. */
 			__( '%1$s × %2$s px', 'slateframe' ),
-			number_format_i18n( (int) $metadata['width'] ),
-			number_format_i18n( (int) $metadata['height'] )
+			number_format_i18n( $width ),
+			number_format_i18n( $height )
 		);
 	}
 
-	if ( is_array( $metadata ) && ! empty( $metadata['filesize'] ) ) {
-		$details[ __( 'File size', 'slateframe' ) ] = size_format( (int) $metadata['filesize'] );
+	$filesize = is_array( $metadata ) ? slateframe_positive_int( isset( $metadata['filesize'] ) ? $metadata['filesize'] : null ) : 0;
+	if ( $filesize ) {
+		$details[ __( 'File size', 'slateframe' ) ] = size_format( $filesize );
 	}
 
 	/**
@@ -178,8 +204,9 @@ function slateframe_entry_meta() {
 		return;
 	}
 
-	$author_id   = (int) get_the_author_meta( 'ID' );
-	$author_name = trim( (string) get_the_author() );
+	$author_id   = slateframe_positive_int( get_the_author_meta( 'ID' ) );
+	$raw_author  = get_the_author();
+	$author_name = is_string( $raw_author ) ? trim( $raw_author ) : '';
 	$author_url  = $author_id ? get_author_posts_url( $author_id ) : '';
 
 	/**
