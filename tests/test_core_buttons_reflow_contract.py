@@ -16,9 +16,12 @@ class CoreButtonsReflowContract(unittest.TestCase):
         self.assertIn("--slateframe-control-padding-inline:12px", css)
         self.assertIn("background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important", block_css)
         self.assertIn("&:focus-visible{outline-color:Highlight}", block_css)
-        self.assertIn("@media(max-width:480px){.is-nowrap:not(:has(>.has-custom-width)){flex-direction:column}}", block_css)
+        self.assertIn(".wp-block-buttons.is-nowrap{", block_css)
+        self.assertIn("@media(width<481px){&:not(:has(.has-custom-width)){flex-direction:column}}", block_css)
+        self.assertNotIn("@media(max-width:480px){.is-nowrap", block_css)
         self.assertNotIn(".is-nowrap>.wp-block-button:not(.has-custom-width){flex:1 1 0}", block_css)
-        self.assertIn(".is-nowrap:has(>:nth-child(2):last-child):not(:has(>.has-custom-width))>.wp-block-button{min-inline-size:min(8rem,35%)}", block_css)
+        self.assertIn("&:has(>:nth-child(2):last-child):not(:has(.has-custom-width))>.wp-block-button{min-inline-size:min(8rem,35%)}", block_css)
+        self.assertNotIn("\n.is-nowrap", block_css)
         self.assertNotIn("background:ButtonFace!important", css)
         self.assertLessEqual(len(block_css.encode("utf-8")), 400)
         self.assertIn("wp_enqueue_block_style(", php)
@@ -43,7 +46,7 @@ class CoreButtonsReflowContract(unittest.TestCase):
         for needle in ("'ltr', 'rtl'", "'200%', '400%'", "forcedColors: 'active'",
                        "AxeBuilder", "openAuthenticatedEditor", "blocks.parse(serialized)",
                        "wp('post', 'delete'", "is-nowrap", "is-vertical", "43",
-                       "core-buttons-320-rtl-200-forced-colors.png", "stacked order", "stacked alignment", "primary readable width", "desktop readable width", "custom width bypass", "native nowrap mobile axis", "mobile reflow axis", "author width preserves native horizontal layout", "core-buttons.css"):
+                       "core-buttons-320-rtl-200-forced-colors.png", "stacked order", "stacked alignment", "primary readable width", "desktop readable width", "custom width bypass", "native nowrap mobile axis", "mobile reflow axis", "author width preserves native horizontal layout", "core-buttons.css", "slateframe-unrelated-nowrap", "unrelated flex axis", "unrelated children"):
             self.assertIn(needle, js)
 
 

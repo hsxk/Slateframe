@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Scope the optional native Buttons nowrap refinement to `wp-block-buttons`, not every Core/plugin `is-nowrap` flex container; protect non-Button layout and child minimum sizes at 320–1920px in RTL/LTR and enlarged text without relaxing the 400-byte stylesheet budget.
+
 - Correct a real exact-SHA 320px/400% visual regression: keep native Core nowrap actions in source order but stack uncustomized mobile groups instead of rendering one-character-wide vertical text columns. Assert full-width stacked geometry, RTL/LTR, enlarged text, author-width bypass, and unchanged desktop layout without increasing the 400-byte block CSS budget.
 
 - Keep both actions in a two-button native nowrap group readable on desktop when one translated label is exceptionally long; honor author custom widths, preserve the 400-byte scoped CSS budget, and add 768/1440/1920 geometry plus custom-width regression.

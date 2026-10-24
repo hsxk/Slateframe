@@ -19,7 +19,11 @@ const content = '<!-- wp:group {"className":"slateframe-core-buttons-fixture"} -
   '<!-- wp:buttons {"layout":{"type":"flex","orientation":"vertical"}} -->' +
   '<div class="wp-block-buttons is-vertical">' + button(label, '#buttons-end') +
   '</div><!-- /wp:buttons --><p id="buttons-end">End of actions</p>' +
-  '</div><!-- /wp:group -->';
+  '</div><!-- /wp:group -->' +
+  '<!-- wp:html --><div class="slateframe-unrelated-nowrap is-nowrap" style="display:flex">' +
+  '<div class="wp-block-button">Unrelated first</div>' +
+  '<div class="wp-block-button">Unrelated second</div>' +
+  '</div><!-- /wp:html -->';
 
 test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'One real WordPress fixture is resized across seven widths.');
@@ -37,8 +41,10 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     if (await scopedStyle.evaluate(node => node.tagName === 'STYLE')) {
       // Playwright's visible-text matcher excludes <style>; inspect raw CSS.
       const cssText = await scopedStyle.evaluate(node => node.textContent || '');
-      expect(cssText).toContain('.is-nowrap>');
-      expect(cssText).toContain('.is-nowrap:has(');
+      expect(cssText).toContain('.wp-block-buttons.is-nowrap{');
+      expect(cssText).toContain('@media(width<481px)');
+      expect(cssText).toContain('min-inline-size:min(8rem,35%)');
+      expect(cssText).not.toMatch(/(^|[{}])\.is-nowrap(?=[:{])/);
       expect(cssText).toContain('@media(forced-colors:active)');
       expect(cssText).toContain('core-buttons.css');
     } else {
@@ -64,6 +70,14 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         });
         expect(geometry.pageOverflow, width + ' ' + dir).toBeLessThanOrEqual(1);
         expect(geometry.groups).toHaveLength(2);
+        // Other Core/plugin containers may also use is-nowrap. The optional
+        // native Button stylesheet must never alter their layout or children.
+        const unrelated = await page.locator('.slateframe-unrelated-nowrap').evaluate(node => ({
+          direction: getComputedStyle(node).flexDirection,
+          minimums: [...node.children].map(child => getComputedStyle(child).minInlineSize),
+        }));
+        expect(unrelated.direction, width + ' ' + dir + ' unrelated flex axis').toBe('row');
+        expect(unrelated.minimums, width + ' ' + dir + ' unrelated children').toEqual(['auto', 'auto']);
         expect(geometry.nowrap.wrap).toBe('nowrap');
         expect(geometry.nowrap.shrink).toEqual(['1', '1']);
         if (width <= 412) {
@@ -128,6 +142,8 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       });
       expect(await root.locator('.wp-block-buttons.is-nowrap').evaluate(node => getComputedStyle(node).flexDirection),
         zoom + ' mobile reflow axis').toBe('column');
+      expect(await page.locator('.slateframe-unrelated-nowrap').evaluate(node => getComputedStyle(node).flexDirection),
+        zoom + ' unrelated flex axis').toBe('row');
       if (zoom === '400%') {
         await fs.mkdir('test-artifacts/screenshots', { recursive: true });
         // A viewport capture stays inside the strict visual-inventory 20,000px height cap;
