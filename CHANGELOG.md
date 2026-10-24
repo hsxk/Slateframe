@@ -46,6 +46,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Fixed
 
+- Remove browser-default bullets from plugin-rendered semantic Core Query Loop lists inside the Portfolio presentation layer. Preserve zero inline indentation, responsive grid tracks, RTL/CJK long-title wrapping, 44px focusable project links, and 400% forced-colors evidence without increasing CSS budgets.
+
+
 - Terminate the `style.css` theme header on a separate line before minified rules: previously the last `Tags` field swallowed thousands of bytes of CSS under WordPress Core's header parser despite Theme Check passing.
 
 
