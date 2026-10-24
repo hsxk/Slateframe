@@ -11,10 +11,12 @@ class CoreQueryPaginationTargets(unittest.TestCase):
         php = (ROOT / "functions.php").read_text()
         selector = ".wp-block-query-pagination :is(a,.page-numbers)"
         self.assertIn(selector, css)
-        self.assertIn("min-inline-size:var(--slateframe-control)", css.split(selector, 1)[1][:300])
-        self.assertIn("min-block-size:var(--slateframe-control)", css.split(selector, 1)[1][:300])
-        self.assertIn("overflow-wrap:anywhere", css.split(selector, 1)[1][:300])
+        self.assertIn(".slateframe-pagination .page-numbers," + selector + "{display:grid", css)
+        self.assertIn("min-inline-size:var(--slateframe-control)", css)
+        self.assertIn("min-block-size:var(--slateframe-control)", css)
+        self.assertIn("overflow-wrap:anywhere", css.rsplit(selector, 1)[1][:300])
         self.assertIn("font-variant-numeric:tabular-nums", css.split(selector, 1)[1][:300])
+        self.assertIn(".wp-block-query-pagination .current{background:var(--slateframe-text);color:var(--slateframe-bg);font-weight:700}", css)
         self.assertIn(".wp-block-query-pagination .current{outline:2px solid CanvasText", css)
         self.assertNotIn(".slateframe-project-grid " + selector, css)
         self.assertIn("add_theme_support( 'editor-styles' )", php)
@@ -32,7 +34,7 @@ class CoreQueryPaginationTargets(unittest.TestCase):
         for marker in ("320, 375, 390, 412, 768, 1440, 1920", "16, 32, 64",
                        "'ltr', 'rtl'", "forcedColors: 'active'", "toBeFocused()",
                        "new AxeBuilder", ".page-numbers.current", "await next.click()",
-                       "await back.click()", "test-artifacts/screenshots/"):
+                       "await back.click()", "UnbrokenProjectLabel", "test-artifacts/screenshots/"):
             self.assertIn(marker, browser)
 
 

@@ -18,6 +18,8 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   await expect(numbers).toBeVisible();
   await expect(numbers.locator('.page-numbers.current')).toHaveCount(1);
   await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+  const originalNextLabel = await next.textContent();
+  await next.evaluate(node => { node.textContent = 'Next 日本語 中文 العربية ' + 'UnbrokenProjectLabel'.repeat(2); });
 
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
@@ -50,7 +52,7 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
           expect(item.height, label + ' ' + item.text + ' height').toBeGreaterThanOrEqual(result.target - 1);
           expect(item.left, label + ' ' + item.text + ' left').toBeGreaterThanOrEqual(-1);
           expect(item.right, label + ' ' + item.text + ' right').toBeLessThanOrEqual(result.viewport + 1);
-          expect(item.display, label + ' ' + item.text + ' display').toBe('inline-grid');
+          expect(item.display, label + ' ' + item.text + ' display').toBe('grid');
         }
         if (font === 16 && [390, 1440].includes(width)) {
           await pagination.screenshot({ path: 'test-artifacts/screenshots/core-query-pagination-' + width + '-' + dir + '.png' });
@@ -62,8 +64,15 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
     }
   }
 
+  await next.evaluate((node, label) => { node.textContent = label; }, originalNextLabel);
   await page.setViewportSize({ width: 390, height: 900 });
   await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+  const currentBeforeForced = await numbers.locator('.page-numbers.current').evaluate(node => {
+    const style = getComputedStyle(node);
+    const link = node.parentElement.querySelector('a.page-numbers');
+    return { active: style.backgroundColor, inactive: link ? getComputedStyle(link).backgroundColor : '' };
+  });
+  expect(currentBeforeForced.active).not.toBe(currentBeforeForced.inactive);
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
   const current = numbers.locator('.page-numbers.current');
   const contrast = await current.evaluate(node => {
