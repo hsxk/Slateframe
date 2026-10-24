@@ -68,7 +68,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           expect(rect.width).toBeGreaterThanOrEqual(43);
         }
         for (const rect of geometry.links) expect(rect.height).toBeGreaterThanOrEqual(43);
-        if ([390, 1440].includes(width)) {
+        if ([320, 390, 1440].includes(width)) {
           await fs.mkdir('test-artifacts/screenshots', { recursive: true });
           await root.screenshot({ path: 'test-artifacts/screenshots/core-buttons-' + width + '-' + dir + '.png' });
         }
