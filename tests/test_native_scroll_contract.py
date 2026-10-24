@@ -6,15 +6,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class NativeScrollContract(unittest.TestCase):
-    def test_core_wrap_does_not_add_unnecessary_focus_stops(self):
+    def test_core_wrap_preserves_native_keyboard_focus_and_containment(self):
         php = (ROOT / "functions.php").read_text()
         fixture = (ROOT / "tests/fixtures/showcase.html").read_text()
         browser = (ROOT / "tests/browser/core-code-keyboard.spec.js").read_text()
         self.assertNotIn("function slateframe_focusable_code_block(", php)
+        self.assertIn("function slateframe_focusable_preformatted_block(", php)
         self.assertIn("<!-- wp:code -->", fixture)
         self.assertIn("<!-- wp:preformatted -->", fixture)
         self.assertIn("browser-core-code-reading", fixture)
-        for needle in ("'ltr', 'rtl'", "'200%'", "forcedColors: 'active'", "not.toHaveAttribute('tabindex', '0')", "scrollWidth"):
+        for needle in ("'ltr', 'rtl'", "'200%'", "forcedColors: 'active'", "toHaveAttribute('tabindex', '0')", "toBeFocused()", "scrollWidth"):
             self.assertIn(needle, browser)
 
     def test_mobile_menu_has_bounded_scroll_and_keyboard_coverage(self):
