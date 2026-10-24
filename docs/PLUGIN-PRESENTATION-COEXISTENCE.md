@@ -27,5 +27,20 @@ Genuine WordPress/Chromium screenshots cover 390/1440 forms, 390 Photography,
 390/1440 RTL Portfolio and the 400% forced-colors form. No extra runtime CSS,
 JavaScript, custom content type, remote media, or plugin dependency ships.
 
+## Portfolio list semantics and zoom acceptance
+
+The WordPress Core Query Loop normally receives a block-support list reset.
+An independently rendered shortcode may emit the same semantic `ul.wp-block-post-template`
+without those Core styles. Slateframe resets the marker in the scoped
+Portfolio presentation layer, preserving the semantic list in the DOM while
+removing visible browser-default bullets. Its grid retains zero inline
+padding and margins; Core `is-layout-grid` track choices remain authoritative.
+
+The disposable Portfolio fixture now checks computed list-style, indentation,
+track counts, 44px keyboard targets and root containment at 320, 375, 390,
+412, 768, 1440 and 1920px in both LTR and RTL at 200% text. It additionally
+captures 390px RTL at 400% text with forced colors and reduced motion. These
+are layout tests, not an alternative to manual screen-reader and WCAG review.
+
 Acceptance requires all exact-head Theme quality and Photography GitHub Actions
 jobs to succeed and the screenshots to be downloaded and visually reviewed.
