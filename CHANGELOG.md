@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Preserve native Core Embed iframe/fallback/caption reflow in a small conditional Gutenberg-shared stylesheet. Add real WordPress 320–1920px RTL/CJK, 200%/400% text, keyboard, Axe, forced-colors and screenshot coverage, plus native editor serialization. No embed provider, custom player or extra JavaScript.
+
 - Preserve native Core Video/Audio figure and caption containment with conditional, Gutenberg-shared styles; add real WordPress seven-width LTR/RTL, CJK, 200%/forced-colors, keyboard/Axe and screenshot regression. No custom media player or extra JavaScript.
 
 - Add native Core Post Navigation Link 44px logical targets, CJK/RTL/long-title reflow and Gutenberg parity with a small conditional block stylesheet; verify real adjacent WordPress post URLs, 320–1920px, 100–400% text, focus, Axe, forced colors and exact-HEAD screenshots without replacing Core rendering.
