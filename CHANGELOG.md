@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Preserve native Core Post Date time semantics, permalink and unlinked dates with conditional editor-shared 44px styling, seven-width RTL/CJK/zoom/forced-colors/Axe/keyboard screenshots, Gutenberg roundtrip and 404 asset isolation.
+
 - Preserve native Core Login/out link, optional form and nonce-bearing logout URLs with conditional editor-shared 44px presentation, seven-width RTL/CJK/zoom/Axe/keyboard/forced-colors screenshots, authenticated Gutenberg roundtrip, 404 isolation and strict CSS budget.
 
 - Align public theme Author and copyright metadata to the repository handle, and enforce consistent attribution in the release validator and regression tests without changing licensing or history.
