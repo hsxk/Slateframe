@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually verify Core Categories nested lists and dropdown keyboard/VoiceOver navigation in Safari and Firefox after WordPress/Chromium baseline; preserve Core taxonomy ownership.
+
 - Manually review native Core Latest Posts grid/list with Safari/VoiceOver and Firefox after the disposable WordPress/Chromium baseline; keep Core query ownership and plugin-neutral behavior.
 - Manually review native Core Embed provider playback, author-defined aspect ratios and iframe accessibility in Safari/VoiceOver and Firefox after the offline WordPress/Chromium baseline; no theme-owned providers.
 - Continue refining Photography/Gallery visual language after shipping mixed-orientation fixtures, natural-ratio features, responsive diptychs, replaceable theme-local starter media, editorial sequences, and native WordPress Core immersive viewing; next focus is final visual polish, manual accessibility review, and release-grade screenshot selection.

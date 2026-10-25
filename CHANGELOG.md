@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Categories hierarchical lists and dropdowns with 44px logical targets, long RTL/CJK label containment, conditional Gutenberg-shared CSS, disposable WordPress taxonomy fixtures, seven-width/zoom/forced-colors/Axe screenshots, editor serialization and strict packaging budgets.
+
 - Align native Latest Posts Gutenberg serialization assertions with the registered WordPress Core block schema: preserve supported list/grid attributes, reject removed legacy attributes, and always verify post count, dates and excerpt settings while retaining real list/grid runtime coverage.
 
 - Preserve native Core Latest Posts list/grid queries while bounding multilingual titles, excerpts and dates with 44px title targets. Add isolated WordPress category fixtures, seven-width LTR/RTL/200%/400%/forced-colors/keyboard/Axe screenshots, authenticated Gutenberg roundtrips and a 500-byte conditional editor-shared CSS budget.
