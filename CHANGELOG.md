@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Post Excerpt presentation with conditional editor-shared 44px Read More links, seven-width CJK/RTL/zoom/Axe/keyboard/forced-colors screenshots, WordPress permalink fixtures, Gutenberg roundtrip and 404 asset isolation.
+
 - Preserve native Core Post Author Name archive links, optional unlinked text and new-tab target with conditional editor-shared 44px CSS, seven-width RTL/CJK/zoom/Axe/keyboard/forced-colors screenshots, Gutenberg roundtrip and 404 isolation.
 
 - Preserve native Core Post Date time semantics, permalink and unlinked dates with conditional editor-shared 44px styling, seven-width RTL/CJK/zoom/forced-colors/Axe/keyboard screenshots, Gutenberg roundtrip and 404 asset isolation.
