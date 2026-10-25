@@ -30,11 +30,18 @@ test('native Core Page List keeps published hierarchy and multilingual links', a
       '--post_parent=' + parent, '--post_name=' + slug + '-draft',
       '--post_title=' + title + ' draft', '--porcelain');
     ids.push(draft);
+    const published = [parent, child, grandchild].map(id =>
+      wp('eval', 'echo get_permalink(' + Number(id) + ');'));
+    // Core Navigation expects list items, not a nested <ul> directly inside
+    // its own <ul>. Keep the standalone dynamic Page List separate and use
+    // a native Navigation Link for the navigation integration contract.
     const content = '<!-- wp:group {"className":"slateframe-page-list-fixture"} -->' +
       '<div class="wp-block-group slateframe-page-list-fixture">' +
       '<!-- wp:page-list /-->' +
       '<!-- wp:navigation {"overlayMenu":"never","ariaLabel":"Page directory"} -->' +
-      '<!-- wp:page-list /--><!-- /wp:navigation -->' +
+      '<!-- wp:navigation-link ' + JSON.stringify({
+        label: 'Published parent / 日本語 / العربية', url: published[0], kind: 'custom',
+      }) + ' /--><!-- /wp:navigation -->' +
       '</div><!-- /wp:group -->';
     const fixture = wp('post', 'create', '--post_type=page', '--post_status=publish',
       '--post_name=' + slug + '-fixture', '--post_title=Core Page List fixture',
@@ -45,12 +52,13 @@ test('native Core Page List keeps published hierarchy and multilingual links', a
     await expect(root).toBeVisible();
     const list = root.locator('.wp-block-page-list').first();
     await expect(list).toBeVisible();
-    // The standalone Page List exposes nested links; Navigation may hide
-    // submenus until opened, so it is verified separately, not measured as visible.
-    await expect(root.locator('nav.wp-block-navigation .wp-block-page-list')).toHaveCount(1);
+    // The standalone Page List owns the published hierarchy. Navigation
+    // independently owns its valid <ul><li> structure and native link target.
+    const nav = root.locator('nav.wp-block-navigation');
+    await expect(nav.locator('.wp-block-navigation__container > li')).toHaveCount(1);
+    await expect(nav.locator('.wp-block-navigation__container > ul')).toHaveCount(0);
+    await expect(nav.locator('a.wp-block-navigation-item__content')).toHaveAttribute('href', published[0]);
     const links = list.locator('a[href]');
-    const published = [parent, child, grandchild].map(id =>
-      wp('eval', 'echo get_permalink(' + Number(id) + ');'));
     const draftURL = wp('eval', 'echo get_permalink(' + Number(draft) + ');');
     const hrefs = await links.evaluateAll(nodes => nodes.map(node => node.href));
     for (const url of published) expect(hrefs).toContain(url);
