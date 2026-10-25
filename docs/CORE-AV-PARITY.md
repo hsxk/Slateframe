@@ -10,6 +10,10 @@ containers using logical inline sizes and allow long mixed CJK/RTL captions
 to wrap without taking over user-authored dimensions. Both stylesheets are
 also registered with Gutenberg through `add_editor_style()`.
 
+WordPress may deliver these registered block styles as inline `<style>` tags
+instead of external CSS links. The browser contract accepts either delivery form
+but requires both exact style handles and their actual rules.
+
 The isolated WordPress/Chromium regression publishes native serialized Core
 blocks (not an injected DOM-only mock), then checks both blocks at
 320/375/390/412/768/1440/1920px in LTR and RTL. It checks that media and

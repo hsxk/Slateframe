@@ -35,11 +35,19 @@ test('native Core Video and Audio keep media, captions and keyboard focus bounde
     await expect(video).toHaveAttribute('controls', '');
     await expect(audio).toHaveAttribute('controls', '');
     await expect(fixture.locator('figcaption')).toHaveCount(2);
-    await expect.poll(() => page.evaluate(() => {
-      const urls = [...document.styleSheets].map(sheet => sheet.href || '');
-      return ['core-video.css', 'core-audio.css'].every(name =>
-        urls.some(url => url.includes('/assets/css/' + name)));
-    })).toBe(true);
+    // WordPress may inline registered block assets instead of emitting links.
+    // Verify the exact handles and actual rules, not one delivery mechanism.
+    await expect.poll(() => page.evaluate(() =>
+      ['video', 'audio'].every(block => {
+        const handle = 'slateframe-core-' + block;
+        const inline = document.getElementById(handle + '-inline-css');
+        const external = document.getElementById(handle + '-css');
+        return Boolean(
+          (inline && inline.textContent.includes('.wp-block-' + block)) ||
+          (external && external.sheet)
+        );
+      })
+    )).toBe(true);
 
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });

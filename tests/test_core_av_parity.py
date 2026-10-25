@@ -34,7 +34,7 @@ class CoreAudiovisualParity(unittest.TestCase):
                        "'ltr', 'rtl'", "style.fontSize = '32px'",
                        "forcedColors: 'active'", "new AxeBuilder",
                        "await media.focus()", "core-av-390-rtl-200-forced-colors.png",
-                       "core-video.css", "core-audio.css", "figcaption"):
+                       "slateframe-core-", "-inline-css", "external.sheet", "figcaption"):
             self.assertIn(needle, spec)
 
 
