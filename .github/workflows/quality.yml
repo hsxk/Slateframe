@@ -995,6 +995,13 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/core-columns-390-rtl-200-forced-colors.png || { echo "Missing native Columns forced-colors evidence" >&2; exit 1; }
+          for width in 320 375 390 412 768 1440 1920; do
+            for direction in ltr rtl; do
+              screenshot="test-artifacts/screenshots/core-group-${width}-${direction}.png"
+              test -s "$screenshot" || { echo "Missing native Group evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          test -s test-artifacts/screenshots/core-group-390-rtl-200-forced-colors.png || { echo "Missing native Group forced-colors evidence" >&2; exit 1; }
           for profile in default compact spacious; do
             for viewport in 390 1440; do
               for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge editorial-pathways empty-author not-found photography-lightbox content-pagination; do
