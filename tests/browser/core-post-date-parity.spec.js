@@ -125,7 +125,7 @@ test('Core Post Date Gutenberg roundtrip keeps native date options', async ({ pa
   // normalize it away on parse. Compare all authored attributes while removing
   // only that documented Core-generated date binding, never other metadata.
   const withoutTransientDateBinding = markup => markup.replace(
-    /<!-- wp:post-date (\\{.*?\\}) \\/-->/g,
+    /<!-- wp:post-date (\{.*?\}) \/-->/g,
     (whole, json) => {
       const attrs = JSON.parse(json);
       const binding = attrs.metadata?.bindings?.datetime;
