@@ -32,6 +32,7 @@ test('native Core Page List keeps published hierarchy and multilingual links', a
     ids.push(draft);
     const content = '<!-- wp:group {"className":"slateframe-page-list-fixture"} -->' +
       '<div class="wp-block-group slateframe-page-list-fixture">' +
+      '<!-- wp:page-list /-->' +
       '<!-- wp:navigation {"overlayMenu":"never","ariaLabel":"Page directory"} -->' +
       '<!-- wp:page-list /--><!-- /wp:navigation -->' +
       '</div><!-- /wp:group -->';
@@ -44,6 +45,9 @@ test('native Core Page List keeps published hierarchy and multilingual links', a
     await expect(root).toBeVisible();
     const list = root.locator('.wp-block-page-list').first();
     await expect(list).toBeVisible();
+    // The standalone Page List exposes nested links; Navigation may hide
+    // submenus until opened, so it is verified separately, not measured as visible.
+    await expect(root.locator('nav.wp-block-navigation .wp-block-page-list')).toHaveCount(1);
     const links = list.locator('a[href]');
     const published = [parent, child, grandchild].map(id =>
       wp('eval', 'echo get_permalink(' + Number(id) + ');'));
