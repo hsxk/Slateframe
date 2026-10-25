@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review native Core Previous/Next Post link announcements, adjacent-post ordering and focus in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium evidence; preserve Core query ownership.
+
 - Manually verify native Core Post Featured Image alt-text and linked-image announcements, aspect-ratio preservation, and focus in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
 
 - Manually review Core Post Title linked/unlinked heading announcements, RTL/CJK long titles and focus behavior in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
