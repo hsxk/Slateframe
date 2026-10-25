@@ -36,9 +36,9 @@ class CoreLatestCommentsParity(unittest.TestCase):
         js = (ROOT / 'tests/browser/core-latest-comments-parity.spec.js').read_text(encoding='utf-8')
         for token in ("wp('comment', 'create'", "wp('comment', 'delete'",
                       "wp('post', 'create'", "wp('post', 'delete'", '--comment_approved=0',
-                      'get_comment_link(', 'finally', 'displayAvatar: true',
-                      'displayAvatar: false', 'displayDate: true', 'displayDate: false',
-                      'displayExcerpt: true', 'displayExcerpt: false',
+                      'get_comment_link(', 'finally', 'displayAvatar: show',
+                      'displayDate: show', 'displayContent', 'displayExcerpt',
+                      'supportsContent', 'WP_Block_Type_Registry',
                       '320, 375, 390, 412, 768, 1440, 1920', "'ltr', 'rtl'",
                       "fontSize = '32px'", "fontSize = '64px'",
                       "forcedColors: 'active'", 'new AxeBuilder',

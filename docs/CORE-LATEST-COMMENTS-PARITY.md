@@ -23,6 +23,10 @@ isolation. Gravatar requests are intercepted **only in the browser test** with
 an in-memory local image to keep the fixture offline and reproducible. The
 WordPress comment and post records are removed in `finally`.
 
+The fixture reads the actual registered Core block schema: current WordPress
+uses `displayContent: 'none' | 'excerpt' | 'full'`, while older Core
+releases use `displayExcerpt`. It never forces obsolete attributes.
+
 Authenticated Gutenberg verifies that native Latest Comments attributes survive
 serialize/parse without editing the existing post. Attributes removed by a
 future Core schema must not be reintroduced by the theme.

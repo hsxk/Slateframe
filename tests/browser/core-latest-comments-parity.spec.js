@@ -21,6 +21,11 @@ test('native Core Latest Comments preserves approved comments, links and metadat
       '--post_content=<!-- wp:paragraph --><p>Core comment fixture</p><!-- /wp:paragraph -->', '--porcelain');
     posts.push(postId);
     const home = wp('eval', 'echo home_url();');
+    // Core 6.7 and current Core expose different excerpt controls. Read the
+    // registered server schema rather than serializing a removed attribute.
+    const schema = JSON.parse(wp('eval',
+      'echo wp_json_encode( WP_Block_Type_Registry::get_instance()->get_registered("core/latest-comments")->attributes );'));
+    const supportsContent = Object.prototype.hasOwnProperty.call(schema, 'displayContent');
     for (let i = 0; i < 3; i++) {
       comments.push(wp('comment', 'create', '--comment_post_ID=' + postId,
         '--comment_author=' + multilingual + ' ' + i,
@@ -34,10 +39,11 @@ test('native Core Latest Comments preserves approved comments, links and metadat
       '--comment_content=Never publish this comment', '--comment_approved=0', '--porcelain');
     comments.push(hidden);
     const block = (attrs) => '<!-- wp:latest-comments ' + JSON.stringify(attrs) + ' /-->';
+    const attrs = show => ({ commentsToShow: 8, displayAvatar: show, displayDate: show,
+      ...(supportsContent ? { displayContent: show ? 'excerpt' : 'none' } : { displayExcerpt: show }) });
     const content = '<!-- wp:group {"className":"slateframe-latest-comments-fixture"} -->' +
       '<div class="wp-block-group slateframe-latest-comments-fixture">' +
-      block({ commentsToShow: 8, displayAvatar: true, displayDate: true, displayExcerpt: true }) +
-      block({ commentsToShow: 8, displayAvatar: false, displayDate: false, displayExcerpt: false }) +
+      block(attrs(true)) + block(attrs(false)) +
       '</div><!-- /wp:group -->';
     const fixture = wp('post', 'create', '--post_type=page', '--post_status=publish',
       '--post_name=' + slug + '-fixture', '--post_title=Core Latest Comments fixture',
@@ -149,7 +155,9 @@ test('Core Latest Comments Gutenberg roundtrip preserves native settings', async
     const before = blocks.serialize(editor.getBlocks());
     const schema = blocks.getBlockType('core/latest-comments')?.attributes;
     if (!schema) throw new Error('Native Core Latest Comments schema missing');
-    const settings = { commentsToShow: 8, displayAvatar: false, displayDate: false, displayExcerpt: false };
+    const settings = { commentsToShow: 8, displayAvatar: false, displayDate: false,
+      ...(Object.prototype.hasOwnProperty.call(schema, 'displayContent') ?
+        { displayContent: 'none' } : { displayExcerpt: false }) };
     const first = blocks.serialize(blocks.createBlock('core/latest-comments', settings));
     const parsed = blocks.parse(first);
     return { before, after: blocks.serialize(editor.getBlocks()), first,
