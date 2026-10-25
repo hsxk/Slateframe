@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Align public theme Author and copyright metadata to the repository handle, and enforce consistent attribution in the release validator and regression tests without changing licensing or history.
+- Add native Core Post Terms tag/category presentation with conditional editor-shared CSS, 44px multilingual term links, real taxonomy URL fixtures, seven responsive widths, RTL/CJK, 200%/400% text, Axe, keyboard, forced-colors, screenshots, Gutenberg roundtrips and package budget.
+
 - Add conditional native Core Latest Comments presentation, preserving approved-only Core queries, author/comment permalinks, date/avatar/excerpt variants, editor roundtrips, 44px link targets, seven widths, CJK/RTL, 200%/400% text, forced colors, Axe, keyboard, screenshots, 404 isolation and package budget.
 
 - Add native Core Page List published hierarchy navigation with conditional Gutenberg-shared 44px link targets, CJK/RTL/long-title containment, seven responsive widths, 200%/400% text, Axe, forced colors, keyboard, screenshots, editor serialization, 404 asset isolation and release budget.

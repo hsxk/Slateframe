@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review native Core Post Terms taxonomy links and separator announcements in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium acceptance.
+
 - Manually review Core Latest Comments screen-reader author/title announcements, localized dates and avatar alternatives in Safari/VoiceOver and Firefox after real WordPress/Chromium acceptance.
 
 - Manually review Core Page List hierarchy and deep nested Navigation announcements in Safari/VoiceOver and Firefox after WordPress/Chromium acceptance.
