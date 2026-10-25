@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review Core Post Author Biography with Safari/VoiceOver and Firefox, including profile-empty behavior and RTL/CJK text reflow, after exact-SHA Chromium evidence.
+
 - Manually verify Core Read More localized announcements and new-tab behavior in Safari/VoiceOver and Firefox after exact-SHA Query Loop/Chromium evidence.
 
 - Manually review native Core Previous/Next Post link announcements, adjacent-post ordering and focus in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium evidence; preserve Core query ownership.
