@@ -135,7 +135,11 @@ test('Core Post Date Gutenberg roundtrip keeps native date options', async ({ pa
       delete attrs.metadata.bindings.datetime;
       if (!Object.keys(attrs.metadata.bindings).length) delete attrs.metadata.bindings;
       if (!Object.keys(attrs.metadata).length) delete attrs.metadata;
-      return '<!-- wp:post-date ' + JSON.stringify(attrs) + ' /-->';
+      // Core omits the attribute object entirely when it becomes empty.
+      // Keep that native comment shape; do not normalize any authored fields.
+      return Object.keys(attrs).length
+        ? '<!-- wp:post-date ' + JSON.stringify(attrs) + ' /-->'
+        : '<!-- wp:post-date /-->';
     }
   );
   for (const entry of result.cases) {
