@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Preserve native Core Login/out link, optional form and nonce-bearing logout URLs with conditional editor-shared 44px presentation, seven-width RTL/CJK/zoom/Axe/keyboard/forced-colors screenshots, authenticated Gutenberg roundtrip, 404 isolation and strict CSS budget.
+
 - Align public theme Author and copyright metadata to the repository handle, and enforce consistent attribution in the release validator and regression tests without changing licensing or history.
 - Add native Core Post Terms tag/category presentation with conditional editor-shared CSS, 44px multilingual term links, real taxonomy URL fixtures, seven responsive widths, RTL/CJK, 200%/400% text, Axe, keyboard, forced-colors, screenshots, Gutenberg roundtrips and package budget.
 
