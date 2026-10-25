@@ -28,12 +28,17 @@ class CoreNavigationTargets(unittest.TestCase):
                 self.assertIn(token, css)
         self.assertIn(".wp-block-navigation__container{min-inline-size:0;max-inline-size:100%}", css)
         self.assertIn(".wp-block-navigation-item__label{overflow-wrap:anywhere}", css)
+        self.assertIn(".wp-block-navigation__responsive-container.is-menu-open:not(.has-background)", css)
+        self.assertIn("background:var(--slateframe-surface)", css)
+        self.assertIn("button{justify-content:center}", css)
         self.assertLessEqual(len(css.encode("utf-8")), 850)
         self.assertNotIn(".slateframe-primary-nav", css)
         self.assertNotIn("javascript", css.lower())
 
     def test_real_wordpress_browser_coverage(self):
         browser = (ROOT / "tests/browser/core-navigation-targets.spec.js").read_text()
+        for contract in ("getAnimations()", "overlaySurface.background", "animations: 'disabled'", "overlayBox"):
+            self.assertIn(contract, browser)
         for value in ("320", "375", "390", "412", "768", "1440", "1920",
                       "rtl", "ltr", "64", "AxeBuilder", "forcedColors", "overlay"):
             with self.subTest(value=value):

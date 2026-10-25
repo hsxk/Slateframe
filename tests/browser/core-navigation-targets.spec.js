@@ -87,7 +87,24 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
     const closeBox = await close.boundingBox();
     expect(closeBox?.width || 0).toBeGreaterThanOrEqual(44);
     expect(closeBox?.height || 0).toBeGreaterThanOrEqual(44);
-    await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-overlay-390-rtl.png' });
+    const responsive = overlay.locator('.wp-block-navigation__responsive-container');
+    await expect(responsive).toHaveClass(/is-menu-open/);
+    // Core fades its modal in. Wait until the page underneath is fully obscured.
+    await expect.poll(() => responsive.evaluate(node =>
+      node.getAnimations().filter(animation => animation.playState === 'running').length
+    )).toBe(0);
+    const overlaySurface = await responsive.evaluate(node => ({
+      background: getComputedStyle(node).backgroundColor,
+      opacity: getComputedStyle(node).opacity,
+    }));
+    expect(overlaySurface.background).not.toBe('transparent');
+    expect(overlaySurface.background).not.toBe('rgba(0, 0, 0, 0)');
+    expect(overlaySurface.opacity).toBe('1');
+    const overlayLink = overlay.locator('.wp-block-navigation__responsive-container-content a').first();
+    const overlayBox = await overlayLink.boundingBox();
+    expect(overlayBox?.x || 0).toBeGreaterThanOrEqual(-1);
+    expect((overlayBox?.x || 0) + (overlayBox?.width || 0)).toBeLessThanOrEqual(391);
+    await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-overlay-390-rtl.png', animations: 'disabled' });
     await close.click();
     await page.keyboard.press('Tab');
     await links.first().focus();
