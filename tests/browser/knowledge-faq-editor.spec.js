@@ -103,7 +103,9 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     await page.setViewportSize({ width: 390, height: 900 });
     await root.evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
-    await expect(page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i })).toBeHidden();
+    // Gutenberg can reopen its first-use guide when the responsive canvas or media changes.
+    // Dismiss the real Core dialog before asserting the evidence is unobscured.
+    await dismissEditorWelcomeGuide(page);
     // Check real visible text fragments, not just the element outer boxes.
     // Closed Core Details have layout-hidden paragraphs: exclude those.
     const zoomBounds = await faq.evaluate(node => {
@@ -172,7 +174,7 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     await page.emulateMedia({ forcedColors: 'none' });
     await page.setViewportSize({ width: 1440, height: 900 });
     await root.evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
-    await expect(page.locator('[role="dialog"]').filter({ hasText: /Welcome to the editor/i })).toBeHidden();
+    await dismissEditorWelcomeGuide(page);
     await faq.screenshot({ path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-1440-ltr.png' });
   } finally {
     wp('post', 'delete', id, '--force');
