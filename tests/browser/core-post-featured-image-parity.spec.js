@@ -22,7 +22,9 @@ test('Core Post Featured Image retains native image and permalink at seven width
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
     wp('post', 'meta', 'update', postId, '_thumbnail_id', attachmentId);
-    wp('post', 'meta', 'update', attachmentId, '_wp_attachment_image_alt', '日本語 中文 العربية photo');
+    const attachmentAlt = '日本語 中文 العربية photo';
+    wp('post', 'meta', 'update', attachmentId, '_wp_attachment_image_alt', attachmentAlt);
+    expect(wp('post', 'meta', 'get', attachmentId, '_wp_attachment_image_alt')).toBe(attachmentAlt);
     const permalink = wp('eval', 'echo get_permalink(' + Number(postId) + ');');
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-featured-image-fixture');
@@ -34,8 +36,13 @@ test('Core Post Featured Image retains native image and permalink at seven width
     await expect(figures.last().locator('a')).toHaveCount(0);
     const images = figures.locator('img');
     await expect(images).toHaveCount(2);
+    // Core intentionally uses the post title as the linked image's alt text,
+    // describing the link destination; unlinked images retain attachment alt.
+    await expect(figures.first().locator('img')).toHaveAttribute('alt', slug);
+    await expect(figures.last().locator('img')).toHaveAttribute('alt', attachmentAlt);
     for (const image of await images.all()) {
-      await expect(image).toHaveAttribute('alt', '日本語 中文 العربية photo');
+      await expect(image).toHaveAttribute('src', /\/wp-content\/uploads\//);
+      await expect(image).toHaveAttribute('srcset', /\s\d+w/);
       expect(await image.evaluate(el => el.complete && el.naturalWidth > 0)).toBe(true);
     }
     await expect.poll(() => page.evaluate(() => Boolean(
