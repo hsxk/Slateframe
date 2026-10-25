@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -139,6 +139,28 @@ function slateframe_register_core_post_navigation_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_post_navigation_styles', 20 );
+
+/**
+ * Keep native Core Video and Audio media within the authored content column.
+ *
+ * These tiny presentation-only assets load only for their respective blocks.
+ * Playback, tracks, captions and media URLs remain owned by WordPress/Core.
+ */
+function slateframe_register_core_av_styles() {
+	foreach ( array( 'video', 'audio' ) as $block ) {
+		wp_enqueue_block_style(
+			'core/' . $block,
+			array(
+				'handle' => 'slateframe-core-' . $block,
+				'src'    => get_template_directory_uri() . '/assets/css/core-' . $block . '.css',
+				'path'   => get_template_directory() . '/assets/css/core-' . $block . '.css',
+				'ver'    => wp_get_theme()->get( 'Version' ),
+			)
+		);
+	}
+}
+add_action( 'init', 'slateframe_register_core_av_styles', 20 );
+
 
 
 
