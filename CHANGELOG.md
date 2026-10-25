@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Avatar conditional editor-shared presentation for 44px linked targets and oversized images, with seven-width RTL/zoom/forced-colors/Axe screenshots, WordPress author context, Gutenberg serialization and 404 isolation.
+
+
 - Preserve native Core Post Author Biography context and empty-profile semantics with a conditional Gutenberg-shared CSS asset, seven-width RTL/CJK/400% reflow, Axe/forced-colors screenshots, editor serialization, and strict asset isolation.
 
 - Preserve native Core Read More Query Loop permalink, accessible post-title and target with conditional 44px editor-shared CSS, seven-width RTL/CJK/zoom/Axe/keyboard/forced-colors screenshots, Gutenberg parity, 404 isolation and a 300-byte budget.

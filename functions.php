@@ -363,6 +363,24 @@ function slateframe_register_core_post_author_name_styles() {
 add_action( 'init', 'slateframe_register_core_post_author_name_styles', 20 );
 
 /**
+ * Keep native Core Avatar images bounded and linked targets accessible.
+ *
+ * Core retains author/comment context, avatar providers and link semantics.
+ */
+function slateframe_register_core_avatar_styles() {
+	wp_enqueue_block_style(
+		'core/avatar',
+		array(
+			'handle' => 'slateframe-core-avatar',
+			'src'    => get_template_directory_uri() . '/assets/css/core-avatar.css',
+			'path'   => get_template_directory() . '/assets/css/core-avatar.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_avatar_styles', 20 );
+
+/**
  * Bound native Core Author Biography text without changing user profiles.
  *
  * Core owns the author lookup, biography content and empty-profile behavior.
