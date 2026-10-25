@@ -1738,4 +1738,3 @@ function slateframe_register_core_separator_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_separator_styles', 20 );
-
