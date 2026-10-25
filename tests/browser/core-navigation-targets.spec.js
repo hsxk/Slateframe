@@ -117,7 +117,7 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
       await expect(mobileOpen, width + 'px Core mobile-only opener must stay hidden').toBeHidden();
       await expect(mobileLink).toBeVisible();
     }
-    await mobileOnly.screenshot({ path: 'test-artifacts/screenshots/core-navigation-desktop-no-opener-1440-rtl.png' });
+    await mobileOnly.screenshot({ path: 'test-artifacts/screenshots/core-navigation-desktop-no-opener-1920-rtl.png' });
     for (const width of [320, 375, 390, 412]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(mobileOpen, width + 'px Core mobile-only opener').toBeVisible();
