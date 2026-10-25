@@ -24,7 +24,8 @@ class CoreTagCloudParity(unittest.TestCase):
             "min-inline-size:0", "max-inline-size:100%",
             "min-inline-size:min(100%,var(--slateframe-control))",
             "min-block-size:var(--slateframe-control)",
-            "overflow-wrap:anywhere",
+            "overflow-wrap:anywhere", "display:inline-block",
+            "box-sizing:border-box", ".tag-link-count{white-space:nowrap}",
         ):
             with self.subTest(needle=needle):
                 self.assertIn(needle, css)
@@ -33,6 +34,7 @@ class CoreTagCloudParity(unittest.TestCase):
         self.assertLessEqual(len(css.encode("utf-8")), 400)
         for forbidden in ("!important", "javascript", "time2log_", "wpcode_", "direction:ltr", "font-size:"):
             self.assertNotIn(forbidden, css)
+        self.assertNotIn("display:inline-flex", css)
         self.assertNotIn("render_block_core/tag-cloud", php)
 
     def test_native_wordpress_browser_evidence(self):

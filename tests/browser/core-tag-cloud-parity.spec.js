@@ -66,6 +66,10 @@ test('Core Tag Cloud retains native term links and bounded CJK/RTL controls', as
       await expect(link).toHaveAttribute('aria-label', /\(.+\)/);
       await expect(link.locator('.tag-link-count')).toContainText(String(index + 1));
     }
+    // A Tag Cloud count is one inline unit, never a detached flex item.
+    expect(await links.first().evaluate(el => getComputedStyle(el).display)).toBe('inline-block');
+    expect(await links.first().locator('.tag-link-count').evaluate(el =>
+      getComputedStyle(el).whiteSpace)).toBe('nowrap');
     // Core owns the variable per-term font sizes.
     const sizes = await links.evaluateAll(nodes => nodes.map(node => node.style.fontSize));
     expect(new Set(sizes.filter(Boolean)).size).toBeGreaterThan(1);
