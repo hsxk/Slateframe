@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-columns.css', 'assets/css/core-group.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-columns.css', 'assets/css/core-group.css', 'assets/css/core-details.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -1700,3 +1700,22 @@ function slateframe_register_core_group_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_group_styles', 20 );
+
+/**
+ * Keep native Core Details disclosures accessible at small viewports.
+ *
+ * The browser and WordPress retain summary, open state and keyboard behavior.
+ * Only presentation is registered; no custom disclosure JavaScript is used.
+ */
+function slateframe_register_core_details_styles() {
+	wp_enqueue_block_style(
+		'core/details',
+		array(
+			'handle' => 'slateframe-core-details',
+			'src'    => get_template_directory_uri() . '/assets/css/core-details.css',
+			'path'   => get_template_directory() . '/assets/css/core-details.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_details_styles', 20 );
