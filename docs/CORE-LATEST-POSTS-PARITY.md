@@ -24,7 +24,14 @@ An unrelated 404 must not load the conditional CSS. Fixture posts, page and
 category are removed in finally.
 
 Authenticated Gutenberg checks native list/grid block parse/serialize
-round-trips without editing or saving the existing editor post.
+round-trips without editing or saving the existing editor post. WordPress
+Core editor metadata differs across versions: newer schemas may no longer
+declare the legacy `postLayout` and `columns` attributes. The test reads
+the registered Core schema, requires supported list/grid attributes to
+round-trip, and rejects serialization of unsupported legacy attributes.
+It independently verifies stable non-default post count, date and excerpt
+settings. The server-side fixture still requires real Core list and grid
+rendering, rather than weakening the presentation acceptance.
 
 This does not claim manual Safari/VoiceOver, Firefox or live third-party plugin
 coexistence acceptance. Review actual SHA-specific WordPress/Chromium screenshots

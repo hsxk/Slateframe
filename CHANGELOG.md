@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Align native Latest Posts Gutenberg serialization assertions with the registered WordPress Core block schema: preserve supported list/grid attributes, reject removed legacy attributes, and always verify post count, dates and excerpt settings while retaining real list/grid runtime coverage.
+
 - Preserve native Core Latest Posts list/grid queries while bounding multilingual titles, excerpts and dates with 44px title targets. Add isolated WordPress category fixtures, seven-width LTR/RTL/200%/400%/forced-colors/keyboard/Axe screenshots, authenticated Gutenberg roundtrips and a 500-byte conditional editor-shared CSS budget.
 
 - Preserve native Core Embed iframe/fallback/caption reflow in a small conditional Gutenberg-shared stylesheet. Add real WordPress 320–1920px RTL/CJK, 200%/400% text, keyboard, Axe, forced-colors and screenshot coverage, plus native editor serialization. No embed provider, custom player or extra JavaScript.

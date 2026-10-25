@@ -128,7 +128,10 @@ test('Core Latest Posts Gutenberg dynamic block round-trips without post edits',
   const result = await page.evaluate(() => {
     const blocks = window.wp.blocks;
     const editor = window.wp.data.select('core/block-editor');
-    if (!blocks.getBlockType('core/latest-posts')) throw new Error('Native Latest Posts missing');
+    const schema = blocks.getBlockType('core/latest-posts')?.attributes;
+    if (!schema) throw new Error('Native Latest Posts missing');
+    const supportsLayout = Object.prototype.hasOwnProperty.call(schema, 'postLayout');
+    const supportsColumns = Object.prototype.hasOwnProperty.call(schema, 'columns');
     const before = blocks.serialize(editor.getBlocks());
     const cases = ['list', 'grid'].map(postLayout => {
       const block = blocks.createBlock('core/latest-posts', {
@@ -137,10 +140,17 @@ test('Core Latest Posts Gutenberg dynamic block round-trips without post edits',
       });
       const first = blocks.serialize(block);
       const parsed = blocks.parse(first);
-      return { first, second: blocks.serialize(parsed), count: parsed.length,
-        valid: parsed[0]?.isValid, name: parsed[0]?.name, layout: parsed[0]?.attributes.postLayout };
+      const attrs = parsed[0]?.attributes ?? {};
+      return {
+        requestedLayout: postLayout, first, second: blocks.serialize(parsed),
+        count: parsed.length, valid: parsed[0]?.isValid, name: parsed[0]?.name,
+        layout: attrs.postLayout, postsToShow: attrs.postsToShow,
+        displayPostDate: attrs.displayPostDate, displayPostContent: attrs.displayPostContent,
+        serializedLayout: first.includes('"postLayout"'),
+        serializedColumns: first.includes('"columns"'),
+      };
     });
-    return { before, after: blocks.serialize(editor.getBlocks()), cases };
+    return { before, after: blocks.serialize(editor.getBlocks()), supportsLayout, supportsColumns, cases };
   });
   expect(result.after).toBe(result.before);
   for (const entry of result.cases) {
@@ -149,6 +159,17 @@ test('Core Latest Posts Gutenberg dynamic block round-trips without post edits',
     expect(entry.valid).toBe(true);
     expect(entry.second).toBe(entry.first);
     expect(entry.first).toContain('wp:latest-posts');
-    expect(entry.layout).toMatch(/^(list|grid)$/);
+    expect(entry.postsToShow).toBe(3);
+    expect(entry.displayPostDate).toBe(true);
+    expect(entry.displayPostContent).toBe(true);
+    if (result.supportsLayout) {
+      // Older Core schemas expose list/grid; their default list can be omitted.
+      expect(entry.layout ?? 'list').toBe(entry.requestedLayout);
+    } else {
+      // Newer Core schemas omit these legacy attributes: do not invent them.
+      expect(entry.layout).toBeUndefined();
+      expect(entry.serializedLayout).toBe(false);
+    }
+    if (!result.supportsColumns) expect(entry.serializedColumns).toBe(false);
   }
 });
