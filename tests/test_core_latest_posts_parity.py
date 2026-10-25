@@ -37,6 +37,7 @@ class CoreLatestPostsParity(unittest.TestCase):
                        "forcedColors: 'active'", 'new AxeBuilder', "page.keyboard.press('Tab')",
                        'core-latest-posts-390-rtl-200-forced-colors.png',
                        'openAuthenticatedEditor', 'blocks.serialize', 'blocks.parse',
+                       'fullPage: true',
                        'supportsLayout', 'supportsColumns', 'requestedLayout',
                        'serializedLayout', 'serializedColumns', 'postsToShow',
                        'wp-block-latest-posts__post-date', 'wp-block-latest-posts__post-excerpt',

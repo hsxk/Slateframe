@@ -19,7 +19,7 @@ category: list and three-column grid, each with titles, dates and excerpts.
 It verifies native post URLs, 44px targets, seven widths (320, 375, 390, 412,
 768, 1440, 1920), both LTR/RTL directions, no horizontal page or item escape,
 200% and 400% text, keyboard focus, forced-colors and Axe WCAG A/AA.
-Screenshots are captured at 320/390/1440 LTR/RTL and 390 RTL 200% forced colors.
+Full-page screenshots avoid sticky-header occlusion and are captured at 320/390/1440 LTR/RTL and 390 RTL 200% forced colors.
 An unrelated 404 must not load the conditional CSS. Fixture posts, page and
 category are removed in finally.
 

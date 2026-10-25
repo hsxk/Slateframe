@@ -90,7 +90,7 @@ test('Core Latest Posts keeps native list/grid, links and excerpts readable', as
         }
         if ([320, 390, 1440].includes(width)) {
           await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-          await root.screenshot({ path: 'test-artifacts/screenshots/core-latest-posts-' + width + '-' + dir + '.png' });
+          await page.screenshot({ fullPage: true, path: 'test-artifacts/screenshots/core-latest-posts-' + width + '-' + dir + '.png' });
         }
       }
     }
@@ -107,7 +107,7 @@ test('Core Latest Posts keeps native list/grid, links and excerpts readable', as
     const axe = await new AxeBuilder({ page }).include('.slateframe-latest-posts-fixture')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
-    await root.screenshot({ path: 'test-artifacts/screenshots/core-latest-posts-390-rtl-200-forced-colors.png' });
+    await page.screenshot({ fullPage: true, path: 'test-artifacts/screenshots/core-latest-posts-390-rtl-200-forced-colors.png' });
     await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
