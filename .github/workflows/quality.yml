@@ -87,7 +87,7 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-latest-posts.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-latest-posts.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/core-page-list.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/core-buttons.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
@@ -107,6 +107,7 @@ jobs:
           test $(wc -c < assets/css/core-categories.css) -le 550
           test $(wc -c < assets/css/core-archives.css) -le 550
           test $(wc -c < assets/css/core-tag-cloud.css) -le 400
+          test $(wc -c < assets/css/core-page-list.css) -le 500
           test $(wc -c < assets/css/navigation.css) -le 4000
           test $(wc -c < assets/css/footer.css) -le 2000
           test $(wc -c < assets/css/forms.css) -le 1300
