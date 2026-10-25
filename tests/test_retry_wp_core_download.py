@@ -1,4 +1,4 @@
-"""Keep WP-CLI installation failures visible while tolerating transient DNS outages."""
+"""Keep WP-CLI failures visible while retrying bounded transient DNS/HTTP 429 errors."""
 from pathlib import Path
 import os
 import subprocess
@@ -50,6 +50,27 @@ exit 1
         calls, sleeps, result = self.run_case(['cURL error 6: Could not resolve host'] * 3, 1)
         self.assertEqual((len(calls), sleeps), (3, ['5', '10']))
         self.assertIn('after three bounded attempts', result.stderr)
+
+    def test_http_429_rate_limit_recovers_with_bounded_retry(self):
+        calls, sleeps, _ = self.run_case(["Error: Couldn't access download URL (HTTP code 429).", 'SUCCESS'], 0)
+        self.assertEqual((len(calls), sleeps), (2, ['5']))
+
+    def test_persistent_http_429_stops_after_three(self):
+        calls, sleeps, result = self.run_case(['Error: HTTP 429 Too Many Requests'] * 3, 1)
+        self.assertEqual((len(calls), sleeps), (3, ['5', '10']))
+        self.assertIn('after three bounded attempts', result.stderr)
+
+    def test_http_429_with_checksum_mismatch_is_fatal(self):
+        calls, sleeps, _ = self.run_case(['HTTP code 429\\nChecksum mismatch'], 1)
+        self.assertEqual((len(calls), sleeps), (1, []))
+
+    def test_http_429_with_http_404_is_fatal(self):
+        calls, sleeps, _ = self.run_case(['HTTP code 429\\nHTTP code 404'], 1)
+        self.assertEqual((len(calls), sleeps), (1, []))
+
+    def test_http_500_is_not_retried(self):
+        calls, sleeps, _ = self.run_case(['HTTP code 500'], 1)
+        self.assertEqual((len(calls), sleeps), (1, []))
 
     def test_http_404_is_not_hidden(self):
         calls, sleeps, _ = self.run_case(['Error: 404 Not Found'], 1)
