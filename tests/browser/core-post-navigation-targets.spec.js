@@ -30,12 +30,10 @@ test('Core Post Navigation retains native adjacency, 44px targets and multilingu
     await expect(root).toBeVisible();
     const links = root.locator('.wp-block-post-navigation-link a');
     await expect(links).toHaveCount(2);
-    const destinations = await links.evaluateAll(nodes => nodes.map(node => new URL(node.href).searchParams.get('p')));
     // Pretty permalinks may hide ?p=, so resolve the native hrefs against WP CLI.
     const urls = [ids[0], ids[2]].map(id => wp('post', 'url', id));
-    const actual = await links.evaluateAll(nodes => nodes.map(node => node.href.replace(/\\/$/, '')));
-    expect(actual.sort()).toEqual(urls.map(url => url.replace(/\\/$/, '')).sort());
-    expect(destinations).toHaveLength(2);
+    const actual = await links.evaluateAll(nodes => nodes.map(node => node.href.replace(/[/]$/, '')));
+    expect(actual.sort()).toEqual(urls.map(url => url.replace(/[/]$/, '')).sort());
     await expect.poll(() => links.first().evaluate(node => getComputedStyle(node).minBlockSize)).toBe('44px');
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
@@ -87,8 +85,8 @@ test('Core Post Navigation retains native adjacency, 44px targets and multilingu
     await root.screenshot({ path: 'test-artifacts/screenshots/core-post-navigation-390-rtl-forced-colors.png' });
     const link = links.first();
     await link.click();
-    await expect(page).toHaveURL(url => url.href.replace(/\\/$/, '') === urls[0].replace(/\\/$/, '') ||
-      url.href.replace(/\\/$/, '') === urls[1].replace(/\\/$/, ''));
+    await expect(page).toHaveURL(url => url.href.replace(/[/]$/, '') === urls[0].replace(/[/]$/, '') ||
+      url.href.replace(/[/]$/, '') === urls[1].replace(/[/]$/, ''));
   } finally {
     for (const id of ids.reverse()) wp('post', 'delete', id, '--force');
   }
