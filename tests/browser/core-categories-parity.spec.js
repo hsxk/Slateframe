@@ -53,8 +53,9 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
     await expect(list.locator('ul.children a[href="' + expected[1] + '"]')).toHaveCount(1);
     const select = root.locator('.wp-block-categories-dropdown select');
     await expect(select).toHaveCount(1);
-    await expect(select.locator('option[value="' + child + '"]')).toHaveCount(1);
-    await expect(select.locator('option[value="' + parent + '"]')).toHaveCount(1);
+    await expect(select.locator('option[value="' + slug + '-child"]')).toHaveCount(1);
+    await expect(select.locator('option[value="' + slug + '"]')).toHaveCount(1);
+    await expect(select).toHaveAttribute('name', 'category_name');
     await expect.poll(() => page.evaluate(() => {
       const inline = document.getElementById('slateframe-core-categories-inline-css');
       const external = document.getElementById('slateframe-core-categories-css');
@@ -115,6 +116,9 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
     await page.locator('html').evaluate(el => { el.style.fontSize = '64px'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
+    // Core dropdown values are category slugs; verify its native change handler navigates.
+    await select.selectOption(slug + '-child');
+    await expect.poll(() => page.url()).toContain(slug + '-child');
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => document.getElementById('slateframe-core-categories-inline-css') ||
       document.getElementById('slateframe-core-categories-css'))).toBeNull();

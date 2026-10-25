@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Correct Core Categories dropdown assertions against actual WordPress 7.1.3 markup: option values are taxonomy slugs, not numeric term IDs. Verify `category_name` and the native change navigation without replacing Core's script or weakening accessibility/viewport coverage.
+
 - Fix the native Categories browser fixture to assign authored taxonomy slugs (WP-CLI treats numeric arguments as term names) and preserve WordPress Core's additional existing categories instead of assuming an isolated two-item list. Verify both exact archive URLs and nested child, and check every rendered control.
 
 - Add native Core Categories hierarchical lists and dropdowns with 44px logical targets, long RTL/CJK label containment, conditional Gutenberg-shared CSS, disposable WordPress taxonomy fixtures, seven-width/zoom/forced-colors/Axe screenshots, editor serialization and strict packaging budgets.

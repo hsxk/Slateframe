@@ -34,6 +34,7 @@ class CoreCategoriesParity(unittest.TestCase):
                        'displayAsDropdown', 'get_category_link', 'ul.children',
                        "const assignedSlug = index === 0 ? slug : slug + '-child'",
                        'expect(actual.filter(url => expected.includes(url))).toHaveLength(2)',
+                       "'category_name'", "select.selectOption(slug + '-child')",
                        '320, 375, 390, 412, 768, 1440, 1920', "'ltr', 'rtl'",
                        "node.style.fontSize = value.font + 'px'", "el.style.fontSize = '64px'",
                        "forcedColors: 'active'", 'new AxeBuilder', "page.keyboard.press('Tab')",

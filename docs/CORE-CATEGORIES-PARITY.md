@@ -29,3 +29,5 @@ fixture. The test requires both exact authored category URLs and the nested
 child, while validating all rendered links rather than assuming only two
 categories exist. WP-CLI term assignment uses slugs: numeric arguments are
 interpreted as new category names and must never be used as term IDs here.
+
+The native Core dropdown uses **term slugs** as option values (not numeric IDs), and its `category_name` change handler performs navigation. The browser fixture asserts exact parent/child slugs and exercises a real selection to ensure Core behavior is preserved.
