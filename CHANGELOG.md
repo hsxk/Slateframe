@@ -6,6 +6,9 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Page List published hierarchy navigation with conditional Gutenberg-shared 44px link targets, CJK/RTL/long-title containment, seven responsive widths, 200%/400% text, Axe, forced colors, keyboard, screenshots, editor serialization, 404 asset isolation and release budget.
+
+
 - Correct a real WordPress/Chromium visual regression in Core Tag Cloud: inline-flex split native parenthesized term counts into detached vertical flex items at 390/1440px. Preserve native font weights, use inline-block links and unbroken count spans, with an exact-SHA screenshot and computed-style regression contract.
 
 - Add native Core Tag Cloud term/category presentation with conditional Gutenberg-shared 303-byte CSS, preserving Core weights, counts, accessible names, taxonomy URLs and navigation. Exercise 44px targets, seven widths, RTL/CJK, 200%/400% text, forced colors, Axe, screenshots, authenticated editor serialization and release budgets.

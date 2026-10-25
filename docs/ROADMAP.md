@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review Core Page List hierarchy and deep nested Navigation announcements in Safari/VoiceOver and Firefox after WordPress/Chromium acceptance.
+
 - Manually review native Core Tag Cloud tag/category modes, variable count-based font sizing and accessible names in Safari/VoiceOver and Firefox after WordPress/Chromium regression evidence.
 
 - Manually review Core Archives native month list/dropdown navigation in Safari/VoiceOver and Firefox, including localized month labels and calendar variants after Chromium fixture verification.
