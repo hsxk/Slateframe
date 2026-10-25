@@ -19,7 +19,7 @@ test('Core Site Title preserves native heading levels, linked titles and seven-w
   const postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
     '--post_title=' + title, '--post_name=' + slug, '--post_content=' + content, '--porcelain');
   try {
-    const permalink = wp('eval', 'echo home_url("/");');
+    const permalink = wp('eval', 'echo home_url();');
     const name = wp('option', 'get', 'blogname');
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-site-title-fixture');
@@ -33,6 +33,8 @@ test('Core Site Title preserves native heading levels, linked titles and seven-w
     const link = headings.first().locator('a');
     await expect(link).toHaveCount(1);
     await expect(link).toHaveAttribute('href', permalink);
+    await expect(link).toHaveAttribute('rel', /home/);
+    await expect(link).toHaveAttribute('target', '_self');
     await expect(headings.last().locator('a')).toHaveCount(0);
     // Stress only the disposable DOM, never the shared WordPress site title.
     await link.evaluate(el => { el.textContent = '日本語 中文 العربية ' + 'LongUnbrokenSiteTitle'.repeat(9); });
@@ -86,7 +88,7 @@ test('Core Site Title preserves native heading levels, linked titles and seven-w
       .toBeLessThanOrEqual(1);
     await page.emulateMedia({ forcedColors: 'none' });
     await link.click();
-    await expect.poll(() => page.url()).toBe(permalink);
+    await expect.poll(() => page.url()).toBe(new URL(permalink).href);
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => document.getElementById('slateframe-core-site-title-inline-css') ||
       document.getElementById('slateframe-core-site-title-css'))).toBeNull();
