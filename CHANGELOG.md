@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Preserve native Core Post Author Biography context and empty-profile semantics with a conditional Gutenberg-shared CSS asset, seven-width RTL/CJK/400% reflow, Axe/forced-colors screenshots, editor serialization, and strict asset isolation.
+
 - Preserve native Core Read More Query Loop permalink, accessible post-title and target with conditional 44px editor-shared CSS, seven-width RTL/CJK/zoom/Axe/keyboard/forced-colors screenshots, Gutenberg parity, 404 isolation and a 300-byte budget.
 
 - Add real WordPress and Gutenberg regression coverage for native Core Previous/Next Post links: adjacent permalinks, RTL/CJK long labels, seven viewport widths, 200%/400% zoom, 44px keyboard targets, Axe, forced colors, screenshots and 404 asset isolation; enforce a dedicated 550-byte conditional CSS cap.
