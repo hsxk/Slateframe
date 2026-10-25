@@ -31,6 +31,12 @@ test('native Login/out link and form retain Core behavior and bounded controls',
     await expect(form.locator('input[type=text]')).toHaveCount(1);
     await expect(form.locator('input[type=password]')).toHaveCount(1);
     await expect(form.locator('input[type=submit]')).toHaveCount(1);
+    // Keep Core URLs and labels native, then emulate exceptionally long translated copy.
+    // This only changes the disposable browser DOM, never WordPress stored content.
+    await link.evaluate(node => { node.textContent = '日本語 中文 العربية ' + 'UnbrokenLoginLabel'.repeat(6); });
+    await form.locator('label').first().evaluate(node => {
+      node.textContent = '日本語 中文 العربية ' + 'UnbrokenUsernameLabel'.repeat(5);
+    });
     await expect.poll(() => page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-loginout-inline-css') ||
       document.getElementById('slateframe-core-loginout-css')
