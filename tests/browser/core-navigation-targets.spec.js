@@ -17,6 +17,9 @@ const content = '<!-- wp:group {"className":"slateframe-core-navigation-fixture"
   '<!-- wp:navigation {"overlayMenu":"always","ariaLabel":"Overlay sections"} -->' +
   '<!-- wp:navigation-link {"label":"Overlay link","url":"#navigation-end","kind":"custom"} /-->' +
   '<!-- /wp:navigation -->' +
+  '<!-- wp:navigation {"overlayMenu":"mobile","ariaLabel":"Mobile-only sections"} -->' +
+  '<!-- wp:navigation-link {"label":"Mobile-only / 日本語 / العربية","url":"#navigation-end","kind":"custom"} /-->' +
+  '<!-- /wp:navigation -->' +
   '<p id="navigation-end">End of article sections</p>' +
   '</div><!-- /wp:group -->';
 
@@ -106,6 +109,30 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
     expect((overlayBox?.x || 0) + (overlayBox?.width || 0)).toBeLessThanOrEqual(391);
     await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-overlay-390-rtl.png', animations: 'disabled' });
     await close.click();
+    const mobileOnly = root.locator('nav.wp-block-navigation').nth(2);
+    const mobileOpen = mobileOnly.locator('button.wp-block-navigation__responsive-container-open');
+    const mobileLink = mobileOnly.locator('a.wp-block-navigation-item__content');
+    for (const width of [768, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(mobileOpen, width + 'px Core mobile-only opener must stay hidden').toBeHidden();
+      await expect(mobileLink).toBeVisible();
+    }
+    await mobileOnly.screenshot({ path: 'test-artifacts/screenshots/core-navigation-desktop-no-opener-1440-rtl.png' });
+    for (const width of [320, 375, 390, 412]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(mobileOpen, width + 'px Core mobile-only opener').toBeVisible();
+      const box = await mobileOpen.boundingBox();
+      expect(box?.width || 0).toBeGreaterThanOrEqual(44);
+      expect(box?.height || 0).toBeGreaterThanOrEqual(44);
+    }
+    await mobileOpen.click();
+    const mobileClose = mobileOnly.locator('button.wp-block-navigation__responsive-container-close');
+    await expect(mobileClose).toBeVisible();
+    await expect.poll(() => mobileOnly.locator('.wp-block-navigation__responsive-container').evaluate(node =>
+      node.getAnimations().filter(animation => animation.playState === 'running').length
+    )).toBe(0);
+    await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-mobile-overlay-412-rtl.png', animations: 'disabled' });
+    await mobileClose.click();
     await page.keyboard.press('Tab');
     await links.first().focus();
     await expect(links.first()).toBeFocused();
