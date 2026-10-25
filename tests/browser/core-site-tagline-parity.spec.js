@@ -94,7 +94,7 @@ test('Core Site Tagline Gutenberg roundtrip keeps native block attributes', asyn
     const before = blocks.serialize(editor.getBlocks());
     const schema = blocks.getBlockType('core/site-tagline')?.attributes;
     if (!schema) throw new Error('Native Core Site Tagline schema missing');
-    const cases = [{}, { className: 'slateframe-tagline-example', level: 2 }].map(input => {
+    const cases = [{}, { className: 'slateframe-tagline-example', level: 2 }, { align: 'full' }].map(input => {
       const first = blocks.serialize(blocks.createBlock('core/site-tagline', input));
       const parsed = blocks.parse(first);
       const second = blocks.serialize(parsed);
@@ -117,6 +117,9 @@ test('Core Site Tagline Gutenberg roundtrip keeps native block attributes', asyn
     }
     if (entry.input.level && result.supported.includes('level')) {
       expect(entry.attrs.level).toBe(entry.input.level);
+    }
+    if (entry.input.align && result.supported.includes('align')) {
+      expect(entry.attrs.align).toBe(entry.input.align);
     }
   }
 });

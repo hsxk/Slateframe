@@ -1,1 +1,2 @@
-.wp-block-site-tagline{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-site-tagline{min-inline-size:0;overflow-wrap:anywhere}
+.wp-block-site-tagline:not(.alignwide):not(.alignfull){max-inline-size:100%}
