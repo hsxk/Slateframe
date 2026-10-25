@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review Core Post Title linked/unlinked heading announcements, RTL/CJK long titles and focus behavior in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
+
 - Manually verify Core Post Excerpt Read More announcements, locale-specific excerpt boundaries and screen-reader focus in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
 
 - Manually review Core Post Author Name localized names, new-tab link announcements and keyboard navigation in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium acceptance.
