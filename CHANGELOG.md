@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
-- Add native Core Site Logo conditional Gutenberg-shared presentation, 44px linked target and bounded images; test real WordPress custom-logo media, RTL/zoom/Axe/focus, seven responsive widths, 404 isolation and editor roundtrip.
+- Add native Core Site Logo conditional Gutenberg-shared presentation, 44px linked target and bounded images; test request-scoped WordPress custom-logo media without global setting changes, RTL/zoom/Axe/focus, seven responsive widths, 404 isolation and editor roundtrip.
 
 - Add native Core Avatar conditional editor-shared presentation for 44px linked targets and oversized images, with seven-width RTL/zoom/forced-colors/Axe screenshots, WordPress author context, Gutenberg serialization and 404 isolation.
 

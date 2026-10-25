@@ -3,6 +3,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
 const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
+const path = require('node:path');
 const { openAuthenticatedEditor } = require('./support/editor-login');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -17,14 +18,20 @@ test('Core Site Logo retains native home links and media at seven widths', async
     '<!-- wp:site-logo {"width":96,"isLink":true} /-->' +
     '<!-- wp:site-logo {"width":96,"isLink":false} /-->' +
     '</div><!-- /wp:group -->';
-  const previous = wp('eval', 'echo (int)get_theme_mod("custom_logo",0);');
-  let attachmentId, postId;
+  let attachmentId, postId, pluginPath;
   try {
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--porcelain');
-    wp('eval', 'set_theme_mod("custom_logo",' + Number(attachmentId) + ');');
     postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
       '--post_title=' + slug, '--post_content=' + content, '--porcelain');
+    // Request-scoped Core filter: never mutate the shared site's logo option
+    // or theme mod while other Playwright workers render their fixtures.
+    const muDir = wp('eval', 'echo WPMU_PLUGIN_DIR;');
+    await fs.mkdir(muDir, { recursive: true });
+    pluginPath = path.join(muDir, slug + '.php');
+    await fs.writeFile(pluginPath, '<?php\nadd_filter("theme_mod_custom_logo", static function($value) { ' +
+      'return is_singular("post") && get_queried_object_id() === ' + Number(postId) +
+      ' ? ' + Number(attachmentId) + ' : $value; }, 100);\n');
     const home = wp('eval', 'echo home_url("/");');
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-site-logo-fixture');
@@ -101,7 +108,7 @@ test('Core Site Logo retains native home links and media at seven widths', async
     expect(await page.evaluate(() => document.getElementById('slateframe-core-site-logo-inline-css') ||
       document.getElementById('slateframe-core-site-logo-css'))).toBeNull();
   } finally {
-    wp('eval', 'set_theme_mod("custom_logo",' + Number(previous) + ');');
+    if (pluginPath) await fs.unlink(pluginPath);
     if (attachmentId) wp('post', 'delete', attachmentId, '--force');
     if (postId) wp('post', 'delete', postId, '--force');
   }
