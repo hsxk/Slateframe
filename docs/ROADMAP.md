@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review native Core Columns and Column stacking/nonstacking choices with Safari/VoiceOver and Firefox, including long RTL/CJK words, keyboard focus, 400% reflow and nested interactive content after exact-SHA Chromium evidence.
+
 - Manually check Core Site Tagline descriptions in Safari/VoiceOver and Firefox, including empty descriptions, unbroken CJK/RTL strings, 400% zoom and contrast before WordPress.org submission.
 
 - Manually verify native Core Site Title heading/link announcements, long CJK/RTL names, 44px home links, and localized brand reflow in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
