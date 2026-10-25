@@ -27,6 +27,10 @@ Theme Check currently recommends two optional legacy capabilities that Slatefram
 - **Custom Background:** Slateframe uses `theme.json` and WordPress appearance tools for presentation instead of adding a legacy Customizer background-image API.
 These are reviewed as product decisions, not ignored errors. If Slateframe's layout model changes, the decisions must be revisited. Slateframe does register the `footer-content` block/widget region; it deliberately does not add a content sidebar or a second reading column.
 
+## Public attribution and distribution boundary
+
+The theme header, distributed readme, and release validator use the repository handle as the public author/copyright identifier. This keeps the distributable site-neutral without changing the GPL license or rewriting existing Git history. Source commits can carry historical author metadata; the release ZIP contains only the validated theme files.
+
 ## Submission artifact
 
 `./bin/build-theme-zip.sh` creates `dist/slateframe.zip`. Development-only files are excluded. The archive must contain the public theme metadata, runtime assets, patterns, templates, `readme.txt`, `LICENSE`, and `screenshot.png`. Entries are sorted and ZIP timestamps/permissions use a fixed default source epoch (2000-01-01 UTC), independent of synthetic PR merge commit times. Release tooling can override SOURCE_DATE_EPOCH explicitly. CI rejects differing SHA256 values and checks cross-event reproducibility. The builder refuses symbolic links before opening the archive, preventing accidental inclusion of files outside the repository.

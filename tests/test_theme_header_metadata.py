@@ -39,6 +39,20 @@ class ThemeHeaderMetadata(unittest.TestCase):
         self.assertIn("Theme Tags must be comma-separated slugs", self.validator)
         self.assertIn("preg_match", self.validator)
 
+    def test_public_pseudonymous_author_matches_distributed_copyright(self):
+        readme = (ROOT / "readme.txt").read_text(encoding="utf-8")
+        self.assertIn("Author: hsxk", self.style)
+        self.assertIn("Copyright: 2026 hsxk", self.style)
+        self.assertIn("Copyright (C) 2026 hsxk.", readme)
+        self.assertIn("'Author'      => 'hsxk'", self.validator)
+
+    def test_release_validator_rejects_author_copyright_mismatch(self):
+        corrupt = self.style.replace("Copyright: 2026 hsxk",
+                                     "Copyright: 2026 Unknown", 1)
+        result = self._run_release_validator(corrupt)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("copyright attribution must match", result.stderr)
+
     def test_no_site_specific_tokens_in_public_header(self):
         header = self.style[:self.style.index("*/")]
         self.assertNotIn("time2log", header.lower())

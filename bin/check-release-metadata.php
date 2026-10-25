@@ -74,7 +74,7 @@ function slateframe_validate_release_metadata() {
 
 	$expected = array(
 		'Theme Name'  => 'Slateframe',
-		'Author'      => 'Hao Kexin',
+		'Author'      => 'hsxk',
 		'Text Domain' => 'slateframe',
 	);
 
@@ -84,7 +84,14 @@ function slateframe_validate_release_metadata() {
 		}
 	}
 
-	if ( ! preg_match( '/\A[a-z0-9-]+(?:,[a-z0-9-]+)*\z/', $style_fields['Tags'] ) || ! preg_match( '/^Tags:[^\r\n]+\r?\n\*\/\r?\n/m', $style ) ) {
+	// The public theme header and distributed readme must use the same pseudonymous owner.
+	$author_pattern = preg_quote( $style_fields['Author'], '/' );
+	if ( ! preg_match( '/^Copyright: [0-9]{4} ' . $author_pattern . '$/m', $style ) ||
+		! preg_match( '/^Slateframe WordPress Theme, Copyright \\(C\\) [0-9]{4} ' . $author_pattern . '\\.$/m', $readme ) ) {
+		throw new RuntimeException( 'Theme copyright attribution must match the public Author field.' );
+	}
+
+	if ( ! preg_match( '/\\A[a-z0-9-]+(?:,[a-z0-9-]+)*\z/', $style_fields['Tags'] ) || ! preg_match( '/^Tags:[^\r\n]+\r?\n\*\/\r?\n/m', $style ) ) {
 		throw new RuntimeException( 'Theme Tags must be comma-separated slugs on their own metadata line before the closing comment.' );
 	}
 
