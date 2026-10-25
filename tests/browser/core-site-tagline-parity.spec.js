@@ -13,7 +13,7 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
   const content = '<!-- wp:group {"className":"slateframe-site-tagline-fixture"} -->' +
     '<div class="wp-block-group slateframe-site-tagline-fixture">' +
     '<!-- wp:site-tagline {"className":"slateframe-tagline-primary"} /-->' +
-    '<!-- wp:site-tagline {"className":"slateframe-tagline-secondary"} /-->' +
+    '<!-- wp:site-tagline {"className":"slateframe-tagline-secondary","level":2} /-->' +
     '</div><!-- /wp:group -->';
   const postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
     '--post_title=' + slug, '--post_name=' + slug, '--post_content=' + content, '--porcelain');
@@ -28,6 +28,7 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
     await expect(taglines.last()).toContainText(description);
     await expect(taglines.first().locator('a')).toHaveCount(0);
     await expect(taglines.first()).toHaveJSProperty('tagName', 'P');
+    await expect(taglines.last()).toHaveJSProperty('tagName', 'H2');
     await expect.poll(() => page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-site-tagline-inline-css') ||
       document.getElementById('slateframe-core-site-tagline-css')
@@ -49,8 +50,7 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
             return {
               overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               left: rect.left, right: rect.right,
-              wrap: getComputedStyle(node).overflowWrap,
-              whitespace: getComputedStyle(node).whiteSpace
+              wrap: getComputedStyle(node).overflowWrap
             };
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
@@ -58,7 +58,6 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
           expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);
           expect(state.right, label + ' right').toBeLessThanOrEqual(width + 1);
           expect(state.wrap, label + ' wrapping').toBe('anywhere');
-          expect(state.whitespace, label + ' whitespace').toBe('normal');
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-site-tagline-' + width + '-' + dir + '.png'
           });
@@ -95,7 +94,7 @@ test('Core Site Tagline Gutenberg roundtrip keeps native block attributes', asyn
     const before = blocks.serialize(editor.getBlocks());
     const schema = blocks.getBlockType('core/site-tagline')?.attributes;
     if (!schema) throw new Error('Native Core Site Tagline schema missing');
-    const cases = [{}, { className: 'slateframe-tagline-example' }].map(input => {
+    const cases = [{}, { className: 'slateframe-tagline-example', level: 2 }].map(input => {
       const first = blocks.serialize(blocks.createBlock('core/site-tagline', input));
       const parsed = blocks.parse(first);
       const second = blocks.serialize(parsed);
@@ -115,6 +114,9 @@ test('Core Site Tagline Gutenberg roundtrip keeps native block attributes', asyn
     expect(entry.attrs).toEqual(entry.reparsedAttrs);
     if (entry.input.className && result.supported.includes('className')) {
       expect(entry.attrs.className).toBe(entry.input.className);
+    }
+    if (entry.input.level && result.supported.includes('level')) {
+      expect(entry.attrs.level).toBe(entry.input.level);
     }
   }
 });

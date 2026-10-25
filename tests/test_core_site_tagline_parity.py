@@ -17,8 +17,9 @@ class CoreSiteTaglineParity(unittest.TestCase):
             self.assertIn(value, php)
         self.assertIn("'assets/css/core-site-tagline.css'", php.split('add_editor_style(', 1)[1].split(');', 1)[0])
         for value in ('.wp-block-site-tagline', 'min-inline-size:0', 'max-inline-size:100%',
-                      'overflow-wrap:anywhere', 'white-space:normal'):
+                      'overflow-wrap:anywhere'):
             self.assertIn(value, css)
+        self.assertNotIn('white-space:', css, 'Do not override Core fitText wrapping semantics')
         self.assertLessEqual(len(css.encode()), 240)
         self.assertIn('test $(wc -c < assets/css/core-site-tagline.css) -le 240', ci)
         for forbidden in ('!important', 'time2log_', 'wpcode_', 'javascript', 'display:none'):
@@ -27,7 +28,7 @@ class CoreSiteTaglineParity(unittest.TestCase):
 
     def test_wordpress_editor_and_visual_evidence(self):
         js = (ROOT / 'tests/browser/core-site-tagline-parity.spec.js').read_text()
-        for value in ("wp('option', 'get', 'blogdescription')", 'wp:site-tagline',
+        for value in ("wp('option', 'get', 'blogdescription')", 'wp:site-tagline', '"level":2',
                       'core/site-tagline', '320, 375, 390, 412, 768, 1440, 1920',
                       "'ltr', 'rtl'", '[16, 32, 64]', 'forcedColors',
                       'AxeBuilder', 'openAuthenticatedEditor', 'blocks.serialize',

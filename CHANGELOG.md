@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
-- Preserve native Core Site Tagline with conditional editor-shared multilingual reflow, seven-width RTL/CJK/400%/forced-colors/Axe screenshots, WordPress description parity, Gutenberg serialization and 404 asset isolation.
+- Preserve native Core Site Tagline with conditional editor-shared multilingual reflow that preserves Core heading levels and fitText, seven-width RTL/CJK/400%/forced-colors/Axe screenshots, WordPress description parity, Gutenberg serialization and 404 asset isolation.
 
 - Add native Core Site Title conditional Gutenberg-shared styling: 44px home link, multilingual brand reflow, native heading/link options, seven widths, RTL/400%/forced-colors/Axe/keyboard screenshots, editor roundtrip and 404 asset isolation.
 
