@@ -18,6 +18,7 @@ class CoreDetailsParity(unittest.TestCase):
         self.assertIn("'assets/css/core-details.css'",
                       php.split("add_editor_style(", 1)[1].split(");", 1)[0])
         for needle in (".wp-block-details", ">summary", "min-inline-size:0",
+                       ":not(.alignwide)", ":not(.alignfull)",
                        "overflow-wrap:anywhere", "min-block-size:var(--slateframe-control)",
                        ":focus-visible", "currentColor"):
             self.assertIn(needle, css)
@@ -34,6 +35,7 @@ class CoreDetailsParity(unittest.TestCase):
         for needle in ("wp('post', 'create'", "wp:details", "<summary>",
                        "日本語 中文 العربية", "summary.press('Enter')",
                        "summary.press('Space')", "toHaveAttribute('open'",
+                       "slateframe-details-wide", "slateframe-details-full",
                        "320, 375, 390, 412, 768, 1440, 1920",
                        "'ltr', 'rtl'", "[16, 32, 64]", "forcedColors",
                        "AxeBuilder", "openAuthenticatedEditor",

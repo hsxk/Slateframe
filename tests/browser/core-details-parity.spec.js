@@ -15,6 +15,8 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
     '<!-- wp:paragraph --><p>Core disclosure content stays readable in every writing direction.</p><!-- /wp:paragraph -->' +
     '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#slateframe-details-target">Read the following section</a></div><!-- /wp:button --></div><!-- /wp:buttons -->' +
     '</details><!-- /wp:details -->' +
+    '<!-- wp:details {"align":"wide","className":"slateframe-details-wide"} --><details class="wp-block-details alignwide slateframe-details-wide"><summary>Wide disclosure stays authored</summary></details><!-- /wp:details -->' +
+    '<!-- wp:details {"align":"full","className":"slateframe-details-full"} --><details class="wp-block-details alignfull slateframe-details-full"><summary>Full disclosure stays authored</summary></details><!-- /wp:details -->' +
     '<!-- wp:paragraph --><p id="slateframe-details-target">Following section remains outside the disclosure.</p><!-- /wp:paragraph -->';
   let postId;
   try {
@@ -25,6 +27,8 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
     const summary = root.locator(':scope > summary');
     const link = root.locator('a.wp-block-button__link');
     await expect(summary).toContainText('日本語 中文 العربية');
+    await expect(page.locator('.slateframe-details-wide')).toHaveClass(/alignwide/);
+    await expect(page.locator('.slateframe-details-full')).toHaveClass(/alignfull/);
     await expect(root).not.toHaveAttribute('open');
     await summary.focus();
     await expect(summary).toBeFocused();
@@ -105,7 +109,7 @@ test('native Details Gutenberg roundtrip preserves summary and nested Core block
     const blocks = window.wp.blocks;
     const editor = window.wp.data.select('core/block-editor');
     const before = blocks.serialize(editor.getBlocks());
-    const root = blocks.createBlock('core/details', { summary: '日本語 中文 العربية' }, [
+    const root = blocks.createBlock('core/details', { summary: '日本語 中文 العربية', align: 'wide', name: 'slateframe-faq' }, [
       blocks.createBlock('core/paragraph', { content: 'Native details body' })
     ]);
     const first = blocks.serialize(root);
@@ -114,7 +118,9 @@ test('native Details Gutenberg roundtrip preserves summary and nested Core block
     return { before, after: blocks.serialize(editor.getBlocks()), first, second,
       third: blocks.serialize(blocks.parse(second)), count: parsed.length,
       name: parsed[0]?.name, valid: parsed[0]?.isValid,
-      summary: parsed[0]?.attributes.summary,
+      summary: String(parsed[0]?.attributes.summary ?? ''),
+      align: parsed[0]?.attributes.align,
+      groupName: parsed[0]?.attributes.name,
       inner: parsed[0]?.innerBlocks.map(block => block.name) };
   });
   expect(result.after).toBe(result.before);
@@ -122,6 +128,8 @@ test('native Details Gutenberg roundtrip preserves summary and nested Core block
   expect(result.name).toBe('core/details');
   expect(result.valid).toBe(true);
   expect(result.summary).toBe('日本語 中文 العربية');
+  expect(result.align).toBe('wide');
+  expect(result.groupName).toBe('slateframe-faq');
   expect(result.inner).toEqual(['core/paragraph']);
   expect(result.first).toBe(result.second);
   expect(result.second).toBe(result.third);
