@@ -31,3 +31,5 @@ categories exist. WP-CLI term assignment uses slugs: numeric arguments are
 interpreted as new category names and must never be used as term IDs here.
 
 The native Core dropdown uses **term slugs** as option values (not numeric IDs), and its `category_name` change handler performs navigation. The browser fixture asserts exact parent/child slugs and exercises a real selection to ensure Core behavior is preserved.
+
+Core's default footer widget can render Categories even on a genuine 404, so the conditional stylesheet must be present on that route when the widget is present. The browser now verifies this positive case, temporarily removes only the disposable `footer-content` sidebar assignments, reloads the same 404 to prove the asset is absent without any Categories block, and restores the exact `sidebars_widgets` option in `finally`. This tests real block-based asset isolation without assuming a widget-free footer.

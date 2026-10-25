@@ -16,6 +16,7 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
   const categories = [];
   const posts = [];
   let pageId;
+  let originalSidebars;
   try {
     const parent = wp('term', 'create', 'category', name + ' parent', '--slug=' + slug, '--porcelain');
     categories.push(parent);
@@ -119,10 +120,26 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
     // Core dropdown values are category slugs; verify its native change handler navigates.
     await select.selectOption(slug + '-child');
     await expect.poll(() => page.url()).toContain(slug + '-child');
+    // The default WordPress footer contains a real Core Categories widget on 404.
+    // Its block asset must load there; a route alone cannot prove asset leakage.
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-site-footer .wp-block-categories')).toHaveCount(1);
+    await expect.poll(() => page.evaluate(() => Boolean(
+      document.getElementById('slateframe-core-categories-inline-css') ||
+      document.getElementById('slateframe-core-categories-css')
+    ))).toBe(true);
+    // Isolate the negative case by temporarily removing the disposable footer widgets.
+    originalSidebars = wp('option', 'get', 'sidebars_widgets', '--format=json');
+    const sidebars = JSON.parse(originalSidebars);
+    if (!Array.isArray(sidebars['footer-content'])) throw new Error('Footer sidebar fixture missing');
+    sidebars['footer-content'] = [];
+    wp('option', 'update', 'sidebars_widgets', JSON.stringify(sidebars), '--format=json');
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(page.locator('.wp-block-categories')).toHaveCount(0);
     expect(await page.evaluate(() => document.getElementById('slateframe-core-categories-inline-css') ||
       document.getElementById('slateframe-core-categories-css'))).toBeNull();
   } finally {
+    if (originalSidebars) wp('option', 'update', 'sidebars_widgets', originalSidebars, '--format=json');
     if (pageId) wp('post', 'delete', pageId, '--force');
     for (const post of posts.reverse()) wp('post', 'delete', post, '--force');
     for (const category of categories.reverse()) wp('term', 'delete', 'category', category);

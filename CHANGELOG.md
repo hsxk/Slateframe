@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Correct Core Categories conditional-asset regression for actual WordPress footer widgets: a Categories block legitimately appears on 404 and must load its stylesheet. Verify both positive footer-block loading and negative 404 isolation after temporarily clearing the disposable sidebar, restoring the exact widget assignments in `finally`.
+
 - Correct Core Categories dropdown assertions against actual WordPress 7.1.3 markup: option values are taxonomy slugs, not numeric term IDs. Verify `category_name` and the native change navigation without replacing Core's script or weakening accessibility/viewport coverage.
 
 - Fix the native Categories browser fixture to assign authored taxonomy slugs (WP-CLI treats numeric arguments as term names) and preserve WordPress Core's additional existing categories instead of assuming an isolated two-item list. Verify both exact archive URLs and nested child, and check every rendered control.

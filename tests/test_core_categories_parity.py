@@ -39,6 +39,8 @@ class CoreCategoriesParity(unittest.TestCase):
                        "node.style.fontSize = value.font + 'px'", "el.style.fontSize = '64px'",
                        "forcedColors: 'active'", 'new AxeBuilder', "page.keyboard.press('Tab')",
                        'core-categories-390-rtl-200-forced-colors.png',
+                       "'sidebars_widgets'", "'footer-content'", 'originalSidebars',
+                       'page.reload',
                        'openAuthenticatedEditor', 'blocks.serialize', 'blocks.parse',
                        'fullPage: true', "page.goto('/?p=999999999'"):
             with self.subTest(needle=needle):
