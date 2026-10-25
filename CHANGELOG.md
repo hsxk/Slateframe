@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
-- Bound nested native Core Group containers for long RTL/CJK content with a conditional editor-shared 110-byte stylesheet, preserving authored wide/full alignments; add seven-width/400%/Axe/focus/forced-colors WordPress screenshots, Gutenberg serialization and a strict 240-byte budget.
+- Bound nested native Core Group containers for long RTL/CJK content with a conditional editor-shared 111-byte stylesheet, preserving authored wide/full alignments; add seven-width/400%/Axe/focus/forced-colors WordPress screenshots, Gutenberg serialization and a strict 240-byte budget.
 
 - Add native Core Columns intrinsic-width containment with editor-shared conditional CSS, default and non-stacked mobile behavior, seven-width RTL/CJK/400% reflow, 44px nested controls, Axe/focus/forced-colors screenshots, Gutenberg roundtrip, and strict asset budget.
 

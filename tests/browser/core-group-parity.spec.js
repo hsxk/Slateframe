@@ -12,14 +12,14 @@ test('native Group preserves nested multilingual content and authored alignments
   const slug = 'slateframe-group-' + randomUUID().slice(0, 12);
   const content = '<!-- wp:group {"className":"slateframe-group-fixture"} --><div class="wp-block-group slateframe-group-fixture">' +
     '<!-- wp:group {"className":"slateframe-group-nested"} --><div class="wp-block-group slateframe-group-nested">' +
-    '<!-- wp:paragraph --><p>日本語 中文 العربية LongUnbrokenEditorialReference'.repeat(1) +
+    '<!-- wp:paragraph --><p>日本語 中文 العربية LongUnbrokenEditorialReference' +
     'VeryLongUnbrokenEditorialReferenceRepeatedManyTimesVeryLongUnbrokenEditorialReferenceRepeatedManyTimes</p><!-- /wp:paragraph -->' +
     '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#slateframe-group-target">Read the following section</a></div><!-- /wp:button --></div><!-- /wp:buttons -->' +
     '</div><!-- /wp:group -->' +
     '<!-- wp:paragraph --><p id="slateframe-group-target">The next section retains Core markup.</p><!-- /wp:paragraph -->' +
     '</div><!-- /wp:group -->' +
-    '<!-- wp:group {"align":"wide","className":"slateframe-group-wide"} --><div class="wp-block-group alignwide slateframe-group-wide"><p>Wide layout stays authored</p></div><!-- /wp:group -->' +
-    '<!-- wp:group {"align":"full","className":"slateframe-group-full"} --><div class="wp-block-group alignfull slateframe-group-full"><p>Full layout stays authored</p></div><!-- /wp:group -->';
+    '<!-- wp:group {"align":"wide","className":"slateframe-group-wide"} --><div class="wp-block-group alignwide slateframe-group-wide"><!-- wp:paragraph --><p>Wide layout stays authored</p><!-- /wp:paragraph --></div><!-- /wp:group -->' +
+    '<!-- wp:group {"align":"full","className":"slateframe-group-full"} --><div class="wp-block-group alignfull slateframe-group-full"><!-- wp:paragraph --><p>Full layout stays authored</p><!-- /wp:paragraph --></div><!-- /wp:group -->';
   let postId;
   try {
     postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
