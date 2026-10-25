@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-columns.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -1662,3 +1662,22 @@ function slateframe_pattern_category() {
 	}
 }
 add_action( 'init', 'slateframe_pattern_category' );
+
+/**
+ * Bound native Core Columns without overriding WordPress stacking choices.
+ *
+ * WordPress owns column widths, mobile stacking and block serialization.
+ * Only intrinsic width containment and multilingual reflow are theme-owned.
+ */
+function slateframe_register_core_columns_styles() {
+	wp_enqueue_block_style(
+		'core/columns',
+		array(
+			'handle' => 'slateframe-core-columns',
+			'src'    => get_template_directory_uri() . '/assets/css/core-columns.css',
+			'path'   => get_template_directory() . '/assets/css/core-columns.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_columns_styles', 20 );

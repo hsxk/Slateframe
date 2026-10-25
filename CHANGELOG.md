@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Columns intrinsic-width containment with editor-shared conditional CSS, default and non-stacked mobile behavior, seven-width RTL/CJK/400% reflow, 44px nested controls, Axe/focus/forced-colors screenshots, Gutenberg roundtrip, and strict asset budget.
+
 - Preserve native Core Site Tagline with conditional editor-shared multilingual reflow that preserves Core heading levels, wide/full alignment and fitText, seven-width RTL/CJK/400%/forced-colors/Axe screenshots, WordPress description parity, Gutenberg serialization and 404 asset isolation.
 
 - Add native Core Site Title conditional Gutenberg-shared styling: 44px home link, multilingual brand reflow, native heading/link options, seven widths, RTL/400%/forced-colors/Axe/keyboard screenshots, editor roundtrip and 404 asset isolation.
