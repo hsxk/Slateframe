@@ -14,8 +14,12 @@ add_editor_style(); the asset is absent from pages without the block.
 
 A disposable published WordPress post imports the theme-local legal PNG as a
 real media attachment, sets native featured-image metadata and CJK/RTL alt text,
-and renders linked and unlinked Core Post Featured Image blocks. Chromium checks
-real image loading and permalink, 320/375/390/412/768/1440/1920px, RTL/LTR,
+and renders linked and unlinked Core Post Featured Image blocks. WordPress Core
+intentionally sets the linked image's `alt` to the post title (the link's
+destination); the unlinked image retains its attachment `alt`. The test asserts
+both distinct behaviors and confirms the attachment metadata remains intact,
+without overriding either in the theme. Chromium checks
+real image loading, responsive `srcset`, and permalink, 320/375/390/412/768/1440/1920px, RTL/LTR,
 200%/400% text zoom, keyboard focus, Axe, forced colors, screenshot evidence,
 and 404 asset isolation. Attachment and post are removed in finally.
 Authenticated Gutenberg verifies native link-option serialization without
