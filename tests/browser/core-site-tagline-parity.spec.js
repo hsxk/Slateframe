@@ -15,10 +15,16 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
     '<!-- wp:site-tagline {"className":"slateframe-tagline-primary"} /-->' +
     '<!-- wp:site-tagline {"className":"slateframe-tagline-secondary","level":2} /-->' +
     '</div><!-- /wp:group -->';
-  const postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
-    '--post_title=' + slug, '--post_name=' + slug, '--post_content=' + content, '--porcelain');
+  // Fresh WP-CLI installs may have an empty site description. Core correctly
+  // renders no Site Tagline in that case; seed only this disposable fixture.
+  const originalDescription = wp('option', 'get', 'blogdescription');
+  const description = originalDescription.trim() || 'Slateframe native tagline 日本語 中文 العربية';
+  const seededDescription = !originalDescription.trim();
+  if (seededDescription) wp('option', 'update', 'blogdescription', description);
+  let postId;
   try {
-    const description = wp('option', 'get', 'blogdescription');
+    postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
+      '--post_title=' + slug, '--post_name=' + slug, '--post_content=' + content, '--porcelain');
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-site-tagline-fixture');
     await expect(root).toBeVisible();
@@ -79,8 +85,17 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => document.getElementById('slateframe-core-site-tagline-inline-css') ||
       document.getElementById('slateframe-core-site-tagline-css'))).toBeNull();
+    // Empty descriptions are owned by WordPress Core and must not render a
+    // fake tagline or leave the conditional stylesheet on unrelated pages.
+    wp('option', 'update', 'blogdescription', '');
+    await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-site-tagline-fixture .wp-block-site-tagline')).toHaveCount(0);
   } finally {
-    wp('post', 'delete', postId, '--force');
+    try {
+      if (postId) wp('post', 'delete', postId, '--force');
+    } finally {
+      if (seededDescription) wp('option', 'update', 'blogdescription', originalDescription);
+    }
   }
 });
 
