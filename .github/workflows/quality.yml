@@ -1010,6 +1010,7 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/core-details-parity-390-rtl-200-forced-colors.png || { echo "Missing native Details forced-colors evidence" >&2; exit 1; }
+          test -s test-artifacts/screenshots/core-details-390-rtl-200-forced-colors.png || { echo "Missing existing Core Details accessibility evidence" >&2; exit 1; }
           for profile in default compact spacious; do
             for viewport in 390 1440; do
               for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge editorial-pathways empty-author not-found photography-lightbox content-pagination; do

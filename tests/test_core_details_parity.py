@@ -48,6 +48,7 @@ class CoreDetailsParity(unittest.TestCase):
             self.assertNotIn(forbidden, js)
         self.assertIn("Missing native Details evidence", ci)
         self.assertIn("Missing native Details forced-colors evidence", ci)
+        self.assertIn("Missing existing Core Details accessibility evidence", ci)
 
 
 if __name__ == "__main__":
