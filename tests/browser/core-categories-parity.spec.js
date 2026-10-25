@@ -22,11 +22,13 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
     const child = wp('term', 'create', 'category', name + ' child', '--slug=' + slug + '-child',
       '--parent=' + parent, '--porcelain');
     categories.push(child);
-    for (const category of categories) {
+    for (const [index, category] of categories.entries()) {
       const post = wp('post', 'create', '--post_type=post', '--post_status=publish',
         '--post_title=Core taxonomy fixture ' + category, '--porcelain');
       posts.push(post);
-      wp('post', 'term', 'set', post, 'category', category);
+      // WP-CLI interprets numeric term arguments as names; use the exact authored slug.
+      const assignedSlug = index === 0 ? slug : slug + '-child';
+      wp('post', 'term', 'set', post, 'category', assignedSlug);
     }
     const content = '<!-- wp:group {"className":"slateframe-categories-fixture"} -->' +
       '<div class="wp-block-group slateframe-categories-fixture">' +
@@ -41,11 +43,14 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
     const list = root.locator('ul.wp-block-categories-list');
     await expect(list).toHaveCount(1);
     const links = list.locator('a');
-    await expect(links).toHaveCount(2);
-    await expect(list.locator('ul.children')).toHaveCount(1);
+    // Core lists all nonempty site categories, including the default fixture category.
+    expect(await links.count()).toBeGreaterThanOrEqual(2);
     const expected = categories.map(id => wp('eval', 'echo get_category_link(' + Number(id) + ');'));
     const actual = await links.evaluateAll(nodes => nodes.map(node => node.href));
-    expect(actual.sort()).toEqual(expected.sort());
+    for (const url of expected) expect(actual).toContain(url);
+    expect(actual.filter(url => expected.includes(url))).toHaveLength(2);
+    // The authored child must remain nested under Core's hierarchy, not flattened.
+    await expect(list.locator('ul.children a[href="' + expected[1] + '"]')).toHaveCount(1);
     const select = root.locator('.wp-block-categories-dropdown select');
     await expect(select).toHaveCount(1);
     await expect(select.locator('option[value="' + child + '"]')).toHaveCount(1);
@@ -75,7 +80,8 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
-          expect(state.controls).toHaveLength(3);
+          // Other real WordPress categories may also render; test every link/select.
+          expect(state.controls.length).toBeGreaterThanOrEqual(3);
           for (const item of state.controls) {
             expect(item.left, label + ' left').toBeGreaterThanOrEqual(-1);
             expect(item.right, label + ' right').toBeLessThanOrEqual(width + 1);

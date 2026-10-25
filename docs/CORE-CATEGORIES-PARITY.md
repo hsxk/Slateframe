@@ -23,3 +23,9 @@ both display modes without modifying the editor post.
 Manual Safari/VoiceOver and Firefox dropdown interaction, announcement of
 nested counts and plugin coexistence remain open. Require exact-SHA Actions
 and real WordPress/Chromium screenshot inspection before merging.
+
+WordPress Core intentionally includes existing nonempty categories alongside the
+fixture. The test requires both exact authored category URLs and the nested
+child, while validating all rendered links rather than assuming only two
+categories exist. WP-CLI term assignment uses slugs: numeric arguments are
+interpreted as new category names and must never be used as term IDs here.
