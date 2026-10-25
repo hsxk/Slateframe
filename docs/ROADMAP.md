@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review Core Archives native month list/dropdown navigation in Safari/VoiceOver and Firefox, including localized month labels and calendar variants after Chromium fixture verification.
+
 - Manually verify Core Categories nested lists and dropdown keyboard/VoiceOver navigation in Safari and Firefox after WordPress/Chromium baseline; preserve Core taxonomy ownership.
 
 - Manually review native Core Latest Posts grid/list with Safari/VoiceOver and Firefox after the disposable WordPress/Chromium baseline; keep Core query ownership and plugin-neutral behavior.
