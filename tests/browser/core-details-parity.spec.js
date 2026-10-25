@@ -72,7 +72,7 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
           expect(target.height, label + ' nested link height').toBeGreaterThanOrEqual(43);
           if (font === 16) {
             await page.screenshot({ fullPage: true,
-              path: 'test-artifacts/screenshots/core-details-' + width + '-' + dir + '.png' });
+              path: 'test-artifacts/screenshots/core-details-parity-' + width + '-' + dir + '.png' });
           }
         }
       }
@@ -87,7 +87,7 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
     expect(axe.violations).toEqual([]);
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     await page.screenshot({ fullPage: true,
-      path: 'test-artifacts/screenshots/core-details-390-rtl-200-forced-colors.png' });
+      path: 'test-artifacts/screenshots/core-details-parity-390-rtl-200-forced-colors.png' });
     await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);

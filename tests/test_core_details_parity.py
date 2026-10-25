@@ -40,7 +40,7 @@ class CoreDetailsParity(unittest.TestCase):
                        "'ltr', 'rtl'", "[16, 32, 64]", "forcedColors",
                        "AxeBuilder", "openAuthenticatedEditor",
                        "blocks.serialize", "blocks.parse",
-                       "core-details-390-rtl-200-forced-colors.png",
+                       "core-details-parity-390-rtl-200-forced-colors.png",
                        "wp('post', 'delete'", "'--force'"):
             self.assertIn(needle, js)
         for forbidden in ("test.only", "test.fixme", "route.fulfill",
