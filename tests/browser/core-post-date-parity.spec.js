@@ -111,18 +111,43 @@ test('Core Post Date Gutenberg roundtrip keeps native date options', async ({ pa
       const attrs = { isLink };
       const first = blocks.serialize(blocks.createBlock('core/post-date', attrs));
       const parsed = blocks.parse(first);
-      return { first, second: blocks.serialize(parsed), count: parsed.length,
-        name: parsed[0]?.name, valid: parsed[0]?.isValid, attrs: parsed[0]?.attributes, isLink };
+      const second = blocks.serialize(parsed);
+      const reparsed = blocks.parse(second);
+      return { first, second, third: blocks.serialize(reparsed), count: parsed.length,
+        name: parsed[0]?.name, valid: parsed[0]?.isValid, attrs: parsed[0]?.attributes,
+        reparsedAttrs: reparsed[0]?.attributes, isLink };
     });
     return { before, after: blocks.serialize(editor.getBlocks()), cases,
       supportsLink: Object.prototype.hasOwnProperty.call(schema, 'isLink') };
   });
   expect(result.after).toBe(result.before);
+  // Core may inject a transient datetime binding on initial serialization and
+  // normalize it away on parse. Compare all authored attributes while removing
+  // only that documented Core-generated date binding, never other metadata.
+  const withoutTransientDateBinding = markup => markup.replace(
+    /<!-- wp:post-date (\\{.*?\\}) \\/-->/g,
+    (whole, json) => {
+      const attrs = JSON.parse(json);
+      const binding = attrs.metadata?.bindings?.datetime;
+      if (binding?.source !== 'core/post-data' || binding.args?.field !== 'date') {
+        return whole;
+      }
+      delete attrs.metadata.bindings.datetime;
+      if (!Object.keys(attrs.metadata.bindings).length) delete attrs.metadata.bindings;
+      if (!Object.keys(attrs.metadata).length) delete attrs.metadata;
+      return '<!-- wp:post-date ' + JSON.stringify(attrs) + ' /-->';
+    }
+  );
   for (const entry of result.cases) {
     expect(entry.count).toBe(1);
     expect(entry.name).toBe('core/post-date');
     expect(entry.valid).toBe(true);
-    expect(entry.first).toBe(entry.second);
+    expect(entry.first).toContain('<!-- wp:post-date');
+    expect(withoutTransientDateBinding(entry.first)).toBe(
+      withoutTransientDateBinding(entry.second)
+    );
+    expect(entry.second).toBe(entry.third);
+    expect(entry.attrs).toEqual(entry.reparsedAttrs);
     if (result.supportsLink) expect(entry.attrs.isLink).toBe(entry.isLink);
   }
 });
