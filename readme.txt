@@ -24,7 +24,7 @@ Highlights include:
 * Responsive primary navigation, optional footer navigation, and a responsive Core block/widget footer region with shared accessible control sizing.
 * Core Search, legacy Search, and authored HTML forms in published synced patterns receive the same conditional presentation styles in posts and footer widgets.
 * Published synced patterns also receive conditional Photography/Core lightbox, Portfolio Query Loop, and Knowledge presentation in posts and Pages; unpublished and cyclic references do not cause unbounded asset discovery.
-* Native comments, archives, author pages, search, pagination, and 404 handling, with responsive Core Categories hierarchy and dropdown presentation.
+* Native comments, archives, author pages, search, pagination, and 404 handling, with responsive native Core Categories and Archives list/dropdown presentation.
 * Lightweight code, table, gallery, caption, footnote, pullquote, disclosure, editorial lead, table-of-contents, and print presentation.
 * Starter patterns for photo essays, photography contact sheets/features/diptychs/three-image sequences with local replaceable placeholders, project case studies/indexes/briefs/outcomes/query grids/decision logs, learning paths/lesson chapters/knowledge outlines/definitions/checkpoints/procedures/comparisons/questions-and-answers, editorial openings/notes/pathways/pullquotes, and curated reading lists.
 * Block styles for editorial notes/leads, framed images, photo sequences, contact sheets/diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, disclosures, numbered steps, checklists, key facts, and editorial ledgers.
