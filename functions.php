@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -234,6 +234,24 @@ function slateframe_register_core_archives_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_archives_styles', 20 );
+
+/**
+ * Keep native Core Tag Cloud term links and count-based sizes accessible.
+ * WordPress owns term queries, weights, counts, URLs and markup.
+ */
+function slateframe_register_core_tag_cloud_styles() {
+	wp_enqueue_block_style(
+		'core/tag-cloud',
+		array(
+			'handle' => 'slateframe-core-tag-cloud',
+			'src'    => get_template_directory_uri() . '/assets/css/core-tag-cloud.css',
+			'path'   => get_template_directory() . '/assets/css/core-tag-cloud.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_tag_cloud_styles', 20 );
+
 
 /**
  * Register optional block/widget regions.

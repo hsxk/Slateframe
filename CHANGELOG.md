@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Tag Cloud term/category presentation with conditional Gutenberg-shared 303-byte CSS, preserving Core weights, counts, accessible names, taxonomy URLs and navigation. Exercise 44px targets, seven widths, RTL/CJK, 200%/400% text, forced colors, Axe, screenshots, authenticated editor serialization and release budgets.
+
 - Add native Core Archives list/dropdown containment and 44px logical targets using a small block-scoped Gutenberg-shared stylesheet. Verify exact monthly WordPress URLs, native select navigation, seven widths, RTL, 200%/400% text, keyboard, Axe, forced colors, screenshots, editor roundtrip, and distribution budget without custom JavaScript.
 
 - Correct Core Categories conditional-asset regression for actual WordPress footer widgets: a Categories block legitimately appears on 404 and must load its stylesheet. Verify both positive footer-block loading and negative 404 isolation after temporarily clearing the disposable sidebar, restoring the exact widget assignments in `finally`.
