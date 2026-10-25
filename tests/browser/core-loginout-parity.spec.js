@@ -31,6 +31,9 @@ test('native Login/out link and form retain Core behavior and bounded controls',
     await expect(form.locator('input[type=text]')).toHaveCount(1);
     await expect(form.locator('input[type=password]')).toHaveCount(1);
     await expect(form.locator('input[type=submit]')).toHaveCount(1);
+    // Keep Core's stacked text/password labels while enlarging the checkbox label.
+    expect(await form.locator('label').first().evaluate(el => getComputedStyle(el).display)).toBe('block');
+    expect(await form.locator('.login-remember label').evaluate(el => getComputedStyle(el).display)).toBe('inline-flex');
     // Keep Core URLs and labels native, then emulate exceptionally long translated copy.
     // This only changes the disposable browser DOM, never WordPress stored content.
     await link.evaluate(node => { node.textContent = '日本語 中文 العربية ' + 'UnbrokenLoginLabel'.repeat(6); });
