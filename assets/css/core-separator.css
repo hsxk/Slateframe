@@ -1,0 +1,3 @@
+.wp-block-separator{box-sizing:border-box;max-inline-size:100%}
+.wp-block-separator:not(.has-text-color){color:var(--slateframe-border)}
+@media(forced-colors:active){.wp-block-separator:not(.has-text-color){color:CanvasText}}
