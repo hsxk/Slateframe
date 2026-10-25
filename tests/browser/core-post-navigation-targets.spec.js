@@ -31,7 +31,7 @@ test('Core Post Navigation retains native adjacency, 44px targets and multilingu
     const links = root.locator('.wp-block-post-navigation-link a');
     await expect(links).toHaveCount(2);
     // Pretty permalinks may hide ?p=, so resolve the native hrefs against WP CLI.
-    const urls = [ids[0], ids[2]].map(id => wp('post', 'url', id));
+    const urls = [ids[0], ids[2]].map(id => wp('eval', 'echo get_permalink(' + Number(id) + ');'));
     const actual = await links.evaluateAll(nodes => nodes.map(node => node.href.replace(/[/]$/, '')));
     expect(actual.sort()).toEqual(urls.map(url => url.replace(/[/]$/, '')).sort());
     await expect.poll(() => links.first().evaluate(node => getComputedStyle(node).minBlockSize)).toBe('44px');
