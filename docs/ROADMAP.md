@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually verify native Core Site Title heading/link announcements, long CJK/RTL names, 44px home links, and localized brand reflow in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
+
 - Manually verify native Core Site Logo home links, unlinked media, absent-logo fallback and localized alt text in Safari/VoiceOver and Firefox after exact-SHA Chromium screenshot review.
 
 - Manually review native Core Avatar author/comment context, small linked touch targets, oversized avatar containment and local-provider failure modes in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
