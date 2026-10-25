@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Stabilize real WordPress Core Navigation overlay visual evidence: wait for the native fade-in, assert an opaque settled surface and in-viewport RTL link, and keep Core-owned/default/custom overlay colors untouched. Preserve the 811-byte conditional CSS budget and existing 44px controls.
+
 - Fix a real 320px Core Navigation regression (454px document overflow) by bounding Core's flex container, not just individual links, within the existing 850-byte block asset cap. Preserve WordPress wrapping and RTL/CJK labels; also re-dismiss the native Gutenberg welcome guide when responsive media changes reopen it during Knowledge FAQ visual checks.
 
 - Give authored native Core Navigation links, submenus, overlays, and WordPress 7+ close controls bounded 44px targets with CJK/RTL wrapping; preserve Gutenberg parity and conditional block loading, and add real seven-width/400%/keyboard/Axe/forced-colors visual regression without theme JavaScript.
