@@ -94,7 +94,7 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
     try {
       if (postId) wp('post', 'delete', postId, '--force');
     } finally {
-      if (seededDescription) wp('option', 'update', 'blogdescription', originalDescription);
+      wp('option', 'update', 'blogdescription', originalDescription);
     }
   }
 });
