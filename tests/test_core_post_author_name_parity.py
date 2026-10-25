@@ -34,7 +34,7 @@ class CorePostAuthorNameParity(unittest.TestCase):
     def test_wordpress_and_editor_evidence(self):
         js = (ROOT / 'tests/browser/core-post-author-name-parity.spec.js').read_text(encoding='utf-8')
         for token in ("wp('post', 'create'", "wp('post', 'delete'", 'finally',
-                      'get_author_posts_url(', 'isLink', 'core/post-author-name',
+                      'get_author_posts_url(', "'--post_author='", 'isLink', 'core/post-author-name',
                       '320, 375, 390, 412, 768, 1440, 1920', "'ltr', 'rtl'",
                       "fontSize = '64px'", "forcedColors: 'active'",
                       'new AxeBuilder', 'openAuthenticatedEditor', 'blocks.serialize',

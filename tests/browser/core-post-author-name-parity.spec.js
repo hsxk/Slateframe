@@ -19,8 +19,11 @@ test('Core Post Author Name preserves native author links and responsive wrappin
     '<!-- wp:post-author-name {"isLink":false} /-->' +
     '<!-- wp:post-author-name {"isLink":true,"linkTarget":"_blank"} /-->' +
     '</div><!-- /wp:group -->';
+  // WP-CLI has no logged-in author by default; explicitly bind the real admin fixture.
+  const authorId = wp('user', 'get', 'admin', '--field=ID');
   const postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
-    '--post_title=' + slug, '--post_content=' + content, '--porcelain');
+    '--post_author=' + authorId, '--post_title=' + slug,
+    '--post_content=' + content, '--porcelain');
   try {
     const authorUrl = wp('eval', 'echo get_author_posts_url((int)get_post_field("post_author",' + Number(postId) + '));');
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
