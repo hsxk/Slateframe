@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add real WordPress and Gutenberg regression coverage for native Core Previous/Next Post links: adjacent permalinks, RTL/CJK long labels, seven viewport widths, 200%/400% zoom, 44px keyboard targets, Axe, forced colors, screenshots and 404 asset isolation; enforce a dedicated 550-byte conditional CSS cap.
+
 - Add native Core Post Featured Image conditional presentation with real local media attachment, linked/unlinked Core permalink and alt text, seven-width RTL/CJK/zoom/forced-colors/Axe/keyboard screenshots, Gutenberg parity and 404 isolation.
 
 - Add conditional native Core Post Title linked/unlinked heading presentation, seven-width RTL/CJK/zoom/forced-colors/Axe/keyboard screenshots, Gutenberg roundtrip, 404 asset isolation and strict CSS budget.
