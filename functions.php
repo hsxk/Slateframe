@@ -1700,4 +1700,3 @@ function slateframe_register_core_group_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_group_styles', 20 );
-
