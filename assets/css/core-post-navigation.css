@@ -1,0 +1,3 @@
+.wp-block-post-navigation-link{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-post-navigation-link a{display:inline-block;min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);max-inline-size:100%;padding-block:var(--slateframe-control-padding-block);overflow-wrap:anywhere;vertical-align:middle}
+.wp-block-post-navigation-link :is(.post-navigation-link__label,.post-navigation-link__title){overflow-wrap:anywhere}

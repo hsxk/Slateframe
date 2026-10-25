@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Post Navigation Link 44px logical targets, CJK/RTL/long-title reflow and Gutenberg parity with a small conditional block stylesheet; verify real adjacent WordPress post URLs, 320–1920px, 100–400% text, focus, Axe, forced colors and exact-HEAD screenshots without replacing Core rendering.
+
 - Fix native Core Navigation's mobile-only overlay opener at desktop widths: center the 44px controls without overriding Core's responsive `display:none`, and verify 320/375/390/412 mobile visibility plus 768/1440/1920 desktop hiding, RTL screenshots, and keyboard interaction.
 
 - Stabilize real WordPress Core Navigation overlay visual evidence: wait for the native fade-in, assert an opaque settled surface and in-viewport RTL link, and keep Core-owned/default/custom overlay colors untouched. Preserve the 811-byte conditional CSS budget and existing 44px controls.
