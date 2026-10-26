@@ -105,9 +105,32 @@ test('native Core Heading preserves levels, authored alignment and fragment targ
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.emulateMedia({ forcedColors: 'none' });
-    await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
-    expect(await page.evaluate(() => document.getElementById('slateframe-core-heading-inline-css') ||
-      document.getElementById('slateframe-core-heading-css'))).toBeNull();
+    // Footer block widgets contain Core Headings, so the 404 is not an asset-free page.
+    // Isolate a blank Page by hiding footer widgets only for its unique request.
+    const blankId = wp('post', 'create', '--post_type=page', '--post_status=publish',
+      '--post_title=' + slug + '-empty', '--post_content=', '--porcelain');
+    const pluginDir = '/tmp/wp-browser/wp-content/mu-plugins';
+    const pluginPath = pluginDir + '/slateframe-heading-isolation-' + slug + '.php';
+    try {
+      await fs.mkdir(pluginDir, { recursive: true });
+      await fs.writeFile(pluginPath, [
+        '<?php',
+        'add_filter( "sidebars_widgets", static function ( $widgets ) {',
+        '  if ( isset( $_GET["slateframe_heading_isolation"] ) && $_GET["slateframe_heading_isolation"] === "' + slug + '" ) {',
+        '    $widgets["footer-content"] = array();',
+        '  }',
+        '  return $widgets;',
+        '} );',
+      ].join('\n') + '\n');
+      await page.goto('/?page_id=' + blankId + '&slateframe_heading_isolation=' + slug,
+        { waitUntil: 'networkidle' });
+      await expect(page.locator('.wp-block-heading')).toHaveCount(0);
+      expect(await page.evaluate(() => document.getElementById('slateframe-core-heading-inline-css') ||
+        document.getElementById('slateframe-core-heading-css'))).toBeNull();
+    } finally {
+      await fs.rm(pluginPath, { force: true });
+      wp('post', 'delete', blankId, '--force');
+    }
   } finally {
     if (id) wp('post', 'delete', id, '--force');
   }
@@ -125,7 +148,8 @@ test('Core Heading Gutenberg roundtrip retains levels, anchors, text and authore
     if (!schema) throw new Error('Native Core Heading schema missing');
     const inputs = [
       { level: 2, anchor: 'chapter-introduction', content: '日本語 中文 العربية' },
-      { level: 3, textAlign: 'center', content: 'Centered knowledge chapter' },
+      { level: 3, ...(schema.textAlign ? { textAlign: 'center' } :
+        { style: { typography: { textAlign: 'center' } } }), content: 'Centered knowledge chapter' },
       { level: 4, content: 'Portfolio methodology' },
     ];
     const cases = inputs.map(input => {
