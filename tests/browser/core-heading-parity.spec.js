@@ -94,8 +94,12 @@ test('native Core Heading preserves levels, authored alignment and fragment targ
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
-    expect(await headings.first().evaluate(node => getComputedStyle(node).outlineColor))
-      .toBe('rgb(0, 0, 0)');
+    const targetOutline = await headings.first().evaluate(node => ({
+      style: getComputedStyle(node).outlineStyle,
+      width: parseFloat(getComputedStyle(node).outlineWidth),
+    }));
+    expect(targetOutline.style).toBe('solid');
+    expect(targetOutline.width).toBeGreaterThanOrEqual(2);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-heading-390-rtl-200-forced-colors.png' });
     await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
