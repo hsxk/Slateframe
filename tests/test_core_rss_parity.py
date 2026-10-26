@@ -35,7 +35,7 @@ class CoreRssParity(unittest.TestCase):
         php = (ROOT / 'tests/fixtures/core-rss-native.php.fixture').read_text(encoding='utf-8')
         for needle in ('pre_http_request', 'render_block(', "'core/rss'", 'wp_json_encode',
                        'displayExcerpt', 'displayAuthor', 'displayDate', "'list', 'grid'",
-                       'wp-block-rss__item-title', 'slateframe.invalid'):
+                       'wp-block-rss__item-title', 'example.org/slateframe-rss-fixture.xml'):
             self.assertIn(needle, php)
 
     def test_wordpress_browser_and_gutenberg_coverage(self):
