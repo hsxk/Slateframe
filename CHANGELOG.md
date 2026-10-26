@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Bound native Core Comments Pagination links and active-page numbers to the 44px Spatial Control System, preserving Core URLs, labels, RTL/CJK wrapping, forced-colors semantics and Gutenberg roundtrip without runtime JavaScript.
+
 - Preserve native Core RSS list/grid presentation, multilingual 44px links, RTL/zoom reflow and Gutenberg serialization without adding a feed service or runtime JavaScript.
 
 ### Testing
