@@ -89,4 +89,49 @@ test('Appearance keeps controls, RTL/CJK and layout within seven breakpoints', a
     path: path.join(screenshotDir, 'appearance-breakpoints-' + profileName + '-' + width + '-rtl-200-forced-colors.png'),
     animations: 'disabled',
   });
+
+  // A 400% text resize must not push the header, brand, or footer outside a
+  // 390px viewport. Check both directions without hiding overflow or relaxing
+  // the bounded control target contract.
+  if (width === 390) {
+    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    for (const direction of ['ltr', 'rtl']) {
+      await page.locator('html').evaluate((node, dir) => { node.dir = dir; }, direction);
+      const zoom = await page.evaluate(() => {
+        const html = document.documentElement;
+        const boxes = ['[data-site-header]', '.slateframe-brand-title', '.slateframe-site-footer']
+          .map(selector => document.querySelector(selector).getBoundingClientRect());
+        return {
+          direction: getComputedStyle(html).direction,
+          overflow: html.scrollWidth - html.clientWidth,
+          control: Number.parseFloat(getComputedStyle(html).getPropertyValue('--slateframe-control')),
+          boxes: boxes.map(box => ({ left: box.left, right: box.right })),
+        };
+      });
+      expect(zoom.direction).toBe(direction);
+      expect(zoom.control).toBe(control);
+      expect(zoom.overflow, direction + ' 400% document overflow').toBeLessThanOrEqual(1);
+      for (const box of zoom.boxes) {
+        expect(box.left, direction + ' 400% left bound').toBeGreaterThanOrEqual(-1);
+        expect(box.right, direction + ' 400% right bound').toBeLessThanOrEqual(width + 1);
+      }
+      await colorTarget.focus();
+      await expect(colorTarget).toBeFocused();
+      const focus = await colorTarget.evaluate(node => {
+        const style = getComputedStyle(node);
+        const box = node.getBoundingClientRect();
+        return { width: box.width, height: box.height,
+          outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) };
+      });
+      expect(focus.width).toBeGreaterThanOrEqual(control - 1);
+      expect(focus.height).toBeGreaterThanOrEqual(control - 1);
+      expect(focus.outlineStyle).not.toBe('none');
+      expect(focus.outlineWidth).toBeGreaterThanOrEqual(2);
+      await page.screenshot({
+        path: path.join(screenshotDir,
+          'appearance-breakpoints-' + profileName + '-390-' + direction + '-400-forced-colors.png'),
+        animations: 'disabled',
+      });
+    }
+  }
 });
