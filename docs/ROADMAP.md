@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review native Core Quote default/plain variants, citations, authored border colors, RTL/CJK long strings and forced-colors contrast in Safari/VoiceOver and Firefox after exact-SHA Chromium acceptance.
+
 - Manually verify native Core Separator `<hr>` announcements, wide/dots and authored color variants, RTL/CJK and forced-colors contrast in Safari/VoiceOver and Firefox after exact-SHA Chromium acceptance.
 
 - Manually verify native Core Details disclosure announcements, summary marker visibility, Enter/Space operation, expanded content, 400% RTL/CJK reflow and forced-colors focus in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium acceptance.

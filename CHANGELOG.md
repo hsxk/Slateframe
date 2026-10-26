@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Restore native Core Quote plain-style parity with a conditional Gutenberg-shared 422-byte stylesheet. Preserve citations and default quotation accents; add WordPress/Chromium checks for seven responsive widths, RTL/CJK, zoom, Axe, forced colors, keyboard order, Gutenberg roundtrip, 404 asset isolation and exact-SHA screenshots.
+
 - Add native Core Separator presentation with a 226-byte conditional Gutenberg-shared stylesheet, retaining semantic `<hr>`, wide/dots variants and authored colors. Cover seven responsive widths, RTL/CJK, 200%/400% zoom, native keyboard focus order, Axe, forced colors, exact-SHA screenshots, Gutenberg roundtrip, 404 asset isolation and reproducible WordPress.org ZIP inclusion.
 
 - Verify native Core Details `name` grouping exclusivity and independent disclosures in real WordPress, including Enter/Space, 44px summary targets, RTL/CJK, seven widths, 200%/400% reflow, Axe, forced colors, 404 asset isolation and mandatory exact-SHA screenshots without introducing accordion JavaScript.
