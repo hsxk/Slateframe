@@ -213,6 +213,23 @@ class ReleaseManifestGuardTests(unittest.TestCase):
     def test_windows_clock_device_name_is_rejected(self):
         self.assert_rejected_portable_path("CLOCK$.txt")
 
+    def test_windows_spaced_console_device_alias_is_rejected(self):
+        self.assert_rejected_portable_path("CON .txt")
+
+    def test_windows_spaced_serial_device_alias_is_rejected(self):
+        self.assert_rejected_portable_path("COM¹ .data")
+
+    def test_windows_spaced_parallel_device_alias_is_rejected(self):
+        self.assert_rejected_portable_path("LPT9 .txt")
+
+    def test_nonreserved_space_before_extension_remains_valid(self):
+        (self.root / "icon .txt").write_text("public\n")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            self.assertIn("slateframe/icon .txt", archive.namelist())
+
     def test_fullwidth_windows_device_name_is_rejected(self):
         self.assert_rejected_portable_path("ＣＯＮ.txt")
 
