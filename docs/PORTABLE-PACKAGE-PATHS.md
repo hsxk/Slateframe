@@ -15,58 +15,7 @@ extensions or producing misleading package inventories.
 The validator checks every component after Unicode **NFKC compatibility
 normalization** without rewriting or renaming the original filename.
 Windows-invalid punctuation (`< > : " / \\ | ? *`), DOS devices including
-`CONIN# Portable release package paths
-
-Slateframe distributes only ordinary theme files in a reproducible ZIP. The
-release manifest checker rejects hidden or uncommitted paths, symlinks,
-private extensions, platform-reserved names, and casefold/NFKC collisions.
-
-File and directory names in the distributable must not contain Unicode
-control (Cc), formatting (Cf), or surrogate (Cs) code points. This prevents
-bidirectional overrides, invisible separators, zero-width format characters,
-C1 controls, byte-order marks, and undecodable filesystem bytes from hiding
-extensions or producing misleading package inventories.
-
-## Cross-platform extraction safety
-
-The validator checks every component after Unicode **NFKC compatibility
-normalization** without rewriting or renaming the original filename.
-Windows-invalid punctuation (`< > : " / \\ | ? *`), DOS devices including
-, `CONOUT# Portable release package paths
-
-Slateframe distributes only ordinary theme files in a reproducible ZIP. The
-release manifest checker rejects hidden or uncommitted paths, symlinks,
-private extensions, platform-reserved names, and casefold/NFKC collisions.
-
-File and directory names in the distributable must not contain Unicode
-control (Cc), formatting (Cf), or surrogate (Cs) code points. This prevents
-bidirectional overrides, invisible separators, zero-width format characters,
-C1 controls, byte-order marks, and undecodable filesystem bytes from hiding
-extensions or producing misleading package inventories.
-
-## Cross-platform extraction safety
-
-The validator checks every component after Unicode **NFKC compatibility
-normalization** without rewriting or renaming the original filename.
-Windows-invalid punctuation (`< > : " / \\ | ? *`), DOS devices including
-, and `CLOCK# Portable release package paths
-
-Slateframe distributes only ordinary theme files in a reproducible ZIP. The
-release manifest checker rejects hidden or uncommitted paths, symlinks,
-private extensions, platform-reserved names, and casefold/NFKC collisions.
-
-File and directory names in the distributable must not contain Unicode
-control (Cc), formatting (Cf), or surrogate (Cs) code points. This prevents
-bidirectional overrides, invisible separators, zero-width format characters,
-C1 controls, byte-order marks, and undecodable filesystem bytes from hiding
-extensions or producing misleading package inventories.
-
-## Cross-platform extraction safety
-
-The validator checks every component after Unicode **NFKC compatibility
-normalization** without rewriting or renaming the original filename.
-Windows-invalid punctuation (`< > : " / \\ | ? *`), DOS devices including
-, spaced DOS device aliases such as
+`CONIN$`, `CONOUT$`, and `CLOCK$`, spaced DOS device aliases such as
 `CON .txt` and `COM¹ .data`, and fullwidth/superscript aliases
 of reserved names are rejected. Names that normalize into hidden dotfiles,
 `.` or `..`, separators, or trailing ASCII/Unicode spaces are also
