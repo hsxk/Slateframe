@@ -177,6 +177,86 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         self.assertIn("nonportable package path", result.stderr)
         self.assertNotEqual(0, result.returncode)
 
+    def assert_rejected_portable_path(self, name):
+        """Exercise the real ZIP builder with a committed unsafe filename."""
+        (self.root / name).write_text("unsafe\n", encoding="utf-8")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("nonportable package path", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_windows_less_than_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe<file.css")
+
+    def test_windows_greater_than_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe>file.css")
+
+    def test_windows_double_quote_filename_is_rejected(self):
+        self.assert_rejected_portable_path('unsafe"file.css')
+
+    def test_windows_pipe_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe|file.css")
+
+    def test_windows_question_mark_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe?file.css")
+
+    def test_windows_asterisk_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe*file.css")
+
+    def test_windows_console_input_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("CONIN$.txt")
+
+    def test_windows_console_output_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("CONOUT$.txt")
+
+    def test_windows_clock_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("CLOCK$.txt")
+
+    def test_fullwidth_windows_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("ＣＯＮ.txt")
+
+    def test_superscript_windows_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("COM¹.txt")
+
+    def test_compatibility_hidden_filename_is_rejected(self):
+        self.assert_rejected_portable_path("．env")
+
+    def test_compatibility_traversal_filename_is_rejected(self):
+        self.assert_rejected_portable_path("．．")
+
+    def test_fullwidth_separator_filename_is_rejected(self):
+        self.assert_rejected_portable_path("asset／name.css")
+
+    def test_fullwidth_backslash_filename_is_rejected(self):
+        self.assert_rejected_portable_path("asset＼name.css")
+
+    def test_unicode_trailing_space_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe　")
+
+    def test_nonbreaking_trailing_space_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe ")
+
+    def test_nfkc_colliding_filenames_are_rejected(self):
+        (self.root / "readme2.css").write_text("one\n")
+        (self.root / "ｒｅａｄｍｅ２.css").write_text("two\n")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("colliding package paths", result.stderr)
+
+    def test_ordinary_cjk_arabic_emoji_filenames_remain_valid(self):
+        (self.root / "assets").mkdir()
+        names = ("写真 資料.txt", "العربية.txt", "作品📷.txt")
+        for name in names:
+            (self.root / "assets" / name).write_text("public asset\n", encoding="utf-8")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            for name in names:
+                self.assertIn("slateframe/assets/" + name, archive.namelist())
+
     def test_committed_control_character_filename_is_rejected(self):
         (self.root / "bad\nname.css").write_text("unsafe\n")
         self.commit()
