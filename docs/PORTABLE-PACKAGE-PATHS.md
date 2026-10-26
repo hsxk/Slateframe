@@ -22,6 +22,13 @@ rejected. NFKC-equivalent names cannot coexist in the ZIP even if Linux
 would permit both. This closes extraction ambiguity and path-aliasing
 risks while keeping ordinary unique multilingual names intact.
 
+The private-file denylist is evaluated against the same NFKC/casefolded
+basename as portability checks. Thus `secret．pem`, fullwidth
+`credentials.json` aliases, compatibility `id_rsa` aliases, and nested
+`backup．bak` cannot evade the extension/name guard. Ordinary unique CJK
+filenames, including compatibility punctuation with safe extensions, remain
+accepted. Literal `.env` files retain the existing hidden-path diagnostic.
+
 The Git-backed release builder regression suite
 (`tests/test_release_manifest_guard.py`) exercises invalid punctuation,
 device names, fullwidth path aliases, compatibility collisions and valid
