@@ -69,10 +69,38 @@ test('real Core Button colors, outline and long labels survive responsive RTL an
       const a11y = await new AxeBuilder({ page }).include('#slateframe-core-buttons-fixture')
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
       expect(a11y.violations).toEqual([]);
+      // A new document is essential here: axe caches author colors from the
+      // preceding normal-palette audit, which can produce a spurious white-on-
+      // white contrast failure after Chromium switches forced-colors media.
+      // Reload under the requested media rather than disabling axe rules.
       await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.locator('html').evaluate((node, dir) => {
+        node.dir = dir;
+        node.style.fontSize = '200%';
+      }, direction);
+      expect(await page.evaluate(() => matchMedia('(forced-colors: active)').matches)).toBe(true);
       for (const link of await buttons.all()) {
         const colors = await color(link);
         expect(colors.background).not.toBe(colors.text);
+        // Verify the actual forced palette, not just different CSS strings.
+        const contrast = await link.evaluate((node) => {
+          const style = getComputedStyle(node);
+          const luminance = (value) => {
+            const channels = value.match(/[0-9.]+/g)?.slice(0, 3).map(Number) || [];
+            if (channels.length !== 3) return 0;
+            const linear = channels.map((v) => {
+              const c = v / 255;
+              return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+            });
+            return linear[0] * 0.2126 + linear[1] * 0.7152 + linear[2] * 0.0722;
+          };
+          const foreground = luminance(style.color);
+          const background = luminance(style.backgroundColor);
+          return (Math.max(foreground, background) + 0.05) /
+            (Math.min(foreground, background) + 0.05);
+        });
+        expect(contrast, 'forced-colors link must meet normal-text AA contrast').toBeGreaterThanOrEqual(4.5);
       }
       const forcedColorsA11y = await new AxeBuilder({ page }).include('#slateframe-core-buttons-fixture')
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
@@ -90,7 +118,9 @@ test('real Core Button colors, outline and long labels survive responsive RTL an
         await fs.mkdir(dir, { recursive: true });
         await root.screenshot({ path: path.join(dir, `core-buttons-${direction}-forced-colors-${width}.png`) });
       }
-      await page.emulateMedia({ forcedColors: 'none' });
+      await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
+      // Clear the forced-palette document before the next direction's axe audit.
+      await page.reload({ waitUntil: 'networkidle' });
     }
   } finally {
     wp('post', 'delete', pageId, '--force');
