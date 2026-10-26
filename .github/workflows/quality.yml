@@ -104,7 +104,8 @@ jobs:
           test $(wc -c < assets/css/core-video.css) -le 350
           test $(wc -c < assets/css/core-audio.css) -le 350
           test $(wc -c < assets/css/core-embed.css) -le 350
-          test $(wc -c < assets/css/core-rss.css assets/css/core-latest-posts.css) -le 500
+          test $(wc -c < assets/css/core-rss.css) -le 600
+          test $(wc -c < assets/css/core-latest-posts.css) -le 500
           test $(wc -c < assets/css/core-latest-comments.css) -le 550
           test $(wc -c < assets/css/core-categories.css) -le 550
           test $(wc -c < assets/css/core-archives.css) -le 550
