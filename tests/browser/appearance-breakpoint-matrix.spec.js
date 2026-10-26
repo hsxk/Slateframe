@@ -59,14 +59,14 @@ test('Appearance keeps controls, RTL/CJK and layout within seven breakpoints', a
   });
 
   await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
-  await page.locator('.slateframe-site-title').evaluate(node => {
+  await page.locator('.slateframe-brand-title').evaluate(node => {
     node.textContent = 'Slateframe 日本語 中文 العربية';
   });
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
   const rtl = await page.evaluate(() => {
     const html = document.documentElement;
     const header = document.querySelector('[data-site-header]').getBoundingClientRect();
-    const title = document.querySelector('.slateframe-site-title').getBoundingClientRect();
+    const title = document.querySelector('.slateframe-brand-title').getBoundingClientRect();
     const footer = document.querySelector('.slateframe-site-footer').getBoundingClientRect();
     return {
       dir: getComputedStyle(html).direction, overflow: html.scrollWidth - html.clientWidth,
