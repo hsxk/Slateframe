@@ -428,6 +428,24 @@ class ReleaseManifestGuardTests(unittest.TestCase):
     def test_database_rollback_journal_is_rejected(self):
         self.assert_rejected_private_path("snapshot.db-journal")
 
+    def test_compressed_pem_is_rejected(self):
+        self.assert_rejected_private_path("secret.pem.gz")
+
+    def test_compressed_credentials_is_rejected(self):
+        self.assert_rejected_private_path("credentials.json.gz")
+
+    def test_compressed_composer_auth_is_rejected(self):
+        self.assert_rejected_private_path("auth.json.zip")
+
+    def test_compressed_wp_config_is_rejected(self):
+        self.assert_rejected_private_path("wp-config.php.zst")
+
+    def test_compressed_backup_is_rejected(self):
+        self.assert_rejected_private_path("backup.bak.xz")
+
+    def test_compressed_ssh_private_key_is_rejected(self):
+        self.assert_rejected_private_path("id_rsa.gz")
+
     def test_public_json_and_svg_remain_distributable(self):
         (self.root / "public-data.json").write_text("{}\n")
         (self.root / "database.svg").write_text("<svg/>\n")

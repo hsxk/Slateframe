@@ -113,18 +113,23 @@ def validate(root, theme_dir):
             # Environment files and compressed database dumps are not theme assets.
             # Check the normalized name so compatibility dots cannot bypass it.
             environment_file = ".env." in portable_basename or portable_basename.endswith(".env")
-            database_extensions = (".sql", ".sqlite", ".sqlite3", ".db")
             compression_extensions = (".gz", ".zip", ".zst", ".xz", ".bz2")
-            compressed_database = any(
-                portable_basename.endswith(database + compression)
-                for database in database_extensions
+            compressed_private_extension = any(
+                portable_basename.endswith(extension + compression)
+                for extension in blocked_extensions
+                for compression in compression_extensions
+            )
+            compressed_private_name = any(
+                portable_basename == blocked + compression
+                for blocked in blocked_names
                 for compression in compression_extensions
             )
             if (
                 portable_basename in blocked_names
                 or portable_basename.endswith(blocked_extensions)
                 or environment_file
-                or compressed_database
+                or compressed_private_extension
+                or compressed_private_name
             ):
                 raise ValueError(f"Refusing private or backup file in theme package: {name}")
             if staged_blob_id(root, item) != committed[name]:

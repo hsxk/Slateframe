@@ -30,8 +30,9 @@ basename as portability checks. Thus `secret．pem`, fullwidth
 filenames, including compatibility punctuation with safe extensions, remain
 accepted. Literal `.env` files retain the existing hidden-path diagnostic.
 
-The denylist also covers compressed SQL/SQLite/DB exports (`.gz`, `.zip`,
-`.zst`, `.xz`, `.bz2`), SQLite/DB files and journal sidecars, named WordPress
+The denylist also covers compressed private extensions and sensitive names
+(`.gz`, `.zip`, `.zst`, `.xz`, `.bz2`), including SQL/SQLite/DB exports,
+private keys and credentials. SQLite/DB files and journal sidecars, named WordPress
 configuration and Composer authentication files, legacy SSH private-key
 basenames, and `.env`-suffixed environment variants. These are not
 distributable theme assets. Regression cases verify the normalized Unicode
