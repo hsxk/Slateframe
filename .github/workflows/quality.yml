@@ -984,6 +984,13 @@ jobs:
           done
           for width in 320 375 390 412 768 1440 1920; do
             for direction in ltr rtl; do
+              screenshot="test-artifacts/screenshots/core-post-comments-count-${width}-${direction}.png"
+              test -s "$screenshot" || { echo "Missing native Comments Count evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          test -s test-artifacts/screenshots/core-post-comments-count-390-rtl-200-forced-colors.png || { echo "Missing Comments Count forced-colors evidence" >&2; exit 1; }
+          for width in 320 375 390 412 768 1440 1920; do
+            for direction in ltr rtl; do
               screenshot="test-artifacts/screenshots/core-post-comments-link-${width}-${direction}.png"
               test -s "$screenshot" || { echo "Missing native Comments Link evidence: $screenshot" >&2; exit 1; }
             done

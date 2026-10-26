@@ -39,6 +39,7 @@ class CorePostCommentsCountParity(unittest.TestCase):
             "wp('post', 'create'", "wp('comment', 'create'",
             "wp('comment', 'delete'", "wp('post', 'delete'", "finally",
             "'--comment_approved=0'", "'--comment_approved=1'",
+            "'--comment_status=closed'",
             "wp:query", "wp:post-template", "wp:post-comments-count",
             "320, 375, 390, 412, 768, 1440, 1920", "'ltr', 'rtl'",
             "fontSize = '64px'", "forcedColors: 'active'",

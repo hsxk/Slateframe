@@ -48,6 +48,10 @@ test('native Comments Count tracks approved comments and reflows without links',
     await expect(count).toHaveText('2');
     expect(Number(wp('comment', 'list', '--post_id=' + postId,
       '--status=approve', '--format=count'))).toBe(2);
+    wp('post', 'update', postId, '--comment_status=closed');
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(count).toHaveText('2');
+    wp('post', 'update', postId, '--comment_status=open');
     await expect.poll(() => page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-post-comments-count-inline-css') ||
       document.getElementById('slateframe-core-post-comments-count-css')

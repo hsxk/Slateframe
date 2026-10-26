@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
-- Preserve native Core Post Comments Count approved-only values and non-interactive semantics with a 140-byte conditional Gutenberg-shared stylesheet; add disposable WordPress moderation fixtures, seven-width RTL/CJK/400% reflow, Axe/keyboard/forced-colors screenshots, editor serialization, 404 isolation and package checks.
+- Preserve native Core Post Comments Count approved-only values and non-interactive semantics with a 145-byte conditional Gutenberg-shared stylesheet; add disposable WordPress moderation fixtures, seven-width RTL/CJK/400% reflow, Axe/keyboard/forced-colors screenshots, editor serialization, 404 isolation and package checks.
 
 - Preserve native Core File download links, authored URLs and optional previews with a 356-byte Gutenberg-shared conditional stylesheet; add seven-width RTL/CJK/400%/keyboard/Axe/forced-colors WordPress screenshots, 404 isolation, editor serialization and ZIP manifest verification.
 
