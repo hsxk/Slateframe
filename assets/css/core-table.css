@@ -1,0 +1,5 @@
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-table{min-inline-size:0;max-inline-size:100%}
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-table table.has-fixed-layout{min-inline-size:100%;max-inline-size:var(--slateframe-wide)}
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-table :is(th,td,figcaption){overflow-wrap:anywhere;word-break:normal}
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-table figcaption{text-align:start}
+@media(forced-colors:active){.wp-block-table.is-style-stripes tbody tr{border-block-end:1px solid CanvasText}}

@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Preserve native Core Table fixed layouts, CJK/RTL cell and caption reflow, logical caption alignment and forced-colors stripe dividers with a conditional Gutenberg-shared stylesheet, real WordPress/Chromium evidence, editor roundtrip and ZIP checks.
+
 - Fix the Core RSS browser fixture's false error banner: a URL-less Core block is an invalid feed and still emits a Core error. Render a real native RSS block against the shared deterministic XML via a disposable WordPress HTTP interception hook, assert three native lists and no error, and retain the original strict link/layout checks.
 
 - Remove the self-feed warning from the Core RSS visual fixture while retaining Core-conditional stylesheet coverage; assert no error banner is present in the real WordPress screenshot.
