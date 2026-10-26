@@ -30,6 +30,13 @@ basename as portability checks. Thus `secret．pem`, fullwidth
 filenames, including compatibility punctuation with safe extensions, remain
 accepted. Literal `.env` files retain the existing hidden-path diagnostic.
 
+The denylist also covers compressed SQL exports (`.sql.gz`, `.sql.zip`,
+`.sql.zst`), SQLite/DB files and journal sidecars, named WordPress
+configuration and Composer authentication files, legacy SSH private-key
+basenames, and `.env`-suffixed environment variants. These are not
+distributable theme assets. Regression cases verify the normalized Unicode
+aliases and ensure ordinary public JSON and SVG files still package.
+
 The Git-backed release builder regression suite
 (`tests/test_release_manifest_guard.py`) exercises invalid punctuation,
 device names, fullwidth path aliases, compatibility collisions and valid

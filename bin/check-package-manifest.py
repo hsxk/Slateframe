@@ -52,8 +52,15 @@ def validate(root, theme_dir):
         while parent != Path("."):
             packaged_directories.add(parent.as_posix())
             parent = parent.parent
-    blocked_extensions = (".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp")
-    blocked_names = {"id_rsa", "id_ed25519", "credentials", "credentials.json"}
+    blocked_extensions = (
+        ".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp",
+        ".sql.gz", ".sql.zip", ".sql.zst", ".sqlite3", ".db",
+        ".db-wal", ".db-shm", ".sqlite-wal", ".sqlite-shm",
+    )
+    blocked_names = {
+        "id_rsa", "id_ed25519", "id_ecdsa", "id_dsa",
+        "credentials", "credentials.json", "wp-config.php", "auth.json",
+    }
 
     reserved_stems = {"con", "prn", "aux", "nul", "conin$", "conout$", "clock$"}
     reserved_stems.update(f"com{index}" for index in range(1, 10))
@@ -101,7 +108,14 @@ def validate(root, theme_dir):
             # A fullwidth dot or compatibility letter can disguise a private
             # extension/name in an otherwise portable ZIP member.
             portable_basename = unicodedata.normalize("NFKC", item.name).casefold()
-            if portable_basename in blocked_names or portable_basename.endswith(blocked_extensions):
+            # Environment files and compressed database dumps are not theme assets.
+            # Check the normalized name so compatibility dots cannot bypass it.
+            environment_file = ".env." in portable_basename or portable_basename.endswith(".env")
+            if (
+                portable_basename in blocked_names
+                or portable_basename.endswith(blocked_extensions)
+                or environment_file
+            ):
                 raise ValueError(f"Refusing private or backup file in theme package: {name}")
             if staged_blob_id(root, item) != committed[name]:
                 raise ValueError(f"Refusing staged content differing from HEAD: {name}")

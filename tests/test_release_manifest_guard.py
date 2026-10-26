@@ -371,6 +371,55 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
             self.assertIn("slateframe/assets/資料．txt", archive.namelist())
 
+    def assert_rejected_private_path(self, name):
+        """Reject a committed secret-like asset before writing the ZIP."""
+        (self.root / name).write_text("private\n", encoding="utf-8")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("private or backup", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_compressed_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("backup.sql.gz")
+
+    def test_zstd_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("backup.sql.zst")
+
+    def test_sqlite3_database_is_rejected(self):
+        self.assert_rejected_private_path("database.sqlite3")
+
+    def test_database_file_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.db")
+
+    def test_sqlite_wal_is_rejected(self):
+        self.assert_rejected_private_path("database.sqlite-wal")
+
+    def test_environment_local_is_rejected(self):
+        self.assert_rejected_private_path("secrets.env.local")
+
+    def test_wp_config_is_rejected(self):
+        self.assert_rejected_private_path("wp-config.php")
+
+    def test_composer_auth_is_rejected(self):
+        self.assert_rejected_private_path("auth.json")
+
+    def test_legacy_ssh_private_key_is_rejected(self):
+        self.assert_rejected_private_path("id_ecdsa")
+
+    def test_fullwidth_compressed_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("backup．sql．gz")
+
+    def test_public_json_and_svg_remain_distributable(self):
+        (self.root / "public-data.json").write_text("{}\n")
+        (self.root / "database.svg").write_text("<svg/>\n")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            self.assertIn("slateframe/public-data.json", archive.namelist())
+            self.assertIn("slateframe/database.svg", archive.namelist())
+
     def test_tracked_backup_is_rejected(self):
         (self.root / "functions.php.bak").write_text("backup")
         self.commit()
