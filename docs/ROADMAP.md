@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually verify Core Comments Pagination comment ordering, translated previous/next labels, current-page announcements and screen-reader focus in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium evidence. Presentation fixture uses Core's real server wrapper without changing shared comment pagination options.
+
 - Manually verify native Core RSS feed success/failure, feed URL handling, caching and localized author/date announcements in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence; CI uses a deterministic layout fixture without external requests.
 
 - Manually inspect native Core Image caption/link and Core lightbox interactions in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium screenshot review; preserve author-controlled image dimensions and links.

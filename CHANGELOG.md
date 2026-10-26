@@ -4,6 +4,12 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Fix the Core RSS browser fixture's false error banner: a URL-less Core block is an invalid feed and still emits a Core error. Render a real native RSS block against the shared deterministic XML via a disposable WordPress HTTP interception hook, assert three native lists and no error, and retain the original strict link/layout checks.
+
+- Remove the self-feed warning from the Core RSS visual fixture while retaining Core-conditional stylesheet coverage; assert no error banner is present in the real WordPress screenshot.
+
+- Bound native Core Comments Pagination links and active-page numbers to the 44px Spatial Control System, preserving Core URLs, labels, RTL/CJK wrapping, forced-colors semantics and Gutenberg roundtrip without runtime JavaScript.
+
 - Preserve native Core RSS list/grid presentation, multilingual 44px links, RTL/zoom reflow and Gutenberg serialization without adding a feed service or runtime JavaScript.
 
 ### Testing
