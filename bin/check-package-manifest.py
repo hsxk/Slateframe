@@ -55,9 +55,10 @@ def validate(root, theme_dir):
     blocked_extensions = (".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp")
     blocked_names = {"id_rsa", "id_ed25519", "credentials", "credentials.json"}
 
-    reserved_stems = {"con", "prn", "aux", "nul"}
+    reserved_stems = {"con", "prn", "aux", "nul", "conin$", "conout$", "clock$"}
     reserved_stems.update(f"com{index}" for index in range(1, 10))
     reserved_stems.update(f"lpt{index}" for index in range(1, 10))
+    windows_metacharacters = set('<>:"/|?*') | {chr(92)}
     portable_names = {}
 
     for item in staged_items:
@@ -66,15 +67,19 @@ def validate(root, theme_dir):
         # Windows/macOS filesystems may normalize case and Unicode spelling.
         # Reject ambiguous archive entries before writing the ZIP.
         for component in relative.parts:
+            # Compatibility folding catches fullwidth separators, dot aliases,
+            # DOS device names and trailing Unicode spaces before ZIP creation.
+            portable_component = unicodedata.normalize("NFKC", component)
             if (
-                "\\" in component
-                or ":" in component
-                or component.rstrip(" .") != component
+                portable_component in (".", "..")
+                or portable_component.startswith(".")
+                or any(character in windows_metacharacters for character in portable_component)
+                or portable_component.rstrip(" .") != portable_component
                 or any(unicodedata.category(character) in ("Cc", "Cf", "Cs") for character in component)
-                or component.split(".", 1)[0].casefold() in reserved_stems
+                or portable_component.split(".", 1)[0].casefold() in reserved_stems
             ):
                 raise ValueError(f"Refusing nonportable package path: {name!r}")
-        portable_name = unicodedata.normalize("NFC", name).casefold()
+        portable_name = unicodedata.normalize("NFKC", name).casefold()
         if portable_name in portable_names and portable_names[portable_name] != name:
             raise ValueError(f"Refusing colliding package paths: {portable_names[portable_name]!r} and {name!r}")
         portable_names[portable_name] = name
