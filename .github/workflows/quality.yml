@@ -987,6 +987,18 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/core-post-comments-link-390-rtl-200-forced-colors.png || { echo "Missing Comments Link forced-colors evidence" >&2; exit 1; }
+          for width in 320 375 390 412 768 1440 1920; do
+            for direction in ltr rtl; do
+              for feature in comments-title post-comments-form; do
+                screenshot="test-artifacts/screenshots/core-${feature}-${width}-${direction}.png"
+                test -s "$screenshot" || { echo "Missing native discussion evidence: $screenshot" >&2; exit 1; }
+              done
+            done
+          done
+          for feature in comments-title post-comments-form; do
+            screenshot="test-artifacts/screenshots/core-${feature}-390-rtl-200-forced-colors.png"
+            test -s "$screenshot" || { echo "Missing discussion forced-colors evidence: $screenshot" >&2; exit 1; }
+          done
           test -s test-artifacts/screenshots/core-post-author-name-390-rtl-200-forced-colors.png || { echo "Missing author forced-colors evidence" >&2; exit 1; }
           for width in 320 375 390 412 768 1440 1920; do
             for direction in ltr rtl; do
