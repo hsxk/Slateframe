@@ -5,7 +5,7 @@
  * The pre_http_request hook supplies only this synthetic feed URL; no remote
  * service is contacted, and production theme code never installs the hook.
  */
-$slateframe_feed_url = 'https://slateframe.invalid/rss-fixture.xml';
+$slateframe_feed_url = 'https://example.org/slateframe-rss-fixture.xml';
 $slateframe_items = '';
 for ( $i = 0; $i < 3; $i++ ) {
 	$slateframe_items .= '<item><title><![CDATA[日本語 中文 العربية LongUnbrokenFeedTitleLongUnbrokenFeedTitleLongUnbrokenFeedTitle ' . $i . ']]></title>'
