@@ -410,6 +410,24 @@ class ReleaseManifestGuardTests(unittest.TestCase):
     def test_fullwidth_compressed_sql_dump_is_rejected(self):
         self.assert_rejected_private_path("backup．sql．gz")
 
+    def test_gzip_database_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.db.gz")
+
+    def test_xz_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("dump.sql.xz")
+
+    def test_bzip2_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("dump.sql.bz2")
+
+    def test_sqlite3_zip_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.sqlite3.zip")
+
+    def test_sqlite3_write_ahead_log_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.sqlite3-wal")
+
+    def test_database_rollback_journal_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.db-journal")
+
     def test_public_json_and_svg_remain_distributable(self):
         (self.root / "public-data.json").write_text("{}\n")
         (self.root / "database.svg").write_text("<svg/>\n")

@@ -54,8 +54,10 @@ def validate(root, theme_dir):
             parent = parent.parent
     blocked_extensions = (
         ".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp",
-        ".sql.gz", ".sql.zip", ".sql.zst", ".sqlite3", ".db",
-        ".db-wal", ".db-shm", ".sqlite-wal", ".sqlite-shm",
+        ".sqlite3", ".db",
+        ".db-wal", ".db-shm", ".db-journal",
+        ".sqlite-wal", ".sqlite-shm", ".sqlite-journal",
+        ".sqlite3-wal", ".sqlite3-shm", ".sqlite3-journal",
     )
     blocked_names = {
         "id_rsa", "id_ed25519", "id_ecdsa", "id_dsa",
@@ -111,10 +113,18 @@ def validate(root, theme_dir):
             # Environment files and compressed database dumps are not theme assets.
             # Check the normalized name so compatibility dots cannot bypass it.
             environment_file = ".env." in portable_basename or portable_basename.endswith(".env")
+            database_extensions = (".sql", ".sqlite", ".sqlite3", ".db")
+            compression_extensions = (".gz", ".zip", ".zst", ".xz", ".bz2")
+            compressed_database = any(
+                portable_basename.endswith(database + compression)
+                for database in database_extensions
+                for compression in compression_extensions
+            )
             if (
                 portable_basename in blocked_names
                 or portable_basename.endswith(blocked_extensions)
                 or environment_file
+                or compressed_database
             ):
                 raise ValueError(f"Refusing private or backup file in theme package: {name}")
             if staged_blob_id(root, item) != committed[name]:
