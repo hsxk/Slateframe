@@ -10,31 +10,35 @@ test('native Comments Link preserves Core count, URL and accessible reflow', asy
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress fixture covers seven widths');
   test.setTimeout(150000);
   const slug = 'slateframe-comments-link-' + randomUUID().slice(0, 12);
-  const content = '<!-- wp:group {"className":"slateframe-comments-link-fixture"} -->' +
-    '<div class="wp-block-group slateframe-comments-link-fixture">' +
-    '<!-- wp:comments-link {"className":"slateframe-comments-link-native"} /-->' +
-    '</div><!-- /wp:group -->';
-  let postId, commentId;
+  const content = '<!-- wp:query {"queryId":91,"className":"slateframe-comments-link-fixture","query":{"perPage":1,"postType":"post","order":"desc","orderBy":"date","search":"' + slug + '","inherit":false}} -->' +
+    '<div class="wp-block-query slateframe-comments-link-fixture">' +
+    '<!-- wp:post-template -->' +
+    '<!-- wp:post-comments-link {"className":"slateframe-comments-link-native"} /-->' +
+    '<!-- /wp:post-template -->' +
+    '</div><!-- /wp:query -->';
+  let postId, pageId, commentId;
   try {
     postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
       '--comment_status=open', '--post_title=' + slug, '--post_name=' + slug,
-      '--post_content=' + content, '--porcelain');
+      '--post_content=Native comment fixture', '--porcelain');
+    pageId = wp('post', 'create', '--post_type=page', '--post_status=publish',
+      '--post_title=Native Comments Link Query Loop fixture', '--post_content=' + content, '--porcelain');
     commentId = wp('comment', 'create', '--comment_post_ID=' + postId,
       '--comment_author=Slateframe Test', '--comment_author_email=example@example.org',
       '--comment_content=Native comment fixture', '--comment_approved=1', '--porcelain');
     expect(Number(wp('comment', 'list', '--post_id=' + postId, '--status=approve', '--format=count'))).toBe(1);
     const coreUrl = wp('eval', 'echo get_comments_link(' + Number(postId) + ');');
-    await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
+    await page.goto('/?page_id=' + pageId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-comments-link-fixture');
-    const block = root.locator('.wp-block-comments-link');
+    const block = root.locator('.wp-block-post-comments-link');
     const link = block.locator('a');
     await expect(block).toHaveCount(1);
     await expect(link).toHaveCount(1);
     await expect(link).toHaveAttribute('href', coreUrl);
     expect((await link.innerText()).trim().length).toBeGreaterThan(0);
     await expect.poll(() => page.evaluate(() => Boolean(
-      document.getElementById('slateframe-core-comments-link-inline-css') ||
-      document.getElementById('slateframe-core-comments-link-css')
+      document.getElementById('slateframe-core-post-comments-link-inline-css') ||
+      document.getElementById('slateframe-core-post-comments-link-css')
     ))).toBe(true);
     // Stress an unusually long localized Core label without changing stored content.
     await link.evaluate(node => {
@@ -62,7 +66,7 @@ test('native Comments Link preserves Core count, URL and accessible reflow', asy
           expect(m.height, label + ' touch height').toBeGreaterThanOrEqual(43);
           expect(m.wrap, label + ' long translated label').toBe('anywhere');
           if (font === 16) await page.screenshot({ fullPage: true,
-            path: 'test-artifacts/screenshots/core-comments-link-' + width + '-' + dir + '.png' });
+            path: 'test-artifacts/screenshots/core-post-comments-link-' + width + '-' + dir + '.png' });
         }
       }
     }
@@ -81,16 +85,17 @@ test('native Comments Link preserves Core count, URL and accessible reflow', asy
     expect(await link.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth)))
       .toBeGreaterThanOrEqual(2);
     await page.screenshot({ fullPage: true,
-      path: 'test-artifacts/screenshots/core-comments-link-390-rtl-200-forced-colors.png' });
+      path: 'test-artifacts/screenshots/core-post-comments-link-390-rtl-200-forced-colors.png' });
     await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => Boolean(
-      document.getElementById('slateframe-core-comments-link-inline-css') ||
-      document.getElementById('slateframe-core-comments-link-css')
+      document.getElementById('slateframe-core-post-comments-link-inline-css') ||
+      document.getElementById('slateframe-core-post-comments-link-css')
     ))).toBe(false);
   } finally {
+    if (pageId) wp('post', 'delete', pageId, '--force');
     if (commentId) wp('comment', 'delete', commentId, '--force');
     if (postId) wp('post', 'delete', postId, '--force');
   }
@@ -104,9 +109,9 @@ test('native Comments Link Gutenberg roundtrip preserves Core attributes', async
   const result = await page.evaluate(() => {
     const blocks = window.wp.blocks, editor = window.wp.data.select('core/block-editor');
     const before = blocks.serialize(editor.getBlocks());
-    const schema = blocks.getBlockType('core/comments-link')?.attributes;
-    if (!schema) throw new Error('Native Core Comments Link block is missing');
-    const first = blocks.serialize(blocks.createBlock('core/comments-link', {
+    const schema = blocks.getBlockType('core/post-comments-link')?.attributes;
+    if (!schema) throw new Error('Native Core Post Comments Link block is missing');
+    const first = blocks.serialize(blocks.createBlock('core/post-comments-link', {
       className: 'slateframe-comments-link-editor'
     }));
     const parsed = blocks.parse(first), second = blocks.serialize(parsed);
@@ -117,7 +122,7 @@ test('native Comments Link Gutenberg roundtrip preserves Core attributes', async
   });
   expect(result.after).toBe(result.before);
   expect(result.count).toBe(1);
-  expect(result.name).toBe('core/comments-link');
+  expect(result.name).toBe('core/post-comments-link');
   expect(result.valid).toBe(true);
   expect(result.className).toBe('slateframe-comments-link-editor');
   expect(result.first).toBe(result.second);

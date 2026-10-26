@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
-- Add native Core Comments Link parity: conditional 44px target, Core comment-count/permalink preservation, real WordPress approved-comment fixture, seven-width RTL/CJK/400% reflow, Axe/keyboard/forced-colors screenshots, Gutenberg roundtrip and 404 asset isolation.
+- Add native Core Post Comments Link parity: conditional 44px target, Core comment-count/permalink preservation, real WordPress approved-comment fixture, seven-width RTL/CJK/400% reflow, Axe/keyboard/forced-colors screenshots, Gutenberg roundtrip and 404 asset isolation.
 
 - Preserve native Core Pullquote default/legacy solid-color variants, semantic citation, RTL/CJK long-string reflow and authored foreground colors in nested blockquotes and citations with a 396-byte Gutenberg-shared conditional stylesheet. Add real WordPress/Chromium evidence at seven widths, Axe, focus, forced colors, Gutenberg roundtrip, 404 isolation, package and static-budget checks.
 
