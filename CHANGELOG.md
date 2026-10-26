@@ -6,7 +6,7 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
-- Preserve native Core Pullquote default/solid-color variants, semantic citation, RTL/CJK long-string reflow and authored foreground colors in nested blockquotes with a 386-byte Gutenberg-shared conditional stylesheet. Add real WordPress/Chromium evidence at seven widths, Axe, focus, forced colors, Gutenberg roundtrip, 404 isolation, package and static-budget checks.
+- Preserve native Core Pullquote default/legacy solid-color variants, semantic citation, RTL/CJK long-string reflow and authored foreground colors in nested blockquotes and citations with a 396-byte Gutenberg-shared conditional stylesheet. Add real WordPress/Chromium evidence at seven widths, Axe, focus, forced colors, Gutenberg roundtrip, 404 isolation, package and static-budget checks.
 
 - Restore native Core Quote plain-style parity with a conditional Gutenberg-shared 422-byte stylesheet. Preserve citations and default quotation accents; add WordPress/Chromium checks for seven responsive widths, RTL/CJK, zoom, Axe, forced colors, keyboard order, Gutenberg roundtrip, 404 asset isolation and exact-SHA screenshots.
 
