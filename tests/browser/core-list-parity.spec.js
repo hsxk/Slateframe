@@ -39,6 +39,12 @@ test('native Core List preserves numbering, nesting and multilingual reflow', as
     await expect(ordered).toHaveAttribute('start', '4');
     expect(await ordered.evaluate(node => node.hasAttribute('reversed'))).toBe(true);
     await expect(root.locator('li')).toHaveCount(4);
+    await expect(root.locator('ol.slateframe-list-ordered > li')).toHaveCount(2);
+    await expect(root.locator('ul.slateframe-list-unordered > li')).toHaveCount(1);
+    await expect(root.locator('ul.slateframe-list-unordered > li > ul.wp-block-list > li')).toHaveCount(1);
+    for (const language of ['ja', 'ar', 'zh']) {
+      await expect(root.locator('li[lang="' + language + '"]')).toHaveCount(1);
+    }
     await expect(root.locator('a')).toHaveAttribute('href', '#slateframe-list-end');
     expect(await ordered.evaluate(node => getComputedStyle(node).listStyleType)).toBe('decimal');
     expect(await root.locator('ul.slateframe-list-unordered')
@@ -99,6 +105,11 @@ test('native Core List preserves numbering, nesting and multilingual reflow', as
     await root.screenshot({
       path: 'test-artifacts/screenshots/core-list-390-rtl-200-forced-colors.png',
     });
+    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth -
+      document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await link.press('Enter');
+    await expect(page).toHaveURL(/#slateframe-list-end$/);
     await page.emulateMedia({ forcedColors: 'none' });
     const blankId = wp('post', 'create', '--post_type=page', '--post_status=publish',
       '--post_title=' + slug + '-empty', '--post_content=', '--porcelain');
