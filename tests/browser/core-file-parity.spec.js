@@ -114,7 +114,13 @@ test('native Core File Gutenberg roundtrip preserves authored file options', asy
     return { before, after: blocks.serialize(editor.getBlocks()), first, second,
       third: blocks.serialize(blocks.parse(second)), count: parsed.length,
       name: parsed[0]?.name, valid: parsed[0]?.isValid,
-      attrs: parsed[0]?.attributes, schema: Object.keys(schema) };
+      attrs: {
+        href: parsed[0]?.attributes.href,
+        fileName: String(parsed[0]?.attributes.fileName ?? ''),
+        showDownloadButton: parsed[0]?.attributes.showDownloadButton,
+        downloadButtonText: String(parsed[0]?.attributes.downloadButtonText ?? ''),
+        displayPreview: parsed[0]?.attributes.displayPreview,
+      }, schema: Object.keys(schema) };
   });
   expect(result.after).toBe(result.before);
   expect(result.count).toBe(1);
