@@ -77,7 +77,8 @@ def validate(root, theme_dir):
                 or any(character in windows_metacharacters for character in portable_component)
                 or portable_component.rstrip(" .") != portable_component
                 or any(unicodedata.category(character) in ("Cc", "Cf", "Cs") for character in component)
-                or portable_component.split(".", 1)[0].casefold() in reserved_stems
+                # Win32 also treats `CON .txt` as a reserved device alias.
+                or portable_component.split(".", 1)[0].rstrip(" ").casefold() in reserved_stems
             ):
                 raise ValueError(f"Refusing nonportable package path: {name!r}")
         portable_name = unicodedata.normalize("NFKC", name).casefold()
