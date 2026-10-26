@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Preserve native Core Image media links, attachment alt text and mixed-script captions with a 142-byte-class block-conditional Gutenberg-shared stylesheet, real WordPress media fixture, seven-width RTL/CJK/400% reflow, Axe/focus/forced-colors screenshots, 404 isolation and ZIP manifest checks.
+
 - Preserve native Core Query Loop No Results visibility and nested content with a conditional 285-byte-class presentation stylesheet, Gutenberg parity, empty/populated disposable WordPress queries, seven-width RTL/CJK/400% reflow, 44px button, Axe/focus/forced-colors screenshots, 404 isolation and package checks.
 
 - Preserve native Core Post Comments Count approved-only values and non-interactive semantics with a 145-byte conditional Gutenberg-shared stylesheet; add disposable WordPress moderation fixtures, seven-width RTL/CJK/400% reflow, Axe/keyboard/forced-colors screenshots, editor serialization, 404 isolation and package checks.

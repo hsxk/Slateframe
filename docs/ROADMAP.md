@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually inspect native Core Image caption/link and Core lightbox interactions in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium screenshot review; preserve author-controlled image dimensions and links.
+
 - Manually review Core Query Loop No Results visibility, nested fallback buttons and RTL/CJK announcements in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
 
 - Manually review native Core Post Comments Count approved-only values, numeric presentation and RTL/CJK announcements in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
