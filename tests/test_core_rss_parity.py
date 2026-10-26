@@ -40,7 +40,7 @@ class CoreRssParity(unittest.TestCase):
                        'blocks.serialize', 'blocks.parse', 'feedURL', 'itemsToShow',
                        'displayExcerpt', 'displayAuthor', 'displayDate',
                        'core-rss-390-rtl-200-forced-colors.png',
-                       "page.goto('/?p=999999999')", 'finally'):
+                       "page.goto('/?p=999999999',", 'finally'):
             with self.subTest(needle=needle):
                 self.assertIn(needle, js)
 
