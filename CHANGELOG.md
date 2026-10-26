@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Preserve native Core RSS list/grid presentation, multilingual 44px links, RTL/zoom reflow and Gutenberg serialization without adding a feed service or runtime JavaScript.
+
 ### Testing
 
 - Preserve native Core Image media links, attachment alt text and mixed-script captions with a 142-byte-class block-conditional Gutenberg-shared stylesheet, real WordPress media fixture, seven-width RTL/CJK/400% reflow, Axe/focus/forced-colors screenshots, 404 isolation and ZIP manifest checks.
