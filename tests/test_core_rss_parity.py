@@ -19,7 +19,7 @@ class CoreRssParity(unittest.TestCase):
         self.assertIn('assets/css/core-rss.css', workflow)
         self.assertIn('test $(wc -c < assets/css/core-rss.css) -le 600', workflow)
         self.assertLessEqual(len(css.encode('utf-8')), 600)
-        for needle in ('.wp-block-rss', '.wp-block-rss li', '.wp-block-rss__item-title',
+        for needle in ('.wp-block-rss', '.wp-block-rss li', '.wp-block-rss__item-title', '.wp-block-rss__item-title a',
                        'min-inline-size:min(100%,var(--slateframe-control))',
                        'min-block-size:var(--slateframe-control)',
                        '.wp-block-rss__item-publish-date', '.wp-block-rss__item-author',
