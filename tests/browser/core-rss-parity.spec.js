@@ -13,7 +13,8 @@ test('Core RSS list/grid titles remain operable across direction, zoom and force
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress page covers all seven widths');
   test.setTimeout(120000);
   const native = JSON.parse(wp('eval-file', process.cwd() + '/tests/fixtures/core-rss-native.php.fixture'));
-  const content = '<!-- wp:rss {"feedURL":"http://127.0.0.1:8080"} /-->' +
+  // A URL-less native block requests its conditional stylesheet without rendering a self-feed warning.
+  const content = '<!-- wp:rss /-->' +
     '<div class="wp-block-group slateframe-rss-fixture">' + native.list + native.grid + '</div>';
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
     '--post_title=Native Core RSS layout fixture', '--post_content=' + content, '--porcelain');
@@ -21,6 +22,8 @@ test('Core RSS list/grid titles remain operable across direction, zoom and force
     await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-rss-fixture');
     await expect(root).toBeVisible();
+    // Visual evidence must not include Core's homepage/self-feed error banner.
+    await expect(page.locator('.slateframe-prose .components-placeholder .notice-error')).toHaveCount(0);
     const lists = root.locator('ul.wp-block-rss');
     await expect(lists).toHaveCount(2);
     await expect(lists.last()).toHaveClass(/is-grid/);
