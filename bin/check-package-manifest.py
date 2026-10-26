@@ -97,7 +97,10 @@ def validate(root, theme_dir):
                 raise ValueError(f"Refusing uncommitted file in theme package: {name}")
             if name in modified:
                 raise ValueError(f"Refusing modified file not committed to HEAD: {name}")
-            if item.name.lower() in blocked_names or item.name.lower().endswith(blocked_extensions):
+            # A fullwidth dot or compatibility letter can disguise a private
+            # extension/name in an otherwise portable ZIP member.
+            portable_basename = unicodedata.normalize("NFKC", item.name).casefold()
+            if portable_basename in blocked_names or portable_basename.endswith(blocked_extensions):
                 raise ValueError(f"Refusing private or backup file in theme package: {name}")
             if staged_blob_id(root, item) != committed[name]:
                 raise ValueError(f"Refusing staged content differing from HEAD: {name}")
