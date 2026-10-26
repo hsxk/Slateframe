@@ -9,8 +9,8 @@ const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], 
 }).trim();
 const multilingual = '日本語 中文 العربية ' + 'LongUnbrokenFeedTitle'.repeat(6);
 const item = (i) => '<li class="wp-block-rss__item">' +
-  '<a class="wp-block-rss__item-title" href="https://example.org/entry/' + i + '">' + multilingual + ' ' + i + '</a>' +
-  '<span class="wp-block-rss__item-publish-date">2026-10-26</span>' +
+  '<div class="wp-block-rss__item-title"><a href="https://example.org/entry/' + i + '">' + multilingual + ' ' + i + '</a></div>' +
+  '<time class="wp-block-rss__item-publish-date" datetime="2026-10-26">2026-10-26</time>' +
   '<span class="wp-block-rss__item-author">' + multilingual + '</span>' +
   '<div class="wp-block-rss__item-excerpt">' + multilingual + '</div></li>';
 
@@ -18,7 +18,7 @@ const item = (i) => '<li class="wp-block-rss__item">' +
 test('Core RSS list/grid titles remain operable across direction, zoom and forced colors', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress page covers all seven widths');
   test.setTimeout(120000);
-  const content = '<!-- wp:rss /-->' + '<div class="wp-block-group slateframe-rss-fixture">' +
+  const content = '<!-- wp:rss {"feedURL":"http://127.0.0.1:8080"} /-->' + '<div class="wp-block-group slateframe-rss-fixture">' +
     '<ul class="wp-block-rss">' + [0, 1, 2].map(item).join('') + '</ul>' +
     '<ul class="wp-block-rss is-grid columns-3">' + [3, 4, 5].map(item).join('') + '</ul></div>';
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
@@ -30,7 +30,7 @@ test('Core RSS list/grid titles remain operable across direction, zoom and force
     const lists = root.locator('ul.wp-block-rss');
     await expect(lists).toHaveCount(2);
     await expect(lists.last()).toHaveClass(/is-grid/);
-    const links = root.locator('a.wp-block-rss__item-title');
+    const links = root.locator('a[href^="https://example.org/entry/"]');
     await expect(links).toHaveCount(6);
     expect(await links.evaluateAll(nodes => nodes.map(node => node.href))).toEqual(
       [0, 1, 2, 3, 4, 5].map(i => 'https://example.org/entry/' + i));
@@ -52,7 +52,7 @@ test('Core RSS list/grid titles remain operable across direction, zoom and force
         }, dir);
         const state = await root.evaluate(node => ({
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-          nodes: [...node.querySelectorAll('li,a.wp-block-rss__item-title,.wp-block-rss__item-excerpt')]
+          nodes: [...node.querySelectorAll('li,a[href^="https://example.org/entry/"],.wp-block-rss__item-excerpt')]
             .map(el => {
               const r = el.getBoundingClientRect();
               const p = el.parentElement.getBoundingClientRect();
