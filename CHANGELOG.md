@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Separator presentation with a 226-byte conditional Gutenberg-shared stylesheet, retaining semantic `<hr>`, wide/dots variants and authored colors. Cover seven responsive widths, RTL/CJK, 200%/400% zoom, native keyboard focus order, Axe, forced colors, exact-SHA screenshots, Gutenberg roundtrip, 404 asset isolation and reproducible WordPress.org ZIP inclusion.
+
 - Verify native Core Details `name` grouping exclusivity and independent disclosures in real WordPress, including Enter/Space, 44px summary targets, RTL/CJK, seven widths, 200%/400% reflow, Axe, forced colors, 404 asset isolation and mandatory exact-SHA screenshots without introducing accordion JavaScript.
 
 - Extend the existing native Core Details `<details>/<summary>` disclosure acceptance and open state with a 351-byte conditional Gutenberg-shared stylesheet. Cover 44px summary targets, keyboard Enter/Space, CJK/RTL reflow, seven widths, 200%/400% text, Axe, forced colors, exact-SHA screenshots, editor serialization and 404 asset isolation without runtime JavaScript.
