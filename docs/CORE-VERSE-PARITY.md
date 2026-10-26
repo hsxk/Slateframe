@@ -5,7 +5,7 @@ Slateframe keeps `core/verse` native. WordPress owns the `pre.wp-block-verse` ma
 ## Acceptance contract
 
 - Publish a disposable real WordPress post with three poetry lines, indentation, Japanese, Chinese, Arabic, and a long unbroken reference.
-- Preserve the exact text content, newline and indentation, semantic `pre.wp-block-verse` element, and authored language.
+- Preserve the native Gutenberg RichText <br> line separators, text content and indentation, semantic `pre.wp-block-verse` element, and authored language.
 - Check seven viewport widths (320/375/390/412/768/1440/1920), LTR/RTL, 200% text zoom and 390px 400% zoom. No document overflow; the poem must inherit the document direction.
 - Verify `white-space: pre-wrap`, `overflow-wrap: anywhere`, and normal Unicode word breaking; do not turn verse into a code-scrolling widget.
 - Run scoped WCAG Axe audit, reduced-motion/forced-colors evidence, 14 normal screenshots and one RTL forced-colors screenshot from real WordPress + Chromium.

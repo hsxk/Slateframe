@@ -19,7 +19,7 @@ test('native Verse preserves poetry line breaks, RTL direction and 400% reflow',
   const content = '<!-- wp:group {"className":"slateframe-verse-fixture"} -->' +
     '<div class="wp-block-group slateframe-verse-fixture">' +
     '<!-- wp:verse --><pre class="wp-block-verse" lang="ja">' +
-    lineOne + '\n' + lineTwo + '\n' + unbroken +
+    lineOne + '<br>' + lineTwo + '<br>' + unbroken +
     '</pre><!-- /wp:verse -->' +
     '<!-- wp:paragraph --><p>Following paragraph remains native.</p><!-- /wp:paragraph -->' +
     '</div><!-- /wp:group -->';
@@ -34,7 +34,8 @@ test('native Verse preserves poetry line breaks, RTL direction and 400% reflow',
     await expect(verse).toHaveCount(1);
     await expect(verse).toHaveAttribute('lang', 'ja');
     const originalText = await verse.textContent();
-    expect(originalText).toContain(lineOne + '\n' + lineTwo + '\n');
+    await expect(verse.locator('br')).toHaveCount(2);
+    expect(originalText).toContain(lineOne + lineTwo);
     expect(originalText).toContain(unbroken);
     await expect.poll(() => page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-verse-inline-css') ||
@@ -128,7 +129,7 @@ test('Gutenberg native Verse serializes multilingual poetry without changing the
     const before = blocks.serialize(editor.getBlocks());
     const schema = blocks.getBlockType('core/verse')?.attributes;
     if (!schema || !schema.content) throw new Error('Native Core Verse schema unavailable');
-    const verse = blocks.createBlock('core/verse', { content: '日本語 中文 العربية' });
+    const verse = blocks.createBlock('core/verse', { content: '日本語<br>中文 العربية' });
     const first = blocks.serialize(verse);
     const parsed = blocks.parse(first);
     const second = blocks.serialize(parsed);
@@ -145,5 +146,7 @@ test('Gutenberg native Verse serializes multilingual poetry without changing the
   expect(result.valid).toBe(true);
   expect(result.second).toBe(result.first);
   expect(result.third).toBe(result.second);
-  expect(result.content).toContain('日本語 中文 العربية');
+  expect(result.content).toContain('日本語');
+  expect(result.content).toContain('中文 العربية');
+  expect(result.first).toContain('<br');
 });
