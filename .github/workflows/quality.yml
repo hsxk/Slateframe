@@ -1128,6 +1128,12 @@ jobs:
             done
           done
           for profile in default compact spacious; do
+            for direction in ltr rtl; do
+              screenshot="test-artifacts/screenshots/appearance-breakpoints-${profile}-390-${direction}-400-forced-colors.png"
+              test -s "$screenshot" || { echo "Missing 400% Appearance evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          for profile in default compact spacious; do
             for viewport in 390 1440; do
               for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge editorial-pathways empty-author not-found photography-lightbox content-pagination; do
                 screenshot="test-artifacts/screenshots/appearance-${profile}-viewport-${viewport}-${surface}.png"
