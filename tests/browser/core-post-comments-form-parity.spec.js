@@ -53,6 +53,23 @@ test('native Comments Form preserves Core ownership and accessible responsive co
           expect(metrics.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
           expect(metrics.left, label + ' left').toBeGreaterThanOrEqual(-1);
           expect(metrics.right, label + ' right').toBeLessThanOrEqual(width + 1);
+          const consentMetrics = await root.locator('.comment-form-cookies-consent').evaluate(node => {
+            const checkbox = node.querySelector('input[type="checkbox"]');
+            const consentLabel = node.querySelector('label');
+            if (!checkbox || !consentLabel) throw new Error('Core consent control missing');
+            const a = checkbox.getBoundingClientRect(), b = consentLabel.getBoundingClientRect();
+            return { inputTop: a.top, labelTop: b.top,
+              inputLeft: a.left, inputRight: a.right, labelLeft: b.left, labelRight: b.right };
+          });
+          expect(Math.abs(consentMetrics.inputTop - consentMetrics.labelTop),
+            label + ' consent vertical alignment').toBeLessThanOrEqual(24);
+          if (dir === 'ltr') {
+            expect(consentMetrics.inputRight, label + ' consent reading order')
+              .toBeLessThanOrEqual(consentMetrics.labelLeft + 1);
+          } else {
+            expect(consentMetrics.labelRight, label + ' consent RTL reading order')
+              .toBeLessThanOrEqual(consentMetrics.inputLeft + 1);
+          }
           expect(await submit.evaluate(node => node.getBoundingClientRect().height),
             label + ' submit target').toBeGreaterThanOrEqual(43);
           if (font === 16) await root.screenshot({

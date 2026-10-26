@@ -24,6 +24,7 @@ class CorePostCommentsFormParity(unittest.TestCase):
             ".wp-block-post-comments-form", "min-inline-size:0",
             "max-inline-size:100%", "overflow-wrap:anywhere",
             "box-sizing:border-box", "comment-form-cookies-consent",
+            "display:grid", "grid-template-columns:max-content minmax(0,1fr)",
             "min-block-size:var(--slateframe-control)",
         ):
             self.assertIn(token, css)

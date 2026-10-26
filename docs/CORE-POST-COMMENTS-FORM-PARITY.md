@@ -12,3 +12,7 @@ Slateframe retains WordPress Core ownership of the comment form: comment submiss
 - Enforce an 850-byte CSS cap, inclusion in the distributable ZIP and editor styles, WPCS, Theme Check and existing reproducibility gates.
 
 Manual Safari/VoiceOver and Firefox form announcements, localized validation, logged-in moderation states and password-manager behavior remain release-candidate acceptance items. Never send a real comment or touch a production site in the automated fixture.
+
+## Narrow consent layout regression
+
+Exact-HEAD 320px/390px Chromium screenshots showed the native cookie-consent checkbox stranded on a separate line above its label. Use a two-column logical grid, with the checkbox in the intrinsic column and the wrapping label in a minmax(0,1fr) column. The seven-width LTR/RTL and 200%/400% browser assertions now require the checkbox and label to share a row in reading order. WordPress still owns the checkbox, consent text, validation and persistence.
