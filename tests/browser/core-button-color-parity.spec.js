@@ -87,7 +87,7 @@ test('real Core Button colors, outline and long labels survive responsive RTL an
         const contrast = await link.evaluate((node) => {
           const style = getComputedStyle(node);
           const luminance = (value) => {
-            const channels = value.match(/[\\d.]+/g)?.slice(0, 3).map(Number) || [];
+            const channels = value.match(/[0-9.]+/g)?.slice(0, 3).map(Number) || [];
             if (channels.length !== 3) return 0;
             const linear = channels.map((v) => {
               const c = v / 255;
