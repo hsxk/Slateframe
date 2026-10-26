@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually review Core Query Loop No Results visibility, nested fallback buttons and RTL/CJK announcements in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
+
 - Manually review native Core Post Comments Count approved-only values, numeric presentation and RTL/CJK announcements in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence.
 
 - Manually verify Core File download, optional preview, RTL/CJK filename announcements and focus in Safari/VoiceOver and Firefox after exact-SHA Chromium evidence; preserve Core media ownership.
