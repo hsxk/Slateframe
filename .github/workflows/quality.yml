@@ -87,7 +87,7 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-comments-pagination.css assets/css/core-navigation.css assets/css/core-post-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-rss.css assets/css/core-latest-posts.css assets/css/core-latest-comments.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/core-page-list.css assets/css/core-post-terms.css assets/css/core-post-comments-link.css assets/css/core-comments-title.css assets/css/core-post-comments-count.css assets/css/core-query-no-results.css assets/css/core-post-comments-form.css assets/css/core-file.css assets/css/core-loginout.css assets/css/core-post-date.css assets/css/core-post-author-name.css assets/css/core-post-author-biography.css assets/css/core-avatar.css assets/css/core-image.css assets/css/core-table.css assets/css/core-heading.css assets/css/core-paragraph.css assets/css/core-list.css inc/core-list.php tests/browser/core-list-parity.spec.js assets/css/core-verse.css inc/core-verse.php tests/browser/core-verse-parity.spec.js assets/css/core-site-logo.css assets/css/core-site-title.css assets/css/core-site-tagline.css assets/css/core-columns.css assets/css/core-group.css assets/css/core-details.css assets/css/core-separator.css assets/css/core-quote.css assets/css/core-pullquote.css assets/css/core-post-excerpt.css assets/css/core-read-more.css assets/css/core-post-title.css assets/css/core-post-featured-image.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-comments-pagination.css assets/css/core-navigation.css assets/css/core-post-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-rss.css assets/css/core-latest-posts.css assets/css/core-latest-comments.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/core-page-list.css assets/css/core-post-terms.css assets/css/core-post-comments-link.css assets/css/core-comments-title.css assets/css/core-post-comments-count.css assets/css/core-query-no-results.css assets/css/core-post-comments-form.css assets/css/core-file.css assets/css/core-loginout.css assets/css/core-post-date.css assets/css/core-post-author-name.css assets/css/core-post-author-biography.css assets/css/core-avatar.css assets/css/core-image.css assets/css/core-table.css assets/css/core-heading.css assets/css/core-paragraph.css assets/css/core-list.css inc/core-list.php tests/browser/core-list-parity.spec.js assets/css/core-verse.css inc/core-verse.php tests/browser/core-verse-parity.spec.js tests/browser/appearance-breakpoint-matrix.spec.js docs/APPEARANCE-BREAKPOINT-MATRIX.md assets/css/core-site-logo.css assets/css/core-site-title.css assets/css/core-site-tagline.css assets/css/core-columns.css assets/css/core-group.css assets/css/core-details.css assets/css/core-separator.css assets/css/core-quote.css assets/css/core-pullquote.css assets/css/core-post-excerpt.css assets/css/core-read-more.css assets/css/core-post-title.css assets/css/core-post-featured-image.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/core-buttons.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
@@ -934,6 +934,7 @@ jobs:
           wp theme mod set slateframe_content_width 640 --path=/tmp/wp-browser
           wp theme mod set slateframe_wide_width 1024 --path=/tmp/wp-browser
           npx playwright test tests/browser/appearance.spec.js --project=viewport-390 --project=viewport-1440
+          npx playwright test tests/browser/appearance-breakpoint-matrix.spec.js
       - name: Verify spacious Appearance bounds
         if: ${{ always() }}
         env:
@@ -948,6 +949,7 @@ jobs:
           wp theme mod set slateframe_content_width 800 --path=/tmp/wp-browser
           wp theme mod set slateframe_wide_width 1280 --path=/tmp/wp-browser
           npx playwright test tests/browser/appearance.spec.js --project=viewport-390 --project=viewport-1440
+          npx playwright test tests/browser/appearance-breakpoint-matrix.spec.js
       - name: Reset Appearance fixture
         if: ${{ always() }}
         run: |
@@ -1117,6 +1119,14 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/core-pullquote-390-rtl-200-forced-colors.png || { echo "Missing Core Pullquote forced-colors evidence" >&2; exit 1; }
+          for profile in default compact spacious; do
+            for viewport in 320 375 390 412 768 1440 1920; do
+              for variant in ltr rtl-200-forced-colors; do
+                screenshot="test-artifacts/screenshots/appearance-breakpoints-${profile}-${viewport}-${variant}.png"
+                test -s "$screenshot" || { echo "Missing Appearance breakpoint evidence: $screenshot" >&2; exit 1; }
+              done
+            done
+          done
           for profile in default compact spacious; do
             for viewport in 390 1440; do
               for surface in home-controls search-controls empty-search page post attachment showcase photography portfolio knowledge editorial-pathways empty-author not-found photography-lightbox content-pagination; do
