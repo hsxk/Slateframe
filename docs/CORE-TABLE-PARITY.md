@@ -1,6 +1,6 @@
 # Native Core Table parity
 
-Slateframe leaves `core/table` in charge of cells, headings, table data, captions, authored layout, and stripe style. No table markup filters, JavaScript, custom data model, or plugin dependency are introduced.
+Slateframe leaves `core/table` in charge of cells, headings, table data, captions, authored layout, and stripe style. No new markup filters, JavaScript, custom data model, or plugin dependency are introduced. The existing narrowly scoped Core Table filter adds `tabindex=0` to a figure only when the author has not supplied a tabindex, preserving keyboard access to horizontally scrollable tables without changing cells or data.
 
 The existing singular reading layer contains horizontally wide tables inside the figure. The conditional `core/table` stylesheet retains Core's fixed-layout algorithm while bounding intrinsic table width to the shared wide measure, wraps mixed CJK/RTL cells and captions, and aligns captions to logical start in Gutenberg and the frontend. Forced-colors stripes gain a system-color row divider rather than depending only on backgrounds.
 

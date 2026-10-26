@@ -34,6 +34,8 @@ test('native Core Table retains fixed layout, caption and striped rows across vi
     const fixed = root.locator('.slateframe-table-fixed');
     const striped = root.locator('.slateframe-table-striped');
     await expect(fixed.locator('table.has-fixed-layout')).toHaveCount(1);
+    await expect(fixed).toHaveAttribute('tabindex', '0');
+    await expect(striped).toHaveAttribute('tabindex', '0');
     await expect(striped.locator('table:not(.has-fixed-layout)')).toHaveCount(1);
     await expect(fixed.locator('th')).toHaveCount(4);
     await expect(striped.locator('tbody tr')).toHaveCount(2);
@@ -91,6 +93,10 @@ test('native Core Table retains fixed layout, caption and striped rows across vi
     await page.setViewportSize({ width: 390, height: 900 });
     await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
     await page.keyboard.press('Tab');
+    await fixed.focus();
+    await expect(fixed).toBeFocused();
+    expect(await fixed.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth)))
+      .toBeGreaterThanOrEqual(2);
     await link.focus();
     await expect(link).toBeFocused();
     expect(await link.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth)))

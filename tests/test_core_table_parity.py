@@ -29,7 +29,7 @@ class CoreTableParity(unittest.TestCase):
         for bad in ("!important", "time2log_", "wpcode_", "direction:ltr",
                     "display:none", "javascript"):
             self.assertNotIn(bad, css)
-        self.assertNotIn("render_block_core/table", php)
+        self.assertEqual(php.count("add_filter( 'render_block_core/table', 'slateframe_focusable_table_block' );"), 1)
 
     def test_wordpress_and_editor_evidence(self):
         js = (ROOT / "tests/browser/core-table-parity.spec.js").read_text(encoding="utf-8")
