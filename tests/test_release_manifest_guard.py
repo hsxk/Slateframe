@@ -321,6 +321,39 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         self.commit()
         self.assertIn("private or backup", self.build().stderr)
 
+    def test_fullwidth_private_extension_is_rejected(self):
+        (self.root / "secret．pem").write_text("private\n")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("private or backup", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_fullwidth_credentials_name_is_rejected(self):
+        (self.root / "ｃｒｅｄｅｎｔｉａｌｓ．ｊｓｏｎ").write_text("private\n")
+        self.commit()
+        self.assertIn("private or backup", self.build().stderr)
+
+    def test_compatibility_ssh_key_name_is_rejected(self):
+        (self.root / "ｉｄ＿ｒｓａ").write_text("private\n")
+        self.commit()
+        self.assertIn("private or backup", self.build().stderr)
+
+    def test_nested_compatibility_backup_extension_is_rejected(self):
+        (self.root / "assets").mkdir()
+        (self.root / "assets" / "backup．bak").write_text("private\n")
+        self.commit()
+        self.assertIn("private or backup", self.build().stderr)
+
+    def test_safe_fullwidth_document_extension_is_preserved(self):
+        (self.root / "assets").mkdir()
+        (self.root / "assets" / "資料．txt").write_text("public\n")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            self.assertIn("slateframe/assets/資料．txt", archive.namelist())
+
     def test_tracked_backup_is_rejected(self):
         (self.root / "functions.php.bak").write_text("backup")
         self.commit()
