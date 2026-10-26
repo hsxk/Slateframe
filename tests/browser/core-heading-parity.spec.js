@@ -171,7 +171,7 @@ test('Core Heading Gutenberg roundtrip retains levels, anchors, text and authore
     expect(entry.second).toBe(entry.third);
     expect(entry.attrs).toEqual(entry.reparsedAttrs);
     for (const [key, value] of Object.entries(entry.input)) {
-      expect(entry.attrs[key], key).toBe(value);
+      expect(entry.attrs[key], key).toEqual(value);
     }
   }
 });
