@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually verify native Core Post Comments Link localized count announcements, closed-comments behavior, anchor navigation and focus in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium evidence.
+
 - Manually review native Core Pullquote default/legacy solid-color variants, citation announcements, authored colors, RTL/CJK reflow and forced-colors contrast in Safari/VoiceOver and Firefox after exact-SHA Chromium acceptance.
 
 - Manually review native Core Quote default/plain variants, citations, authored border colors, RTL/CJK long strings and forced-colors contrast in Safari/VoiceOver and Firefox after exact-SHA Chromium acceptance.
