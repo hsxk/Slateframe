@@ -18,7 +18,7 @@ class CorePullquoteParity(unittest.TestCase):
         self.assertIn("'assets/css/core-pullquote.css'",
                       php.split('add_editor_style(', 1)[1].split(');', 1)[0])
         for expected in ('.wp-block-pullquote', 'overflow-wrap:anywhere',
-                         'min-inline-size:0', 'CanvasText'):
+                         'min-inline-size:0', 'CanvasText', 'has-text-color', 'color:inherit'):
             self.assertIn(expected, css)
         self.assertLessEqual(len(css.encode()), 440)
         self.assertIn('test $(wc -c < assets/css/core-pullquote.css) -le 440', ci)

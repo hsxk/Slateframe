@@ -1,6 +1,6 @@
 # Native Core Pullquote parity
 
-Slateframe preserves WordPress `core/pullquote` semantics, citations, author-defined text/background colors and native solid-color style. The theme supplies a conditional 419-byte stylesheet to bound long CJK/RTL text, prevent horizontal overflow and keep uncustomized borders visible in forced-colors mode. Gutenberg shares the stylesheet; WordPress owns serialization, markup and authoring. No runtime JavaScript or custom content model is introduced.
+Slateframe preserves WordPress `core/pullquote` semantics, citations, author-defined text/background colors and native solid-color style. The theme supplies a conditional 386-byte stylesheet to bound long CJK/RTL text, prevent horizontal overflow and honor authored foreground colors inside nested blockquotes, and keep uncustomized borders visible in forced-colors mode. Gutenberg shares the stylesheet; WordPress owns serialization, markup and authoring. No runtime JavaScript or custom content model is introduced.
 
 ## Acceptance
 

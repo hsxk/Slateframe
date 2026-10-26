@@ -34,6 +34,8 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
     });
     expect(authoredColors.background).not.toBe('rgba(0, 0, 0, 0)');
     expect(authoredColors.background).not.toBe(authoredColors.text);
+    const nestedText = await solid.locator('blockquote').evaluate(node => getComputedStyle(node).color);
+    expect(nestedText).toBe(authoredColors.text);
     await expect.poll(() => page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-pullquote-inline-css') ||
       document.getElementById('slateframe-core-pullquote-css')
