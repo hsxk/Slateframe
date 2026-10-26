@@ -4,6 +4,8 @@ Slateframe is pre-release software. The roadmap describes direction, not a promi
 
 ## Before the first release candidate
 
+- Manually verify native Core Heading level/anchor announcements, long CJK/RTL fragment navigation, authored alignment and 400% reflow in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium evidence; see [Core Heading parity](CORE-HEADING-PARITY.md).
+
 - Manually review native Core Table horizontal scrolling, fixed layouts, striped rows, captions and keyboard/VoiceOver access in Safari and Firefox after exact-SHA Chromium evidence.
 
 - Manually verify Core Comments Pagination comment ordering, translated previous/next labels, current-page announcements and screen-reader focus in Safari/VoiceOver and Firefox after exact-SHA WordPress/Chromium evidence. Presentation fixture uses Core's real server wrapper without changing shared comment pagination options.

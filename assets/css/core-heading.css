@@ -1,0 +1,5 @@
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-heading{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere;word-break:normal;hyphens:auto;scroll-margin-block-start:calc(var(--slateframe-header-height) + var(--slateframe-stack-gap))}
+:is(.slateframe-prose,.editor-styles-wrapper) h1.wp-block-heading{font-size:clamp(1.9rem,4vw,3rem);line-height:1.14;text-wrap:balance}
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-heading:is(:lang(ja),:lang(zh),:lang(ko)){letter-spacing:normal}
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-heading:target{outline:2px solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}
+@media(forced-colors:active){:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-heading:target{outline-color:Highlight}}
