@@ -12,7 +12,7 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
   const slug = 'slateframe-pullquote-' + randomUUID().slice(0, 12);
   const content = '<!-- wp:paragraph --><p><a class="slateframe-pullquote-before" href="#slateframe-pullquote-after">Before</a></p><!-- /wp:paragraph -->' +
     '<!-- wp:pullquote {"className":"slateframe-pullquote-default"} --><figure class="wp-block-pullquote slateframe-pullquote-default"><blockquote><p>日本語 中文 العربية VeryLongUnbrokenPullquoteVeryLongUnbrokenPullquoteVeryLongUnbrokenPullquote</p><cite>Native citation — 作者</cite></blockquote></figure><!-- /wp:pullquote -->' +
-    '<!-- wp:pullquote {"className":"is-style-solid-color slateframe-pullquote-solid","backgroundColor":"contrast","textColor":"base"} --><figure class="wp-block-pullquote is-style-solid-color slateframe-pullquote-solid has-base-color has-contrast-background-color has-text-color has-background"><blockquote><p>Solid quotation</p><cite>Solid citation</cite></blockquote></figure><!-- /wp:pullquote -->' +
+    '<!-- wp:pullquote {"className":"is-style-solid-color slateframe-pullquote-solid","backgroundColor":"ink","textColor":"paper"} --><figure class="wp-block-pullquote is-style-solid-color slateframe-pullquote-solid has-paper-color has-ink-background-color has-text-color has-background"><blockquote><p>Solid quotation</p><cite>Solid citation</cite></blockquote></figure><!-- /wp:pullquote -->' +
     '<!-- wp:paragraph --><p><a id="slateframe-pullquote-after" class="slateframe-pullquote-after" href="#main-content">After</a></p><!-- /wp:paragraph -->';
   let postId;
   try {
@@ -26,6 +26,14 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
     await expect(standard.locator('cite')).toHaveText('Native citation — 作者');
     await expect(solid.locator('cite')).toHaveText('Solid citation');
     await expect(solid).toHaveClass(/is-style-solid-color/);
+    await expect(solid).toHaveClass(/has-ink-background-color/);
+    await expect(solid).toHaveClass(/has-paper-color/);
+    const authoredColors = await solid.evaluate(node => {
+      const style = getComputedStyle(node);
+      return { background: style.backgroundColor, text: style.color };
+    });
+    expect(authoredColors.background).not.toBe('rgba(0, 0, 0, 0)');
+    expect(authoredColors.background).not.toBe(authoredColors.text);
     await expect.poll(() => page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-pullquote-inline-css') ||
       document.getElementById('slateframe-core-pullquote-css')
