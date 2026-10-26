@@ -1,0 +1,3 @@
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-pullquote{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-pullquote blockquote{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+@media(forced-colors:active){:is(.slateframe-prose,.editor-styles-wrapper) .wp-block-pullquote:not(.has-border-color){border-block-color:CanvasText}}
