@@ -54,6 +54,11 @@ test('native Core Paragraph retains authored content and links across reflow and
               return { left: rect.left, right: rect.right, wrap: css.overflowWrap, dir: css.direction };
             }),
             alignment: getComputedStyle(node.querySelector('.slateframe-paragraph-center')).textAlign,
+            dropCap: (() => {
+              const paragraph = node.querySelector('.slateframe-paragraph-dropcap');
+              return { size: parseFloat(getComputedStyle(paragraph, '::first-letter').fontSize),
+                width: paragraph.getBoundingClientRect().width };
+            })(),
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
@@ -64,6 +69,8 @@ test('native Core Paragraph retains authored content and links across reflow and
             expect(box.dir, label + ' direction').toBe(dir);
           }
           expect(state.alignment, label + ' authored alignment').toBe('center');
+          expect(state.dropCap.size, label + ' native drop cap size').toBeGreaterThan(0);
+          expect(state.dropCap.size, label + ' bounded native drop cap').toBeLessThanOrEqual(state.dropCap.width + 1);
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-paragraph-' + width + '-' + dir + '.png',
           });

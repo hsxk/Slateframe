@@ -1,1 +1,2 @@
 :is(.slateframe-prose,.editor-styles-wrapper) p{min-inline-size:0;overflow-wrap:anywhere;word-break:normal;hyphens:auto}
+:is(.slateframe-prose,.editor-styles-wrapper) p.has-drop-cap:not(:focus)::first-letter{font-size:min(8.4em,calc(100dvi - var(--slateframe-gutter) - var(--slateframe-gutter)))}
