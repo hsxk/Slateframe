@@ -7,20 +7,14 @@ const { openAuthenticatedEditor } = require('./support/editor-login');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
 }).trim();
-const multilingual = '日本語 中文 العربية ' + 'LongUnbrokenFeedTitle'.repeat(6);
-const item = (i) => '<li class="wp-block-rss__item">' +
-  '<div class="wp-block-rss__item-title"><a href="https://example.org/entry/' + i + '">' + multilingual + ' ' + i + '</a></div>' +
-  '<time class="wp-block-rss__item-publish-date" datetime="2026-10-26">2026-10-26</time>' +
-  '<span class="wp-block-rss__item-author">' + multilingual + '</span>' +
-  '<div class="wp-block-rss__item-excerpt">' + multilingual + '</div></li>';
 
-// The fixture is native Core RSS markup, not a network-dependent external feed.
+// Core renders both variants against a deterministic synthetic feed; no external network.
 test('Core RSS list/grid titles remain operable across direction, zoom and forced colors', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress page covers all seven widths');
   test.setTimeout(120000);
-  const content = '<!-- wp:rss {"feedURL":"http://127.0.0.1:8080"} /-->' + '<div class="wp-block-group slateframe-rss-fixture">' +
-    '<ul class="wp-block-rss">' + [0, 1, 2].map(item).join('') + '</ul>' +
-    '<ul class="wp-block-rss is-grid columns-3">' + [3, 4, 5].map(item).join('') + '</ul></div>';
+  const native = JSON.parse(wp('eval-file', process.cwd() + '/tests/fixtures/core-rss-native.php.fixture'));
+  const content = '<!-- wp:rss {"feedURL":"http://127.0.0.1:8080"} /-->' +
+    '<div class="wp-block-group slateframe-rss-fixture">' + native.list + native.grid + '</div>';
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
     '--post_title=Native Core RSS layout fixture', '--post_content=' + content, '--porcelain');
   try {
@@ -33,7 +27,7 @@ test('Core RSS list/grid titles remain operable across direction, zoom and force
     const links = root.locator('a[href^="https://example.org/entry/"]');
     await expect(links).toHaveCount(6);
     expect(await links.evaluateAll(nodes => nodes.map(node => node.href))).toEqual(
-      [0, 1, 2, 3, 4, 5].map(i => 'https://example.org/entry/' + i));
+      [0, 1, 2, 0, 1, 2].map(i => 'https://example.org/entry/' + i));
     await expect(root.locator('.wp-block-rss__item-publish-date')).toHaveCount(6);
     await expect(root.locator('.wp-block-rss__item-author')).toHaveCount(6);
     await expect(root.locator('.wp-block-rss__item-excerpt')).toHaveCount(6);
