@@ -31,6 +31,13 @@ class CoreRssParity(unittest.TestCase):
         self.assertNotIn('render_block_core/rss', php)
         self.assertNotIn('pre_http_request', php)
 
+    def test_native_offline_core_renderer_fixture(self):
+        php = (ROOT / 'tests/fixtures/core-rss-native.php.fixture').read_text(encoding='utf-8')
+        for needle in ('pre_http_request', 'render_block(', "'core/rss'", 'wp_json_encode',
+                       'displayExcerpt', 'displayAuthor', 'displayDate', "'list', 'grid'",
+                       'wp-block-rss__item-title', 'slateframe.invalid'):
+            self.assertIn(needle, php)
+
     def test_wordpress_browser_and_gutenberg_coverage(self):
         js = (ROOT / 'tests/browser/core-rss-parity.spec.js').read_text(encoding='utf-8')
         for needle in ('wp-block-rss', 'is-grid', '320, 375, 390, 412, 768, 1440, 1920',
@@ -40,6 +47,7 @@ class CoreRssParity(unittest.TestCase):
                        'blocks.serialize', 'blocks.parse', 'feedURL', 'itemsToShow',
                        'displayExcerpt', 'displayAuthor', 'displayDate',
                        'core-rss-390-rtl-200-forced-colors.png',
+                       "wp('eval-file'",
                        "page.goto('/?p=999999999',", 'finally'):
             with self.subTest(needle=needle):
                 self.assertIn(needle, js)
