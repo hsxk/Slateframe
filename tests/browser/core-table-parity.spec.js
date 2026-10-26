@@ -131,10 +131,11 @@ test('Core Table Gutenberg roundtrip preserves native cells and authored layout'
     const before = blocks.serialize(editor.getBlocks());
     const inputs = [
       { hasFixedLayout: true, caption: '日本語 中文 العربية fixed table',
-        head: [{ cells: [{ content: 'Heading' }, { content: '見出し' }] }],
-        body: [{ cells: [{ content: '123' }, { content: '本文' }] }] },
+        head: [{ cells: [{ content: 'Heading', tag: 'th', scope: 'col' },
+          { content: '見出し', tag: 'th', scope: 'col' }] }],
+        body: [{ cells: [{ content: '123', tag: 'td' }, { content: '本文', tag: 'td' }] }] },
       { hasFixedLayout: false, className: 'is-style-stripes',
-        body: [{ cells: [{ content: 'Arabic العربية' }, { content: '中文' }] }] }
+        body: [{ cells: [{ content: 'Arabic العربية', tag: 'td' }, { content: '中文', tag: 'td' }] }] }
     ];
     const cases = inputs.map(input => {
       const first = blocks.serialize(blocks.createBlock('core/table', input));
