@@ -18,7 +18,7 @@ class CoreTableParity(unittest.TestCase):
         self.assertIn("'assets/css/core-table.css'",
                       php.split("add_editor_style(", 1)[1].split(");", 1)[0])
         for token in (".wp-block-table", "table.has-fixed-layout",
-                      "table-layout:fixed", "inline-size:100%",
+                      "min-inline-size:100%", "max-inline-size:var(--slateframe-wide)",
                       "overflow-wrap:anywhere", "figcaption",
                       "text-align:start", "forced-colors:active", "CanvasText"):
             self.assertIn(token, css)

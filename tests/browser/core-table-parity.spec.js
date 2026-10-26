@@ -58,7 +58,7 @@ test('native Core Table retains fixed layout, caption and striped rows across vi
               const table = figure.querySelector('table');
               const caption = figure.querySelector('figcaption');
               const a = figure.getBoundingClientRect(), b = caption.getBoundingClientRect();
-              return { left: a.left, right: a.right, scroll: figure.scrollWidth,
+              return { left: a.left, right: a.right, height: a.height, scroll: figure.scrollWidth,
                 client: figure.clientWidth, captionLeft: b.left, captionRight: b.right,
                 captionWrap: getComputedStyle(caption).overflowWrap,
                 captionAlign: getComputedStyle(caption).textAlign,
@@ -78,6 +78,8 @@ test('native Core Table retains fixed layout, caption and striped rows across vi
             expect(figure.captionAlign, label + ' caption alignment').toBe('start');
             expect(figure.cellWrap, label + ' cell wrap').toBe('anywhere');
             expect(figure.scroll, label + ' scroll containment').toBeGreaterThanOrEqual(figure.client);
+            if (width === 390) expect(figure.height, label + ' avoid pathological tall tables')
+              .toBeLessThan(font === 64 ? 8000 : 5000);
           }
           expect(state.figures[0].layout, label + ' fixed layout').toBe('fixed');
           if (font === 16) await root.screenshot({
