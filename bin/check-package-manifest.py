@@ -69,10 +69,11 @@ def validate(root, theme_dir):
         for component in relative.parts:
             # Compatibility folding catches fullwidth separators, dot aliases,
             # DOS device names and trailing Unicode spaces before ZIP creation.
+            # Keep the established hidden-path diagnostic for literal dotfiles.
             portable_component = unicodedata.normalize("NFKC", component)
             if (
                 portable_component in (".", "..")
-                or portable_component.startswith(".")
+                or (portable_component.startswith(".") and not component.startswith("."))
                 or any(character in windows_metacharacters for character in portable_component)
                 or portable_component.rstrip(" .") != portable_component
                 or any(unicodedata.category(character) in ("Cc", "Cf", "Cs") for character in component)
