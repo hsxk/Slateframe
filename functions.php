@@ -27,7 +27,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-post-comments-link.css', 'assets/css/core-comments-title.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-columns.css', 'assets/css/core-group.css', 'assets/css/core-details.css', 'assets/css/core-separator.css', 'assets/css/core-quote.css', 'assets/css/core-pullquote.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-post-comments-link.css', 'assets/css/core-comments-title.css', 'assets/css/core-post-comments-form.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-columns.css', 'assets/css/core-group.css', 'assets/css/core-details.css', 'assets/css/core-separator.css', 'assets/css/core-quote.css', 'assets/css/core-pullquote.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -345,6 +345,25 @@ function slateframe_register_core_comments_title_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_comments_title_styles', 20 );
+
+/**
+ * Bound the native Core Post Comments Form without owning submissions.
+ *
+ * Core retains nonce handling, comment moderation, login rules and labels.
+ * The stylesheet is conditional and shared with the block editor.
+ */
+function slateframe_register_core_post_comments_form_styles() {
+	wp_enqueue_block_style(
+		'core/post-comments-form',
+		array(
+			'handle' => 'slateframe-core-post-comments-form',
+			'src'    => get_template_directory_uri() . '/assets/css/core-post-comments-form.css',
+			'path'   => get_template_directory() . '/assets/css/core-post-comments-form.css',
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+add_action( 'init', 'slateframe_register_core_post_comments_form_styles', 20 );
 
 /**
  * Bound native Core Login/out links and optional login forms.

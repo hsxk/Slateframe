@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Add native Core Post Comments Form conditional Gutenberg-shared styling for responsive form containment, CJK/RTL labels, cookie-consent wrapping and 44px cancel-reply controls. Test real open/closed WordPress comments, duplicate classic-form prevention, seven widths, 200%/400% zoom, keyboard, Axe, forced colors, screenshots, Gutenberg roundtrip, 404 isolation and strict package budget.
+
 - Prevent duplicate classic/native comments UI on single posts containing Core Comments, legacy Post Comments or native Comments Form blocks; preserve classic fallback otherwise. Correct the Comments Title browser fixture to render one Core-owned `#comments` heading at a time and exercise both heading variants without duplicate IDs.
 
 - Preserve native Core Comments Title approved-count, post-title and heading-level variants with conditional Gutenberg-shared styling; cover real approved/pending WordPress comments, seven widths, RTL/CJK/400% reflow, Axe, forced colors, editor roundtrip, exact-SHA screenshots, 404 asset isolation and ZIP reproducibility.

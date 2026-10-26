@@ -1,0 +1,6 @@
+.wp-block-post-comments-form{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-post-comments-form :is(.comment-form,.comment-form p){min-inline-size:0;max-inline-size:100%}
+.wp-block-post-comments-form :is(input:not([type=checkbox],[type=radio],[type=hidden]),textarea){box-sizing:border-box;max-inline-size:100%}
+.wp-block-post-comments-form :is(label,.logged-in-as,.comment-notes){overflow-wrap:anywhere}
+.wp-block-post-comments-form .comment-form-cookies-consent{display:grid;grid-template-columns:max-content minmax(0,1fr);align-items:start;gap:var(--slateframe-component-gap)}
+.wp-block-post-comments-form #cancel-comment-reply-link{display:inline-flex;align-items:center;min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}

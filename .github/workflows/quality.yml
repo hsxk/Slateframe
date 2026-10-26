@@ -87,7 +87,7 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-navigation.css assets/css/core-post-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-latest-posts.css assets/css/core-latest-comments.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/core-page-list.css assets/css/core-post-terms.css assets/css/core-post-comments-link.css assets/css/core-comments-title.css assets/css/core-loginout.css assets/css/core-post-date.css assets/css/core-post-author-name.css assets/css/core-post-author-biography.css assets/css/core-avatar.css assets/css/core-site-logo.css assets/css/core-site-title.css assets/css/core-site-tagline.css assets/css/core-columns.css assets/css/core-group.css assets/css/core-details.css assets/css/core-separator.css assets/css/core-quote.css assets/css/core-pullquote.css assets/css/core-post-excerpt.css assets/css/core-read-more.css assets/css/core-post-title.css assets/css/core-post-featured-image.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-navigation.css assets/css/core-post-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-latest-posts.css assets/css/core-latest-comments.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/core-page-list.css assets/css/core-post-terms.css assets/css/core-post-comments-link.css assets/css/core-comments-title.css assets/css/core-post-comments-form.css assets/css/core-loginout.css assets/css/core-post-date.css assets/css/core-post-author-name.css assets/css/core-post-author-biography.css assets/css/core-avatar.css assets/css/core-site-logo.css assets/css/core-site-title.css assets/css/core-site-tagline.css assets/css/core-columns.css assets/css/core-group.css assets/css/core-details.css assets/css/core-separator.css assets/css/core-quote.css assets/css/core-pullquote.css assets/css/core-post-excerpt.css assets/css/core-read-more.css assets/css/core-post-title.css assets/css/core-post-featured-image.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/core-buttons.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
@@ -113,6 +113,7 @@ jobs:
           test $(wc -c < assets/css/core-post-terms.css) -le 450
           test $(wc -c < assets/css/core-post-comments-link.css) -le 380
           test $(wc -c < assets/css/core-comments-title.css) -le 240
+          test $(wc -c < assets/css/core-post-comments-form.css) -le 850
           test $(wc -c < assets/css/core-loginout.css) -le 750
           test $(wc -c < assets/css/core-post-date.css) -le 400
           test $(wc -c < assets/css/core-post-author-name.css) -le 400
@@ -239,7 +240,7 @@ jobs:
           MARIADB_DATABASE: wordpress
         ports: ['3306:3306']
         options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
@@ -281,7 +282,7 @@ jobs:
           MARIADB_DATABASE: wordpress
         ports: ['3306:3306']
         options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
@@ -349,7 +350,7 @@ jobs:
           MARIADB_DATABASE: wordpress
         ports: ['3306:3306']
         options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
@@ -461,7 +462,7 @@ jobs:
           MARIADB_DATABASE: wordpress
         ports: ['3306:3306']
         options: >-
-          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
       - uses: actions/checkout@v4
@@ -986,6 +987,18 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/core-post-comments-link-390-rtl-200-forced-colors.png || { echo "Missing Comments Link forced-colors evidence" >&2; exit 1; }
+          for width in 320 375 390 412 768 1440 1920; do
+            for direction in ltr rtl; do
+              for feature in comments-title post-comments-form; do
+                screenshot="test-artifacts/screenshots/core-${feature}-${width}-${direction}.png"
+                test -s "$screenshot" || { echo "Missing native discussion evidence: $screenshot" >&2; exit 1; }
+              done
+            done
+          done
+          for feature in comments-title post-comments-form; do
+            screenshot="test-artifacts/screenshots/core-${feature}-390-rtl-200-forced-colors.png"
+            test -s "$screenshot" || { echo "Missing discussion forced-colors evidence: $screenshot" >&2; exit 1; }
+          done
           test -s test-artifacts/screenshots/core-post-author-name-390-rtl-200-forced-colors.png || { echo "Missing author forced-colors evidence" >&2; exit 1; }
           for width in 320 375 390 412 768 1440 1920; do
             for direction in ltr rtl; do
@@ -1131,6 +1144,7 @@ jobs:
           grep -qx 'slateframe/assets/css/core-pullquote.css' /tmp/package.txt
           grep -qx 'slateframe/assets/css/core-post-comments-link.css' /tmp/package.txt
           grep -qx 'slateframe/assets/css/core-comments-title.css' /tmp/package.txt
+          grep -qx 'slateframe/assets/css/core-post-comments-form.css' /tmp/package.txt
           grep -qx 'slateframe/screenshot.png' /tmp/package.txt
           python3 bin/check-screenshot.py dist/slateframe/screenshot.png
           if grep -qx "slateframe/.distignore" /tmp/package.txt; then echo "Packaging manifest leaked into theme ZIP" >&2; exit 1; fi
