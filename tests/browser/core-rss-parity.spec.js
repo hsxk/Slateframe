@@ -13,17 +13,31 @@ test('Core RSS list/grid titles remain operable across direction, zoom and force
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress page covers all seven widths');
   test.setTimeout(120000);
   const native = JSON.parse(wp('eval-file', process.cwd() + '/tests/fixtures/core-rss-native.php.fixture'));
-  // A URL-less native block requests its conditional stylesheet without rendering a self-feed warning.
-  const content = '<!-- wp:rss /-->' +
+  // A valid Core RSS block renders the same deterministic feed in the browser.
+  const content = '<!-- wp:rss {"feedURL":"https://example.org/slateframe-rss-fixture.xml","itemsToShow":3} /-->' +
     '<div class="wp-block-group slateframe-rss-fixture">' + native.list + native.grid + '</div>';
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
     '--post_title=Native Core RSS layout fixture', '--post_content=' + content, '--porcelain');
+  // Only this disposable browser fixture intercepts the synthetic feed. No network request.
+  const browserHook = '/tmp/wp-browser/wp-content/mu-plugins/slateframe-rss-browser-fixture.php';
+  await fs.writeFile(browserHook, `<?php
+add_filter( 'pre_http_request', static function ( $pre, $args, $url ) {
+    if ( 'https://example.org/slateframe-rss-fixture.xml' !== $url ) { return $pre; }
+    return array(
+        'headers' => array( 'content-type' => 'application/rss+xml; charset=UTF-8' ),
+        'body' => file_get_contents( get_template_directory() . '/tests/fixtures/core-rss-feed.xml' ),
+        'response' => array( 'code' => 200, 'message' => 'OK' ),
+        'cookies' => array(),
+    );
+}, 10, 3 );
+`);
   try {
     await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-rss-fixture');
     await expect(root).toBeVisible();
     // Visual evidence must not include Core's homepage/self-feed error banner.
     await expect(page.locator('.slateframe-prose .components-placeholder .notice-error')).toHaveCount(0);
+    await expect(page.locator('ul.wp-block-rss')).toHaveCount(3);
     const lists = root.locator('ul.wp-block-rss');
     await expect(lists).toHaveCount(2);
     await expect(lists.last()).toHaveClass(/is-grid/);
@@ -96,6 +110,7 @@ test('Core RSS list/grid titles remain operable across direction, zoom and force
       document.getElementById('slateframe-core-rss-css'))).toBeNull();
   } finally {
     wp('post', 'delete', id, '--force');
+    await fs.rm(browserHook, { force: true });
   }
 });
 

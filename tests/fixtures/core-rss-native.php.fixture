@@ -8,20 +8,11 @@
 $slateframe_feed_url = 'https://example.org/slateframe-rss-fixture.xml';
 // Unique descending dates make SimplePie's native newest-first ordering deterministic.
 // Equal timestamps may be returned in a different order across PHP/WP builds.
-$slateframe_dates = array( 'Mon, 26 Oct 2026', 'Sun, 25 Oct 2026', 'Sat, 24 Oct 2026' );
-$slateframe_items = '';
-for ( $i = 0; $i < 3; $i++ ) {
-	$slateframe_items .= '<item><title><![CDATA[日本語 中文 العربية LongUnbrokenFeedTitleLongUnbrokenFeedTitleLongUnbrokenFeedTitle ' . $i . ']]></title>'
-		. '<link>https://example.org/entry/' . $i . '</link>'
-		. '<dc:creator><![CDATA[日本語 中文 العربية Editor]]></dc:creator>'
-		. '<pubDate>' . $slateframe_dates[ $i ] . ' 00:00:00 +0000</pubDate>'
-		. '<description><![CDATA[日本語 中文 العربية LongUnbrokenFeedExcerptLongUnbrokenFeedExcerptLongUnbrokenFeedExcerpt]]></description></item>';
+$slateframe_xml = file_get_contents( __DIR__ . '/core-rss-feed.xml' );
+if ( false === $slateframe_xml ) {
+	fwrite( STDERR, 'Synthetic RSS fixture XML missing.' . PHP_EOL );
+	exit( 1 );
 }
-$slateframe_xml = '<?xml version="1.0" encoding="UTF-8"?>'
-	. '<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/"><channel>'
-	. '<title>Slateframe test feed</title><link>https://example.org/</link>'
-	. '<description>Local deterministic RSS fixture</description>'
-	. $slateframe_items . '</channel></rss>';
 add_filter(
 	'pre_http_request',
 	static function ( $pre, $args, $url ) use ( $slateframe_feed_url, $slateframe_xml ) {
