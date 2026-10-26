@@ -15,8 +15,11 @@ test('native Comments Title preserves approved counts and semantic multilingual 
   const content = '<!-- wp:comments {"className":"slateframe-comments-title-fixture"} -->' +
     '<div class="wp-block-comments slateframe-comments-title-fixture">' +
     '<!-- wp:comments-title {"showPostTitle":true,"showCommentsCount":true,"level":2} /-->' +
-    '<!-- wp:comments-title {"showPostTitle":false,"showCommentsCount":true,"level":3} /-->' +
     '</div><!-- /wp:comments -->';
+  const alternateContent = content.replace(
+    '<!-- wp:comments-title {"showPostTitle":true,"showCommentsCount":true,"level":2} /-->',
+    '<!-- wp:comments-title {"showPostTitle":false,"showCommentsCount":true,"level":3} /-->'
+  );
   let postId, approvedId, pendingId, secondApprovedId;
   try {
     postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
@@ -31,11 +34,11 @@ test('native Comments Title preserves approved counts and semantic multilingual 
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-comments-title-fixture');
     const titles = root.locator('.wp-block-comments-title');
-    await expect(titles).toHaveCount(2);
-    await expect(titles.nth(0)).toHaveJSProperty('tagName', 'H2');
-    await expect(titles.nth(1)).toHaveJSProperty('tagName', 'H3');
+    await expect(titles).toHaveCount(1);
+    await expect(titles.first()).toHaveJSProperty('tagName', 'H2');
     await expect(titles.first()).toContainText(slug);
-    expect((await titles.nth(1).innerText()).includes(slug)).toBe(false);
+    await expect(page.locator('#comments')).toHaveCount(1);
+    await expect(page.locator('.slateframe-comments')).toHaveCount(0);
     const before = await titles.first().innerText();
     await expect.poll(() => page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-comments-title-inline-css') ||
@@ -46,8 +49,15 @@ test('native Comments Title preserves approved counts and semantic multilingual 
       '--comment_content=Second approved comment', '--comment_approved=1', '--porcelain');
     expect(Number(wp('comment', 'list', '--post_id=' + postId, '--status=approve', '--format=count'))).toBe(2);
     await page.reload({ waitUntil: 'networkidle' });
-    await expect(titles).toHaveCount(2);
+    await expect(titles).toHaveCount(1);
     expect(await titles.first().innerText()).not.toBe(before);
+    wp('post', 'update', postId, '--post_content=' + alternateContent);
+    await page.reload({ waitUntil: 'networkidle' });
+    await expect(titles).toHaveCount(1);
+    await expect(titles.first()).toHaveJSProperty('tagName', 'H3');
+    expect((await titles.first().innerText()).includes(slug)).toBe(false);
+    await expect(page.locator('#comments')).toHaveCount(1);
+    await expect(page.locator('.slateframe-comments')).toHaveCount(0);
     await titles.first().evaluate(node => {
       node.textContent = '日本語 中文 العربية ' + 'VeryLongUnbrokenCommentsHeading'.repeat(8);
     });

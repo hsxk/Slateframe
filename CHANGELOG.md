@@ -6,6 +6,8 @@ All notable changes to Slateframe will be documented here.
 
 ### Testing
 
+- Prevent duplicate classic/native comments UI on single posts containing Core Comments, legacy Post Comments or native Comments Form blocks; preserve classic fallback otherwise. Correct the Comments Title browser fixture to render one Core-owned `#comments` heading at a time and exercise both heading variants without duplicate IDs.
+
 - Preserve native Core Comments Title approved-count, post-title and heading-level variants with conditional Gutenberg-shared styling; cover real approved/pending WordPress comments, seven widths, RTL/CJK/400% reflow, Axe, forced colors, editor roundtrip, exact-SHA screenshots, 404 asset isolation and ZIP reproducibility.
 
 - Add native Core Post Comments Link parity: conditional 44px target, Core comment-count/permalink preservation, real WordPress approved-comment fixture, seven-width RTL/CJK/400% reflow, Axe/keyboard/forced-colors screenshots, Gutenberg roundtrip and 404 asset isolation.
