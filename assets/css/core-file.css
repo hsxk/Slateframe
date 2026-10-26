@@ -1,0 +1,3 @@
+.wp-block-file{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-file>a{display:inline-flex;align-items:center;box-sizing:border-box;min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-file .wp-block-file__button{min-inline-size:min(100%,var(--slateframe-control));justify-content:center}
