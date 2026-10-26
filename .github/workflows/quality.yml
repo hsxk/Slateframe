@@ -87,7 +87,7 @@ jobs:
             echo 'Production patterns must not introduce remote media or third-party requests.' >&2
             exit 1
           fi
-          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-comments-pagination.css assets/css/core-navigation.css assets/css/core-post-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-rss.css assets/css/core-latest-posts.css assets/css/core-latest-comments.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/core-page-list.css assets/css/core-post-terms.css assets/css/core-post-comments-link.css assets/css/core-comments-title.css assets/css/core-post-comments-count.css assets/css/core-query-no-results.css assets/css/core-post-comments-form.css assets/css/core-file.css assets/css/core-loginout.css assets/css/core-post-date.css assets/css/core-post-author-name.css assets/css/core-post-author-biography.css assets/css/core-avatar.css assets/css/core-image.css assets/css/core-table.css assets/css/core-heading.css assets/css/core-paragraph.css assets/css/core-site-logo.css assets/css/core-site-title.css assets/css/core-site-tagline.css assets/css/core-columns.css assets/css/core-group.css assets/css/core-details.css assets/css/core-separator.css assets/css/core-quote.css assets/css/core-pullquote.css assets/css/core-post-excerpt.css assets/css/core-read-more.css assets/css/core-post-title.css assets/css/core-post-featured-image.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
+          for file in style.css readme.txt LICENSE .distignore assets/css/core-buttons.css assets/css/core-comments-pagination.css assets/css/core-navigation.css assets/css/core-post-navigation.css assets/css/core-video.css assets/css/core-audio.css assets/css/core-embed.css assets/css/core-rss.css assets/css/core-latest-posts.css assets/css/core-latest-comments.css assets/css/core-categories.css assets/css/core-archives.css assets/css/core-tag-cloud.css assets/css/core-page-list.css assets/css/core-post-terms.css assets/css/core-post-comments-link.css assets/css/core-comments-title.css assets/css/core-post-comments-count.css assets/css/core-query-no-results.css assets/css/core-post-comments-form.css assets/css/core-file.css assets/css/core-loginout.css assets/css/core-post-date.css assets/css/core-post-author-name.css assets/css/core-post-author-biography.css assets/css/core-avatar.css assets/css/core-image.css assets/css/core-table.css assets/css/core-heading.css assets/css/core-paragraph.css assets/css/core-list.css inc/core-list.php tests/browser/core-list-parity.spec.js assets/css/core-site-logo.css assets/css/core-site-title.css assets/css/core-site-tagline.css assets/css/core-columns.css assets/css/core-group.css assets/css/core-details.css assets/css/core-separator.css assets/css/core-quote.css assets/css/core-pullquote.css assets/css/core-post-excerpt.css assets/css/core-read-more.css assets/css/core-post-title.css assets/css/core-post-featured-image.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/photography.css assets/css/content-modes.css assets/css/empty-state.css index.php functions.php theme.json rtl.css template-parts/content-card.php template-parts/content-none.php inc/template-tags.php inc/customizer.php package.json playwright.config.js .github/workflows/photography.yml tests/browser/theme.spec.js tests/browser/appearance.spec.js tests/browser/photography-raster-lightbox.spec.js tests/browser/color-mode.spec.js tests/browser/editor.spec.js tests/fixtures/showcase.html bin/build-theme-zip.sh bin/check-release-metadata.php bin/check-pattern-runtime.php phpcs.xml.dist; do test -f "$file"; done
       - name: Enforce asset budgets
         run: |
           wc -c style.css assets/css/core-buttons.css assets/css/navigation.css assets/css/footer.css assets/css/forms.css assets/css/form-content.css assets/css/search-form.css assets/css/comments.css assets/css/reading.css assets/css/publishing.css assets/css/photography.css assets/css/content-modes.css assets/css/query-loop.css assets/css/empty-state.css assets/css/editor.css assets/js/theme.js
@@ -128,6 +128,7 @@ jobs:
           test $(wc -c < assets/css/core-table.css) -le 600
           test $(wc -c < assets/css/core-heading.css) -le 900
           test $(wc -c < assets/css/core-paragraph.css) -le 300
+          test $(wc -c < assets/css/core-list.css) -le 350
           test $(wc -c < assets/css/core-site-logo.css) -le 400
           test $(wc -c < assets/css/core-site-title.css) -le 400
           test $(wc -c < assets/css/core-site-tagline.css) -le 240
@@ -387,7 +388,7 @@ jobs:
           test "$(wp option get stylesheet --path=/tmp/wp-site)" = slateframe
           wp eval-file "$GITHUB_WORKSPACE/bin/check-pattern-runtime.php" --path=/tmp/wp-site
           wp eval '$styles=WP_Block_Styles_Registry::get_instance(); foreach ([["core/gallery","slateframe-contact-sheet"],["core/gallery","slateframe-diptych"],["core/image","slateframe-photo-feature"],["core/paragraph","slateframe-lead"],["core/list","slateframe-steps"],["core/list","slateframe-checklist"],["core/group","slateframe-key-facts"],["core/group","slateframe-project-brief"],["core/group","slateframe-learning-callout"],["core/group","slateframe-definition"],["core/columns","slateframe-ledger"],["core/columns","slateframe-metrics"]] as $style) { if (!$styles->is_registered($style[0],$style[1])) { throw new RuntimeException($style[0]."/".$style[1]); } }' --path=/tmp/wp-site
-          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/core-buttons.css","assets/css/forms.css","assets/css/form-content.css","assets/css/reading.css","assets/css/photography.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
+          wp eval 'if (!current_theme_supports("editor-styles")) { throw new RuntimeException("Editor styles support missing."); } global $editor_styles; foreach (["style.css","assets/css/core-buttons.css","assets/css/core-list.css","assets/css/forms.css","assets/css/form-content.css","assets/css/reading.css","assets/css/photography.css","assets/css/content-modes.css","assets/css/query-loop.css","assets/css/editor.css"] as $asset) { if (!in_array($asset, (array) $editor_styles, true)) { throw new RuntimeException("Editor stylesheet missing: " . $asset); } }' --path=/tmp/wp-site
       - name: Validate bounded Appearance settings
         shell: bash
         run: |
@@ -1096,6 +1097,13 @@ jobs:
           test -s test-artifacts/screenshots/core-paragraph-390-rtl-200-forced-colors.png || { echo "Missing Core Paragraph forced-colors evidence" >&2; exit 1; }
           for width in 320 375 390 412 768 1440 1920; do
             for direction in ltr rtl; do
+              screenshot="test-artifacts/screenshots/core-list-${width}-${direction}.png"
+              test -s "$screenshot" || { echo "Missing Core List evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          test -s test-artifacts/screenshots/core-list-390-rtl-200-forced-colors.png || { echo "Missing Core List forced-colors evidence" >&2; exit 1; }
+          for width in 320 375 390 412 768 1440 1920; do
+            for direction in ltr rtl; do
               screenshot="test-artifacts/screenshots/core-pullquote-${width}-${direction}.png"
               test -s "$screenshot" || { echo "Missing Core Pullquote evidence: $screenshot" >&2; exit 1; }
             done
@@ -1187,6 +1195,8 @@ jobs:
           grep -qx 'slateframe/assets/css/core-table.css' /tmp/package.txt
           grep -qx 'slateframe/assets/css/core-heading.css' /tmp/package.txt
           grep -qx 'slateframe/assets/css/core-paragraph.css' /tmp/package.txt
+          grep -qx 'slateframe/assets/css/core-list.css' /tmp/package.txt
+          grep -qx 'slateframe/inc/core-list.php' /tmp/package.txt
           grep -qx 'slateframe/assets/css/core-post-comments-form.css' /tmp/package.txt
            grep -qx 'slateframe/assets/css/core-file.css' /tmp/package.txt
           grep -qx 'slateframe/screenshot.png' /tmp/package.txt
