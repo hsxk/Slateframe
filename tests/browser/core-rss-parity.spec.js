@@ -18,7 +18,7 @@ const item = (i) => '<li class="wp-block-rss__item">' +
 test('Core RSS list/grid titles remain operable across direction, zoom and forced colors', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress page covers all seven widths');
   test.setTimeout(120000);
-  const content = '<div class="wp-block-group slateframe-rss-fixture">' +
+  const content = '<!-- wp:rss /-->' + '<div class="wp-block-group slateframe-rss-fixture">' +
     '<ul class="wp-block-rss">' + [0, 1, 2].map(item).join('') + '</ul>' +
     '<ul class="wp-block-rss is-grid columns-3">' + [3, 4, 5].map(item).join('') + '</ul></div>';
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
