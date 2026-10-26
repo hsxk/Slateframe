@@ -30,6 +30,9 @@ class CorePostCommentsFormParity(unittest.TestCase):
         self.assertLessEqual(len(css.encode("utf-8")), 850)
         self.assertIn("test $(wc -c < assets/css/core-post-comments-form.css) -le 850", ci)
         self.assertIn("grep -qx 'slateframe/assets/css/core-post-comments-form.css' /tmp/package.txt", ci)
+        self.assertIn("for feature in comments-title post-comments-form; do", ci)
+        self.assertIn("Missing native discussion evidence:", ci)
+        self.assertIn("Missing discussion forced-colors evidence:", ci)
         for forbidden in ("!important", "display:none", "time2log_", "wpcode_",
                           "direction:ltr", "javascript"):
             self.assertNotIn(forbidden, css)
