@@ -31,8 +31,8 @@ class CorePostExcerptParity(unittest.TestCase):
         for token in ("wp('post', 'create'", "wp('post', 'delete'", 'finally',
                       'get_permalink(', '--post_excerpt=', 'moreText', 'showMoreOnNewLine',
                       'excerptLength', 'core/post-excerpt', '320, 375, 390, 412, 768, 1440, 1920',
-                      "'ltr', 'rtl'", "fontSize = '64px'", "forcedColors: 'active'",
-                      'new AxeBuilder', 'openAuthenticatedEditor', 'blocks.serialize',
+                      "'ltr', 'rtl'", "await setRootTextScale(page, 64, 'rtl');", "forcedColors: 'active'",
+                      'new AxeBuilder', "require('./support/root-text-scale')", 'openAuthenticatedEditor', 'blocks.serialize',
                       'blocks.parse', "page.keyboard.press('Tab')",
                       'core-post-excerpt-390-rtl-200-forced-colors.png',
                       "page.goto('/?p=999999999'"):
