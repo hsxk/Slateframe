@@ -96,7 +96,10 @@ class PortfolioColumnsContract(unittest.TestCase):
 
     def test_plugin_shortcode_reflow_keeps_normal_size_and_core_grid(self):
         plugin = (ROOT / 'tests/browser/plugin-coexistence.spec.js').read_text(encoding='utf-8')
-        self.assertIn('baselineTracks', plugin)
+        self.assertIn('computed normal-size root', plugin)
+        self.assertIn("inline: '16px', priority: 'important', computed: 16", plugin)
+        self.assertIn('baseline.rootPx', plugin)
+        self.assertIn('baseline.containerWidth', plugin)
         self.assertIn('normal-size columns', plugin)
         self.assertIn('layout.containerWidth <= 35 * layout.rootFontSize', plugin)
         self.assertIn('200% container reflow', plugin)
