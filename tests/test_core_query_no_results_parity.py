@@ -39,15 +39,19 @@ class CoreQueryNoResultsParity(unittest.TestCase):
             "wp:query", "wp:post-template", "wp:query-no-results",
             "slateframe-empty-query", "slateframe-populated-query",
             "320, 375, 390, 412, 768, 1440, 1920", "'ltr', 'rtl'",
-            "fontSize = '64px'", "forcedColors: 'active'", "new AxeBuilder",
+            "setRootTextScale(page, font, dir)", "setRootTextScale(page, 64, 'rtl')",
+            "forcedColors: 'active'", "new AxeBuilder",
             "page.keyboard.press('Tab')", "openAuthenticatedEditor",
             "blocks.serialize", "blocks.parse",
             "core-query-no-results-390-rtl-200-forced-colors.png",
+            "core-query-no-results-390-rtl-400-forced-colors.png",
+            "core-query-no-results-390-' + dir + '-400.png",
             "page.goto('/?p=999999999'",
         ):
             with self.subTest(token=token):
                 self.assertIn(token, js)
-        for forbidden in ("test.only", "test.fixme", "route.fulfill", "set_theme_mod("):
+        for forbidden in ("test.only", "test.fixme", "route.fulfill", "set_theme_mod(",
+                          "node.style.fontSize", "node.style.fontSize ="):
             self.assertNotIn(forbidden, js)
 
 
