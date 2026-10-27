@@ -64,8 +64,15 @@ class CoreProseZoomContract(unittest.TestCase):
             path.write_bytes(b"not a png")
             with self.assertRaisesRegex(ValueError, "PNG signature"):
                 check_capture(path)
-            with self.assertRaises(OSError):
+            # Exercise the missing-capture path only after every preceding capture is valid.
+            path.write_bytes(png_header())
+            for name in CAPTURES[1:-1]:
+                (root / name).write_bytes(png_header())
+            with self.assertRaises(FileNotFoundError) as missing:
                 verify(root)
+            self.assertEqual(Path(missing.exception.filename), root / CAPTURES[-1])
+            (root / CAPTURES[-1]).write_bytes(png_header())
+            verify(root)
 
 
 if __name__ == "__main__":
