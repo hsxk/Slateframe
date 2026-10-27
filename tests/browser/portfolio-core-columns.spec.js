@@ -1,4 +1,5 @@
 const { test, expect } = require('@playwright/test');
+const AxeBuilder = require('@axe-core/playwright').default;
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH;
 const width = (info) => info.project.use.viewport?.width || 0;
 const columns = (chosen, w) => w <= 640 ? 1 : w <= 900 ? Math.min(2, chosen) : chosen;
@@ -145,7 +146,7 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
     const target = await link.boundingBox();
     expect(target.width).toBeGreaterThanOrEqual(43);
     expect(target.height).toBeGreaterThanOrEqual(43);
-    if ([390, 768, 1440, 1920].includes(viewport)) {
+    if ([320, 375, 390, 412, 768, 1440, 1920].includes(viewport)) {
       await link.evaluate(node => node.blur());
       await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
       const fs = require('node:fs/promises');
@@ -154,6 +155,24 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
         path: 'test-artifacts/screenshots/portfolio-reflow-' + viewport + '-' + dir + '-400.png',
         animations: 'disabled',
       });
+    }
+    if (viewport === 390 && dir === 'rtl') {
+      const axe = await new AxeBuilder({ page }).include('.slateframe-project-grid')
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+      expect(axe.violations).toEqual([]);
+      await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+      await link.focus();
+      const outline = await link.evaluate(node => ({
+        style: getComputedStyle(node).outlineStyle,
+        width: parseFloat(getComputedStyle(node).outlineWidth),
+      }));
+      expect(outline.style).not.toBe('none');
+      expect(outline.width).toBeGreaterThanOrEqual(2);
+      await page.screenshot({
+        path: 'test-artifacts/screenshots/portfolio-reflow-390-rtl-400-forced-colors.png',
+        animations: 'disabled',
+      });
+      await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
     }
   }
 });

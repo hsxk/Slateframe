@@ -62,7 +62,11 @@ class PortfolioColumnsContract(unittest.TestCase):
         workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
         self.assertIn('portfolio-reflow-${viewport}-${direction}-400.png', workflow)
         self.assertIn('portfolio-reflow-680-${direction}-default.png', workflow)
-        self.assertIn('for viewport in 390 768 1440 1920; do', workflow)
+        self.assertIn('for viewport in 320 375 390 412 768 1440 1920; do', workflow)
+        self.assertIn('portfolio-reflow-390-rtl-400-forced-colors.png', workflow)
+        self.assertIn(".include('.slateframe-project-grid')", browser)
+        self.assertIn(".withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])", browser)
+        self.assertIn("forcedColors: 'active'", browser)
         self.assertIn('assets/css/portfolio-reflow.css', workflow)
         self.assertIn('test $(wc -c < assets/css/portfolio-reflow.css) -le 260', workflow)
 

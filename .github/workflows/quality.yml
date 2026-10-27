@@ -1128,12 +1128,13 @@ jobs:
             screenshot="test-artifacts/screenshots/portfolio-reflow-680-${direction}-default.png"
             test -s "$screenshot" || { echo "Missing Portfolio 680px tablet evidence: $screenshot" >&2; exit 1; }
           done
-          for viewport in 390 768 1440 1920; do
+          for viewport in 320 375 390 412 768 1440 1920; do
             for direction in ltr rtl; do
               screenshot="test-artifacts/screenshots/portfolio-reflow-${viewport}-${direction}-400.png"
               test -s "$screenshot" || { echo "Missing Portfolio 400% evidence: $screenshot" >&2; exit 1; }
             done
           done
+          test -s test-artifacts/screenshots/portfolio-reflow-390-rtl-400-forced-colors.png || { echo 'Missing Portfolio 400% RTL forced-colors evidence' >&2; exit 1; }
           for profile in default compact spacious; do
             for viewport in 320 375 390 412 768 1440 1920; do
               for variant in ltr rtl-200-forced-colors; do
