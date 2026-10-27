@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs/promises');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8' }).trim();
 
@@ -51,10 +52,7 @@ test('plain Core HTML table stays semantic and keyboard scrollable in RTL and LT
       }
     }
     await page.setViewportSize({ width: 320, height: 900 });
-    await page.evaluate(() => {
-      document.documentElement.dir = 'rtl';
-      document.documentElement.style.fontSize = '200%';
-    });
+    await setRootTextScale(page, 32, 'rtl');
     await page.emulateMedia({ forcedColors: 'active' });
     await before.focus();
     await page.keyboard.press('Tab');
@@ -71,6 +69,21 @@ test('plain Core HTML table stays semantic and keyboard scrollable in RTL and LT
     expect(focus.pageOverflow).toBeLessThanOrEqual(1);
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await table.screenshot({ path: 'test-artifacts/screenshots/plain-table-320-rtl-200-forced-colors.png' });
+    await setRootTextScale(page, 64, 'rtl');
+    await before.focus();
+    await page.keyboard.press('Tab');
+    await expect(table).toBeFocused();
+    expect(await table.evaluate(node => node.matches(':focus-visible'))).toBe(true);
+    expect(await table.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth)))
+      .toBeGreaterThanOrEqual(2);
+    expect(await table.evaluate(node => node.scrollWidth - node.clientWidth)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth -
+      document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await table.evaluate(node => { node.scrollLeft = 0; });
+    await page.keyboard.press('ArrowLeft');
+    await expect.poll(async () => Math.abs(await table.evaluate(node => node.scrollLeft)),
+      { timeout: 3000 }).toBeGreaterThan(0);
+    await table.screenshot({ path: 'test-artifacts/screenshots/plain-table-320-rtl-400-forced-colors.png' });
   } finally {
     wp('post', 'delete', id, '--force');
   }

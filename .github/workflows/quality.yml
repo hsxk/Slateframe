@@ -1085,6 +1085,13 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/core-table-390-rtl-200-forced-colors.png || { echo "Missing Core Table forced-colors evidence" >&2; exit 1; }
+          for direction in ltr rtl; do
+            test -s "test-artifacts/screenshots/core-table-390-${direction}-400.png" || { echo "Missing real 400% Core Table evidence: ${direction}" >&2; exit 1; }
+            test -s "test-artifacts/screenshots/core-data-table-390-${direction}-400.png" || { echo "Missing real 400% data table evidence: ${direction}" >&2; exit 1; }
+          done
+          for screenshot in core-table-390-rtl-400-forced-colors.png core-data-table-rtl.png core-data-table-390-rtl-200-forced-colors.png core-data-table-390-rtl-400-forced-colors.png plain-table-320-rtl-200-forced-colors.png plain-table-320-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing table zoom/keyboard evidence: $screenshot" >&2; exit 1; }
+          done
           for width in 320 375 390 412 768 1440 1920; do
             for direction in ltr rtl; do
               screenshot="test-artifacts/screenshots/core-heading-${width}-${direction}.png"
