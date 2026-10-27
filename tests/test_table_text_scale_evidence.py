@@ -25,8 +25,8 @@ class TableTextScaleEvidence(unittest.TestCase):
             with self.subTest(path=path):
                 js = (ROOT / path).read_text(encoding="utf-8")
                 self.assertIn("require('./support/root-text-scale')", js)
-                self.assertIn("setRootTextScale(page, 32", js if "core-table-parity" in path or "data-table" in path else js)
-                self.assertIn("setRootTextScale(page, 64", js if "core-table-parity" in path or "data-table" in path else js)
+                self.assertIn("setRootTextScale(page, 32", js)
+                self.assertIn("setRootTextScale(page, 64", js)
                 self.assertNotIn("style.fontSize = '200%'", js)
                 self.assertNotIn("style.fontSize = '400%'", js)
         core = (ROOT / paths[0]).read_text(encoding="utf-8")
@@ -36,6 +36,18 @@ class TableTextScaleEvidence(unittest.TestCase):
         self.assertIn("core-data-table-390-rtl-400-forced-colors.png", data)
         plain = (ROOT / paths[2]).read_text(encoding="utf-8")
         self.assertIn("plain-table-320-rtl-400-forced-colors.png", plain)
+
+    def test_exact_visual_inventory_is_a_required_ci_gate(self):
+        ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+        for token in ("core-table-390-${direction}-400.png",
+                      "core-data-table-390-${direction}-400.png",
+                      "core-table-390-rtl-400-forced-colors.png",
+                      "core-data-table-390-rtl-400-forced-colors.png",
+                      "plain-table-320-rtl-400-forced-colors.png"):
+            self.assertIn(token, ci)
+        self.assertIn("test -s", ci)
+        self.assertIn("setRootTextScale(page, pixels, dir)",
+                      (ROOT / "tests/browser/data-table-numeric-parity.spec.js").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":
