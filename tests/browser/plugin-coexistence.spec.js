@@ -98,6 +98,21 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
           getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length);
         expect(baselineTracks,`${width} ${direction} normal-size columns`).toBe(width<=640?1:width<=900?2:3);
         await page.locator('html').evaluate(n=>{n.style.setProperty('font-size','32px','important');});
+        // The real WordPress browser fixture has previously exposed a stale
+        // computed 16px immediately after the 32px override. Wait for actual
+        // style resolution; an inline declaration alone is not acceptance.
+        await page.evaluate(() => new Promise(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        await expect.poll(() => page.evaluate(() => {
+          const root = document.documentElement;
+          return {
+            inline: root.style.getPropertyValue('font-size'),
+            priority: root.style.getPropertyPriority('font-size'),
+            computed: parseFloat(getComputedStyle(root).fontSize),
+          };
+        }), { timeout: 10000 }).toEqual({
+          inline: '32px', priority: 'important', computed: 32,
+        });
         const layout = await list.evaluate(n=>{
           const css=getComputedStyle(n), a=n.querySelector('.wp-block-post-title a');
           const rect=a.getBoundingClientRect();
