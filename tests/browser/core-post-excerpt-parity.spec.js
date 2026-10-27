@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8', timeout: 30000 }).trim();
 
 test('Core Post Excerpt preserves Read More permalink and seven-width reflow', async ({ page }, info) => {
@@ -44,9 +45,7 @@ test('Core Post Excerpt preserves Read More permalink and seven-width reflow', a
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, value) => {
-            node.dir = value.dir; node.style.fontSize = value.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const state = await root.evaluate(node => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             links: [...node.querySelectorAll('.wp-block-post-excerpt__more-link')].map(el => {
@@ -68,11 +67,18 @@ test('Core Post Excerpt preserves Read More permalink and seven-width reflow', a
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-post-excerpt-' + width + '-' + dir + '.png'
           });
+          if (width === 390 && font === 64) {
+            await links.first().scrollIntoViewIfNeeded();
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/core-post-excerpt-390-' + dir + '-400.png',
+              fullPage: false,
+            });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.keyboard.press('Tab');
     await links.first().focus();
     await expect(links.first()).toBeFocused();
@@ -84,7 +90,7 @@ test('Core Post Excerpt preserves Read More permalink and seven-width reflow', a
     await links.first().focus();
     expect(await links.first().evaluate(el => parseFloat(getComputedStyle(el).outlineWidth))).toBeGreaterThanOrEqual(2);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-post-excerpt-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
     await page.emulateMedia({ forcedColors: 'none' });
