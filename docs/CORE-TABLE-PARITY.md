@@ -48,7 +48,7 @@ containment styles. This is a component-level regression test, **not**
 a claim that WordPress's entire existing editing interface passes 400%
 reflow. Published front-end Table and Article suites retain their
 strict document overflow limit of 1px; no budget or acceptance threshold
-is lowered. Both editor screenshots remain mandatory. The plugin
+is lowered. Both editor figure screenshots and two additional **full editor context** viewport screenshots (390/1440px) are mandatory and captured before assertions, so a failing test still leaves inspectable evidence of the real WordPress chrome. The plugin
 suite now uses the shared computed-scale helper before its 400% focus
 assertions.
 
