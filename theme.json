@@ -85,7 +85,7 @@
 		},
 		"typography": {
 			"fluid": true,
-			"dropCap": false,
+			"dropCap": true,
 			"lineHeight": true,
 			"letterSpacing": true,
 			"fontFamilies": [
