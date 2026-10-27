@@ -41,6 +41,9 @@ class CoreTableParity(unittest.TestCase):
                       "blocks.parse", "core-table-390-rtl-200-forced-colors.png",
                       "page.goto('/?p=999999999'"):
             self.assertIn(token, js)
+        for token in ("setRootTextScale(page, font, dir)", "setRootTextScale(page, 32, 'rtl')",
+                      "setRootTextScale(page, 64, 'rtl')", "core-table-390-rtl-400-forced-colors.png"):
+            self.assertIn(token, js)
         for bad in ("test.only", "test.fixme", "route.fulfill", "set_theme_mod(",
                     "wp('option', 'update'"):
             self.assertNotIn(bad, js)
