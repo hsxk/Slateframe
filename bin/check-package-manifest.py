@@ -52,12 +52,22 @@ def validate(root, theme_dir):
         while parent != Path("."):
             packaged_directories.add(parent.as_posix())
             parent = parent.parent
-    blocked_extensions = (".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp")
-    blocked_names = {"id_rsa", "id_ed25519", "credentials", "credentials.json"}
+    blocked_extensions = (
+        ".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp",
+        ".sqlite3", ".db",
+        ".db-wal", ".db-shm", ".db-journal",
+        ".sqlite-wal", ".sqlite-shm", ".sqlite-journal",
+        ".sqlite3-wal", ".sqlite3-shm", ".sqlite3-journal",
+    )
+    blocked_names = {
+        "id_rsa", "id_ed25519", "id_ecdsa", "id_dsa",
+        "credentials", "credentials.json", "wp-config.php", "auth.json",
+    }
 
-    reserved_stems = {"con", "prn", "aux", "nul"}
+    reserved_stems = {"con", "prn", "aux", "nul", "conin$", "conout$", "clock$"}
     reserved_stems.update(f"com{index}" for index in range(1, 10))
     reserved_stems.update(f"lpt{index}" for index in range(1, 10))
+    windows_metacharacters = set('<>:"/|?*') | {chr(92)}
     portable_names = {}
 
     for item in staged_items:
@@ -66,15 +76,21 @@ def validate(root, theme_dir):
         # Windows/macOS filesystems may normalize case and Unicode spelling.
         # Reject ambiguous archive entries before writing the ZIP.
         for component in relative.parts:
+            # Compatibility folding catches fullwidth separators, dot aliases,
+            # DOS device names and trailing Unicode spaces before ZIP creation.
+            # Keep the established hidden-path diagnostic for literal dotfiles.
+            portable_component = unicodedata.normalize("NFKC", component)
             if (
-                "\\" in component
-                or ":" in component
-                or component.rstrip(" .") != component
+                portable_component in (".", "..")
+                or (portable_component.startswith(".") and not component.startswith("."))
+                or any(character in windows_metacharacters for character in portable_component)
+                or portable_component.rstrip(" .") != portable_component
                 or any(unicodedata.category(character) in ("Cc", "Cf", "Cs") for character in component)
-                or component.split(".", 1)[0].casefold() in reserved_stems
+                # Win32 also treats `CON .txt` as a reserved device alias.
+                or portable_component.split(".", 1)[0].rstrip(" ").casefold() in reserved_stems
             ):
                 raise ValueError(f"Refusing nonportable package path: {name!r}")
-        portable_name = unicodedata.normalize("NFC", name).casefold()
+        portable_name = unicodedata.normalize("NFKC", name).casefold()
         if portable_name in portable_names and portable_names[portable_name] != name:
             raise ValueError(f"Refusing colliding package paths: {portable_names[portable_name]!r} and {name!r}")
         portable_names[portable_name] = name
@@ -91,7 +107,30 @@ def validate(root, theme_dir):
                 raise ValueError(f"Refusing uncommitted file in theme package: {name}")
             if name in modified:
                 raise ValueError(f"Refusing modified file not committed to HEAD: {name}")
-            if item.name.lower() in blocked_names or item.name.lower().endswith(blocked_extensions):
+            # A fullwidth dot or compatibility letter can disguise a private
+            # extension/name in an otherwise portable ZIP member.
+            portable_basename = unicodedata.normalize("NFKC", item.name).casefold()
+            # Environment files and compressed database dumps are not theme assets.
+            # Check the normalized name so compatibility dots cannot bypass it.
+            environment_file = ".env." in portable_basename or portable_basename.endswith(".env")
+            compression_extensions = (".gz", ".zip", ".zst", ".xz", ".bz2")
+            compressed_private_extension = any(
+                portable_basename.endswith(extension + compression)
+                for extension in blocked_extensions
+                for compression in compression_extensions
+            )
+            compressed_private_name = any(
+                portable_basename == blocked + compression
+                for blocked in blocked_names
+                for compression in compression_extensions
+            )
+            if (
+                portable_basename in blocked_names
+                or portable_basename.endswith(blocked_extensions)
+                or environment_file
+                or compressed_private_extension
+                or compressed_private_name
+            ):
                 raise ValueError(f"Refusing private or backup file in theme package: {name}")
             if staged_blob_id(root, item) != committed[name]:
                 raise ValueError(f"Refusing staged content differing from HEAD: {name}")

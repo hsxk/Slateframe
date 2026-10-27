@@ -177,6 +177,103 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         self.assertIn("nonportable package path", result.stderr)
         self.assertNotEqual(0, result.returncode)
 
+    def assert_rejected_portable_path(self, name):
+        """Exercise the real ZIP builder with a committed unsafe filename."""
+        (self.root / name).write_text("unsafe\n", encoding="utf-8")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("nonportable package path", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_windows_less_than_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe<file.css")
+
+    def test_windows_greater_than_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe>file.css")
+
+    def test_windows_double_quote_filename_is_rejected(self):
+        self.assert_rejected_portable_path('unsafe"file.css')
+
+    def test_windows_pipe_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe|file.css")
+
+    def test_windows_question_mark_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe?file.css")
+
+    def test_windows_asterisk_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe*file.css")
+
+    def test_windows_console_input_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("CONIN$.txt")
+
+    def test_windows_console_output_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("CONOUT$.txt")
+
+    def test_windows_clock_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("CLOCK$.txt")
+
+    def test_windows_spaced_console_device_alias_is_rejected(self):
+        self.assert_rejected_portable_path("CON .txt")
+
+    def test_windows_spaced_serial_device_alias_is_rejected(self):
+        self.assert_rejected_portable_path("COM¹ .data")
+
+    def test_windows_spaced_parallel_device_alias_is_rejected(self):
+        self.assert_rejected_portable_path("LPT9 .txt")
+
+    def test_nonreserved_space_before_extension_remains_valid(self):
+        (self.root / "icon .txt").write_text("public\n")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            self.assertIn("slateframe/icon .txt", archive.namelist())
+
+    def test_fullwidth_windows_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("ＣＯＮ.txt")
+
+    def test_superscript_windows_device_name_is_rejected(self):
+        self.assert_rejected_portable_path("COM¹.txt")
+
+    def test_compatibility_hidden_filename_is_rejected(self):
+        self.assert_rejected_portable_path("．env")
+
+    def test_compatibility_traversal_filename_is_rejected(self):
+        self.assert_rejected_portable_path("．．")
+
+    def test_fullwidth_separator_filename_is_rejected(self):
+        self.assert_rejected_portable_path("asset／name.css")
+
+    def test_fullwidth_backslash_filename_is_rejected(self):
+        self.assert_rejected_portable_path("asset＼name.css")
+
+    def test_unicode_trailing_space_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe　")
+
+    def test_nonbreaking_trailing_space_filename_is_rejected(self):
+        self.assert_rejected_portable_path("unsafe ")
+
+    def test_nfkc_colliding_filenames_are_rejected(self):
+        (self.root / "readme2.css").write_text("one\n")
+        (self.root / "ｒｅａｄｍｅ２.css").write_text("two\n")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("colliding package paths", result.stderr)
+
+    def test_ordinary_cjk_arabic_emoji_filenames_remain_valid(self):
+        (self.root / "assets").mkdir()
+        names = ("写真 資料.txt", "العربية.txt", "作品📷.txt")
+        for name in names:
+            (self.root / "assets" / name).write_text("public asset\n", encoding="utf-8")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            for name in names:
+                self.assertIn("slateframe/assets/" + name, archive.namelist())
+
     def test_committed_control_character_filename_is_rejected(self):
         (self.root / "bad\nname.css").write_text("unsafe\n")
         self.commit()
@@ -240,6 +337,124 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         (self.root / "backup.pem").write_text("private")
         self.commit()
         self.assertIn("private or backup", self.build().stderr)
+
+    def test_fullwidth_private_extension_is_rejected(self):
+        (self.root / "secret．pem").write_text("private\n")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("private or backup", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_fullwidth_credentials_name_is_rejected(self):
+        (self.root / "ｃｒｅｄｅｎｔｉａｌｓ．ｊｓｏｎ").write_text("private\n")
+        self.commit()
+        self.assertIn("private or backup", self.build().stderr)
+
+    def test_compatibility_ssh_key_name_is_rejected(self):
+        (self.root / "ｉｄ＿ｒｓａ").write_text("private\n")
+        self.commit()
+        self.assertIn("private or backup", self.build().stderr)
+
+    def test_nested_compatibility_backup_extension_is_rejected(self):
+        (self.root / "assets").mkdir()
+        (self.root / "assets" / "backup．bak").write_text("private\n")
+        self.commit()
+        self.assertIn("private or backup", self.build().stderr)
+
+    def test_safe_fullwidth_document_extension_is_preserved(self):
+        (self.root / "assets").mkdir()
+        (self.root / "assets" / "資料．txt").write_text("public\n")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            self.assertIn("slateframe/assets/資料．txt", archive.namelist())
+
+    def assert_rejected_private_path(self, name):
+        """Reject a committed secret-like asset before writing the ZIP."""
+        (self.root / name).write_text("private\n", encoding="utf-8")
+        self.commit()
+        result = self.build()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("private or backup", result.stderr)
+        self.assertFalse((self.root / "dist" / "slateframe.zip").exists())
+
+    def test_compressed_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("backup.sql.gz")
+
+    def test_zstd_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("backup.sql.zst")
+
+    def test_sqlite3_database_is_rejected(self):
+        self.assert_rejected_private_path("database.sqlite3")
+
+    def test_database_file_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.db")
+
+    def test_sqlite_wal_is_rejected(self):
+        self.assert_rejected_private_path("database.sqlite-wal")
+
+    def test_environment_local_is_rejected(self):
+        self.assert_rejected_private_path("secrets.env.local")
+
+    def test_wp_config_is_rejected(self):
+        self.assert_rejected_private_path("wp-config.php")
+
+    def test_composer_auth_is_rejected(self):
+        self.assert_rejected_private_path("auth.json")
+
+    def test_legacy_ssh_private_key_is_rejected(self):
+        self.assert_rejected_private_path("id_ecdsa")
+
+    def test_fullwidth_compressed_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("backup．sql．gz")
+
+    def test_gzip_database_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.db.gz")
+
+    def test_xz_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("dump.sql.xz")
+
+    def test_bzip2_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("dump.sql.bz2")
+
+    def test_sqlite3_zip_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.sqlite3.zip")
+
+    def test_sqlite3_write_ahead_log_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.sqlite3-wal")
+
+    def test_database_rollback_journal_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.db-journal")
+
+    def test_compressed_pem_is_rejected(self):
+        self.assert_rejected_private_path("secret.pem.gz")
+
+    def test_compressed_credentials_is_rejected(self):
+        self.assert_rejected_private_path("credentials.json.gz")
+
+    def test_compressed_composer_auth_is_rejected(self):
+        self.assert_rejected_private_path("auth.json.zip")
+
+    def test_compressed_wp_config_is_rejected(self):
+        self.assert_rejected_private_path("wp-config.php.zst")
+
+    def test_compressed_backup_is_rejected(self):
+        self.assert_rejected_private_path("backup.bak.xz")
+
+    def test_compressed_ssh_private_key_is_rejected(self):
+        self.assert_rejected_private_path("id_rsa.gz")
+
+    def test_public_json_and_svg_remain_distributable(self):
+        (self.root / "public-data.json").write_text("{}\n")
+        (self.root / "database.svg").write_text("<svg/>\n")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            self.assertIn("slateframe/public-data.json", archive.namelist())
+            self.assertIn("slateframe/database.svg", archive.namelist())
 
     def test_tracked_backup_is_rejected(self):
         (self.root / "functions.php.bak").write_text("backup")
