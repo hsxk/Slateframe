@@ -49,13 +49,22 @@ class PortfolioColumnsContract(unittest.TestCase):
 
     def test_all_authored_columns_rtl_cjk_and_core_grid_survive_zoom(self):
         browser = (ROOT / 'tests/browser/portfolio-core-columns.spec.js').read_text(encoding='utf-8')
-        self.assertIn('w <= 35 * rootPx ? 1 : columns(chosen, w)', browser)
+        self.assertIn('containerWidth <= 35 * rootPx ? 1 : columns(chosen, viewport)', browser)
         self.assertIn('for (const chosen of [1, 2, 3, 4, 5, 6])', browser)
         self.assertIn('Core Grid must survive 400%', browser)
         self.assertIn('for (const viewport of [641, 650, 680, 720, 768, 900])', browser)
         self.assertIn('for (const chosen of [1, 2, 3, 4, 5, 6])', browser)
         self.assertIn("for (const dir of ['ltr', 'rtl'])", browser)
-        self.assertIn("node.style.fontSize = '64px'", browser)
+        self.assertIn("node.style.setProperty('font-size', '64px', 'important')", browser)
+        self.assertIn("node.style.setProperty('font-size', '32px', 'important')", browser)
+        self.assertIn("node.style.setProperty('font-size', '16px', 'important')", browser)
+        self.assertIn("real 200% computed font size", browser)
+        self.assertIn("real 400% font size", browser)
+        self.assertIn("pagination actual zoom", browser)
+        self.assertIn("parseFloat(getComputedStyle(node.closest('.slateframe-project-grid')).width)", browser)
+        self.assertIn("for (const size of [16, 32])", browser)
+        self.assertNotIn("node.style.fontSize = '200%'", browser)
+        self.assertNotIn("root.style.fontSize = state.size", browser)
         self.assertIn('expect(target.height).toBeGreaterThanOrEqual(43)', browser)
 
     def test_exact_sha_evidence_and_budget_gates(self):
