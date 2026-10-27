@@ -110,7 +110,9 @@ class PortfolioColumnsContract(unittest.TestCase):
         # Relative percentage zoom did not yield a 32px computed root in one
         # real WordPress/Chromium fixture. Test the actual 200%/400% geometry.
         self.assertIn("n.style.setProperty('font-size','32px','important')", plugin)
-        self.assertIn("n.style.setProperty('font-size','64px','important')", plugin)
+        self.assertIn("const { setRootTextScale } = require('./support/root-text-scale');", plugin)
+        self.assertIn("await setRootTextScale(page, 64, 'rtl')", plugin)
+        self.assertNotIn("n.style.setProperty('font-size','64px','important')", plugin)
         self.assertIn('actual 200% font size', plugin)
         self.assertIn('Core grid actual 200%', plugin)
         # Core Grid is a new shortcode page: it needs its own computed-scale
@@ -130,7 +132,14 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn("n.style.removeProperty('font-size')", plugin)
         self.assertNotIn("n.style.fontSize=", plugin)
         self.assertGreaterEqual(plugin.count("setProperty('font-size','32px','important')"), 5)
-        self.assertGreaterEqual(plugin.count("setProperty('font-size','64px','important')"), 2)
+        # Both the form and Portfolio forced-colors 400% checks must use the
+        # shared helper, which waits for inline priority, computed size and RTL.
+        self.assertGreaterEqual(plugin.count("await setRootTextScale(page, 64, 'rtl')"), 2)
+        helper = (ROOT / 'tests/browser/support/root-text-scale.js').read_text(encoding='utf-8')
+        self.assertIn("computed: pixels", helper)
+        self.assertIn("priority: 'important'", helper)
+        self.assertIn("direction,", helper)
+        self.assertIn("expect.poll", helper)
 
 
 if __name__ == '__main__':
