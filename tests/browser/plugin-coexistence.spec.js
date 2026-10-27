@@ -37,9 +37,9 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     const open = async key => page.goto(`/?page_id=${pages[key]}`, { waitUntil:'networkidle' });
     const styles = async expected => { for (const [name,count] of Object.entries(expected)) await expect(asset(page,name)).toHaveCount(count); };
     await open('plain');
-    await styles({ forms:0, 'form-content':0, photography:0, 'content-modes':0, 'query-loop':0 });
+    await styles({ forms:0, 'form-content':0, photography:0, 'content-modes':0, 'query-loop':0, 'portfolio-reflow':0 });
     await open('form');
-    await styles({ forms:1, 'form-content':1, photography:0, 'query-loop':0 });
+    await styles({ forms:1, 'form-content':1, photography:0, 'query-loop':0, 'portfolio-reflow':0 });
     const form = page.locator('.ci-demo-form');
     await expect(form.locator('legend')).toContainText('日本語 中文 العربية');
     await expect(form.locator('input')).toHaveAttribute('readonly','');
@@ -73,13 +73,13 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     await page.emulateMedia({forcedColors:'none'});
     await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.fontSize='';});
     await open('photo');
-    await styles({photography:1,'content-modes':0,'query-loop':0,forms:0});
+    await styles({photography:1,'content-modes':0,'query-loop':0,'portfolio-reflow':0,forms:0});
     const img = page.locator('.slateframe-photography-sequence img');
     await expect(img).toBeVisible();
     await expect.poll(()=>img.evaluate(n=>n.complete&&n.naturalWidth>0)).toBe(true);
     await page.screenshot({path:'test-artifacts/screenshots/plugin-coexistence-photo-390.png',fullPage:true});
     await open('portfolio');
-    await styles({photography:0,'content-modes':1,'query-loop':1,forms:0});
+    await styles({photography:0,'content-modes':1,'query-loop':1,'portfolio-reflow':1,forms:0});
     const link = page.locator('.slateframe-project-grid .wp-block-post-title a');
     await expect(link).toContainText('日本語 中文');
     await link.focus(); await expect(link).toBeFocused();
@@ -89,7 +89,13 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     for (const width of [320,375,390,412,768,1440,1920]) {
       await page.setViewportSize({width,height:900});
       for (const direction of ['ltr','rtl']) {
-        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='200%';},direction);
+        // The plugin owns its shortcode markup; normal-size authored columns
+        // must remain unchanged before testing the opt-in 200% reflow.
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='100%';},direction);
+        const baselineTracks = await list.evaluate(n=>
+          getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length);
+        expect(baselineTracks,`${width} ${direction} normal-size columns`).toBe(width<=640?1:width<=900?2:3);
+        await page.locator('html').evaluate(n=>{n.style.fontSize='200%';});
         const layout = await list.evaluate(n=>{
           const css=getComputedStyle(n), a=n.querySelector('.wp-block-post-title a');
           const rect=a.getBoundingClientRect();
@@ -97,6 +103,8 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
             display:css.display, listStyle:css.listStyleType,
             paddingStart:css.paddingInlineStart, marginStart:css.marginInlineStart,
             tracks:css.gridTemplateColumns.split(' ').filter(Boolean).length,
+            containerWidth:parseFloat(getComputedStyle(n.closest('.slateframe-project-grid')).width),
+            rootFontSize:parseFloat(getComputedStyle(document.documentElement).fontSize),
             overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
             linkLeft:rect.left, linkRight:rect.right, linkHeight:rect.height
           };
@@ -105,7 +113,13 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
         expect(layout.listStyle,`${width} ${direction} marker`).toBe('none');
         expect(layout.paddingStart,`${width} ${direction} padding`).toBe('0px');
         expect(layout.marginStart,`${width} ${direction} margin`).toBe('0px');
-        expect(layout.tracks,`${width} ${direction} columns`).toBe(width<=640?1:width<=900?2:3);
+        // A named 35rem container, not the viewport alone, governs readable
+        // columns when users enlarge text. Keep Core's viewport caps otherwise.
+        expect(layout.containerWidth).toBeGreaterThan(0);
+        expect(layout.rootFontSize).toBeCloseTo(32, 1);
+        const expectedTracks = layout.containerWidth <= 35 * layout.rootFontSize
+          ? 1 : width<=640?1:width<=900?2:3;
+        expect(layout.tracks,`${width} ${direction} 200% container reflow`).toBe(expectedTracks);
         expect(layout.overflow,`${width} ${direction} overflow`).toBeLessThanOrEqual(1);
         expect(layout.linkLeft).toBeGreaterThanOrEqual(-1);
         expect(layout.linkRight).toBeLessThanOrEqual(width+1);
@@ -130,7 +144,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
 
     // Plugin-generated Core grid: preserve author columns and semantic list.
     await open('portfolioCore');
-    await styles({photography:0,'content-modes':1,'query-loop':1,forms:0});
+    await styles({photography:0,'content-modes':1,'query-loop':1,'portfolio-reflow':1,forms:0});
     const coreGrid = page.locator('.slateframe-project-grid .wp-block-post-template.is-layout-grid');
     await expect(coreGrid.locator(':scope > li')).toHaveCount(2);
     for (const width of [320,375,390,412,768,1440,1920]) {
@@ -172,7 +186,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     }
     await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.fontSize='';});
     await open('native');
-    await styles({photography:1,'query-loop':0}); // A plugin cannot suppress required native presentation.
+    await styles({photography:1,'query-loop':0,'portfolio-reflow':0}); // A plugin cannot suppress required native presentation.
   } finally {
     for (const postId of ids) { try { wp('post','delete',postId,'--force'); } catch {} }
     if (fs.existsSync(file)) fs.unlinkSync(file);
