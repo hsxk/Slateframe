@@ -1135,6 +1135,10 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/portfolio-reflow-390-rtl-400-forced-colors.png || { echo 'Missing Portfolio 400% RTL forced-colors evidence' >&2; exit 1; }
+          for name in portfolio-reflow-680-ltr-full-page.png portfolio-reflow-390-ltr-400-full-page.png portfolio-reflow-1440-ltr-400-full-page.png portfolio-reflow-390-rtl-400-forced-colors-full-page.png; do
+            screenshot="test-artifacts/screenshots/$name"
+            test -s "$screenshot" || { echo "Missing full-page Portfolio context: $screenshot" >&2; exit 1; }
+          done
           for profile in default compact spacious; do
             for viewport in 320 375 390 412 768 1440 1920; do
               for variant in ltr rtl-200-forced-colors; do
