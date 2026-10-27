@@ -71,6 +71,9 @@ class TableTextScaleEvidence(unittest.TestCase):
                       "core-table-editor-"):
             self.assertIn(token, browser)
         self.assertIn("core-table-editor-${width}-rtl-400.png", ci)
+        self.assertIn("core-table-editor-context-${width}-rtl-400.png", ci)
+        self.assertIn("core-table-editor-context-", browser)
+        self.assertIn("await page.screenshot(", browser)
 
     def test_editor_table_does_not_hide_core_canvas_overflow(self):
         browser = (ROOT / "tests/browser/core-table-parity.spec.js").read_text(encoding="utf-8")
