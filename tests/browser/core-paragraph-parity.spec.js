@@ -71,6 +71,11 @@ test('native Core Paragraph retains authored content and links across reflow and
           expect(state.alignment, label + ' authored alignment').toBe('center');
           expect(state.dropCap.size, label + ' native drop cap size').toBeGreaterThan(0);
           expect(state.dropCap.size, label + ' bounded native drop cap').toBeLessThanOrEqual(state.dropCap.width + 1);
+          if (width === 390 && font === 64) {
+            // At 400% the first letter must leave meaningful inline room for text,
+            // not merely avoid viewport overflow while each word stacks vertically.
+            expect(state.dropCap.size, label + ' readable 400% drop cap').toBeLessThanOrEqual(width / 2);
+          }
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-paragraph-' + width + '-' + dir + '.png',
           });
