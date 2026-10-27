@@ -1124,6 +1124,10 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/core-pullquote-390-rtl-200-forced-colors.png || { echo "Missing Core Pullquote forced-colors evidence" >&2; exit 1; }
+          for direction in ltr rtl; do
+            screenshot="test-artifacts/screenshots/portfolio-reflow-680-${direction}-default.png"
+            test -s "$screenshot" || { echo "Missing Portfolio 680px tablet evidence: $screenshot" >&2; exit 1; }
+          done
           for viewport in 390 768 1440 1920; do
             for direction in ltr rtl; do
               screenshot="test-artifacts/screenshots/portfolio-reflow-${viewport}-${direction}-400.png"

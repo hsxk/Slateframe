@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH;
 const width = (info) => info.project.use.viewport?.width || 0;
 const columns = (chosen, w) => w <= 640 ? 1 : w <= 900 ? Math.min(2, chosen) : chosen;
-const zoomColumns = (chosen, w, rootPx) => w <= 40 * rootPx ? 1 : columns(chosen, w);
+const zoomColumns = (chosen, w, rootPx) => w <= 35 * rootPx ? 1 : columns(chosen, w);
 
 async function openTemplate(page) {
   await page.goto(projectPath, { waitUntil: 'domcontentloaded' });
@@ -64,6 +64,40 @@ test('RTL/CJK and 200% text enlargement preserve grid boundaries', async ({ page
   const actual = await metrics(list);
   expect(actual.tracks).toBe(zoomColumns(6, width(info), 32));
   expect(actual.overflow).toBeLessThanOrEqual(1);
+});
+
+test('default-size Portfolio preserves 641–900px authored tablet columns near container gutters', async ({ page }, info) => {
+  test.skip(width(info) !== 390 || !projectPath, 'One real WordPress fixture covers the gutter boundary');
+  const list = await openTemplate(page);
+  for (const viewport of [641, 650, 680, 720, 768, 900]) {
+    await page.setViewportSize({ width: viewport, height: 900 });
+    for (const direction of ['ltr', 'rtl']) {
+      await page.locator('html').evaluate((node, dir) => {
+        node.dir = dir;
+        node.style.fontSize = '16px';
+      }, direction);
+      for (const chosen of [1, 2, 3, 4, 5, 6]) {
+        await list.evaluate((node, count) => {
+          for (const name of [...node.classList]) {
+            if (/^columns-[1-6]$/.test(name)) node.classList.remove(name);
+          }
+          node.classList.add('columns-' + count);
+        }, chosen);
+        const actual = await metrics(list);
+        const label = viewport + 'px ' + direction + ' authored columns-' + chosen;
+        expect(actual.tracks, label + ' must retain Core tablet choice').toBe(columns(chosen, viewport));
+        expect(actual.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+        if (viewport === 680 && chosen === 3) {
+          const fs = require('node:fs/promises');
+          await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+          await page.screenshot({
+            path: 'test-artifacts/screenshots/portfolio-reflow-680-' + direction + '-default.png',
+            animations: 'disabled',
+          });
+        }
+      }
+    }
+  }
 });
 
 test('Portfolio native flex columns reflow at 400% without overriding Core Grid', async ({ page }, info) => {
