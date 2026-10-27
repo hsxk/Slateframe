@@ -119,6 +119,8 @@ class PackageTests(unittest.TestCase):
             shutil.copy2(BUILDER, fixture / "bin" / "build-theme-zip.sh")
             shutil.copy2(ROOT / "bin" / "check-package-manifest.py",
                          fixture / "bin" / "check-package-manifest.py")
+            shutil.copy2(ROOT / "bin" / "verify-package-head.py",
+                         fixture / "bin" / "verify-package-head.py")
             (fixture / "bin" / "check-screenshot.py").write_text(
                 "import sys\nfrom pathlib import Path\n"
                 "assert Path(sys.argv[1]).read_bytes().startswith(bytes.fromhex('89504e470d0a1a0a'))\n")

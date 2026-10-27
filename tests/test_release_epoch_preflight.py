@@ -27,7 +27,9 @@ class ReleaseEpochPreflightTests(unittest.TestCase):
         for name in ("style.css", "functions.php", "theme.json", "readme.txt", "LICENSE", "screenshot.png"):
             (self.root / name).write_bytes(name.encode())
         (self.root / ".distignore").write_text("/dist/\n")
-        for name in ("check-package-manifest.py", "check-screenshot.py"):
+        # Epoch tests isolate timestamp behavior; exact-HEAD verification has
+        # its own Git-backed regression suite.
+        for name in ("check-package-manifest.py", "check-screenshot.py", "verify-package-head.py"):
             (self.root / "bin" / name).write_text("import sys\n")
         self.dist = self.root / "dist"
         self.dist.mkdir()
