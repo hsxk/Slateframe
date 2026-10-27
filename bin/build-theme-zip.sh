@@ -187,6 +187,8 @@ try:
 except (OSError, ValueError, zipfile.BadZipFile, zlib.error) as error:
     raise SystemExit(f"Refusing invalid theme ZIP: {error}") from error
 PY_VERIFY_ZIP
+# Attest final decompressed ZIP bytes against committed HEAD, not just staging.
+python3 "$ROOT/bin/verify-package-head.py" "$ROOT" "$TEMP_ZIP"
 chmod 0644 "$TEMP_ZIP"
 # The source and destination are on the same filesystem; rename is atomic.
 mv -f -- "$TEMP_ZIP" "$ZIP_FILE"
