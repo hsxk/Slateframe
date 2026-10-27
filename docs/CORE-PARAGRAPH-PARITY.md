@@ -6,7 +6,7 @@ Slateframe keeps `core/paragraph` native. WordPress owns the paragraph tag, inli
 
 - Publish a disposable WordPress post with long Japanese, Chinese, Arabic, and unbroken URL text; verify that links remain reachable and text stays inside the viewport at 320, 375, 390, 412, 768, 1440 and 1920px, LTR and RTL.
 - Preserve Core's semantic `p` elements, authored center alignment, native drop-cap class and anchor destinations. Do not override Core's color or font-size support.
-- At extreme mobile text zoom, constrain only the native drop-cap first-letter size to the available viewport width. Retain Core's float, class, authored paragraph styles, and default-size drop-cap appearance; assert the actual pseudo-element size, not just paragraph boxes.
+- At extreme mobile text zoom, constrain only the native drop-cap first-letter size to **half the dynamic viewport minus one theme gutter**. The previous full-viewport cap prevented overflow but left almost no room for following text at 390px/400%, visibly stacking letters in a narrow column. Preserve Core's float, class, authored paragraph styles, and normal-size appearance; assert the actual pseudo-element size stays at most half the viewport at 390px/400%, not just paragraph boxes. Keep the 300-byte CSS budget unchanged.
 - Exercise 200% and 400% root text scaling, keyboard focus, WCAG Axe and forced-colors contrast without weakening tests.
 - Capture 14 frontend screenshots plus a 390px RTL/200% forced-colors screenshot from a real WordPress/Chromium run.
 - Test asset isolation on a blank Page, suppressing footer widgets only for the disposable test request. A 404 is not a valid isolation fixture when footer widgets contain native Paragraph blocks.
