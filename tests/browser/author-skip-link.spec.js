@@ -47,7 +47,7 @@ test('focused skip link remains bounded and wraps at computed 400% zoom', async 
           const box = node.getBoundingClientRect(), style = getComputedStyle(node);
           return {
             left: box.left, right: box.right, height: box.height,
-            whiteSpace: style.whiteSpace, wrap: style.overflowWrap,
+            whiteSpace: style.whiteSpace, wrap: style.overflowWrap, wordWrap: style.wordWrap,
             outline: parseFloat(style.outlineWidth),
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
           };
@@ -58,6 +58,7 @@ test('focused skip link remains bounded and wraps at computed 400% zoom', async 
         expect(state.height, label + ' target height').toBeGreaterThanOrEqual(44);
         expect(state.whiteSpace, label + ' wraps').toBe('normal');
         expect(state.wrap, label + ' long token').toBe('anywhere');
+        expect(state.wordWrap, label + ' Core word-wrap alias').toBe('anywhere');
         expect(state.outline, label + ' focus').toBeGreaterThanOrEqual(2);
         expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
         if (width === 390 && font === 64) {
