@@ -4,15 +4,15 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-READING = ROOT / "assets/css/reading.css"
+BASE = ROOT / "style.css"
 BROWSER = ROOT / "tests/browser/portfolio-focus-scroll.spec.js"
 WORKFLOW = ROOT / ".github/workflows/quality.yml"
 
 
 class PortfolioFocusClearanceContract(unittest.TestCase):
     def test_scroll_clearance_is_scoped_and_budgeted(self):
-        css = READING.read_text(encoding="utf-8")
-        self.assertLessEqual(len(css.encode("utf-8")), 7000)
+        css = BASE.read_text(encoding="utf-8")
+        self.assertLessEqual(len(css.encode("utf-8")), 16000)
         self.assertIn(
             "@media(min-width:481px){.slateframe-project-grid a{"
             "scroll-margin-block-start:calc(var(--slateframe-header-height) + "
