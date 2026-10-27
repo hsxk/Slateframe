@@ -33,6 +33,10 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
           node.dir = value.dir;
           node.style.setProperty('font-size', value.font + 'px', 'important');
         }, { dir, font });
+        // A declaration is not proof of a settled user-scale layout.
+        // Wait for the actual 16/32/64px computed root before checking targets.
+        await expect.poll(() => page.evaluate(() =>
+          parseFloat(getComputedStyle(document.documentElement).fontSize)), { timeout: 10000 }).toBe(font);
         const result = await pagination.evaluate((node) => {
           const controls = [...node.querySelectorAll('a,.page-numbers')]
             .filter(el => el.getClientRects().length);

@@ -28,6 +28,8 @@ class PortfolioTextScaleEvidence(unittest.TestCase):
         self.assertIn("node.style.setProperty('font-size', value.font + 'px', 'important')", source)
         self.assertIn('actual computed text scale', source)
         self.assertIn('toBeCloseTo(font, 1)', source)
+        self.assertIn('A declaration is not proof of a settled user-scale layout.', source)
+        self.assertIn('toBe(font)', source)
         self.assertIn("font === 64", source)
         self.assertIn("forcedColors: 'active'", source)
         self.assertIn("node.style.removeProperty('font-size')", source)
