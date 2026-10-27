@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8', timeout: 30000 }).trim();
 
 test('native Core Paragraph retains authored content and links across reflow and directions', async ({ page }, info) => {
@@ -44,9 +45,7 @@ test('native Core Paragraph retains authored content and links across reflow and
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, state) => {
-            node.dir = state.dir; node.style.fontSize = state.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const state = await root.evaluate(node => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             boxes: [...node.querySelectorAll('p')].map(p => {
@@ -90,7 +89,7 @@ test('native Core Paragraph retains authored content and links across reflow and
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     const link = root.locator('a');
     await link.focus();
     await expect(link).toBeFocused();
@@ -103,7 +102,7 @@ test('native Core Paragraph retains authored content and links across reflow and
     expect(await link.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth)))
       .toBeGreaterThanOrEqual(2);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-paragraph-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     const blankId = wp('post', 'create', '--post_type=page', '--post_status=publish',
