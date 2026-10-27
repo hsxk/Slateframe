@@ -3,6 +3,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs');
 const { randomUUID } = require('node:crypto');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8', timeout: 30000 }).trim();
 const asset = (page, name) => page.locator(`link[href*="/assets/css/${name}.css"]`);
 
@@ -63,7 +64,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
       }
     }
     await page.setViewportSize({width:390,height:900});
-    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.setProperty('font-size','64px','important');});
+    await setRootTextScale(page, 64, 'rtl');
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
     expect(await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
     await form.locator('button').focus();
@@ -169,7 +170,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
       }
     }
     await page.setViewportSize({width:390,height:900});
-    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.setProperty('font-size','64px','important');});
+    await setRootTextScale(page, 64, 'rtl');
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
     await link.focus();
     await expect(link).toBeFocused();

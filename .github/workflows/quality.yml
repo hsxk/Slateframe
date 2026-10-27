@@ -1095,6 +1095,11 @@ jobs:
               test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing real 400% Core Table keyboard evidence: $screenshot" >&2; exit 1; }
             done
           done
+          for width in 390 1440; do
+            for screenshot in "core-table-editor-${width}-rtl-400.png" "core-table-editor-context-${width}-rtl-400.png"; do
+              test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing real Gutenberg Core Table editor evidence: $screenshot" >&2; exit 1; }
+            done
+          done
           for screenshot in core-table-390-rtl-400-forced-colors.png core-data-table-rtl.png core-data-table-390-rtl-200-forced-colors.png core-data-table-390-rtl-400-forced-colors.png plain-table-320-rtl-200-forced-colors.png plain-table-320-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing table zoom/keyboard evidence: $screenshot" >&2; exit 1; }
           done

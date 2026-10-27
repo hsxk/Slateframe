@@ -12,6 +12,46 @@ A local Chromium preflight found that forcing a fixed table to 100% of a 390px f
 
 The data-table and plain-HTML-table suites use the same computed-scale gate, with 390px 400% LTR/RTL data-table screenshots, 200%/400% RTL forced-colors evidence, and 320px RTL keyboard-scroll screenshots at both zoom levels. All new evidence files are required by Theme quality, not optional artifacts. No theme runtime CSS or JavaScript was added for these checks.
 
+## Gutenberg editor scroll parity
+
+The editor canvas now uses the same bounded native Core Table scroll boundary as
+published articles: zero minimum inline size, stable scrollbar gutter, inline-size
+containment and inline overscroll containment. This prevents long mixed CJK/RTL
+table cells from expanding nested editor layouts while leaving Core's table markup
+and fixed-layout algorithm intact.
+
+An authenticated WordPress Gutenberg test inserts a disposable native Core Table
+without saving the post. At a browser-computed 64px root and RTL direction it
+checks the rendered block's overflow, scrollbar gutter, overscroll containment,
+inline-size containment and absence of document-level horizontal overflow at
+390px and 1440px. Two editor screenshots are mandatory CI artifacts. The block
+is removed in a finally clause. This tests actual editor styles, not merely
+serialized block attributes.
+
+## CI regression: editor canvas versus native table overflow
+
+The real WordPress/Chromium run for SHA `54366dd` (Theme quality
+[40519061456](https://github.com/hsxk/Slateframe/actions/runs/40519061456))
+failed the new 390px RTL editor check: the **entire existing Gutenberg
+document** measured 267px of horizontal overflow at 400% root text.
+Its fixture contains many unrelated Core blocks, editor controls and the
+first-run welcome guide; that measurement alone does not identify the
+newly inserted table as the cause. The same run found a separate stale
+32px-versus-64px computed scale in the shortcode plugin suite.
+
+The revised editor test dismisses the Core welcome guide, measures the
+real document overflow **before** inserting the disposable Core Table,
+then requires that inserting the table does not increase that baseline
+by more than 1px. It also checks the table's own viewport width,
+positive internal scroll range, computed 64px RTL root, and native
+containment styles. This is a component-level regression test, **not**
+a claim that WordPress's entire existing editing interface passes 400%
+reflow. Published front-end Table and Article suites retain their
+strict document overflow limit of 1px; no budget or acceptance threshold
+is lowered. Both editor figure screenshots and two additional **full editor context** viewport screenshots (390/1440px) are mandatory and captured before assertions, so a failing test still leaves inspectable evidence of the real WordPress chrome. The plugin
+suite now uses the shared computed-scale helper before its 400% focus
+assertions.
+
 ## 400% keyboard scroll acceptance
 
 The Core Table fixture now exercises **both fixed-layout and striped figures** at a browser-computed 64px root size in LTR and RTL with forced colors enabled. For each figure, it verifies real horizontal overflow, keyboard focus, a visible system-color focus outline, directional ArrowRight/ArrowLeft scrolling with a nonzero `scrollLeft`, and no document-level horizontal overflow. Four 390px viewport screenshots (one per direction and figure variant) are required by the Theme quality workflow. These complement the full-height content screenshots: a clipped viewport of a scrollable figure is not itself proof that the table can be operated with a keyboard. No new theme runtime CSS or JavaScript is needed.
