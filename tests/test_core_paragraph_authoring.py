@@ -15,7 +15,7 @@ class CoreParagraphAuthoringContract(unittest.TestCase):
     def test_native_first_letter_remains_bounded_without_replacing_core_float(self):
         css = (ROOT / "assets/css/core-paragraph.css").read_text(encoding="utf-8")
         self.assertIn("p.has-drop-cap:not(:focus)::first-letter", css)
-        self.assertIn("font-size:min(8.4em,calc(100dvi", css)
+        self.assertIn("font-size:min(8.4em,calc(50dvi", css)
         self.assertNotIn("float:", css)
         self.assertLessEqual(len(css.encode("utf-8")), 300)
 
@@ -30,6 +30,7 @@ class CoreParagraphAuthoringContract(unittest.TestCase):
         self.assertIn('core-paragraph-390-${direction}-400.png', workflow)
         browser = (ROOT / "tests/browser/core-paragraph-parity.spec.js").read_text(encoding="utf-8")
         self.assertIn("width === 390 && font === 64", browser)
+        self.assertIn("readable 400% drop cap", browser)
         self.assertIn("dropCap: true", browser)
         self.assertIn("blocks.getSaveContent('core/paragraph', attributes)", browser)
         self.assertIn("expect(result.first).toContain(result.nativeMarkup)", browser)
