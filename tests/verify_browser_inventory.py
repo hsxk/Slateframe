@@ -57,6 +57,16 @@ REQUIRED_FAQ = frozenset((
 ))
 REQUIRED_SCREENSHOTS = REQUIRED_APPEARANCE | REQUIRED_RESPONSIVE | REQUIRED_FAQ
 
+# Theme quality separately requires these five captures. Reject screenshots
+# mislabeled as 390px when a desktop-width crop was actually recorded.
+CORE_ZOOM_EVIDENCE = frozenset((
+    'core-query-no-results-390-ltr-400.png',
+    'core-query-no-results-390-rtl-400.png',
+    'core-query-no-results-390-rtl-400-forced-colors.png',
+    'core-search-extra-390-ltr-400.png',
+    'core-search-extra-390-rtl-400.png',
+))
+
 # A filename alone is insufficient proof of a readable multi-line paragraph or
 # keyboard focus target. These minimum crop heights deliberately stay below
 # the expected Core rendering at 200% text and the 44px control contract.
@@ -116,6 +126,11 @@ def scan(root):
         actual_width, height = validate_png(path, width)
         check_faq_crop_dimensions(path.name, height)
         check_faq_viewport_width(path.name, actual_width)
+        if path.name in CORE_ZOOM_EVIDENCE:
+            if actual_width > 390:
+                raise ValueError(f'Core 400% crop exceeds viewport: {path.name}')
+            if height < 44:
+                raise ValueError(f'Incomplete Core 400% crop: {path.name}')
         match = FULL_PAGE.fullmatch(path.name)
         if match and actual_width != int(match.group(2) or match.group(3)):
             raise ValueError('Full-page viewport width mismatch')

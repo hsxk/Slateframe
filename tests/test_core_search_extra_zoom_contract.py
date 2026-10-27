@@ -17,6 +17,10 @@ class CoreSearchExtraZoomContract(unittest.TestCase):
             with self.subTest(token=token):
                 self.assertIn(token, js)
         self.assertNotIn("node.style.fontSize", js)
+        inventory = (ROOT / "tests/verify_browser_inventory.py").read_text(encoding="utf-8")
+        self.assertIn("CORE_ZOOM_EVIDENCE", inventory)
+        self.assertIn("Core 400% crop exceeds viewport", inventory)
+        self.assertIn("Incomplete Core 400% crop", inventory)
         ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         for name in ("core-query-no-results-390-ltr-400.png",
                      "core-query-no-results-390-rtl-400.png",

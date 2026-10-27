@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import patch
 import zlib
 
-from verify_browser_inventory import MANIFEST, REQUIRED_FAQ, REQUIRED_SCREENSHOTS, run
+from verify_browser_inventory import CORE_ZOOM_EVIDENCE, MANIFEST, REQUIRED_FAQ, REQUIRED_SCREENSHOTS, run
 
 SHA = 'a' * 40
 
@@ -211,6 +211,22 @@ class InventoryContract(unittest.TestCase):
             with self.subTest(name=name):
                 self.assertEqual(manifest['screenshots'][name]['sha256'],
                                  hashlib.sha256((self.root / name).read_bytes()).hexdigest())
+
+    def test_core_400_percent_evidence_crops_are_bounded(self):
+        self.assertEqual(len(CORE_ZOOM_EVIDENCE), 5)
+        for name in sorted(CORE_ZOOM_EVIDENCE):
+            with self.subTest(name=name):
+                path = self.root / name
+                path.write_bytes(png(390, 44))
+                self.assertEqual(run('generate', self.root), 65)
+                self.assertEqual(run('verify', self.root), 65)
+                path.write_bytes(png(391, 44))
+                with self.assertRaisesRegex(ValueError, 'Core 400% crop exceeds viewport'):
+                    run('generate', self.root)
+                path.write_bytes(png(390, 43))
+                with self.assertRaisesRegex(ValueError, 'Incomplete Core 400% crop'):
+                    run('generate', self.root)
+                path.unlink()
 
     def test_short_final_paragraph_crop_is_rejected(self):
         path = self.root / 'gutenberg-knowledge-faq-final-paragraph-390-rtl-200-forced-colors.png'
