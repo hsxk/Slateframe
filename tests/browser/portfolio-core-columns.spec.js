@@ -91,7 +91,7 @@ test('default-size Portfolio preserves 641–900px authored tablet columns near 
         if (viewport === 680 && chosen === 3) {
           const fs = require('node:fs/promises');
           await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-          await page.screenshot({
+          await list.screenshot({
             path: 'test-artifacts/screenshots/portfolio-reflow-680-' + direction + '-default.png',
             animations: 'disabled',
           });
@@ -148,10 +148,9 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
     expect(target.height).toBeGreaterThanOrEqual(43);
     if ([320, 375, 390, 412, 768, 1440, 1920].includes(viewport)) {
       await link.evaluate(node => node.blur());
-      await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
       const fs = require('node:fs/promises');
       await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-      await page.screenshot({
+      await list.screenshot({
         path: 'test-artifacts/screenshots/portfolio-reflow-' + viewport + '-' + dir + '-400.png',
         animations: 'disabled',
       });
@@ -168,7 +167,7 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
       }));
       expect(outline.style).not.toBe('none');
       expect(outline.width).toBeGreaterThanOrEqual(2);
-      await page.screenshot({
+      await list.screenshot({
         path: 'test-artifacts/screenshots/portfolio-reflow-390-rtl-400-forced-colors.png',
         animations: 'disabled',
       });
