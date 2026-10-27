@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8', timeout: 30000 }).trim();
 
 test('native Separator retains Core variants, author colors, and RTL reflow', async ({ page }, info) => {
@@ -47,9 +48,7 @@ test('native Separator retains Core variants, author colors, and RTL reflow', as
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, value) => {
-            node.dir = value.dir; node.style.fontSize = value.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const result = await page.evaluate(selectors => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             separators: selectors.map(selector => {
@@ -71,11 +70,16 @@ test('native Separator retains Core variants, author colors, and RTL reflow', as
           expect(result.separators[3].color, label + ' authored inline color').toBe('rgb(142, 43, 69)');
           if (font === 16) await page.screenshot({ fullPage: true,
             path: 'test-artifacts/screenshots/core-separator-' + width + '-' + dir + '.png' });
+          if (width === 390 && font === 64) {
+            await page.locator(selectors[1]).scrollIntoViewIfNeeded();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-separator-390-' + dir + '-400.png' });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     const axe = await new AxeBuilder({ page }).include('#main-content')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
@@ -89,7 +93,10 @@ test('native Separator retains Core variants, author colors, and RTL reflow', as
       path: 'test-artifacts/screenshots/core-separator-390-rtl-200-forced-colors.png' });
     const color = await page.locator(selectors[0]).evaluate(node => getComputedStyle(node).color);
     expect(color).not.toBe('rgba(0, 0, 0, 0)');
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await afterLink.scrollIntoViewIfNeeded();
+    await page.screenshot({ fullPage: false,
+      path: 'test-artifacts/screenshots/core-separator-390-rtl-400-forced-colors.png' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
