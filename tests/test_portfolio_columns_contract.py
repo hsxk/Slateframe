@@ -71,6 +71,17 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn('assets/css/portfolio-reflow.css', workflow)
         self.assertIn('test $(wc -c < assets/css/portfolio-reflow.css) -le 260', workflow)
 
+    def test_plugin_shortcode_reflow_keeps_normal_size_and_core_grid(self):
+        plugin = (ROOT / 'tests/browser/plugin-coexistence.spec.js').read_text(encoding='utf-8')
+        self.assertIn('baselineTracks', plugin)
+        self.assertIn('normal-size columns', plugin)
+        self.assertIn('layout.containerWidth <= 35 * layout.rootFontSize', plugin)
+        self.assertIn('200% container reflow', plugin)
+        self.assertIn("'portfolio-reflow':0", plugin)
+        self.assertIn("'portfolio-reflow':1", plugin)
+        self.assertIn('const coreGrid =', plugin)
+        self.assertIn('Core grid columns', plugin)
+
 
 if __name__ == '__main__':
     unittest.main()
