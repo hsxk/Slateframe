@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
+const { settlePortfolioImagesForEvidence } = require('./visual-evidence');
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH;
 const width = (info) => info.project.use.viewport?.width || 0;
 const columns = (chosen, w) => w <= 640 ? 1 : w <= 900 ? Math.min(2, chosen) : chosen;
@@ -70,6 +71,7 @@ test('RTL/CJK and 200% text enlargement preserve grid boundaries', async ({ page
 test('default-size Portfolio preserves 641–900px authored tablet columns near container gutters', async ({ page }, info) => {
   test.skip(width(info) !== 390 || !projectPath, 'One real WordPress fixture covers the gutter boundary');
   const list = await openTemplate(page);
+  await settlePortfolioImagesForEvidence(page);
   for (const viewport of [641, 650, 680, 720, 768, 900]) {
     await page.setViewportSize({ width: viewport, height: 900 });
     for (const direction of ['ltr', 'rtl']) {
@@ -105,6 +107,7 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
   test.skip(!projectPath, 'Requires the real WordPress Portfolio fixture');
   test.setTimeout(120000);
   const list = await openTemplate(page);
+  await settlePortfolioImagesForEvidence(page);
   const viewport = width(info);
   for (const dir of ['ltr', 'rtl']) {
     await page.locator('html').evaluate((node, direction) => {
