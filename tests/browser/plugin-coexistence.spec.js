@@ -47,9 +47,10 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     for (const width of [320,375,390,412,768,1440,1920]) {
       await page.setViewportSize({ width, height:900 });
       for (const direction of ['ltr','rtl']) {
-        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='200%';},direction);
-        const result = await form.evaluate(n=>({overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='32px';},direction);
+        const result = await form.evaluate(n=>({rootFontSize:parseFloat(getComputedStyle(document.documentElement).fontSize),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
           boxes:[n,n.querySelector('input'),n.querySelector('button')].map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,height:r.height};})}));
+        expect(result.rootFontSize,`${width} ${direction} actual 200% font size`).toBeCloseTo(32, 1);
         expect(result.overflow,`${width} ${direction} overflow`).toBeLessThanOrEqual(1);
         for(const box of result.boxes){expect(box.left).toBeGreaterThanOrEqual(-1);expect(box.right).toBeLessThanOrEqual(width+1);}
         expect(result.boxes[1].height).toBeGreaterThanOrEqual(44);
@@ -62,8 +63,9 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
       }
     }
     await page.setViewportSize({width:390,height:900});
-    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='400%';});
+    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='64px';});
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
+    expect(await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
     await form.locator('button').focus();
     await expect(form.locator('button')).toBeFocused();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
@@ -91,11 +93,11 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
       for (const direction of ['ltr','rtl']) {
         // The plugin owns its shortcode markup; normal-size authored columns
         // must remain unchanged before testing the opt-in 200% reflow.
-        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='100%';},direction);
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='16px';},direction);
         const baselineTracks = await list.evaluate(n=>
           getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length);
         expect(baselineTracks,`${width} ${direction} normal-size columns`).toBe(width<=640?1:width<=900?2:3);
-        await page.locator('html').evaluate(n=>{n.style.fontSize='200%';});
+        await page.locator('html').evaluate(n=>{n.style.fontSize='32px';});
         const layout = await list.evaluate(n=>{
           const css=getComputedStyle(n), a=n.querySelector('.wp-block-post-title a');
           const rect=a.getBoundingClientRect();
@@ -126,17 +128,18 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
         expect(layout.linkHeight).toBeGreaterThanOrEqual(44);
       }
       if ([390,1440].includes(width)) {
-        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='200%';});
+        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='32px';});
         await link.focus();
         await expect(link).toBeFocused();
         await page.screenshot({path:`test-artifacts/screenshots/plugin-coexistence-portfolio-${width}-rtl.png`,fullPage:true});
       }
     }
     await page.setViewportSize({width:390,height:900});
-    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='400%';});
+    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='64px';});
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
     await link.focus();
     await expect(link).toBeFocused();
+    expect(await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.screenshot({path:'test-artifacts/screenshots/plugin-coexistence-portfolio-390-rtl-400-forced-colors.png',fullPage:true});
     await page.emulateMedia({forcedColors:'none'});
@@ -150,11 +153,12 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     for (const width of [320,375,390,412,768,1440,1920]) {
       await page.setViewportSize({width,height:900});
       for (const direction of ['ltr','rtl']) {
-        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='200%';},direction);
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='32px';},direction);
         const result = await coreGrid.evaluate(n=>{
           const css=getComputedStyle(n);
           return {
             display:css.display, tracks:css.gridTemplateColumns.split(' ').filter(Boolean).length,
+            rootFontSize:parseFloat(getComputedStyle(document.documentElement).fontSize),
             listStyle:css.listStyleType, marginStart:css.marginInlineStart,
             paddingStart:css.paddingInlineStart,
             items:[...n.children].map(li=>getComputedStyle(li).listStyleType),
@@ -164,6 +168,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
             overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
           };
         });
+        expect(result.rootFontSize,`${width} ${direction} Core grid actual 200%`).toBeCloseTo(32, 1);
         expect(result.display,`${width} ${direction} Core grid display`).toBe('grid');
         expect(result.tracks,`${width} ${direction} Core grid columns`).toBe(2);
         expect(result.listStyle).toBe('none');
@@ -178,7 +183,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
         }
       }
       if ([390,1440].includes(width)) {
-        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='200%';});
+        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='32px';});
         await coreGrid.locator('.wp-block-post-title a').first().focus();
         await expect(coreGrid.locator('.wp-block-post-title a').first()).toBeFocused();
         await page.screenshot({path:`test-artifacts/screenshots/plugin-coexistence-core-grid-${width}-rtl.png`,fullPage:true});
