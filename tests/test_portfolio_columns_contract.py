@@ -67,7 +67,18 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn('portfolio-reflow-390-rtl-400-forced-colors.png', workflow)
         self.assertEqual(browser.count('await list.screenshot({'), 3)
         self.assertEqual(browser.count('await settlePortfolioImagesForEvidence(page);'), 2)
-        self.assertNotIn('await page.screenshot({', browser)
+        self.assertEqual(browser.count('await page.screenshot({'), 3)
+        self.assertEqual(browser.count('fullPage: true,'), 3)
+        for evidence in (
+            'portfolio-reflow-680-ltr-full-page.png',
+            'portfolio-reflow-390-rtl-400-forced-colors-full-page.png',
+            "'-ltr-400-full-page.png'",
+        ):
+            self.assertIn(evidence, browser)
+        self.assertIn('portfolio-reflow-680-ltr-full-page.png', workflow)
+        self.assertIn('portfolio-reflow-390-ltr-400-full-page.png', workflow)
+        self.assertIn('portfolio-reflow-1440-ltr-400-full-page.png', workflow)
+        self.assertIn('portfolio-reflow-390-rtl-400-forced-colors-full-page.png', workflow)
         self.assertIn(".include('.slateframe-project-grid')", browser)
         self.assertIn(".withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])", browser)
         self.assertIn("forcedColors: 'active'", browser)
