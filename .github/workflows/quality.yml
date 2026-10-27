@@ -1210,6 +1210,11 @@ jobs:
           for screenshot in core-query-no-results-390-ltr-400.png core-query-no-results-390-rtl-400.png core-query-no-results-390-rtl-400-forced-colors.png core-search-extra-390-ltr-400.png core-search-extra-390-rtl-400.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing computed 400% Core fallback/search evidence: $screenshot" >&2; exit 1; }
           done
+          # Core prose and Query Loop link affordances must show real 400% reflow.
+          for screenshot in core-heading-390-ltr-400.png core-heading-390-rtl-400.png core-read-more-390-ltr-400.png core-read-more-390-rtl-400.png core-post-excerpt-390-ltr-400.png core-post-excerpt-390-rtl-400.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing computed 400% Core prose evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_prose_zoom_evidence.py test-artifacts/screenshots
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
           python3 tests/verify_browser_inventory.py generate
