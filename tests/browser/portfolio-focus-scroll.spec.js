@@ -55,6 +55,14 @@ async function checkScrollTarget(page, link, viewport, direction, font) {
   }
   await link.focus();
   await expect(link).toBeFocused();
+  if (viewport > 480) {
+    const afterFocus = await link.evaluate(node => ({
+      top: node.getBoundingClientRect().top,
+      headerBottom: document.querySelector('.slateframe-site-header').getBoundingClientRect().bottom,
+    }));
+    expect(afterFocus.top, label + ' keyboard focus not obscured')
+      .toBeGreaterThanOrEqual(afterFocus.headerBottom - 1);
+  }
   const focus = await link.evaluate(node => ({
     outline: getComputedStyle(node).outlineStyle,
     width: parseFloat(getComputedStyle(node).outlineWidth),
