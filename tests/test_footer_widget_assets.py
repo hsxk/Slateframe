@@ -163,9 +163,14 @@ class FooterWidgetAssetContract(unittest.TestCase):
     def test_mobile_core_search_uses_intrinsic_single_column_without_budget_change(self):
         base = (ROOT / "style.css").read_text(encoding="utf-8")
         forms = (ROOT / "assets/css/forms.css").read_text(encoding="utf-8")
+        # The mobile search rule may share a media block with other responsive
+        # styles; check its complete intrinsic-grid behavior, not adjacency to
+        # an unrelated preceding rule.
+        mobile = base.split("@media(max-width:640px){", 1)
+        self.assertEqual(len(mobile), 2, "Missing mobile CSS breakpoint")
         self.assertIn(
-            "@media(max-width:640px){.alignleft,.alignright{float:none;margin-inline:auto}.wp-block-search__button-outside,.wp-block-search__button-inside{& .wp-block-search__inside-wrapper{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--slateframe-component-gap)}",
-            base,
+            ".alignleft,.alignright{float:none;margin-inline:auto}.wp-block-search__button-outside,.wp-block-search__button-inside{& .wp-block-search__inside-wrapper{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--slateframe-component-gap)}",
+            mobile[1],
         )
         self.assertIn("& .wp-block-search__button{margin:0;inline-size:100%;white-space:normal}", base)
         self.assertLessEqual(len(base.encode("utf-8")), 16000)
