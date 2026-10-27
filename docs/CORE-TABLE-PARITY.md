@@ -11,3 +11,7 @@ A disposable real WordPress post checks fixed and striped tables, header cells, 
 A local Chromium preflight found that forcing a fixed table to 100% of a 390px figure produced 24,000px-tall cells at 200% text. The corrected rule keeps Core's intrinsic table sizing, caps it at the shared wide token, and adds a strict height regression bound at 200%/400%.
 
 The data-table and plain-HTML-table suites use the same computed-scale gate, with 390px 400% LTR/RTL data-table screenshots, 200%/400% RTL forced-colors evidence, and 320px RTL keyboard-scroll screenshots at both zoom levels. All new evidence files are required by Theme quality, not optional artifacts. No theme runtime CSS or JavaScript was added for these checks.
+
+## 400% keyboard scroll acceptance
+
+The Core Table fixture now exercises **both fixed-layout and striped figures** at a browser-computed 64px root size in LTR and RTL with forced colors enabled. For each figure, it verifies real horizontal overflow, keyboard focus, a visible system-color focus outline, directional ArrowRight/ArrowLeft scrolling with a nonzero `scrollLeft`, and no document-level horizontal overflow. Four 390px viewport screenshots (one per direction and figure variant) are required by the Theme quality workflow. These complement the full-height content screenshots: a clipped viewport of a scrollable figure is not itself proof that the table can be operated with a keyboard. No new theme runtime CSS or JavaScript is needed.
