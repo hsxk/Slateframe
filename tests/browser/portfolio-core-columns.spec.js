@@ -97,6 +97,13 @@ test('default-size Portfolio preserves 641–900px authored tablet columns near 
             path: 'test-artifacts/screenshots/portfolio-reflow-680-' + direction + '-default.png',
             animations: 'disabled',
           });
+          if (direction === 'ltr') {
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/portfolio-reflow-680-ltr-full-page.png',
+              fullPage: true,
+              animations: 'disabled',
+            });
+          }
         }
       }
     }
@@ -157,6 +164,13 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
         path: 'test-artifacts/screenshots/portfolio-reflow-' + viewport + '-' + dir + '-400.png',
         animations: 'disabled',
       });
+      if (dir === 'ltr' && [390, 1440].includes(viewport)) {
+        await page.screenshot({
+          path: 'test-artifacts/screenshots/portfolio-reflow-' + viewport + '-ltr-400-full-page.png',
+          fullPage: true,
+          animations: 'disabled',
+        });
+      }
     }
     if (viewport === 390 && dir === 'rtl') {
       const axe = await new AxeBuilder({ page }).include('.slateframe-project-grid')
@@ -172,6 +186,11 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
       expect(outline.width).toBeGreaterThanOrEqual(2);
       await list.screenshot({
         path: 'test-artifacts/screenshots/portfolio-reflow-390-rtl-400-forced-colors.png',
+        animations: 'disabled',
+      });
+      await page.screenshot({
+        path: 'test-artifacts/screenshots/portfolio-reflow-390-rtl-400-forced-colors-full-page.png',
+        fullPage: true,
         animations: 'disabled',
       });
       await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
