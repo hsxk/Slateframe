@@ -32,3 +32,7 @@ known-good archive.
 Run `python3 -m unittest discover -s tests -p 'test_*.py'`. Merge only after
 Theme quality and Photography Actions pass for the exact PR HEAD and the
 real WordPress/Chromium screenshots are downloaded and visually inspected.
+
+## Standalone ZIP metadata defense
+
+The final verifier also rejects empty archives, duplicate member names, unsafe or ambiguous path components, backslash separators, ZIP comments, encrypted entries, non-regular Unix member types (including symlinks and FIFOs), and case-folded/NFKC filename collisions. This complements, rather than replaces, the builder's stricter staged manifest and exact ZIP permission checks. `tests/test_release_zip_metadata.py` exercises 18 independent acceptance/rejection cases against a temporary Git repository; no WordPress runtime behavior or release budget is changed.
