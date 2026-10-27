@@ -30,6 +30,39 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn('.slateframe-footer-content .wp-block-post-template{grid-template-columns:1fr}', self.css)
         self.assertIn(':where(:not(.is-layout-grid))', self.css)
 
+    def test_named_container_reflow_is_bounded_and_scoped(self):
+        reflow = (ROOT / 'assets/css/portfolio-reflow.css').read_text(encoding='utf-8')
+        self.assertLessEqual(len(reflow.encode('utf-8')), 260)
+        self.assertIn('.slateframe-project-grid{container:slateframe-portfolio/inline-size}', reflow)
+        self.assertIn('@container slateframe-portfolio (max-width:40rem)', reflow)
+        self.assertIn('.wp-block-post-template:where(:not(.is-layout-grid))', reflow)
+        self.assertIn('grid-template-columns:minmax(0,1fr)', reflow)
+        self.assertNotIn('overflow:hidden', reflow)
+        self.assertNotIn('!important', reflow)
+
+    def test_conditional_frontend_and_editor_parity(self):
+        php = (ROOT / 'functions.php').read_text(encoding='utf-8')
+        self.assertIn("'assets/css/query-loop.css', 'assets/css/portfolio-reflow.css', 'assets/css/editor.css'", php)
+        self.assertIn("'slateframe-portfolio-reflow'", php)
+        self.assertIn("array( 'slateframe-query-loop' )", php)
+        self.assertIn("get_template_directory_uri() . '/assets/css/portfolio-reflow.css'", php)
+
+    def test_all_authored_columns_rtl_cjk_and_core_grid_survive_zoom(self):
+        browser = (ROOT / 'tests/browser/portfolio-core-columns.spec.js').read_text(encoding='utf-8')
+        self.assertIn('w <= 40 * rootPx ? 1 : columns(chosen, w)', browser)
+        self.assertIn('for (const chosen of [1, 2, 3, 4, 5, 6])', browser)
+        self.assertIn('Core Grid must survive 400%', browser)
+        self.assertIn("for (const dir of ['ltr', 'rtl'])", browser)
+        self.assertIn("node.style.fontSize = '64px'", browser)
+        self.assertIn('expect(target.height).toBeGreaterThanOrEqual(43)', browser)
+
+    def test_exact_sha_evidence_and_budget_gates(self):
+        workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
+        self.assertIn('portfolio-reflow-${viewport}-${direction}-400.png', workflow)
+        self.assertIn('for viewport in 390 768 1440 1920; do', workflow)
+        self.assertIn('assets/css/portfolio-reflow.css', workflow)
+        self.assertIn('test $(wc -c < assets/css/portfolio-reflow.css) -le 260', workflow)
+
 
 if __name__ == '__main__':
     unittest.main()
