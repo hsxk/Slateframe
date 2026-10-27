@@ -97,13 +97,18 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn('Core grid columns', plugin)
         # Relative percentage zoom did not yield a 32px computed root in one
         # real WordPress/Chromium fixture. Test the actual 200%/400% geometry.
-        self.assertIn("n.style.fontSize='32px'", plugin)
-        self.assertIn("n.style.fontSize='64px'", plugin)
+        self.assertIn("n.style.setProperty('font-size','32px','important')", plugin)
+        self.assertIn("n.style.setProperty('font-size','64px','important')", plugin)
         self.assertIn('actual 200% font size', plugin)
         self.assertIn('Core grid actual 200%', plugin)
         self.assertIn('toBeCloseTo(64, 1)', plugin)
         self.assertNotIn("n.style.fontSize='200%'", plugin)
         self.assertNotIn("n.style.fontSize='400%'", plugin)
+        self.assertIn("n.style.setProperty('font-size','16px','important')", plugin)
+        self.assertIn("n.style.removeProperty('font-size')", plugin)
+        self.assertNotIn("n.style.fontSize=", plugin)
+        self.assertGreaterEqual(plugin.count("setProperty('font-size','32px','important')"), 5)
+        self.assertGreaterEqual(plugin.count("setProperty('font-size','64px','important')"), 2)
 
 
 if __name__ == '__main__':
