@@ -249,6 +249,15 @@ test('Gutenberg Core Table keeps real 400% RTL scroll containment in its editing
         scrollableWidth: node.scrollWidth - node.clientWidth
       };
     });
+    // Capture both the actual native block and the surrounding WordPress UI
+    // before assertions, so failed acceptance still yields inspectable evidence.
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    await figure.screenshot({
+      path: 'test-artifacts/screenshots/core-table-editor-' + width + '-rtl-400.png'
+    });
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-table-editor-context-' + width + '-rtl-400.png'
+    });
     expect(style.overflow).toBe('auto');
     expect(style.gutter).toBe('stable');
     expect(style.overscroll).toBe('contain');
@@ -263,10 +272,6 @@ test('Gutenberg Core Table keeps real 400% RTL scroll containment in its editing
     expect(style.pageOverflow,
       'new table must not increase pre-existing WordPress editor overflow (' + baselineOverflow + 'px)')
       .toBeLessThanOrEqual(baselineOverflow + 1);
-    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-    await figure.screenshot({
-      path: 'test-artifacts/screenshots/core-table-editor-' + width + '-rtl-400.png'
-    });
   } finally {
     await page.evaluate(id => {
       window.wp.data.dispatch('core/block-editor').removeBlock(id);
