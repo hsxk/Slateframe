@@ -1,4 +1,6 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs/promises');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 test('author archive keyboard skip link reaches the main landmark', async ({ page }, testInfo) => {
   await page.goto('/', { waitUntil: 'networkidle' });
@@ -23,4 +25,57 @@ test('author archive keyboard skip link reaches the main landmark', async ({ pag
   await page.emulateMedia({ forcedColors: 'active' });
   await expect(main).toBeFocused();
   expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+});
+
+test('focused skip link remains bounded and wraps at computed 400% zoom', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One WordPress page covers seven widths');
+  test.setTimeout(120000);
+  await page.goto('/', { waitUntil: 'networkidle' });
+  const skip = page.locator('a.skip-link[href="#main-content"]');
+  await skip.evaluate(node => {
+    node.textContent = 'Skip to content 日本語中文 العربية LongUnbrokenNavigationLabel';
+  });
+  await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+  for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const dir of ['ltr', 'rtl']) {
+      for (const font of width <= 412 ? [16, 32, 64] : [16, 32]) {
+        await setRootTextScale(page, font, dir);
+        await skip.focus();
+        await expect(skip).toBeFocused();
+        const state = await skip.evaluate(node => {
+          const box = node.getBoundingClientRect(), style = getComputedStyle(node);
+          return {
+            left: box.left, right: box.right, height: box.height,
+            whiteSpace: style.whiteSpace, wrap: style.overflowWrap,
+            outline: parseFloat(style.outlineWidth),
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+          };
+        });
+        const label = width + 'px ' + dir + ' ' + font + 'px';
+        expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);
+        expect(state.right, label + ' right').toBeLessThanOrEqual(width + 1);
+        expect(state.height, label + ' target height').toBeGreaterThanOrEqual(44);
+        expect(state.whiteSpace, label + ' wraps').toBe('normal');
+        expect(state.wrap, label + ' long token').toBe('anywhere');
+        expect(state.outline, label + ' focus').toBeGreaterThanOrEqual(2);
+        expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+        if (width === 390 && font === 64) {
+          await page.screenshot({ fullPage: false,
+            path: 'test-artifacts/screenshots/skip-link-390-' + dir + '-400.png' });
+        }
+      }
+    }
+  }
+  await page.setViewportSize({ width: 390, height: 900 });
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  await setRootTextScale(page, 64, 'rtl');
+  await skip.focus();
+  await page.screenshot({ fullPage: false,
+    path: 'test-artifacts/screenshots/skip-link-390-rtl-400-forced-colors.png' });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth -
+    document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  await skip.press('Enter');
+  await expect(page).toHaveURL(/#main-content$/);
+  await expect(page.locator('main#main-content')).toBeFocused();
 });
