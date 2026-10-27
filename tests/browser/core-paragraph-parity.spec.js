@@ -74,6 +74,13 @@ test('native Core Paragraph retains authored content and links across reflow and
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-paragraph-' + width + '-' + dir + '.png',
           });
+          if (width === 390 && font === 64) {
+            await root.locator('.slateframe-paragraph-dropcap').scrollIntoViewIfNeeded();
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/core-paragraph-390-' + dir + '-400.png',
+              fullPage: false,
+            });
+          }
         }
       }
     }
@@ -133,6 +140,7 @@ test('native Core Paragraph Gutenberg roundtrip preserves inline text and suppor
     if (!schema) throw new Error('Native Core Paragraph schema missing');
     const attributes = {
       content: '日本語 中文 العربية <a href="#chapter">Read chapter</a>',
+      dropCap: true,
       ...(schema.textAlign ? { textAlign: 'center' } :
         { style: { typography: { textAlign: 'center' } } }),
     };
@@ -152,6 +160,8 @@ test('native Core Paragraph Gutenberg roundtrip preserves inline text and suppor
   expect(result.second).toBe(result.third);
   expect(result.attrs.content).toContain('日本語 中文 العربية');
   expect(result.attrs.content).toContain('href="#chapter"');
+  expect(result.attrs.dropCap).toBe(true);
+  expect(result.first).toContain('has-drop-cap');
   for (const [key, value] of Object.entries(result.requested)) {
     expect(result.attrs[key], key).toEqual(value);
   }

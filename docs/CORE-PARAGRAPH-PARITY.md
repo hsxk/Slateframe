@@ -14,3 +14,9 @@ Slateframe keeps `core/paragraph` native. WordPress owns the paragraph tag, inli
 - Enforce a 300-byte stylesheet budget, source presence, screenshot evidence, and inclusion in the deterministic distributable ZIP.
 
 Inspect the actual screenshot artifact from the **exact PR HEAD** and require both Theme quality and Photography Actions success before merge. Manual Safari/VoiceOver and Firefox checks remain necessary before release.
+
+## Native Drop Cap authoring
+
+`theme.json` enables WordPress Core's own Paragraph Drop Cap authoring control. Previously the theme disabled the editor control even though it preserved and tested the native `has-drop-cap` output. No custom control, markup, JavaScript, or plugin is introduced. The frontend and editor share the same conditionally loaded `core-paragraph.css` asset.
+
+At 390px/400% text scaling, test both LTR and RTL with a real authored Drop Cap, keep its first-letter bounded, and capture viewport screenshots focused on the paragraph. WordPress Core's `:not(:focus)` behavior is intentional for editable content; do not override the focused state to force a decorative float. Verify the native `dropCap: true` attribute survives Gutenberg serialize → parse → serialize without changing the open document. These screenshots supplement, not replace, the existing 14-width/direction captures and forced-colors evidence.
