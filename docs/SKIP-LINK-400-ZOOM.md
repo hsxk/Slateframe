@@ -6,6 +6,14 @@ Previously the hidden utility's `white-space:nowrap` remained in force when
 focused. A translated or unusually long label could extend beyond a narrow
 viewport at 400% text zoom.
 
+A real WordPress/Chromium run at `1e8f016` exposed an additional Core
+cascade conflict: WordPress global styles apply
+`.screen-reader-text { word-wrap: normal !important; }`. Since `word-wrap`
+is an alias of `overflow-wrap`, an ordinary `overflow-wrap:anywhere` on the
+focused skip link computed to `normal` even though the theme selector existed.
+The focused selector now explicitly overrides this Core `!important` rule,
+and the browser test checks both computed aliases without changing Core markup.
+
 The focused `.skip-link` now uses logical `inset-inline-start` (LTR/RTL),
 a viewport-bounded maximum inline size, normal wrapping and
 `overflow-wrap:anywhere`. This changes **only the visible focused state**:
