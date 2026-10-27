@@ -37,6 +37,24 @@ class TableTextScaleEvidence(unittest.TestCase):
         plain = (ROOT / paths[2]).read_text(encoding="utf-8")
         self.assertIn("plain-table-320-rtl-400-forced-colors.png", plain)
 
+    def test_core_table_keyboard_zoom_requires_actual_scroll_and_focus(self):
+        js = (ROOT / "tests/browser/core-table-parity.spec.js").read_text(encoding="utf-8")
+        ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+        for token in ("for (const dir of ['ltr', 'rtl'])",
+                      "for (const [variant, figure] of [['fixed', fixed], ['striped', striped]])",
+                      "await setRootTextScale(page, 64, dir)",
+                      "node.matches(':focus-visible')",
+                      "getComputedStyle(node).outlineWidth",
+                      "node.scrollWidth - node.clientWidth",
+                      "await page.keyboard.press(dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight')",
+                      "node.scrollLeft", "toBeGreaterThan(0)",
+                      "document.documentElement.scrollWidth",
+                      "-keyboard-forced-colors.png"):
+            self.assertIn(token, js)
+        for token in ("for direction in ltr rtl", "for variant in fixed striped",
+                      "core-table-390-${direction}-400-${variant}-keyboard-forced-colors.png"):
+            self.assertIn(token, ci)
+
     def test_exact_visual_inventory_is_a_required_ci_gate(self):
         ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         for token in ("core-table-390-${direction}-400.png",
