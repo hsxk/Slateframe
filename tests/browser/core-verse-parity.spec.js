@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -46,10 +47,7 @@ test('native Verse preserves poetry line breaks, RTL direction and 400% reflow',
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, state) => {
-            node.dir = state.dir;
-            node.style.fontSize = state.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const state = await verse.evaluate(node => {
             const rect = node.getBoundingClientRect();
             const css = getComputedStyle(node);
@@ -75,13 +73,16 @@ test('native Verse preserves poetry line breaks, RTL direction and 400% reflow',
               path: 'test-artifacts/screenshots/core-verse-' + width + '-' + dir + '.png',
             });
           }
+          if (width === 390 && font === 64) {
+            await verse.scrollIntoViewIfNeeded();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-verse-390-' + dir + '-400.png' });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => {
-      node.dir = 'rtl'; node.style.fontSize = '32px';
-    });
+    await setRootTextScale(page, 32, 'rtl');
     const axe = await new AxeBuilder({ page }).include('.slateframe-verse-fixture')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
@@ -90,6 +91,12 @@ test('native Verse preserves poetry line breaks, RTL direction and 400% reflow',
     await root.screenshot({
       path: 'test-artifacts/screenshots/core-verse-390-rtl-200-forced-colors.png',
     });
+    await setRootTextScale(page, 64, 'rtl');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth -
+      document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await verse.scrollIntoViewIfNeeded();
+    await page.screenshot({ fullPage: false,
+      path: 'test-artifacts/screenshots/core-verse-390-rtl-400-forced-colors.png' });
     await page.emulateMedia({ forcedColors: 'none' });
     const blankId = wp('post', 'create', '--post_type=page', '--post_status=publish',
       '--post_title=' + slug + '-empty', '--post_content=', '--porcelain');
