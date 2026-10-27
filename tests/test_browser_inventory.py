@@ -123,6 +123,30 @@ class InventoryContract(unittest.TestCase):
                 self.assertEqual(run('generate', self.root), 65)
                 path.unlink()
 
+    def test_portfolio_full_page_width_is_bound_to_its_viewport(self):
+        for name, viewport in (
+            ('portfolio-reflow-680-ltr-full-page.png', 680),
+            ('portfolio-reflow-390-ltr-400-full-page.png', 390),
+            ('portfolio-reflow-1440-ltr-400-full-page.png', 1440),
+            ('portfolio-reflow-390-rtl-400-forced-colors-full-page.png', 390),
+        ):
+            with self.subTest(name=name):
+                path = self.root / name
+                path.write_bytes(png(viewport))
+                self.assertEqual(run('generate', self.root), 65)
+                path.write_bytes(png(viewport - 1))
+                with self.assertRaisesRegex(ValueError, 'Portfolio full-page viewport width mismatch'):
+                    run('generate', self.root)
+                path.unlink()
+
+    def test_tall_400_percent_portfolio_page_survives_inventory(self):
+        path = self.root / 'portfolio-reflow-390-rtl-400-forced-colors-full-page.png'
+        path.write_bytes(png(390, 22358))
+        self.assertEqual(run('generate', self.root), 65)
+        manifest = json.loads((self.root / MANIFEST).read_text())
+        self.assertEqual(manifest['screenshots'][path.name]['height'], 22358)
+        self.assertEqual(run('verify', self.root), 65)
+
     def test_rejects_missing_appearance_mode_even_if_count_is_unchanged(self):
         victim = self.root / 'appearance-spacious-viewport-1440-photography-lightbox.png'
         victim.unlink()

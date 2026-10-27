@@ -24,6 +24,9 @@ SIGNATURE = b"\x89PNG\r\n\x1a\n"
 MAX_CHUNK = 64 * 1024 * 1024
 MAX_COMPRESSED = 16 * 1024 * 1024
 MAX_PIXELS = 25_000_000
+# Real 390px RTL/400% Portfolio pages can exceed 20,000 CSS pixels in height.
+# Retain the independent 25M-pixel, 20MiB-file and 16MiB-IDAT safety caps.
+MAX_FULL_PAGE_HEIGHT = 24_000
 MAX_FILE_BYTES = 20 * 1024 * 1024
 
 
@@ -143,7 +146,7 @@ def validate_png(path: Path, viewport: int, *, include_raster_hash: bool = False
                 raise ValueError(f"missing first IHDR: {path.name}")
             width, height, depth, color, compression, filtering, interlace = struct.unpack(">IIBBBBB", payload)
             if not (min(200, viewport // 2) <= width <= viewport + 4
-                    and 24 <= height <= 20_000 and width * height <= MAX_PIXELS):
+                    and 24 <= height <= MAX_FULL_PAGE_HEIGHT and width * height <= MAX_PIXELS):
                 raise ValueError(f"wrong viewport or dimensions {width}x{height}: {path.name}")
             if depth != 8 or color not in (2, 6) or compression or filtering or interlace:
                 raise ValueError(f"unsupported screenshot encoding: {path.name}")

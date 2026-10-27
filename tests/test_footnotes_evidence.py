@@ -108,6 +108,24 @@ class FootnotesEvidenceContract(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "identical"):
                 verify(folder, HEAD)
 
+    def test_real_400_percent_portfolio_full_page_preserves_all_pixels(self):
+        # 56c4b88 WordPress/Chromium produced an actual 390x22358 RTL page.
+        # It fits the existing 25M-pixel budget and must not be cropped.
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'portfolio-rtl-400.png'
+            path.write_bytes(minimal_png(390, 22358))
+            self.assertEqual(validate_png(path, 390), (390, 22358))
+
+    def test_tall_evidence_still_rejects_height_above_explicit_cap(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'too-tall.png'
+            # IHDR is rejected before any raster decompression/allocation.
+            ihdr = struct.pack('>IIBBBBB', 390, 24001, 8, 6, 0, 0, 0)
+            path.write_bytes(b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', ihdr)
+                             + chunk(b'IDAT', zlib.compress(b'tiny')) + chunk(b'IEND', b''))
+            with self.assertRaisesRegex(ValueError, 'wrong viewport or dimensions'):
+                validate_png(path, 390)
+
     def test_oversized_raster_rejected_before_decompression(self):
         with tempfile.TemporaryDirectory() as root:
             path = Path(root) / "evidence.png"
