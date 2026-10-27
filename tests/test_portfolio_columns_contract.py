@@ -84,6 +84,15 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn("'portfolio-reflow':1", plugin)
         self.assertIn('const coreGrid =', plugin)
         self.assertIn('Core grid columns', plugin)
+        # Relative percentage zoom did not yield a 32px computed root in one
+        # real WordPress/Chromium fixture. Test the actual 200%/400% geometry.
+        self.assertIn("n.style.fontSize='32px'", plugin)
+        self.assertIn("n.style.fontSize='64px'", plugin)
+        self.assertIn('actual 200% font size', plugin)
+        self.assertIn('Core grid actual 200%', plugin)
+        self.assertIn('toBeCloseTo(64, 1)', plugin)
+        self.assertNotIn("n.style.fontSize='200%'", plugin)
+        self.assertNotIn("n.style.fontSize='400%'", plugin)
 
 
 if __name__ == '__main__':
