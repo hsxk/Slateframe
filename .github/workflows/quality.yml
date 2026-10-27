@@ -1089,6 +1089,12 @@ jobs:
             test -s "test-artifacts/screenshots/core-table-390-${direction}-400.png" || { echo "Missing real 400% Core Table evidence: ${direction}" >&2; exit 1; }
             test -s "test-artifacts/screenshots/core-data-table-390-${direction}-400.png" || { echo "Missing real 400% data table evidence: ${direction}" >&2; exit 1; }
           done
+          for direction in ltr rtl; do
+            for variant in fixed striped; do
+              screenshot="core-table-390-${direction}-400-${variant}-keyboard-forced-colors.png"
+              test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing real 400% Core Table keyboard evidence: $screenshot" >&2; exit 1; }
+            done
+          done
           for screenshot in core-table-390-rtl-400-forced-colors.png core-data-table-rtl.png core-data-table-390-rtl-200-forced-colors.png core-data-table-390-rtl-400-forced-colors.png plain-table-320-rtl-200-forced-colors.png plain-table-320-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing table zoom/keyboard evidence: $screenshot" >&2; exit 1; }
           done
