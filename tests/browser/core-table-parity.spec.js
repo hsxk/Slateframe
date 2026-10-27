@@ -188,3 +188,68 @@ test('Core Table Gutenberg roundtrip preserves native cells and authored layout'
     if (item.input.className) expect(item.attrs.className).toBe(item.input.className);
   }
 });
+
+
+test('Gutenberg Core Table keeps real 400% RTL scroll containment in its editing canvas', async ({ page }, info) => {
+  const postId = process.env.SLATEFRAME_EDITOR_POST_ID;
+  const width = info.project.use.viewport?.width;
+  test.skip(!postId || ![390, 1440].includes(width), 'Authenticated Gutenberg fixture');
+  test.setTimeout(90000);
+  await openAuthenticatedEditor(page, postId);
+  // Insert a disposable native Core block; never save or modify the fixture post.
+  const clientId = await page.evaluate(() => {
+    const block = window.wp.blocks.createBlock('core/table', {
+      hasFixedLayout: true,
+      body: [{ cells: [
+        { content: '日本語 中文 العربية ' + 'LongTableCell'.repeat(8), tag: 'td' },
+        { content: 'Value 1234567890', tag: 'td' }
+      ] }]
+    });
+    window.wp.data.dispatch('core/block-editor').insertBlocks(block);
+    return block.clientId;
+  });
+  try {
+    const selector = '.editor-styles-wrapper :is([data-block="' + clientId +
+      '"].wp-block-table,[data-block="' + clientId + '"] .wp-block-table)';
+    let canvas;
+    await expect.poll(async () => {
+      for (const frame of page.frames()) {
+        if (await frame.locator(selector).count().catch(() => 0)) {
+          canvas = frame;
+          return true;
+        }
+      }
+      return false;
+    }, { timeout: 15000 }).toBe(true);
+    await setRootTextScale(canvas, 64, 'rtl');
+    const figure = canvas.locator(selector);
+    await expect(figure).toHaveCount(1);
+    const style = await figure.evaluate(node => {
+      const css = getComputedStyle(node);
+      return {
+        overflow: css.overflowX,
+        gutter: css.scrollbarGutter,
+        overscroll: css.overscrollBehaviorInline,
+        containment: css.contain,
+        minWidth: css.minInlineSize,
+        direction: css.direction,
+        pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+      };
+    });
+    expect(style.overflow).toBe('auto');
+    expect(style.gutter).toBe('stable');
+    expect(style.overscroll).toBe('contain');
+    expect(style.containment).toContain('inline-size');
+    expect(style.minWidth).toBe('0px');
+    expect(style.direction).toBe('rtl');
+    expect(style.pageOverflow).toBeLessThanOrEqual(1);
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    await figure.screenshot({
+      path: 'test-artifacts/screenshots/core-table-editor-' + width + '-rtl-400.png'
+    });
+  } finally {
+    await page.evaluate(id => {
+      window.wp.data.dispatch('core/block-editor').removeBlock(id);
+    }, clientId);
+  }
+});

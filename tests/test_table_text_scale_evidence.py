@@ -55,6 +55,23 @@ class TableTextScaleEvidence(unittest.TestCase):
                       "core-table-390-${direction}-400-${variant}-keyboard-forced-colors.png"):
             self.assertIn(token, ci)
 
+    def test_gutenberg_core_table_scroll_parity_is_exercised(self):
+        editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
+        browser = (ROOT / "tests/browser/core-table-parity.spec.js").read_text(encoding="utf-8")
+        ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+        for token in ("min-inline-size: 0;", "scrollbar-gutter: stable;",
+                      "overscroll-behavior-inline: contain;", "contain: inline-size;"):
+            self.assertIn(token, editor)
+        for token in ("openAuthenticatedEditor(page, postId)",
+                      "window.wp.blocks.createBlock('core/table'",
+                      "insertBlocks(block)", "removeBlock(id)",
+                      "await setRootTextScale(canvas, 64, 'rtl')",
+                      "css.scrollbarGutter", "css.overscrollBehaviorInline",
+                      "css.contain", "document.documentElement.scrollWidth",
+                      "core-table-editor-"):
+            self.assertIn(token, browser)
+        self.assertIn("core-table-editor-${width}-rtl-400.png", ci)
+
     def test_exact_visual_inventory_is_a_required_ci_gate(self):
         ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         for token in ("core-table-390-${direction}-400.png",

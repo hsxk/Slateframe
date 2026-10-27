@@ -75,9 +75,14 @@
 	color: var(--slateframe-muted);
 }
 
+/* Match the published Core Table scroll boundary inside nested Gutenberg layouts. */
 .editor-styles-wrapper .wp-block-table {
+	min-inline-size: 0;
 	max-inline-size: 100%;
 	overflow-x: auto;
+	scrollbar-gutter: stable;
+	overscroll-behavior-inline: contain;
+	contain: inline-size;
 }
 
 .editor-styles-wrapper .wp-block-table table {
