@@ -33,6 +33,8 @@ class PortfolioFocusClearanceContract(unittest.TestCase):
             "result.scrollMargin",
             "result.headerHeight",
             "result.headerPosition",
+            "afterFocus.headerBottom",
+            "afterFocus.top",
             "result.overflow",
             "toBeFocused()",
             "getComputedStyle(node).outlineWidth",
