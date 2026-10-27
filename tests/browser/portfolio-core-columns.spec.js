@@ -4,7 +4,7 @@ const { settlePortfolioImagesForEvidence } = require('./visual-evidence');
 const projectPath = process.env.SLATEFRAME_PROJECT_PATH;
 const width = (info) => info.project.use.viewport?.width || 0;
 const columns = (chosen, w) => w <= 640 ? 1 : w <= 900 ? Math.min(2, chosen) : chosen;
-const zoomColumns = (chosen, w, rootPx) => w <= 35 * rootPx ? 1 : columns(chosen, w);
+const zoomColumns = (chosen, viewport, containerWidth, rootPx) => containerWidth <= 35 * rootPx ? 1 : columns(chosen, viewport);
 
 async function openTemplate(page) {
   await page.goto(projectPath, { waitUntil: 'domcontentloaded' });
@@ -48,14 +48,15 @@ test('Core is-layout-grid remains authoritative', async ({ page }) => {
   const actual = await metrics(list);
   expect(actual.tracks).toBe(2);
   expect(actual.overflow).toBeLessThanOrEqual(1);
-  await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+  await page.locator('html').evaluate(node => { node.style.setProperty('font-size', '64px', 'important'); });
+  expect(await page.locator('html').evaluate(node => parseFloat(getComputedStyle(node).fontSize))).toBeCloseTo(64, 1);
   expect((await metrics(list)).tracks, 'authored Core Grid must survive 400%').toBe(2);
 });
 
 test('RTL/CJK and 200% text enlargement preserve grid boundaries', async ({ page }, info) => {
   test.skip(!projectPath, 'Requires the real WordPress Portfolio fixture');
   const list = await openTemplate(page);
-  await page.locator('html').evaluate((node) => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
+  await page.locator('html').evaluate((node) => { node.dir = 'rtl'; node.style.setProperty('font-size', '32px', 'important'); });
   await list.evaluate((node) => {
     for (const name of [...node.classList]) if (/^columns-[1-6]$/.test(name)) node.classList.remove(name);
     node.classList.add('columns-6');
@@ -64,7 +65,12 @@ test('RTL/CJK and 200% text enlargement preserve grid boundaries', async ({ page
     });
   });
   const actual = await metrics(list);
-  expect(actual.tracks).toBe(zoomColumns(6, width(info), 32));
+  const zoom = await list.evaluate(node => ({
+    rootPx: parseFloat(getComputedStyle(document.documentElement).fontSize),
+    containerWidth: parseFloat(getComputedStyle(node.closest('.slateframe-project-grid')).width),
+  }));
+  expect(zoom.rootPx, 'real 200% computed font size').toBeCloseTo(32, 1);
+  expect(actual.tracks).toBe(zoomColumns(6, width(info), zoom.containerWidth, zoom.rootPx));
   expect(actual.overflow).toBeLessThanOrEqual(1);
 });
 
@@ -77,7 +83,7 @@ test('default-size Portfolio preserves 641–900px authored tablet columns near 
     for (const direction of ['ltr', 'rtl']) {
       await page.locator('html').evaluate((node, dir) => {
         node.dir = dir;
-        node.style.fontSize = '16px';
+        node.style.setProperty('font-size', '16px', 'important');
       }, direction);
       for (const chosen of [1, 2, 3, 4, 5, 6]) {
         await list.evaluate((node, count) => {
@@ -119,7 +125,7 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
   for (const dir of ['ltr', 'rtl']) {
     await page.locator('html').evaluate((node, direction) => {
       node.dir = direction;
-      node.style.fontSize = '64px';
+      node.style.setProperty('font-size', '64px', 'important');
     }, dir);
     for (const chosen of [1, 2, 3, 4, 5, 6]) {
       await list.evaluate((node, count) => {
@@ -132,6 +138,8 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
         });
       }, chosen);
       const state = await list.evaluate(node => ({
+        rootPx: parseFloat(getComputedStyle(document.documentElement).fontSize),
+        containerWidth: parseFloat(getComputedStyle(node.closest('.slateframe-project-grid')).width),
         containerName: getComputedStyle(node.closest('.slateframe-project-grid')).containerName,
         tracks: getComputedStyle(node).gridTemplateColumns.split(' ').filter(Boolean).length,
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -141,8 +149,9 @@ test('Portfolio native flex columns reflow at 400% without overriding Core Grid'
         }),
       }));
       const label = viewport + 'px ' + dir + ' columns-' + chosen + ' 400%';
+      expect(state.rootPx, label + ' real 400% font size').toBeCloseTo(64, 1);
       expect(state.containerName, label + ' named container').toBe('slateframe-portfolio');
-      expect(state.tracks, label + ' readable tracks').toBe(zoomColumns(chosen, viewport, 64));
+      expect(state.tracks, label + ' readable tracks').toBe(zoomColumns(chosen, viewport, state.containerWidth, state.rootPx));
       expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
       for (const box of state.boxes) {
         expect(box.left, label + ' card left').toBeGreaterThanOrEqual(-1);
@@ -204,12 +213,13 @@ test('native Core pagination keeps 44px targets in RTL and enlarged text', async
   const nav = page.locator('.slateframe-project-grid .wp-block-query-pagination').first();
   await expect(nav).toBeVisible();
   for (const direction of ['ltr', 'rtl']) {
-    for (const size of ['100%', '200%']) {
+    for (const size of [16, 32]) {
       await page.locator('html').evaluate((root, state) => {
         root.dir = state.direction;
-        root.style.fontSize = state.size;
+        root.style.setProperty('font-size', state.size + 'px', 'important');
       }, { direction, size });
       const metrics = await nav.evaluate((node) => ({
+        rootPx: parseFloat(getComputedStyle(document.documentElement).fontSize),
         minTarget: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
         links: [...node.querySelectorAll('a[href]')].map((link) => {
           const box = link.getBoundingClientRect();
@@ -220,6 +230,7 @@ test('native Core pagination keeps 44px targets in RTL and enlarged text', async
         })),
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       }));
+      expect(metrics.rootPx, 'pagination actual zoom').toBeCloseTo(size, 1);
       expect(metrics.minTarget).toBeGreaterThanOrEqual(44);
       expect(metrics.links.length).toBeGreaterThan(0);
       expect(metrics.current.length).toBeGreaterThan(0);
