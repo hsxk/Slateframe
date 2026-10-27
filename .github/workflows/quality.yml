@@ -1139,6 +1139,9 @@ jobs:
             screenshot="test-artifacts/screenshots/$name"
             test -s "$screenshot" || { echo "Missing full-page Portfolio context: $screenshot" >&2; exit 1; }
           done
+          for name in portfolio-focus-scroll-390-rtl-400.png portfolio-focus-scroll-768-rtl-200-forced-colors.png portfolio-focus-scroll-1440-ltr-400.png; do
+            test -s "test-artifacts/screenshots/$name" || { echo "Missing Portfolio focus clearance evidence: $name" >&2; exit 1; }
+          done
           for profile in default compact spacious; do
             for viewport in 320 375 390 412 768 1440 1920; do
               for variant in ltr rtl-200-forced-colors; do
