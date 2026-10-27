@@ -94,9 +94,28 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
         // The plugin owns its shortcode markup; normal-size authored columns
         // must remain unchanged before testing the opt-in 200% reflow.
         await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.setProperty('font-size','16px','important');},direction);
-        const baselineTracks = await list.evaluate(n=>
-          getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length);
-        expect(baselineTracks,`${width} ${direction} normal-size columns`).toBe(width<=640?1:width<=900?2:3);
+        // A prior 200% iteration may leave the old computed root active
+        // until Chromium finishes resolving the new 16px declaration.
+        // Check the real baseline before asserting authored column parity.
+        await page.evaluate(() => new Promise(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        await expect.poll(() => page.evaluate(() => {
+          const root = document.documentElement;
+          return {
+            inline: root.style.getPropertyValue('font-size'),
+            priority: root.style.getPropertyPriority('font-size'),
+            computed: parseFloat(getComputedStyle(root).fontSize),
+          };
+        }), { timeout: 10000 }).toEqual({
+          inline: '16px', priority: 'important', computed: 16,
+        });
+        const baseline = await list.evaluate(n=>({
+          tracks:getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length,
+          rootPx:parseFloat(getComputedStyle(document.documentElement).fontSize),
+          containerWidth:parseFloat(getComputedStyle(n.closest('.slateframe-project-grid')).width),
+        }));
+        expect(baseline.rootPx,`${width} ${direction} computed normal-size root`).toBeCloseTo(16, 1);
+        expect(baseline.tracks,`${width} ${direction} normal-size columns (container ${baseline.containerWidth}px, root ${baseline.rootPx}px)`).toBe(width<=640?1:width<=900?2:3);
         await page.locator('html').evaluate(n=>{n.style.setProperty('font-size','32px','important');});
         // The real WordPress browser fixture has previously exposed a stale
         // computed 16px immediately after the 32px override. Wait for actual
