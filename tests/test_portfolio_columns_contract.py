@@ -59,6 +59,7 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn('expect(target.height).toBeGreaterThanOrEqual(43)', browser)
 
     def test_exact_sha_evidence_and_budget_gates(self):
+        browser = (ROOT / 'tests/browser/portfolio-core-columns.spec.js').read_text(encoding='utf-8')
         workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
         self.assertIn('portfolio-reflow-${viewport}-${direction}-400.png', workflow)
         self.assertIn('portfolio-reflow-680-${direction}-default.png', workflow)
