@@ -28,8 +28,8 @@ class CoreReadMoreParity(unittest.TestCase):
         for value in ("wp('post', 'create'", "wp('post', 'delete'", 'finally',
                       'get_permalink(', 'wp:query', 'wp:post-template', 'core/read-more',
                       '320, 375, 390, 412, 768, 1440, 1920', "'ltr', 'rtl'",
-                      "fontSize = '64px'", "forcedColors: 'active'", 'new AxeBuilder',
-                      'openAuthenticatedEditor', 'blocks.serialize', 'blocks.parse',
+                      "await setRootTextScale(page, 64, 'rtl');", "forcedColors: 'active'", 'new AxeBuilder',
+                      "require('./support/root-text-scale')", 'openAuthenticatedEditor', 'blocks.serialize', 'blocks.parse',
                       "page.keyboard.press('Tab')", 'screen-reader-text',
                       'core-read-more-390-rtl-200-forced-colors.png'):
             self.assertIn(value, js)
