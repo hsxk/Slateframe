@@ -114,6 +114,32 @@ test('native Core Table retains fixed layout, caption and striped rows across vi
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await link.focus();
     await root.screenshot({ path: 'test-artifacts/screenshots/core-table-390-rtl-400-forced-colors.png' });
+    // A scrollable Core figure must remain reachable and operable at real 400% text.
+    // Capture the visible viewport, not only a tall clipped element screenshot.
+    for (const dir of ['ltr', 'rtl']) {
+      await setRootTextScale(page, 64, dir);
+      for (const [variant, figure] of [['fixed', fixed], ['striped', striped]]) {
+        const label = '390px ' + dir + ' 400% ' + variant;
+        expect(await figure.evaluate(node => node.scrollWidth - node.clientWidth),
+          label + ' horizontally scrollable').toBeGreaterThan(0);
+        await page.keyboard.press('Tab');
+        await figure.focus();
+        await expect(figure, label + ' keyboard focus').toBeFocused();
+        expect(await figure.evaluate(node => node.matches(':focus-visible')),
+          label + ' visible focus').toBe(true);
+        expect(await figure.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth)),
+          label + ' forced-colors outline').toBeGreaterThanOrEqual(2);
+        await figure.evaluate(node => { node.scrollLeft = 0; });
+        await page.keyboard.press(dir === 'rtl' ? 'ArrowLeft' : 'ArrowRight');
+        await expect.poll(async () => Math.abs(await figure.evaluate(node => node.scrollLeft)),
+          { timeout: 3000, message: label + ' keyboard scroll' }).toBeGreaterThan(0);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth -
+          document.documentElement.clientWidth), label + ' document overflow')
+          .toBeLessThanOrEqual(1);
+        await page.screenshot({ path: 'test-artifacts/screenshots/core-table-390-' + dir +
+          '-400-' + variant + '-keyboard-forced-colors.png' });
+      }
+    }
     await page.emulateMedia({ forcedColors: 'none' });
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => document.getElementById('slateframe-core-table-inline-css') ||
