@@ -38,6 +38,16 @@ basenames, and `.env`-suffixed environment variants. These are not
 distributable theme assets. Regression cases verify the normalized Unicode
 aliases and ensure ordinary public JSON and SVG files still package.
 
+Archive suffixes are peeled repeatedly when checking sensitive basenames:
+a file called `backup.sql.tar.gz`, `id_ed25519.tar.zst`,
+`credentials.json.rar`, or `dump.sql.gz.zip` is rejected just like
+its unwrapped private name. The guard also excludes common editor backup
+suffixes (`.old`, `.backup`, `.tmp`, `.temp`, `.save`, `~`) and
+private-key/vault formats (`.p8`, `.jks`, `.keystore`, `.kdbx`).
+These are filename-based release safety checks, not archive-content scanning;
+ordinary uniquely named public archives such as `photo.tar.gz` remain
+distributable. Regression tests cover both rejection and safe packaging.
+
 The Git-backed release builder regression suite
 (`tests/test_release_manifest_guard.py`) exercises invalid punctuation,
 device names, fullwidth path aliases, compatibility collisions and valid

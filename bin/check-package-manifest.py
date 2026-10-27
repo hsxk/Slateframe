@@ -54,7 +54,7 @@ def validate(root, theme_dir):
             parent = parent.parent
     blocked_extensions = (
         ".pem", ".key", ".p12", ".pfx", ".sql", ".sqlite", ".bak", ".orig", ".swp",
-        ".sqlite3", ".db",
+        ".sqlite3", ".db", ".p8", ".jks", ".keystore", ".kdbx",
         ".db-wal", ".db-shm", ".db-journal",
         ".sqlite-wal", ".sqlite-shm", ".sqlite-journal",
         ".sqlite3-wal", ".sqlite3-shm", ".sqlite3-journal",
@@ -110,28 +110,33 @@ def validate(root, theme_dir):
             # A fullwidth dot or compatibility letter can disguise a private
             # extension/name in an otherwise portable ZIP member.
             portable_basename = unicodedata.normalize("NFKC", item.name).casefold()
-            # Environment files and compressed database dumps are not theme assets.
-            # Check the normalized name so compatibility dots cannot bypass it.
-            environment_file = ".env." in portable_basename or portable_basename.endswith(".env")
-            compression_extensions = (".gz", ".zip", ".zst", ".xz", ".bz2")
-            compressed_private_extension = any(
-                portable_basename.endswith(extension + compression)
-                for extension in blocked_extensions
-                for compression in compression_extensions
+            # Inspect successive archive wrappers, not just one compression
+            # suffix. A name such as backup.sql.tar.gz or id_rsa.gz.zip
+            # must never bypass the private-file guard.
+            archive_wrappers = (
+                ".tar.gz", ".tar.zst", ".tar.xz", ".tar.bz2", ".tar.br",
+                ".tgz", ".tbz", ".tbz2", ".txz", ".tzst",
+                ".tar", ".gz", ".zip", ".zst", ".xz", ".bz2",
+                ".br", ".7z", ".rar", ".lz4",
             )
-            compressed_private_name = any(
-                portable_basename == blocked + compression
-                for blocked in blocked_names
-                for compression in compression_extensions
-            )
-            if (
-                portable_basename in blocked_names
-                or portable_basename.endswith(blocked_extensions)
-                or environment_file
-                or compressed_private_extension
-                or compressed_private_name
-            ):
-                raise ValueError(f"Refusing private or backup file in theme package: {name}")
+            backup_suffixes = (".old", ".backup", ".tmp", ".temp", ".save", ".swo", "~")
+            candidate = portable_basename
+            while True:
+                if (
+                    candidate in blocked_names
+                    or candidate.endswith(blocked_extensions)
+                    or ".env." in candidate
+                    or candidate.endswith(".env")
+                    or candidate.endswith(backup_suffixes)
+                ):
+                    raise ValueError(f"Refusing private or backup file in theme package: {name}")
+                wrapper = next(
+                    (suffix for suffix in archive_wrappers if candidate.endswith(suffix)),
+                    None,
+                )
+                if wrapper is None:
+                    break
+                candidate = candidate[: -len(wrapper)]
             if staged_blob_id(root, item) != committed[name]:
                 raise ValueError(f"Refusing staged content differing from HEAD: {name}")
 

@@ -446,6 +446,69 @@ class ReleaseManifestGuardTests(unittest.TestCase):
     def test_compressed_ssh_private_key_is_rejected(self):
         self.assert_rejected_private_path("id_rsa.gz")
 
+
+    def test_tar_gzip_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("backup.sql.tar.gz")
+
+    def test_tar_gzip_credentials_is_rejected(self):
+        self.assert_rejected_private_path("credentials.json.tar.gz")
+
+    def test_tar_zstd_ssh_key_is_rejected(self):
+        self.assert_rejected_private_path("id_ed25519.tar.zst")
+
+    def test_tar_xz_pem_is_rejected(self):
+        self.assert_rejected_private_path("secret.pem.tar.xz")
+
+    def test_tar_bzip2_database_is_rejected(self):
+        self.assert_rejected_private_path("snapshot.sqlite3.tar.bz2")
+
+    def test_double_wrapped_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("dump.sql.gz.zip")
+
+    def test_seven_zip_sql_dump_is_rejected(self):
+        self.assert_rejected_private_path("dump.sql.7z")
+
+    def test_rar_credentials_is_rejected(self):
+        self.assert_rejected_private_path("credentials.json.rar")
+
+    def test_unicode_wrapped_private_extension_is_rejected(self):
+        self.assert_rejected_private_path("secret．pem．tar．gz")
+
+    def test_brotli_wrapped_private_key_is_rejected(self):
+        self.assert_rejected_private_path("secret.pem.br")
+
+    def test_apple_private_key_is_rejected(self):
+        self.assert_rejected_private_path("private.p8")
+
+    def test_java_keystore_is_rejected(self):
+        self.assert_rejected_private_path("android.jks")
+
+    def test_password_vault_is_rejected(self):
+        self.assert_rejected_private_path("passwords.kdbx")
+
+    def test_generic_keystore_is_rejected(self):
+        self.assert_rejected_private_path("settings.keystore")
+
+    def test_editor_old_backup_is_rejected(self):
+        self.assert_rejected_private_path("functions.php.old")
+
+    def test_editor_tilde_backup_is_rejected(self):
+        self.assert_rejected_private_path("functions.php~")
+
+    def test_compressed_editor_backup_is_rejected(self):
+        self.assert_rejected_private_path("functions.php.backup.gz")
+
+    def test_safe_public_archive_wrappers_remain_distributable(self):
+        names = ("photo.tar.gz", "icons.7z", "sample.zip", "写真.tgz")
+        for name in names:
+            (self.root / name).write_text("public archive fixture\\n", encoding="utf-8")
+        self.commit()
+        result = self.build()
+        self.assertEqual(0, result.returncode, result.stderr)
+        with zipfile.ZipFile(self.root / "dist" / "slateframe.zip") as archive:
+            for name in names:
+                self.assertIn("slateframe/" + name, archive.namelist())
+
     def test_public_json_and_svg_remain_distributable(self):
         (self.root / "public-data.json").write_text("{}\n")
         (self.root / "database.svg").write_text("<svg/>\n")
