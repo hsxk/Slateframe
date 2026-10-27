@@ -1206,6 +1206,10 @@ jobs:
           # The browser inventory below enforces all nine FAQ screenshots,
           # including the full Gutenberg paragraph and keyboard focus crop.
           # Never use the fixed 1200x900 WordPress.org validator for these crops.
+          # Native Core fallback and search must show actual 400% text in both directions.
+          for screenshot in core-query-no-results-390-ltr-400.png core-query-no-results-390-rtl-400.png core-query-no-results-390-rtl-400-forced-colors.png core-search-extra-390-ltr-400.png core-search-extra-390-rtl-400.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing computed 400% Core fallback/search evidence: $screenshot" >&2; exit 1; }
+          done
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
           python3 tests/verify_browser_inventory.py generate

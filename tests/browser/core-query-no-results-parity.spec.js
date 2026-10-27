@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
 }).trim();
@@ -58,9 +59,7 @@ test('native Query No Results appears only for an empty Core Query Loop', async 
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, value) => {
-            node.dir = value.dir; node.style.fontSize = value.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const m = await message.evaluate(node => {
             const box = node.getBoundingClientRect();
             const a = node.querySelector('.wp-block-button__link').getBoundingClientRect();
@@ -85,11 +84,16 @@ test('native Query No Results appears only for an empty Core Query Loop', async 
               path: 'test-artifacts/screenshots/core-query-no-results-' + width + '-' + dir + '.png',
             });
           }
+          if (font === 64 && width === 390) {
+            await message.screenshot({
+              path: 'test-artifacts/screenshots/core-query-no-results-390-' + dir + '-400.png',
+            });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.keyboard.press('Tab');
     await button.focus();
     await expect(button).toBeFocused();
@@ -103,9 +107,16 @@ test('native Query No Results appears only for an empty Core Query Loop', async 
     await message.screenshot({
       path: 'test-artifacts/screenshots/core-query-no-results-390-rtl-200-forced-colors.png',
     });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await button.focus();
+    await expect(button).toBeFocused();
+    expect(await button.evaluate(node => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
+    expect(await button.evaluate(node => getComputedStyle(node).outlineStyle)).not.toBe('none');
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    await message.screenshot({
+      path: 'test-artifacts/screenshots/core-query-no-results-390-rtl-400-forced-colors.png',
+    });
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => Boolean(
       document.getElementById('slateframe-core-query-no-results-inline-css') ||

@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 // Structural Core-shaped fixtures; Core's button-only reveal JS and Gutenberg
 // saved-block validity require separate WordPress/editor acceptance.
@@ -20,10 +21,7 @@ test('Core Search no-button and button-only remain accessible at 400% text', asy
   });
   for (const direction of ['ltr', 'rtl']) {
     for (const font of [16, 32, 64]) {
-      await page.locator('html').evaluate((node, state) => {
-        node.dir = state.direction;
-        node.style.fontSize = state.font + 'px';
-      }, { direction, font });
+      await setRootTextScale(page, font, direction);
       for (const selector of ['#extra-search', '.slateframe-extra-search-test button']) {
         const control = page.locator(selector);
         const metrics = await control.evaluate(node => {
@@ -40,13 +38,19 @@ test('Core Search no-button and button-only remain accessible at 400% text', asy
         await control.focus();
         await expect(control, label).toBeFocused();
       }
+      if (font === 64 && width === 390) {
+        await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+        await page.locator('.slateframe-extra-search-test').screenshot({
+          path: 'test-artifacts/screenshots/core-search-extra-390-' + direction + '-400.png',
+        });
+      }
     }
   }
   expect(await page.locator('.slateframe-extra-search-test form').first().evaluate(node => new FormData(node).get('s'))).toBe('portable');
   await expect(page.locator('.slateframe-extra-search-test button')).toHaveAccessibleName('Search articles');
   if (![320, 390, 768, 1440, 1920].includes(width)) return;
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
-  await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '64px'; });
+  await setRootTextScale(page, 64, 'rtl');
   for (const selector of ['#extra-search', '.slateframe-extra-search-test button']) {
     const control = page.locator(selector);
     await control.focus();
