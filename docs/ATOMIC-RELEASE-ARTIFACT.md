@@ -34,3 +34,12 @@ file. CRC checks remain in place to catch compressed data corruption.
 This is an additional defense against a ZIP writer or post-processing step
 producing a structurally valid but different package. It does not replace the
 source manifest, WordPress.org Theme Check, or a new-SHA GitHub Actions run.
+
+## Final ZIP-to-HEAD attestation
+
+After structural and staged-byte checks, `bin/verify-package-head.py` hashes
+actual decompressed ZIP members with Git's object-format-aware `hash-object
+--stdin` and compares them with committed `HEAD` blob IDs. This prevents a
+staging rewrite between preflight and ZIP writing from silently replacing the
+release bytes while retaining valid CRCs. Failed attestation preserves the
+last known-good ZIP; see [exact-HEAD integrity](FINAL-ARCHIVE-HEAD-INTEGRITY.md).

@@ -24,6 +24,9 @@ class AtomicReleaseTests(unittest.TestCase):
         (self.root / 'bin').mkdir(parents=True)
         (self.root / 'bin' / 'build-theme-zip.sh').write_bytes(BUILDER.read_bytes())
         (self.root / 'bin' / 'build-theme-zip.sh').chmod(0o755)
+        (self.root / 'bin' / 'verify-package-head.py').write_bytes(
+            (BUILDER.parent / 'verify-package-head.py').read_bytes()
+        )
         (self.root / '.distignore').write_text('.git/\nbin/\ndist/\n.distignore\n')
         for filename in ('style.css', 'functions.php', 'theme.json', 'readme.txt', 'LICENSE'):
             (self.root / filename).write_text(filename + '\n')

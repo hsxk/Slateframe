@@ -15,7 +15,7 @@ The public quality workflow currently requires:
 - every shipped `patterns/*.php` file has a valid `slateframe/` slug matching its filename, exactly matches the live WordPress pattern registry, parses as block content, and embeds no remote media URLs;
 - responsive browser regression, including real Gutenberg authoring evidence, core attachment/media templates, untitled/sticky/search discovery states, content-mode, print, CJK/RTL, long-string, and system/light/dark color-mode fixtures;
 - separate base, singular-reading, discussion, specialized content-mode, and combined contextual-runtime ceilings so optional presentation does not silently inflate ordinary routes;
-- package-content and complete 1200×900 PNG decoding (chunk lengths, CRC, zlib stream, row filters, dimensions, and IEND), plus a byte-for-byte reproducibility gate that builds the same revision twice and requires identical SHA256 output.
+- package-content and complete 1200×900 PNG decoding (chunk lengths, CRC, zlib stream, row filters, dimensions, and IEND), plus final ZIP-to-HEAD Git blob attestation and a byte-for-byte reproducibility gate that builds the same revision twice and requires identical SHA256 output.
 
 Theme Check advisory findings remain visible in CI rather than being hidden. Color-mode CI also validates the 44px toggle target, accessible pressed state/name, server-resolved site defaults, visitor-cookie persistence, semantic dark surfaces, and representative mobile/desktop screenshots.
 

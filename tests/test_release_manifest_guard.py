@@ -6,6 +6,8 @@ The fixture uses a temporary Git repository and does not touch production.
 
 import hashlib
 import os
+import shlex
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -26,6 +28,9 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         (self.root / "bin" / "build-theme-zip.sh").write_bytes(SCRIPT.read_bytes())
         (self.root / "bin" / "check-package-manifest.py").write_bytes(
             (SCRIPT.parent / "check-package-manifest.py").read_bytes()
+        )
+        (self.root / "bin" / "verify-package-head.py").write_bytes(
+            (SCRIPT.parent / "verify-package-head.py").read_bytes()
         )
         (self.root / "bin" / "check-screenshot.py").write_text(
             "from pathlib import Path\n"
@@ -666,6 +671,27 @@ class ReleaseManifestGuardTests(unittest.TestCase):
         self.assertEqual(0, result.returncode, result.stderr)
         self.assertTrue((Path(self.temp.name) / "outside" / "slateframe.zip").is_file())
 
+
+    def test_zip_writer_stage_mutation_cannot_replace_last_good_release(self):
+        first = self.build()
+        self.assertEqual(0, first.returncode, first.stderr)
+        release = self.root / "dist" / "slateframe.zip"
+        original = release.read_bytes()
+        wrapper_dir = Path(self.temp.name) / "python-wrapper"
+        wrapper_dir.mkdir()
+        wrapper = wrapper_dir / "python3"
+        wrapper.write_text(
+            "#!/bin/sh\n"
+            "if [ \"$1\" = \"-\" ] && [ \"$4\" != \"\" ]; then\n"
+            "  printf 'post-check tampering\\n' > \"$3/style.css\"\n"
+            "fi\n"
+            "exec " + shlex.quote(shutil.which("python3")) + " \"$@\"\n"
+        )
+        wrapper.chmod(0o755)
+        result = self.build(extra_env={"PATH": str(wrapper_dir) + os.pathsep + os.environ["PATH"]})
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("ZIP bytes differing from HEAD: slateframe/style.css", result.stderr)
+        self.assertEqual(original, release.read_bytes())
 
 if __name__ == "__main__":
     unittest.main()
