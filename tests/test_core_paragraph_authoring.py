@@ -34,7 +34,7 @@ class CoreParagraphAuthoringContract(unittest.TestCase):
         self.assertIn("dropCap: true", browser)
         self.assertIn("blocks.getSaveContent('core/paragraph', attributes)", browser)
         self.assertIn("expect(result.first).toContain(result.nativeMarkup)", browser)
-        self.assertIn("expect(result.first).toContain", browser)
+        self.assertIn("""expect(result.first).toContain('"dropCap":true')""", browser)
         self.assertNotIn("expect(result.first).toContain('has-drop-cap')", browser)
         self.assertIn("toHaveClass(/has-drop-cap/)", browser)
 
