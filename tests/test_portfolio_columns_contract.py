@@ -113,6 +113,12 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn("n.style.setProperty('font-size','64px','important')", plugin)
         self.assertIn('actual 200% font size', plugin)
         self.assertIn('Core grid actual 200%', plugin)
+        # Core Grid is a new shortcode page: it needs its own computed-scale
+        # settle, not only the preceding legacy-flex Portfolio checks.
+        core_grid = plugin.split('// Plugin-generated Core grid:', 1)[1]
+        self.assertIn('requestAnimationFrame(() => requestAnimationFrame(resolve))', core_grid)
+        self.assertIn("inline: '32px', priority: 'important', computed: 32", core_grid)
+        self.assertIn('const result = await coreGrid.evaluate', core_grid)
         self.assertIn('requestAnimationFrame(() => requestAnimationFrame(resolve))', plugin)
         self.assertIn("root.style.getPropertyPriority('font-size')", plugin)
         self.assertIn("inline: '32px', priority: 'important', computed: 32", plugin)

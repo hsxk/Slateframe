@@ -188,6 +188,21 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
       await page.setViewportSize({width,height:900});
       for (const direction of ['ltr','rtl']) {
         await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.setProperty('font-size','32px','important');},direction);
+        // The Core-grid shortcode is a fresh WordPress navigation. Its first
+        // computed-style read can still reflect 16px despite the 32px inline
+        // user-scale declaration; settle it before judging Core parity.
+        await page.evaluate(() => new Promise(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        await expect.poll(() => page.evaluate(() => {
+          const root = document.documentElement;
+          return {
+            inline: root.style.getPropertyValue('font-size'),
+            priority: root.style.getPropertyPriority('font-size'),
+            computed: parseFloat(getComputedStyle(root).fontSize),
+          };
+        }), { timeout: 10000 }).toEqual({
+          inline: '32px', priority: 'important', computed: 32,
+        });
         const result = await coreGrid.evaluate(n=>{
           const css=getComputedStyle(n);
           return {
