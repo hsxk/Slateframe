@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -58,9 +59,7 @@ test('native Core List preserves numbering, nesting and multilingual reflow', as
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of [320, 390].includes(width) ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, state) => {
-            node.dir = state.dir; node.style.fontSize = state.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const state = await root.evaluate(node => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             lists: [...node.querySelectorAll('.wp-block-list')].map(list => {
@@ -86,11 +85,16 @@ test('native Core List preserves numbering, nesting and multilingual reflow', as
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-list-' + width + '-' + dir + '.png',
           });
+          if (width === 390 && font === 64) {
+            await ordered.scrollIntoViewIfNeeded();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-list-390-' + dir + '-400.png' });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     const link = root.locator('a');
     await link.focus();
     await expect(link).toBeFocused();
@@ -105,7 +109,10 @@ test('native Core List preserves numbering, nesting and multilingual reflow', as
     await root.screenshot({
       path: 'test-artifacts/screenshots/core-list-390-rtl-200-forced-colors.png',
     });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await link.scrollIntoViewIfNeeded();
+    await page.screenshot({ fullPage: false,
+      path: 'test-artifacts/screenshots/core-list-390-rtl-400-forced-colors.png' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await link.press('Enter');
