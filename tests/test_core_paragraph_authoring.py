@@ -31,6 +31,11 @@ class CoreParagraphAuthoringContract(unittest.TestCase):
         browser = (ROOT / "tests/browser/core-paragraph-parity.spec.js").read_text(encoding="utf-8")
         self.assertIn("width === 390 && font === 64", browser)
         self.assertIn("dropCap: true", browser)
+        self.assertIn("blocks.getSaveContent('core/paragraph', attributes)", browser)
+        self.assertIn("expect(result.first).toContain(result.nativeMarkup)", browser)
+        self.assertIn("expect(result.first).toContain", browser)
+        self.assertNotIn("expect(result.first).toContain('has-drop-cap')", browser)
+        self.assertIn("toHaveClass(/has-drop-cap/)", browser)
 
 
 if __name__ == "__main__":
