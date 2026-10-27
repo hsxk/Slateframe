@@ -90,13 +90,16 @@ test('RTL mixed CJK and Arabic project titles stay inside the grid', async ({ pa
 
 test('project links remain operable at 200 percent root text size', async ({ page }, testInfo) => {
   const { grid, links } = await openGrid(page);
-  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  await page.evaluate(() => { document.documentElement.style.setProperty('font-size', '32px', 'important'); });
+  await expect.poll(() => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))).toBe(32);
   const geometry = await grid.evaluate((node) => ({
     viewport: document.documentElement.clientWidth,
     overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
     gridWidth: node.getBoundingClientRect().width,
+    rootPx: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
     control: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
   }));
+  expect(geometry.rootPx, 'Portfolio keyboard actual 200%').toBeCloseTo(32, 1);
   expect(geometry.overflow).toBeLessThanOrEqual(1);
   expect(geometry.gridWidth).toBeLessThanOrEqual(geometry.viewport + 1);
   for (const link of await links.all()) {

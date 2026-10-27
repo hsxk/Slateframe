@@ -31,13 +31,14 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
       for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
         await page.locator('html').evaluate((node, value) => {
           node.dir = value.dir;
-          node.style.fontSize = value.font + 'px';
+          node.style.setProperty('font-size', value.font + 'px', 'important');
         }, { dir, font });
         const result = await pagination.evaluate((node) => {
           const controls = [...node.querySelectorAll('a,.page-numbers')]
             .filter(el => el.getClientRects().length);
           return {
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            rootPx: parseFloat(getComputedStyle(document.documentElement).fontSize),
             target: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
             controls: controls.map(el => {
               const rect = el.getBoundingClientRect();
@@ -49,6 +50,7 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
           };
         });
         const label = width + 'px ' + dir + ' ' + font + 'px';
+        expect(result.rootPx, label + ' actual computed text scale').toBeCloseTo(font, 1);
         expect(result.controls.length, label + ' native controls').toBeGreaterThanOrEqual(3);
         expect(result.target, label + ' bounded target token').toBeGreaterThanOrEqual(44);
         expect(result.overflow, label + ' page reflow').toBeLessThanOrEqual(1);
@@ -72,7 +74,8 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
 
   await next.evaluate((node, label) => { node.textContent = label; }, originalNextLabel);
   await page.setViewportSize({ width: 390, height: 900 });
-  await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+  await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.setProperty('font-size', '32px', 'important'); });
+  await expect.poll(() => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))).toBe(32);
   const currentBeforeForced = await numbers.locator('.page-numbers.current').evaluate(node => {
     const style = getComputedStyle(node);
     const link = node.parentElement.querySelector('a.page-numbers');
@@ -84,7 +87,8 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   // colors when a live page toggles the preference after extensive reflow.
   await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
   await page.reload({ waitUntil: 'networkidle' });
-  await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+  await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.setProperty('font-size', '32px', 'important'); });
+  await expect.poll(() => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))).toBe(32);
   const current = numbers.locator('.page-numbers.current');
   const contrast = await current.evaluate(node => {
     const s = getComputedStyle(node);
@@ -114,7 +118,7 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   await pagination.screenshot({ path: 'test-artifacts/screenshots/core-query-pagination-390-rtl-200-forced-colors.png' });
 
   await page.emulateMedia({ forcedColors: 'none' });
-  await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
+  await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.removeProperty('font-size'); });
   await next.click();
   const pageTwo = page.locator('.browser-project-grid .wp-block-query-pagination').first();
   await expect(pageTwo.locator('a.wp-block-query-pagination-previous')).toBeVisible();
@@ -139,7 +143,8 @@ test('Core Query Pagination retains native emphasis without the Portfolio presen
   await expect(current).toBeVisible();
   await expect(next).toBeVisible();
   for (const direction of ['ltr', 'rtl']) {
-    await page.locator('html').evaluate((node, dir) => { node.dir = dir; node.style.fontSize = '32px'; }, direction);
+    await page.locator('html').evaluate((node, dir) => { node.dir = dir; node.style.setProperty('font-size', '32px', 'important'); }, direction);
+    await expect.poll(() => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))).toBe(32);
     const state = await current.evaluate(node => {
       const css = getComputedStyle(node);
       const box = node.getBoundingClientRect();
