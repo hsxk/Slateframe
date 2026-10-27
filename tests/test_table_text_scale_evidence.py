@@ -72,6 +72,18 @@ class TableTextScaleEvidence(unittest.TestCase):
             self.assertIn(token, browser)
         self.assertIn("core-table-editor-${width}-rtl-400.png", ci)
 
+    def test_editor_table_does_not_hide_core_canvas_overflow(self):
+        browser = (ROOT / "tests/browser/core-table-parity.spec.js").read_text(encoding="utf-8")
+        plugin = (ROOT / "tests/browser/plugin-coexistence.spec.js").read_text(encoding="utf-8")
+        for token in ("baselineOverflow", "scrollableWidth", "figureWidth",
+                      "viewportWidth", "style.pageOverflow",
+                      "baselineOverflow + 1", "Welcome to the editor",
+                      "await setRootTextScale(canvas, 64, 'rtl')"):
+            self.assertIn(token, browser)
+        self.assertIn("toBeGreaterThan(0)", browser)
+        self.assertIn("setRootTextScale(page, 64, 'rtl')", plugin)
+        self.assertNotIn("n.dir='rtl';n.style.setProperty('font-size','64px','important');", plugin)
+
     def test_exact_visual_inventory_is_a_required_ci_gate(self):
         ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         for token in ("core-table-390-${direction}-400.png",
