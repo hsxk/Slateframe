@@ -144,13 +144,17 @@ test('native Core Paragraph Gutenberg roundtrip preserves inline text and suppor
       ...(schema.textAlign ? { textAlign: 'center' } :
         { style: { typography: { textAlign: 'center' } } }),
     };
+    // Compare against the active WordPress Core save implementation, not a
+    // hard-coded class: Core versions may serialize dropCap metadata without
+    // emitting has-drop-cap on a programmatically created block.
+    const nativeMarkup = blocks.getSaveContent('core/paragraph', attributes);
     const first = blocks.serialize(blocks.createBlock('core/paragraph', attributes));
     const parsed = blocks.parse(first);
     const second = blocks.serialize(parsed);
     return { before, after: blocks.serialize(editor.getBlocks()), first, second,
       third: blocks.serialize(blocks.parse(second)), name: parsed[0]?.name,
       valid: parsed[0]?.isValid, count: parsed.length, attrs: parsed[0]?.attributes,
-      requested: attributes };
+      requested: attributes, nativeMarkup };
   });
   expect(result.after).toBe(result.before);
   expect(result.count).toBe(1);
@@ -161,7 +165,10 @@ test('native Core Paragraph Gutenberg roundtrip preserves inline text and suppor
   expect(result.attrs.content).toContain('日本語 中文 العربية');
   expect(result.attrs.content).toContain('href="#chapter"');
   expect(result.attrs.dropCap).toBe(true);
-  expect(result.first).toContain('has-drop-cap');
+  expect(result.first).toContain('"dropCap":true');
+  expect(result.nativeMarkup).toContain('<p');
+  expect(result.nativeMarkup).toContain('日本語 中文 العربية');
+  expect(result.first).toContain(result.nativeMarkup);
   for (const [key, value] of Object.entries(result.requested)) {
     expect(result.attrs[key], key).toEqual(value);
   }
