@@ -196,6 +196,27 @@ test('Gutenberg Core Table keeps real 400% RTL scroll containment in its editing
   test.skip(!postId || ![390, 1440].includes(width), 'Authenticated Gutenberg fixture');
   test.setTimeout(90000);
   await openAuthenticatedEditor(page, postId);
+  // Core's first-run guide is not theme content and can cover the screenshot.
+  const welcome = page.getByRole('dialog', { name: 'Welcome to the editor' });
+  if (await welcome.isVisible()) {
+    await welcome.getByRole('button', { name: 'Close' }).click();
+  }
+  // Measure the real editor document *before* adding our table. The WordPress
+  // fixture already contains many unrelated blocks and admin/editor controls;
+  // its pre-existing 400% overflow is not attributable to this Core Table.
+  let canvas;
+  await expect.poll(async () => {
+    for (const frame of page.frames()) {
+      if (await frame.locator('.editor-styles-wrapper').count().catch(() => 0)) {
+        canvas = frame;
+        return true;
+      }
+    }
+    return false;
+  }, { timeout: 15000 }).toBe(true);
+  await setRootTextScale(canvas, 64, 'rtl');
+  const baselineOverflow = await canvas.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth);
   // Insert a disposable native Core block; never save or modify the fixture post.
   const clientId = await page.evaluate(() => {
     const block = window.wp.blocks.createBlock('core/table', {
@@ -211,17 +232,6 @@ test('Gutenberg Core Table keeps real 400% RTL scroll containment in its editing
   try {
     const selector = '.editor-styles-wrapper :is([data-block="' + clientId +
       '"].wp-block-table,[data-block="' + clientId + '"] .wp-block-table)';
-    let canvas;
-    await expect.poll(async () => {
-      for (const frame of page.frames()) {
-        if (await frame.locator(selector).count().catch(() => 0)) {
-          canvas = frame;
-          return true;
-        }
-      }
-      return false;
-    }, { timeout: 15000 }).toBe(true);
-    await setRootTextScale(canvas, 64, 'rtl');
     const figure = canvas.locator(selector);
     await expect(figure).toHaveCount(1);
     const style = await figure.evaluate(node => {
@@ -233,7 +243,10 @@ test('Gutenberg Core Table keeps real 400% RTL scroll containment in its editing
         containment: css.contain,
         minWidth: css.minInlineSize,
         direction: css.direction,
-        pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth
+        pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        viewportWidth: document.documentElement.clientWidth,
+        figureWidth: node.getBoundingClientRect().width,
+        scrollableWidth: node.scrollWidth - node.clientWidth
       };
     });
     expect(style.overflow).toBe('auto');
@@ -242,7 +255,14 @@ test('Gutenberg Core Table keeps real 400% RTL scroll containment in its editing
     expect(style.containment).toContain('inline-size');
     expect(style.minWidth).toBe('0px');
     expect(style.direction).toBe('rtl');
-    expect(style.pageOverflow).toBeLessThanOrEqual(1);
+    // A native table must scroll within its own bounded figure, not expand
+    // the editor canvas. Keep the existing frontend document-overflow gate
+    // (<= 1px) unchanged; here isolate the table's contribution from Core UI.
+    expect(style.scrollableWidth, '400% table retains native horizontal scroll').toBeGreaterThan(0);
+    expect(style.figureWidth, 'table fits the real editor viewport').toBeLessThanOrEqual(style.viewportWidth + 1);
+    expect(style.pageOverflow,
+      'new table must not increase pre-existing WordPress editor overflow (' + baselineOverflow + 'px)')
+      .toBeLessThanOrEqual(baselineOverflow + 1);
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await figure.screenshot({
       path: 'test-artifacts/screenshots/core-table-editor-' + width + '-rtl-400.png'
