@@ -37,9 +37,9 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     const open = async key => page.goto(`/?page_id=${pages[key]}`, { waitUntil:'networkidle' });
     const styles = async expected => { for (const [name,count] of Object.entries(expected)) await expect(asset(page,name)).toHaveCount(count); };
     await open('plain');
-    await styles({ forms:0, 'form-content':0, photography:0, 'content-modes':0, 'query-loop':0 });
+    await styles({ forms:0, 'form-content':0, photography:0, 'content-modes':0, 'query-loop':0, 'portfolio-reflow':0 });
     await open('form');
-    await styles({ forms:1, 'form-content':1, photography:0, 'query-loop':0 });
+    await styles({ forms:1, 'form-content':1, photography:0, 'query-loop':0, 'portfolio-reflow':0 });
     const form = page.locator('.ci-demo-form');
     await expect(form.locator('legend')).toContainText('日本語 中文 العربية');
     await expect(form.locator('input')).toHaveAttribute('readonly','');
@@ -47,23 +47,25 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     for (const width of [320,375,390,412,768,1440,1920]) {
       await page.setViewportSize({ width, height:900 });
       for (const direction of ['ltr','rtl']) {
-        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='200%';},direction);
-        const result = await form.evaluate(n=>({overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.setProperty('font-size','32px','important');},direction);
+        const result = await form.evaluate(n=>({rootFontSize:parseFloat(getComputedStyle(document.documentElement).fontSize),overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
           boxes:[n,n.querySelector('input'),n.querySelector('button')].map(e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,height:r.height};})}));
+        expect(result.rootFontSize,`${width} ${direction} actual 200% font size`).toBeCloseTo(32, 1);
         expect(result.overflow,`${width} ${direction} overflow`).toBeLessThanOrEqual(1);
         for(const box of result.boxes){expect(box.left).toBeGreaterThanOrEqual(-1);expect(box.right).toBeLessThanOrEqual(width+1);}
         expect(result.boxes[1].height).toBeGreaterThanOrEqual(44);
         expect(result.boxes[2].height).toBeGreaterThanOrEqual(44);
       }
       if ([390,1440].includes(width)) {
-        await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.fontSize='';});
+        await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.removeProperty('font-size');});
         fs.mkdirSync('test-artifacts/screenshots',{recursive:true});
         await page.screenshot({path:`test-artifacts/screenshots/plugin-coexistence-form-${width}.png`,fullPage:true});
       }
     }
     await page.setViewportSize({width:390,height:900});
-    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='400%';});
+    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.setProperty('font-size','64px','important');});
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
+    expect(await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
     await form.locator('button').focus();
     await expect(form.locator('button')).toBeFocused();
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
@@ -71,15 +73,15 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     expect(axe.violations).toEqual([]);
     await page.screenshot({path:'test-artifacts/screenshots/plugin-coexistence-form-390-rtl-400-forced-colors.png',fullPage:true});
     await page.emulateMedia({forcedColors:'none'});
-    await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.fontSize='';});
+    await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.removeProperty('font-size');});
     await open('photo');
-    await styles({photography:1,'content-modes':0,'query-loop':0,forms:0});
+    await styles({photography:1,'content-modes':0,'query-loop':0,'portfolio-reflow':0,forms:0});
     const img = page.locator('.slateframe-photography-sequence img');
     await expect(img).toBeVisible();
     await expect.poll(()=>img.evaluate(n=>n.complete&&n.naturalWidth>0)).toBe(true);
     await page.screenshot({path:'test-artifacts/screenshots/plugin-coexistence-photo-390.png',fullPage:true});
     await open('portfolio');
-    await styles({photography:0,'content-modes':1,'query-loop':1,forms:0});
+    await styles({photography:0,'content-modes':1,'query-loop':1,'portfolio-reflow':1,forms:0});
     const link = page.locator('.slateframe-project-grid .wp-block-post-title a');
     await expect(link).toContainText('日本語 中文');
     await link.focus(); await expect(link).toBeFocused();
@@ -89,7 +91,47 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     for (const width of [320,375,390,412,768,1440,1920]) {
       await page.setViewportSize({width,height:900});
       for (const direction of ['ltr','rtl']) {
-        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='200%';},direction);
+        // The plugin owns its shortcode markup; normal-size authored columns
+        // must remain unchanged before testing the opt-in 200% reflow.
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.setProperty('font-size','16px','important');},direction);
+        // A prior 200% iteration may leave the old computed root active
+        // until Chromium finishes resolving the new 16px declaration.
+        // Check the real baseline before asserting authored column parity.
+        await page.evaluate(() => new Promise(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        await expect.poll(() => page.evaluate(() => {
+          const root = document.documentElement;
+          return {
+            inline: root.style.getPropertyValue('font-size'),
+            priority: root.style.getPropertyPriority('font-size'),
+            computed: parseFloat(getComputedStyle(root).fontSize),
+          };
+        }), { timeout: 10000 }).toEqual({
+          inline: '16px', priority: 'important', computed: 16,
+        });
+        const baseline = await list.evaluate(n=>({
+          tracks:getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length,
+          rootPx:parseFloat(getComputedStyle(document.documentElement).fontSize),
+          containerWidth:parseFloat(getComputedStyle(n.closest('.slateframe-project-grid')).width),
+        }));
+        expect(baseline.rootPx,`${width} ${direction} computed normal-size root`).toBeCloseTo(16, 1);
+        expect(baseline.tracks,`${width} ${direction} normal-size columns (container ${baseline.containerWidth}px, root ${baseline.rootPx}px)`).toBe(width<=640?1:width<=900?2:3);
+        await page.locator('html').evaluate(n=>{n.style.setProperty('font-size','32px','important');});
+        // The real WordPress browser fixture has previously exposed a stale
+        // computed 16px immediately after the 32px override. Wait for actual
+        // style resolution; an inline declaration alone is not acceptance.
+        await page.evaluate(() => new Promise(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        await expect.poll(() => page.evaluate(() => {
+          const root = document.documentElement;
+          return {
+            inline: root.style.getPropertyValue('font-size'),
+            priority: root.style.getPropertyPriority('font-size'),
+            computed: parseFloat(getComputedStyle(root).fontSize),
+          };
+        }), { timeout: 10000 }).toEqual({
+          inline: '32px', priority: 'important', computed: 32,
+        });
         const layout = await list.evaluate(n=>{
           const css=getComputedStyle(n), a=n.querySelector('.wp-block-post-title a');
           const rect=a.getBoundingClientRect();
@@ -97,6 +139,8 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
             display:css.display, listStyle:css.listStyleType,
             paddingStart:css.paddingInlineStart, marginStart:css.marginInlineStart,
             tracks:css.gridTemplateColumns.split(' ').filter(Boolean).length,
+            containerWidth:parseFloat(getComputedStyle(n.closest('.slateframe-project-grid')).width),
+            rootFontSize:parseFloat(getComputedStyle(document.documentElement).fontSize),
             overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
             linkLeft:rect.left, linkRight:rect.right, linkHeight:rect.height
           };
@@ -105,42 +149,65 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
         expect(layout.listStyle,`${width} ${direction} marker`).toBe('none');
         expect(layout.paddingStart,`${width} ${direction} padding`).toBe('0px');
         expect(layout.marginStart,`${width} ${direction} margin`).toBe('0px');
-        expect(layout.tracks,`${width} ${direction} columns`).toBe(width<=640?1:width<=900?2:3);
+        // A named 35rem container, not the viewport alone, governs readable
+        // columns when users enlarge text. Keep Core's viewport caps otherwise.
+        expect(layout.containerWidth).toBeGreaterThan(0);
+        expect(layout.rootFontSize).toBeCloseTo(32, 1);
+        const expectedTracks = layout.containerWidth <= 35 * layout.rootFontSize
+          ? 1 : width<=640?1:width<=900?2:3;
+        expect(layout.tracks,`${width} ${direction} 200% container reflow`).toBe(expectedTracks);
         expect(layout.overflow,`${width} ${direction} overflow`).toBeLessThanOrEqual(1);
         expect(layout.linkLeft).toBeGreaterThanOrEqual(-1);
         expect(layout.linkRight).toBeLessThanOrEqual(width+1);
         expect(layout.linkHeight).toBeGreaterThanOrEqual(44);
       }
       if ([390,1440].includes(width)) {
-        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='200%';});
+        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.setProperty('font-size','32px','important');});
         await link.focus();
         await expect(link).toBeFocused();
         await page.screenshot({path:`test-artifacts/screenshots/plugin-coexistence-portfolio-${width}-rtl.png`,fullPage:true});
       }
     }
     await page.setViewportSize({width:390,height:900});
-    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='400%';});
+    await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.setProperty('font-size','64px','important');});
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
     await link.focus();
     await expect(link).toBeFocused();
+    expect(await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.screenshot({path:'test-artifacts/screenshots/plugin-coexistence-portfolio-390-rtl-400-forced-colors.png',fullPage:true});
     await page.emulateMedia({forcedColors:'none'});
-    await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.fontSize='';});
+    await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.removeProperty('font-size');});
 
     // Plugin-generated Core grid: preserve author columns and semantic list.
     await open('portfolioCore');
-    await styles({photography:0,'content-modes':1,'query-loop':1,forms:0});
+    await styles({photography:0,'content-modes':1,'query-loop':1,'portfolio-reflow':1,forms:0});
     const coreGrid = page.locator('.slateframe-project-grid .wp-block-post-template.is-layout-grid');
     await expect(coreGrid.locator(':scope > li')).toHaveCount(2);
     for (const width of [320,375,390,412,768,1440,1920]) {
       await page.setViewportSize({width,height:900});
       for (const direction of ['ltr','rtl']) {
-        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.fontSize='200%';},direction);
+        await page.locator('html').evaluate((n,d)=>{n.dir=d;n.style.setProperty('font-size','32px','important');},direction);
+        // The Core-grid shortcode is a fresh WordPress navigation. Its first
+        // computed-style read can still reflect 16px despite the 32px inline
+        // user-scale declaration; settle it before judging Core parity.
+        await page.evaluate(() => new Promise(resolve =>
+          requestAnimationFrame(() => requestAnimationFrame(resolve))));
+        await expect.poll(() => page.evaluate(() => {
+          const root = document.documentElement;
+          return {
+            inline: root.style.getPropertyValue('font-size'),
+            priority: root.style.getPropertyPriority('font-size'),
+            computed: parseFloat(getComputedStyle(root).fontSize),
+          };
+        }), { timeout: 10000 }).toEqual({
+          inline: '32px', priority: 'important', computed: 32,
+        });
         const result = await coreGrid.evaluate(n=>{
           const css=getComputedStyle(n);
           return {
             display:css.display, tracks:css.gridTemplateColumns.split(' ').filter(Boolean).length,
+            rootFontSize:parseFloat(getComputedStyle(document.documentElement).fontSize),
             listStyle:css.listStyleType, marginStart:css.marginInlineStart,
             paddingStart:css.paddingInlineStart,
             items:[...n.children].map(li=>getComputedStyle(li).listStyleType),
@@ -150,6 +217,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
             overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth
           };
         });
+        expect(result.rootFontSize,`${width} ${direction} Core grid actual 200%`).toBeCloseTo(32, 1);
         expect(result.display,`${width} ${direction} Core grid display`).toBe('grid');
         expect(result.tracks,`${width} ${direction} Core grid columns`).toBe(2);
         expect(result.listStyle).toBe('none');
@@ -164,15 +232,15 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
         }
       }
       if ([390,1440].includes(width)) {
-        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.fontSize='200%';});
+        await page.locator('html').evaluate(n=>{n.dir='rtl';n.style.setProperty('font-size','32px','important');});
         await coreGrid.locator('.wp-block-post-title a').first().focus();
         await expect(coreGrid.locator('.wp-block-post-title a').first()).toBeFocused();
         await page.screenshot({path:`test-artifacts/screenshots/plugin-coexistence-core-grid-${width}-rtl.png`,fullPage:true});
       }
     }
-    await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.fontSize='';});
+    await page.locator('html').evaluate(n=>{n.dir='ltr';n.style.removeProperty('font-size');});
     await open('native');
-    await styles({photography:1,'query-loop':0}); // A plugin cannot suppress required native presentation.
+    await styles({photography:1,'query-loop':0,'portfolio-reflow':0}); // A plugin cannot suppress required native presentation.
   } finally {
     for (const postId of ids) { try { wp('post','delete',postId,'--force'); } catch {} }
     if (fs.existsSync(file)) fs.unlinkSync(file);

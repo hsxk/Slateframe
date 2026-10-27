@@ -30,6 +30,108 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn('.slateframe-footer-content .wp-block-post-template{grid-template-columns:1fr}', self.css)
         self.assertIn(':where(:not(.is-layout-grid))', self.css)
 
+    def test_named_container_reflow_is_bounded_and_scoped(self):
+        reflow = (ROOT / 'assets/css/portfolio-reflow.css').read_text(encoding='utf-8')
+        self.assertLessEqual(len(reflow.encode('utf-8')), 260)
+        self.assertIn('.slateframe-project-grid{container:slateframe-portfolio/inline-size}', reflow)
+        self.assertIn('@container slateframe-portfolio (max-width:35rem)', reflow)
+        self.assertIn('.wp-block-post-template:where(:not(.is-layout-grid))', reflow)
+        self.assertIn('grid-template-columns:minmax(0,1fr)', reflow)
+        self.assertNotIn('overflow:hidden', reflow)
+        self.assertNotIn('!important', reflow)
+
+    def test_conditional_frontend_and_editor_parity(self):
+        php = (ROOT / 'functions.php').read_text(encoding='utf-8')
+        self.assertIn("'assets/css/query-loop.css', 'assets/css/portfolio-reflow.css', 'assets/css/editor.css'", php)
+        self.assertIn("'slateframe-portfolio-reflow'", php)
+        self.assertIn("array( 'slateframe-query-loop' )", php)
+        self.assertIn("get_template_directory_uri() . '/assets/css/portfolio-reflow.css'", php)
+
+    def test_all_authored_columns_rtl_cjk_and_core_grid_survive_zoom(self):
+        browser = (ROOT / 'tests/browser/portfolio-core-columns.spec.js').read_text(encoding='utf-8')
+        self.assertIn('containerWidth <= 35 * rootPx ? 1 : columns(chosen, viewport)', browser)
+        self.assertIn('for (const chosen of [1, 2, 3, 4, 5, 6])', browser)
+        self.assertIn('Core Grid must survive 400%', browser)
+        self.assertIn('for (const viewport of [641, 650, 680, 720, 768, 900])', browser)
+        self.assertIn('for (const chosen of [1, 2, 3, 4, 5, 6])', browser)
+        self.assertIn("for (const dir of ['ltr', 'rtl'])", browser)
+        self.assertIn("node.style.setProperty('font-size', '64px', 'important')", browser)
+        self.assertIn("node.style.setProperty('font-size', '32px', 'important')", browser)
+        self.assertIn("node.style.setProperty('font-size', '16px', 'important')", browser)
+        self.assertIn("real 200% computed font size", browser)
+        self.assertIn("real 400% font size", browser)
+        self.assertIn("pagination actual zoom", browser)
+        self.assertIn("parseFloat(getComputedStyle(node.closest('.slateframe-project-grid')).width)", browser)
+        self.assertIn("for (const size of [16, 32])", browser)
+        self.assertNotIn("node.style.fontSize = '200%'", browser)
+        self.assertNotIn("root.style.fontSize = state.size", browser)
+        self.assertIn('expect(target.height).toBeGreaterThanOrEqual(43)', browser)
+
+    def test_exact_sha_evidence_and_budget_gates(self):
+        browser = (ROOT / 'tests/browser/portfolio-core-columns.spec.js').read_text(encoding='utf-8')
+        workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
+        self.assertIn('portfolio-reflow-${viewport}-${direction}-400.png', workflow)
+        self.assertIn('portfolio-reflow-680-${direction}-default.png', workflow)
+        self.assertIn('for viewport in 320 375 390 412 768 1440 1920; do', workflow)
+        self.assertIn('portfolio-reflow-390-rtl-400-forced-colors.png', workflow)
+        self.assertEqual(browser.count('await list.screenshot({'), 3)
+        self.assertEqual(browser.count('await settlePortfolioImagesForEvidence(page);'), 2)
+        self.assertEqual(browser.count('await page.screenshot({'), 3)
+        self.assertEqual(browser.count('fullPage: true,'), 3)
+        for evidence in (
+            'portfolio-reflow-680-ltr-full-page.png',
+            'portfolio-reflow-390-rtl-400-forced-colors-full-page.png',
+            "'-ltr-400-full-page.png'",
+        ):
+            self.assertIn(evidence, browser)
+        self.assertIn('portfolio-reflow-680-ltr-full-page.png', workflow)
+        self.assertIn('portfolio-reflow-390-ltr-400-full-page.png', workflow)
+        self.assertIn('portfolio-reflow-1440-ltr-400-full-page.png', workflow)
+        self.assertIn('portfolio-reflow-390-rtl-400-forced-colors-full-page.png', workflow)
+        self.assertIn(".include('.slateframe-project-grid')", browser)
+        self.assertIn(".withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])", browser)
+        self.assertIn("forcedColors: 'active'", browser)
+        self.assertIn('assets/css/portfolio-reflow.css', workflow)
+        self.assertIn('test $(wc -c < assets/css/portfolio-reflow.css) -le 260', workflow)
+
+    def test_plugin_shortcode_reflow_keeps_normal_size_and_core_grid(self):
+        plugin = (ROOT / 'tests/browser/plugin-coexistence.spec.js').read_text(encoding='utf-8')
+        self.assertIn('computed normal-size root', plugin)
+        self.assertIn("inline: '16px', priority: 'important', computed: 16", plugin)
+        self.assertIn('baseline.rootPx', plugin)
+        self.assertIn('baseline.containerWidth', plugin)
+        self.assertIn('normal-size columns', plugin)
+        self.assertIn('layout.containerWidth <= 35 * layout.rootFontSize', plugin)
+        self.assertIn('200% container reflow', plugin)
+        self.assertIn("'portfolio-reflow':0", plugin)
+        self.assertIn("'portfolio-reflow':1", plugin)
+        self.assertIn('const coreGrid =', plugin)
+        self.assertIn('Core grid columns', plugin)
+        # Relative percentage zoom did not yield a 32px computed root in one
+        # real WordPress/Chromium fixture. Test the actual 200%/400% geometry.
+        self.assertIn("n.style.setProperty('font-size','32px','important')", plugin)
+        self.assertIn("n.style.setProperty('font-size','64px','important')", plugin)
+        self.assertIn('actual 200% font size', plugin)
+        self.assertIn('Core grid actual 200%', plugin)
+        # Core Grid is a new shortcode page: it needs its own computed-scale
+        # settle, not only the preceding legacy-flex Portfolio checks.
+        core_grid = plugin.split('// Plugin-generated Core grid:', 1)[1]
+        self.assertIn('requestAnimationFrame(() => requestAnimationFrame(resolve))', core_grid)
+        self.assertIn("inline: '32px', priority: 'important', computed: 32", core_grid)
+        self.assertIn('const result = await coreGrid.evaluate', core_grid)
+        self.assertIn('requestAnimationFrame(() => requestAnimationFrame(resolve))', plugin)
+        self.assertIn("root.style.getPropertyPriority('font-size')", plugin)
+        self.assertIn("inline: '32px', priority: 'important', computed: 32", plugin)
+        self.assertIn('await expect.poll(() => page.evaluate', plugin)
+        self.assertIn('toBeCloseTo(64, 1)', plugin)
+        self.assertNotIn("n.style.fontSize='200%'", plugin)
+        self.assertNotIn("n.style.fontSize='400%'", plugin)
+        self.assertIn("n.style.setProperty('font-size','16px','important')", plugin)
+        self.assertIn("n.style.removeProperty('font-size')", plugin)
+        self.assertNotIn("n.style.fontSize=", plugin)
+        self.assertGreaterEqual(plugin.count("setProperty('font-size','32px','important')"), 5)
+        self.assertGreaterEqual(plugin.count("setProperty('font-size','64px','important')"), 2)
+
 
 if __name__ == '__main__':
     unittest.main()

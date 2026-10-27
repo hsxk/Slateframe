@@ -1,1 +1,2 @@
-.wp-block-post-title{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}.wp-block-post-title a{display:inline-flex;align-items:center;box-sizing:border-box;min-inline-size:min(100%,var(--slateframe-control));min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-post-title{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}.wp-block-post-title a{display:inline-flex;align-items:center;min-inline-size:min(100%,var(--slateframe-control));min-block-size:var(--slateframe-control);max-inline-size:100%}
+@media(min-width:481px){.slateframe-project-grid a{scroll-margin-block-start:calc(var(--slateframe-header-height) + .5rem)}}

@@ -21,6 +21,10 @@ FULL_PAGE = re.compile(
     r'(?!footnotes\.png|content-pagination\.png)[a-z0-9-]+'
     r'|viewport-(320|375|390|412|768|1440|1920)-[a-z0-9-]+)\.png\Z'
 )
+PORTFOLIO_FULL_PAGE = re.compile(
+    r'portfolio-reflow-(?P<width>390|1440)-(?:ltr-400|rtl-400-forced-colors)-full-page\.png\Z'
+    r'|portfolio-reflow-(?P<tablet>680)-ltr-full-page\.png\Z'
+)
 NAME = re.compile(r'[a-zA-Z0-9][a-zA-Z0-9_.-]*\.png\Z')
 
 # A raw screenshot count cannot prove that all Appearance modes or viewport
@@ -115,6 +119,9 @@ def scan(root):
         match = FULL_PAGE.fullmatch(path.name)
         if match and actual_width != int(match.group(2) or match.group(3)):
             raise ValueError('Full-page viewport width mismatch')
+        portfolio_page = PORTFOLIO_FULL_PAGE.fullmatch(path.name)
+        if portfolio_page and actual_width != int(portfolio_page.group('width') or portfolio_page.group('tablet')):
+            raise ValueError('Portfolio full-page viewport width mismatch')
         total += len(data)
         if total > 1024 * 1024 * 1024:
             raise ValueError('Screenshot artifact too large')

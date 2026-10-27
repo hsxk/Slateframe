@@ -38,8 +38,9 @@ test('native Portfolio Query Loop renders matching posts and hides its empty sta
     for (const direction of ['ltr', 'rtl']) {
       await page.locator('html').evaluate((node, dir) => {
         node.dir = dir;
-        node.style.fontSize = '200%';
+        node.style.setProperty('font-size', '32px', 'important');
       }, direction);
+      await expect.poll(() => page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))).toBe(32);
       await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
       const geometry = await title.evaluate((node) => {
         const root = document.documentElement;
@@ -51,11 +52,13 @@ test('native Portfolio Query Loop renders matching posts and hides its empty sta
         const style = getComputedStyle(node);
         return {
           viewport: root.clientWidth, document: root.scrollWidth,
+          rootPx: Number.parseFloat(getComputedStyle(root).fontSize),
           cardLeft: box.left, cardRight: box.right,
           textLeft: text.left, textRight: text.right,
           visible: style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0,
         };
       });
+      expect(geometry.rootPx, direction + ' positive Query Loop actual 200%').toBeCloseTo(32, 1);
       expect(geometry.visible, direction).toBe(true);
       expect(geometry.document - geometry.viewport, direction).toBeLessThanOrEqual(1);
       expect(geometry.cardLeft, direction).toBeGreaterThanOrEqual(-1);
