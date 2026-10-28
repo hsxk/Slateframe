@@ -35,7 +35,11 @@ The real WordPress browser test uses computed 16/32/64px root text sizes
 through the shared scale helper, LTR/RTL, and 320/375/390/412/768/1440/1920px
 viewports. It focuses the link, checks the bounding rectangle and visible
 outline, preserves at least a 44px target height, rejects horizontal document
-overflow, and follows the anchor to the main landmark with Enter.
+overflow, and follows the anchor to the main landmark with Enter. The
+archive test reaches the link using an actual initial Tab keypress instead
+of programmatic focus. Forced-colors at 320px and 390px additionally checks
+the 44px focused target, outline, wrapping aliases and zero document overflow
+before recording the required 390px screenshot.
 
 Three **390x900 full viewport** captures are required by Theme quality:
 
