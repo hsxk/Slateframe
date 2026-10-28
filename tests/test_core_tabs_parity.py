@@ -34,7 +34,7 @@ class CoreTabsParity(unittest.TestCase):
         tabs_css = (ROOT / "assets/css/core-tabs.css").read_text()
         browser = (ROOT / "tests/browser/core-tabs-parity.spec.js").read_text()
         self.assertIn("@media print", css)
-        self.assertIn('.wp-block-tab-panel[hidden="until-found"]', css)
+        self.assertRegex(css, r'\.wp-block-tab-panel\[hidden=(?:"until-found"|until-found)\]')
         self.assertIn("content-visibility:visible!important", css)
         self.assertNotIn("content-visibility:visible", tabs_css)
         for token in ("media: 'print'", "media: 'screen'",
