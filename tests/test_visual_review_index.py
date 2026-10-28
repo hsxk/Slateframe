@@ -255,5 +255,30 @@ class VisualReviewIndex(unittest.TestCase):
                 review.png_dimensions(data)
 
 
+    def test_acceptance_subset_is_marked_as_required(self):
+        entries = review.load_evidence(self.root, HEAD)
+        required = {entry['name'] for entry in entries if entry['required']}
+        self.assertEqual(required, set(self.names[:3]))
+        page = review.render(HEAD, entries, 1, 'screenshots/')
+        self.assertEqual(page.count('Required visual evidence'), 3)
+        for name in self.names[:3]:
+            self.assertIn(f'<img src="screenshots/{name}"', page)
+
+    def test_all_required_thumbnails_survive_a_smaller_optional_limit(self):
+        entries = [{'name': f'appearance-default-390-variant-{index}.png',
+                    'width': 390, 'height': 900, 'required': False} for index in range(40)]
+        entries.extend([
+            {'name': 'appearance-default-1440-rtl-400.png',
+             'width': 1440, 'height': 900, 'required': True},
+            {'name': 'appearance-default-1920-ltr-400.png',
+             'width': 1920, 'height': 900, 'required': True},
+        ])
+        page = review.render(HEAD, entries, limit=1, asset_prefix='screenshots/')
+        self.assertEqual(page.count('<img src='), 2)
+        self.assertEqual(page.count('Required visual evidence'), 2)
+        self.assertIn('Browse remaining 40 verified screenshots', page)
+        self.assertIn('appearance-default-1440-rtl-400.png', page)
+        self.assertIn('appearance-default-1920-ltr-400.png', page)
+
 if __name__ == '__main__':
     unittest.main()

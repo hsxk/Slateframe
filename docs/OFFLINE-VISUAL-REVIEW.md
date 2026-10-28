@@ -37,7 +37,12 @@ image omitted from the thumbnail selection remains reachable through a native
 keyboard-accessible **Browse remaining** disclosure and full-resolution link.
 The representative selection reserves mobile and desktop captures across the
 seven supported viewport widths before filling remaining slots, so a large
-390px set cannot hide 1440px/1920px evidence.
+390px set cannot hide 1440px/1920px evidence. Screenshots listed in
+`VISUAL_EVIDENCE.json` are always rendered as **Required visual evidence**
+thumbnails, even when their count exceeds `--limit-per-group`. The limit applies
+to optional thumbnails only after all acceptance evidence is shown. This avoids
+silently hiding a required screenshot behind the disclosure, but does not
+constitute human visual approval.
 Use `--limit-per-group 10000` to display all thumbnails. The output must live **outside**
 the verified screenshot directory so that it does not invalidate the original
 artifact manifest. Clicking a thumbnail opens the full-resolution PNG.

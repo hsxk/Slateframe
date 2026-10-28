@@ -215,7 +215,8 @@ def load_evidence(directory: Path, expected_head: str) -> list[dict]:
             raise ValueError(f"screenshot digest mismatch: {name}")
         if png_dimensions(data) != (entry.get("width"), entry.get("height")):
             raise ValueError(f"screenshot dimensions mismatch: {name}")
-        checked.append({"name": name, "width": entry["width"], "height": entry["height"]})
+        checked.append({"name": name, "width": entry["width"], "height": entry["height"],
+                        "required": name in subset_names})
     return checked
 
 
@@ -247,8 +248,10 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
         # A mobile-heavy group must still surface desktop evidence. Reserve
         # one representative per available viewport before filling by priority.
         ordered = sorted(members, key=priority)
-        chosen = []
-        selected_names = set()
+        # The visual acceptance subset is mandatory, not a disposable sample.
+        # Preserve every required thumbnail even when it exceeds the optional limit.
+        chosen = [entry for entry in ordered if entry.get("required", False)]
+        selected_names = {entry["name"] for entry in chosen}
 
         def choose(predicate):
             if len(chosen) >= limit:
@@ -276,9 +279,10 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
             name = html.escape(entry["name"], quote=True)
             image_url = html.escape(asset_prefix + quote(entry["name"]), quote=True)
             dimensions = f'{entry["width"]} × {entry["height"]}'
+            required_label = '<strong class="required">Required visual evidence</strong> ' if entry.get("required", False) else ""
             figures.append(f'<figure><a href="{image_url}"><img src="{image_url}" loading="lazy" alt="{name}" '
                            f'width="{entry["width"]}" height="{entry["height"]}"></a>'
-                           f'<figcaption>{name} <small>{dimensions}</small></figcaption></figure>')
+                           f'<figcaption>{required_label}{name} <small>{dimensions}</small></figcaption></figure>')
         selected = {entry["name"] for entry in chosen}
         remaining = sorted((entry for entry in members if entry["name"] not in selected),
                            key=lambda entry: entry["name"])
@@ -299,6 +303,7 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
            'figure{margin:0;padding:.6rem;background:white;border:1px solid #aaa;min-width:0}'
            'img{display:block;max-width:100%;height:auto;max-height:24rem;object-fit:contain;margin:auto}'
            'figcaption,.files a{overflow-wrap:anywhere}figcaption{margin-top:.6rem;font-size:.85rem}'
+           '.required{display:block;font-size:.85rem}'
            'small{display:block}a:focus-visible{outline:3px solid #1264bb;outline-offset:3px}'
            '@media(prefers-color-scheme:dark){body{background:#181818;color:#f6f6f6}'
            'figure{background:#272727;border-color:#888}a{color:#b6d9ff}}')
