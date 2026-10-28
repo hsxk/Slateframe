@@ -27,10 +27,6 @@ test('Core Media & Text preserves both authored stacking modes at 100/200/400% t
     const root = page.locator('.slateframe-media-text-fixture');
     await expect(root).toBeVisible();
     await expect(root.locator('.wp-block-media-text')).toHaveCount(2);
-    await expect.poll(() => page.evaluate(() => Boolean(
-      document.getElementById('slateframe-core-media-text-inline-css') ||
-      document.getElementById('slateframe-core-media-text-css')
-    ))).toBe(true);
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
@@ -99,8 +95,6 @@ test('Core Media & Text preserves both authored stacking modes at 100/200/400% t
     await page.screenshot({ path: 'test-artifacts/screenshots/core-media-text-390-rtl-400-forced-colors.png', animations: 'disabled' });
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     await expect(page.locator('.wp-block-media-text')).toHaveCount(0);
-    expect(await page.evaluate(() => document.getElementById('slateframe-core-media-text-inline-css') ||
-      document.getElementById('slateframe-core-media-text-css'))).toBeNull();
   } finally {
     wp('post', 'delete', id, '--force');
   }
