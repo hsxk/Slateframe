@@ -18,7 +18,8 @@ const fixture = '<!-- wp:group {"className":"slateframe-media-text-fixture"} -->
   '<div class="wp-block-media-text has-media-on-the-right">' + image + body + '</div><!-- /wp:media-text -->' +
   '<p id="media-text-end">End of reference.</p></div><!-- /wp:group -->';
 
-test('Core Media & Text preserves both authored stacking modes at 100/200/400% text', async ({ page }) => {
+test('Core Media & Text preserves both authored stacking modes at 100/200/400% text', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress fixture covers seven widths');
   test.setTimeout(150000);
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
     '--post_title=Slateframe Media Text ' + randomUUID(), '--post_content=' + fixture, '--porcelain');
