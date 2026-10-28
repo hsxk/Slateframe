@@ -16,7 +16,7 @@ def png_header(width=390, height=900, corrupt=False):
     crc = zlib.crc32(chunk) & 0xFFFFFFFF
     if corrupt:
         crc ^= 1
-    return b"\\x89PNG\\r\\n\\x1a\\n" + struct.pack(">I", 13) + chunk + struct.pack(">I", crc)
+    return b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + chunk + struct.pack(">I", crc)
 
 
 class CoreEmbedZoomEvidence(unittest.TestCase):
