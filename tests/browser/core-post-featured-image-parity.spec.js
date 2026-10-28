@@ -26,10 +26,17 @@ test('Core Post Featured Image retains native image and permalink at seven width
     const attachmentAlt = '日本語 中文 العربية photo';
     wp('post', 'meta', 'update', attachmentId, '_wp_attachment_image_alt', attachmentAlt);
     expect(wp('post', 'meta', 'get', attachmentId, '_wp_attachment_image_alt')).toBe(attachmentAlt);
+    const caption = '日本語 中文 العربية ' + 'UnbrokenCaptionSegment'.repeat(3);
+    wp('post', 'update', attachmentId, '--post_excerpt=' + caption);
     const permalink = wp('eval', 'echo get_permalink(' + Number(postId) + ');');
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-featured-image-fixture');
     await expect(root).toBeVisible();
+    const hero = page.locator('.slateframe-entry-hero-image');
+    await expect(hero).toBeVisible();
+    await expect(hero).toHaveAttribute('fetchpriority', 'high');
+    const heroCaption = page.locator('.slateframe-entry-hero figcaption');
+    await expect(heroCaption).toHaveText(caption);
     const figures = root.locator('.wp-block-post-featured-image');
     await expect(figures).toHaveCount(2);
     const linked = figures.first().locator('a');
@@ -72,6 +79,37 @@ test('Core Post Featured Image retains native image and permalink at seven width
           expect(state.rootFont, label + ' computed root font').toBe(font);
           expect(state.direction, label + ' computed direction').toBe(dir);
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          // The theme's editorial hero must not crop a Core attachment when
+          // its intrinsic height exceeds the viewport cap (e.g. at 1440px).
+          const heroState = await hero.evaluate(img => {
+            const rect = img.getBoundingClientRect();
+            return {
+              naturalRatio: img.naturalWidth / img.naturalHeight,
+              renderedRatio: rect.width / rect.height,
+              left: rect.left, right: rect.right, height: rect.height,
+            };
+          });
+          expect(heroState.naturalRatio, label + ' natural ratio').toBeGreaterThan(0);
+          expect(Math.abs(heroState.renderedRatio - heroState.naturalRatio),
+            label + ' uncropped editorial hero').toBeLessThan(0.015);
+          expect(heroState.left, label + ' hero left').toBeGreaterThanOrEqual(-1);
+          expect(heroState.right, label + ' hero right').toBeLessThanOrEqual(width + 1);
+          expect(heroState.height, label + ' bounded hero height').toBeLessThanOrEqual(703);
+          const captionState = await heroCaption.evaluate(node => {
+            const r = node.getBoundingClientRect();
+            return { left: r.left, right: r.right, overflow: node.scrollWidth - node.clientWidth,
+              align: getComputedStyle(node).textAlign };
+          });
+          expect(captionState.left, label + ' caption left').toBeGreaterThanOrEqual(-1);
+          expect(captionState.right, label + ' caption right').toBeLessThanOrEqual(width + 1);
+          expect(captionState.overflow, label + ' caption text overflow').toBeLessThanOrEqual(1);
+          expect(['start', 'left', 'right'], label + ' caption logical alignment')
+            .toContain(captionState.align);
+          if (font === 16 && dir === 'ltr' && [390, 1440].includes(width)) {
+            await page.locator('.slateframe-entry-hero').screenshot({
+              path: 'test-artifacts/screenshots/entry-hero-natural-' + width + '-ltr.png',
+            });
+          }
           expect(state.left, label + ' link left').toBeGreaterThanOrEqual(-1);
           expect(state.right, label + ' link right').toBeLessThanOrEqual(width + 1);
           expect(state.width, label + ' target width').toBeGreaterThanOrEqual(43);
@@ -118,6 +156,9 @@ test('Core Post Featured Image retains native image and permalink at seven width
       .toBeGreaterThanOrEqual(2);
     await page.screenshot({
       path: 'test-artifacts/screenshots/core-post-featured-image-390-rtl-400-forced-colors.png',
+    });
+    await page.locator('.slateframe-entry-hero').screenshot({
+      path: 'test-artifacts/screenshots/entry-hero-natural-390-rtl-400-forced-colors.png',
     });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
