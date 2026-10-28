@@ -70,7 +70,7 @@ test('WordPress related, recovery and post navigation reflow at computed 400% RT
               const r = link.getBoundingClientRect();
               const target = wrapTarget ? link.querySelector(wrapTarget) : link;
               const t = target.getBoundingClientRect();
-              return { left: r.left, right: r.right, height: r.height,
+              return { left: r.left, right: r.right, width: r.width, height: r.height,
                 targetLeft: t.left, targetRight: t.right,
                 wrap: getComputedStyle(target).overflowWrap };
             }),
@@ -83,7 +83,8 @@ test('WordPress related, recovery and post navigation reflow at computed 400% RT
             expect(link.right, label + ' right').toBeLessThanOrEqual(width + 1);
             expect(link.targetLeft, label + ' text left').toBeGreaterThanOrEqual(-1);
             expect(link.targetRight, label + ' text right').toBeLessThanOrEqual(width + 1);
-            expect(link.height, label + ' touch target').toBeGreaterThanOrEqual(44);
+            expect(link.width, label + ' touch target width').toBeGreaterThanOrEqual(44);
+            expect(link.height, label + ' touch target height').toBeGreaterThanOrEqual(44);
             expect(link.wrap, label + ' long-token wrap').toBe('anywhere');
           }
           if (scenario.name === '404-recovery') {
@@ -94,7 +95,7 @@ test('WordPress related, recovery and post navigation reflow at computed 400% RT
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    for (const dir of scenario.name === '404-recovery' ? [] : ['ltr', 'rtl']) {
+    for (const dir of ['ltr', 'rtl']) {
       await setRootTextScale(page, 64, dir);
       await links.first().scrollIntoViewIfNeeded();
       await links.first().focus();
