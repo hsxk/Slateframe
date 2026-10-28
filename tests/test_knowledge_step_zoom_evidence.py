@@ -31,7 +31,7 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
         bootstrap = (ROOT / "functions.php").read_text(encoding="utf-8")
         editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         reading = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
-        self.assertIn("& :is(ul,ol):not(.is-style-slateframe-steps,.is-style-slateframe-checklist){padding-inline-start:1.35em}", reading)
+        self.assertIn("& :is(ul,ol):not(:where(.is-style-slateframe-steps,.is-style-slateframe-checklist)){padding-inline-start:1.35em}", reading)
         self.assertNotIn("& :is(ul,ol){padding-inline-start:1.35em}", reading)
         self.assertLessEqual(len(reading.encode("utf-8")), 7000)
         self.assertIn("--slateframe-step:max(var(--slateframe-control),1.3rem)", css)
