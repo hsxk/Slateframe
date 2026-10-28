@@ -19,6 +19,7 @@ class RequiredVisualNavigation(unittest.TestCase):
             {"name": "appearance-default-viewport-1440-footnotes.png",
              "width": 1440, "height": 900, "required": True},
             {"name": "portfolio-390.png", "width": 390, "height": 900, "required": False},
+            {"name": "portfolio-1440.png", "width": 1440, "height": 900, "required": False},
             {"name": "knowledge-1440.png", "width": 1440, "height": 900, "required": False},
         ]
 
