@@ -40,6 +40,10 @@ class RelatedReadingZoomEvidence(unittest.TestCase):
                       "new AxeBuilder", "scrollIntoViewIfNeeded", "fullPage: false",
                       "related-reading", "404-recovery", "post-navigation"):
             self.assertIn(token, spec)
+        self.assertEqual(len(CAPTURES), 9)
+        self.assertIn("expect(link.width", spec)
+        self.assertIn("expect(link.height", spec)
+        self.assertIn("for (const dir of ['ltr', 'rtl'])", spec)
         for name in CAPTURES:
             self.assertIn(name, workflow)
         self.assertIn("python3 tests/verify_related_reading_zoom_evidence.py", workflow)
