@@ -36,7 +36,7 @@ class CorePostAuthorNameParity(unittest.TestCase):
         for token in ("wp('post', 'create'", "wp('post', 'delete'", 'finally',
                       'get_author_posts_url(', "'--post_author='", 'isLink', 'core/post-author-name',
                       '320, 375, 390, 412, 768, 1440, 1920', "'ltr', 'rtl'",
-                      "fontSize = '64px'", "forcedColors: 'active'",
+                      "await setRootTextScale(page, font, dir);", "forcedColors: 'active'",
                       'new AxeBuilder', 'openAuthenticatedEditor', 'blocks.serialize',
                       'blocks.parse', "page.keyboard.press('Tab')",
                       'core-post-author-name-390-rtl-200-forced-colors.png',

@@ -31,7 +31,7 @@ class CorePostAuthorBiographyParity(unittest.TestCase):
         for token in ("wp('user', 'create'", "wp('user', 'delete'", "wp('post', 'delete'",
                       'finally', "'description'", 'wp:post-author-biography',
                       '320, 375, 390, 412, 768, 1440, 1920',
-                      "'ltr', 'rtl'", 'fontSize = \'64px\'',
+                      "'ltr', 'rtl'", 'await setRootTextScale(page, font, dir);',
                       "forcedColors: 'active'", 'new AxeBuilder',
                       'openAuthenticatedEditor', 'blocks.serialize', 'blocks.parse',
                       'core-post-author-biography-390-rtl-200-forced-colors.png',

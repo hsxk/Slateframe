@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -52,9 +53,7 @@ test('Core Post Author Name preserves native author links and responsive wrappin
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((el, state) => {
-            el.dir = state.dir; el.style.fontSize = state.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const metrics = await link.evaluate(el => {
             const r = el.getBoundingClientRect();
             return { left: r.left, right: r.right, width: r.width, height: r.height,
@@ -71,11 +70,15 @@ test('Core Post Author Name preserves native author links and responsive wrappin
           if (font === 16) {
             await root.screenshot({ path: 'test-artifacts/screenshots/core-post-author-name-' + width + '-' + dir + '.png' });
           }
+          if (width === 390 && font === 64) {
+            await link.scrollIntoViewIfNeeded();
+            await page.screenshot({ path: 'test-artifacts/screenshots/core-post-author-name-390-' + dir + '-400.png', fullPage: false });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(el => { el.dir = 'rtl'; el.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.keyboard.press('Tab');
     await link.focus();
     await expect(link).toBeFocused();
@@ -87,7 +90,11 @@ test('Core Post Author Name preserves native author links and responsive wrappin
     await link.focus();
     expect(await link.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth))).toBeGreaterThanOrEqual(2);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-post-author-name-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(el => { el.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await link.focus();
+    await expect(link).toBeFocused();
+    expect(await link.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth))).toBeGreaterThanOrEqual(2);
+    await page.screenshot({ path: 'test-artifacts/screenshots/core-post-author-name-390-rtl-400-forced-colors.png', fullPage: false });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
     await page.emulateMedia({ forcedColors: 'none' });
