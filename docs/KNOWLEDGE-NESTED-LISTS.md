@@ -71,3 +71,10 @@ not only the CSS token value. The screenshot verifier rejects symlinked evidence
 as well as missing, corrupt, incomplete or incorrectly sized PNGs. These checks
 are regression guards; only real WordPress/Chromium Actions at the exact commit
 SHA and downloaded visual review establish release acceptance.
+
+
+## Core Query Loop coexistence after the Steps reset
+
+The real WordPress Browser smoke at PR #172 SHA `589446e` exposed a separate cascade regression in a disposable shortcode-generated Portfolio Query Loop: at 320px LTR / 32px root the native `.wp-block-post-template` acquired 43.2px of unwanted inline-start padding. The Steps/Checklist exclusion had introduced a high-specificity `:not(...)` into the generic reading list selector, allowing it to outrank the contextual Query Loop's deliberate `padding-inline:0` reset. This is a runtime presentation defect, not an acceptable test exception.
+
+The reading selector now uses `:not(:where(.is-style-slateframe-steps,.is-style-slateframe-checklist))`. The `:where()` zeroes the exclusion's specificity while retaining both exclusions and ordinary/nested Core List indentation. The contextual `.slateframe-project-grid .wp-block-post-template` reset therefore wins normally; no `!important`, new dependency, business logic, or budget increase is required. Isolated Chromium computed-style checks found zero padding for plugin Query Loops and Steps/Checklist, while ordinary and nested lists retained 1.35em. This local reproduction is not WordPress acceptance. The plugin coexistence browser suite now also checks the actual 16px baseline and 64px RTL padding. Only fresh exact-HEAD Actions, real WordPress screenshots and ZIP verification can authorize merge.
