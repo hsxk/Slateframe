@@ -134,28 +134,26 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
             const li = getComputedStyle(node);
             const badge = getComputedStyle(node, '::before');
             const box = node.getBoundingClientRect();
-            const gap = parseFloat(getComputedStyle(document.documentElement)
-              .getPropertyValue('--slateframe-component-gap')) ||
-              parseFloat(getComputedStyle(node).getPropertyValue('--slateframe-space-3'));
             const badgeSize = parseFloat(badge.width);
             return {
               badgeWidth: badgeSize, badgeHeight: parseFloat(badge.height),
               badgeFont: parseFloat(badge.fontSize),
               padding: parseFloat(li.paddingInlineStart),
               control: parseFloat(li.getPropertyValue('--slateframe-control')),
-              gap, minHeight: parseFloat(li.minBlockSize),
+              minHeight: parseFloat(li.minBlockSize),
               left: box.left, right: box.right,
-              markerInset: dirFromStyle(li) === 'rtl' ? badge.right : badge.left,
+              markerInset: li.direction === 'rtl' ? badge.right : badge.left,
               overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               nested: getComputedStyle(node.querySelector('.nested-checks')).listStyleType,
             };
-            function dirFromStyle(style) { return style.direction; }
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(result.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
           expect(result.left, label + ' list left').toBeGreaterThanOrEqual(-1);
           expect(result.right, label + ' list right').toBeLessThanOrEqual(width + 1);
-          expect(result.badgeWidth, label + ' badge minimum').toBeGreaterThanOrEqual(44);
+          expect(result.control, label + ' Appearance control floor').toBeGreaterThanOrEqual(44);
+          expect(result.control, label + ' Appearance control ceiling').toBeLessThanOrEqual(56);
+          expect(result.badgeWidth, label + ' badge minimum').toBeGreaterThanOrEqual(result.control - 1);
           expect(result.badgeWidth, label + ' badge bounded').toBeLessThanOrEqual(Math.max(44, font * 1.3) + 1);
           expect(result.badgeHeight, label + ' badge square').toBeCloseTo(result.badgeWidth, 0);
           expect(result.minHeight, label + ' reserve badge height').toBeGreaterThanOrEqual(result.badgeHeight - 1);
