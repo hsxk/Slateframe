@@ -18,4 +18,4 @@ Slateframe leaves WordPress Core Navigation, its overlay, submenu, and keyboard 
 
 Automated Chromium checks do not replace manual Safari/VoiceOver and Firefox review. The theme adds no navigation interception, custom content ownership, extra JavaScript, or plugin dependencies.
 
-Three mandatory real 390×900 viewport PNGs capture 400% LTR, RTL, and RTL forced-colors navigation. The CI verifier rejects missing, linked, truncated, corrupt, non-PNG or incorrectly sized evidence; the static contract prevents narrowing the 42-case matrix to a single 400% viewport. Screenshots are manually reviewed before merge.
+Three mandatory real 390×900 viewport PNGs capture 400% LTR, RTL, and RTL forced-colors navigation. Each capture scrolls the actual first Core Navigation link into the viewport and asserts intersection before taking a viewport-only screenshot, preventing a valid PNG of unrelated off-screen content from passing visual review. The CI verifier rejects missing, linked, truncated, corrupt, non-PNG or incorrectly sized evidence; the static contract prevents narrowing the 42-case matrix to a single 400% viewport. Screenshots are manually reviewed before merge.
