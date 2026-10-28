@@ -5,3 +5,13 @@ Slateframe supports the WordPress **RSS** block as a feed reader, not a feed ser
 Core renders a title wrapper containing an optional anchor; only the actual anchor receives the minimum target, so unlinked titles remain ordinary text. The block title links retain a minimum `--slateframe-control` hit area (44px or more). Long CJK, Arabic, mixed-script titles, dates, authors and excerpts wrap inside their actual columns at 320/375/390/412/768/1440/1920px, including RTL and enlarged text. The editor receives the same CSS. Core remains free to apply authored colors, typography and grid columns.
 
 The browser fixture calls WordPress Core's actual RSS renderer with an intercepted, synthetic RSS 2.0 response inside an isolated WP-CLI process. It embeds Core's returned list/grid markup in a disposable WordPress Page; a valid native Core RSS block fetches the same deterministic local XML through a disposable, URL-scoped WordPress HTTP interception hook, activates the conditional style, and renders without an error banner, and no external feed is requested. It verifies list/grid semantics, links, focus, Axe, forced colors, 200%/400% reflow and screenshots. A separate authenticated Gutenberg check verifies `core/rss` attributes survive parse/serialize unchanged. This does **not** claim external-feed integration testing; before release, manually verify a real feed, network failure, and Safari/VoiceOver/Firefox announcements.
+
+## Exact 400% text and keyboard evidence
+
+The disposable WordPress fixture verifies computed root 16/32/64px text via the
+shared Chromium helper, rather than assuming that a requested inline CSS value
+took effect. At 320px and 390px in RTL, native RSS title links must remain
+within the viewport and retain a minimum 44px target. A real 390x900
+forced-colors screenshot captures keyboard focus at 400% zoom. CI rejects
+missing, corrupt, wrong-sized and non-PNG evidence without changing the
+existing CSS budget or WordPress feed semantics.

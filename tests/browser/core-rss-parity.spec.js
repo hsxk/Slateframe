@@ -3,6 +3,7 @@ const AxeBuilder = require('@axe-core/playwright').default;
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -57,10 +58,7 @@ add_filter( 'pre_http_request', static function ( $pre, $args, $url ) {
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        await page.locator('html').evaluate((node, value) => {
-          node.dir = value;
-          node.style.fontSize = '16px';
-        }, dir);
+        await setRootTextScale(page, 16, dir);
         const state = await root.evaluate(node => ({
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           nodes: [...node.querySelectorAll('li,a[href^="https://example.org/entry/"],.wp-block-rss__item-excerpt')]
@@ -89,7 +87,7 @@ add_filter( 'pre_http_request', static function ( $pre, $args, $url ) {
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     await page.keyboard.press('Tab');
     await links.first().focus();
@@ -102,9 +100,28 @@ add_filter( 'pre_http_request', static function ( $pre, $args, $url ) {
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
     await page.screenshot({ fullPage: true, path: 'test-artifacts/screenshots/core-rss-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
-      .toBeLessThanOrEqual(1);
+    await setRootTextScale(page, 64, 'rtl');
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+        width + 'px RTL 400% RSS containment').toBeLessThanOrEqual(1);
+      const geometry = await links.first().evaluate(node => {
+        const r = node.getBoundingClientRect();
+        return { left: r.left, right: r.right, width: r.width, height: r.height };
+      });
+      expect(geometry.left).toBeGreaterThanOrEqual(-1);
+      expect(geometry.right).toBeLessThanOrEqual(width + 1);
+      expect(geometry.width).toBeGreaterThanOrEqual(43);
+      expect(geometry.height).toBeGreaterThanOrEqual(43);
+    }
+    await page.setViewportSize({ width: 390, height: 900 });
+    await links.first().scrollIntoViewIfNeeded();
+    await links.first().focus();
+    await expect(links.first()).toBeFocused();
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-rss-390-rtl-400-forced-colors.png',
+      fullPage: false,
+    });
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => document.getElementById('slateframe-core-rss-inline-css') ||
       document.getElementById('slateframe-core-rss-css'))).toBeNull();

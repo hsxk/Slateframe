@@ -41,7 +41,10 @@ class CoreRssParity(unittest.TestCase):
     def test_wordpress_browser_and_gutenberg_coverage(self):
         js = (ROOT / 'tests/browser/core-rss-parity.spec.js').read_text(encoding='utf-8')
         for needle in ('wp-block-rss', 'is-grid', '320, 375, 390, 412, 768, 1440, 1920',
-                       "'ltr', 'rtl'", "fontSize = '32px'", "fontSize = '64px'",
+                       "'ltr', 'rtl'", "await setRootTextScale(page, 16, dir);",
+                       "await setRootTextScale(page, 32, 'rtl');",
+                       "await setRootTextScale(page, 64, 'rtl');",
+                       "core-rss-390-rtl-400-forced-colors.png",
                        "forcedColors: 'active'", 'new AxeBuilder',
                        "page.keyboard.press('Tab')", 'openAuthenticatedEditor',
                        'blocks.serialize', 'blocks.parse', 'feedURL', 'itemsToShow',

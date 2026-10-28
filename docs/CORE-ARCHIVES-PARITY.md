@@ -13,3 +13,13 @@ Slateframe styles the WordPress Core Archives block without owning queries, date
 ## Manual release review
 
 Review exact-SHA WordPress/Chromium screenshots, then test Safari/VoiceOver and Firefox for native dropdown announcement and keyboard navigation. Check translated month labels with real language packs before claiming cross-browser acceptance.
+
+## Exact 400% RTL focus and reflow
+
+Native list and dropdown controls are checked at computed root 16/32/64px
+in real WordPress/Chromium, preserving Core month URLs and the Gutenberg
+list/dropdown roundtrip. At 320px and 390px RTL/400%, both link and select
+must remain inside the viewport with at least 44px hit areas. The focused
+native select is captured in a real 390x900 forced-colors viewport; CI
+rejects absent, damaged, wrong-sized or non-PNG screenshot evidence.
+No theme runtime script or Core block override is introduced.
