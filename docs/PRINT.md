@@ -12,6 +12,7 @@ Slateframe uses a WordPress-enqueued, print-media-only CSS stylesheet at `assets
 - Suppress Core Cover overlays and excessive Spacer heights while retaining Cover text and natural image proportions.
 - Scale ordinary portrait article images, Cover media, and featured images to a maximum 18 cm on paper, without cropping or losing their natural proportions.
 - Keep headings with following material and keep figures and table rows together where supported by the browser's print fragmentation engine.
+- Native WordPress 7.1 Core Tabs print all panels, including `hidden="until-found"` inactive panels, without changing their screen selection or adding runtime JavaScript; WordPress 6.7 remains supported without the Tabs block.
 - Native Details remain native: expand a closed disclosure before printing if the hidden text must be included; CSS does not forcibly open it.
 - Use RTL-compatible logical properties and allow CJK and long multilingual table tokens to wrap. Keep semantic four-column tables intact; reduce cell inline padding instead of lowering the reader's font size or hiding columns. Extremely narrow print previews may still wrap words heavily at 200% zoom.
 

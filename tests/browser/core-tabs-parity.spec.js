@@ -124,6 +124,40 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
       path: 'test-artifacts/screenshots/core-tabs-390-rtl-400-forced-colors.png',
       animations: 'disabled',
     });
+
+    // Print inactive native panels without changing Core's selected screen tab.
+    await page.emulateMedia({ media: 'screen', forcedColors: 'none' });
+    const panels = tabs.getByRole('tabpanel', { includeHidden: true });
+    await expect(buttons.first()).toHaveAttribute('aria-selected', 'true');
+    await expect(panels.nth(1)).toBeHidden();
+    for (const dir of ['ltr', 'rtl']) {
+      await page.locator('html').evaluate((node, direction) => {
+        node.dir = direction;
+        node.style.fontSize = '64px';
+      }, dir);
+      await page.emulateMedia({ media: 'print' });
+      await expect(panels.nth(0)).toBeVisible();
+      await expect(panels.nth(1)).toBeVisible();
+      const printState = await panels.nth(1).evaluate(node => ({
+        contentVisibility: getComputedStyle(node).contentVisibility,
+        hidden: node.getAttribute('hidden'),
+        height: node.getBoundingClientRect().height,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      }));
+      expect(printState.contentVisibility).toBe('visible');
+      expect(printState.hidden).toBe('until-found');
+      expect(printState.height).toBeGreaterThan(0);
+      expect(printState.overflow).toBeLessThanOrEqual(1);
+      await panels.nth(1).scrollIntoViewIfNeeded();
+      await expect(panels.nth(1)).toBeInViewport();
+      await page.screenshot({
+        path: 'test-artifacts/screenshots/core-tabs-print-390-' + dir + '-400.png',
+        animations: 'disabled',
+      });
+      await page.emulateMedia({ media: 'screen' });
+      await expect(panels.nth(1)).toBeHidden();
+      await expect(buttons.first()).toHaveAttribute('aria-selected', 'true');
+    }
   } finally {
     wp('post', 'delete', id, '--force');
   }

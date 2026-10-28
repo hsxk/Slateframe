@@ -29,4 +29,5 @@ html,body{overflow:visible!important}body{background:#fff!important;color:#000!i
 & .wp-block-table{overflow:visible!important}}
 .slateframe-prose>table,.slateframe-prose .wp-block-table table{display:table;width:100%!important;table-layout:fixed;overflow:visible!important}
 .slateframe-prose :is(th,td){min-inline-size:0!important;overflow-wrap:anywhere;word-break:normal;padding-inline:.2em!important}
+.slateframe-prose .wp-block-tabs .wp-block-tab-panel[hidden="until-found"]{content-visibility:visible!important;display:block!important}
 :focus{outline:0}}

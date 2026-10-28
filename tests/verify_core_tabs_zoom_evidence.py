@@ -10,6 +10,8 @@ CAPTURES = (
     "core-tabs-390-rtl-400.png",
     "core-tabs-390-rtl-400-forced-colors.png",
     "core-tabs-390-rtl-400-selected-forced-colors.png",
+    "core-tabs-print-390-ltr-400.png",
+    "core-tabs-print-390-rtl-400.png",
 )
 
 
