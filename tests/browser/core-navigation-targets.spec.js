@@ -89,7 +89,14 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
     await expect(close).toBeVisible();
     const closeBox = await close.boundingBox();
     expect(closeBox?.width || 0).toBeGreaterThanOrEqual(44);
-    expect(closeBox?.height || 0).toBeGreaterThanOrEqual(44);
+    const closeMetrics = await close.evaluate(node => ({
+      minimum: parseFloat(getComputedStyle(node).minBlockSize),
+      rendered: node.getBoundingClientRect().height,
+    }));
+    // Chromium may report a 44px Core control as 43.999999 CSS pixels.
+    // Preserve the 44px minimum and normalize only sub-0.00005px float noise.
+    expect(closeMetrics.minimum).toBeGreaterThanOrEqual(44);
+    expect(Number(closeMetrics.rendered.toFixed(4))).toBeGreaterThanOrEqual(44);
     const responsive = overlay.locator('.wp-block-navigation__responsive-container');
     await expect(responsive).toHaveClass(/is-menu-open/);
     // Core fades its modal in. Wait until the page underneath is fully obscured.

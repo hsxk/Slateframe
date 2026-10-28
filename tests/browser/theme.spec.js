@@ -17,6 +17,12 @@ function projectWidth(testInfo) {
 	return testInfo.project.use.viewport?.width || 1440;
 }
 
+// Core's integer-sized responsive crops and fractional CSS layout differ by rounding.
+// Compare integer CSS pixels once (floor), then reject two-pixel crop deficits.
+function sourceCropShortfall(naturalPixels, renderedCssPixels) {
+	return Math.floor(renderedCssPixels) - naturalPixels;
+}
+
 async function useShortDesktopNavigation(page) {
 	await page.locator('[data-primary-nav] > ul > li > a').evaluateAll((links) =>
 		links.forEach((link, index) => { link.textContent = `Nav ${index + 1}`; })
@@ -1321,6 +1327,17 @@ test('portfolio Query Loop stylesheet is requested only for project-grid documen
 	}
 });
 
+test('Core srcset rounding accepts one crop pixel but rejects two', () => {
+	expect(sourceCropShortfall(335, 336)).toBe(1);
+	expect(sourceCropShortfall(240, 241)).toBe(1);
+	expect(sourceCropShortfall(335, 335.01)).toBe(0);
+	expect(sourceCropShortfall(334, 336)).toBeGreaterThan(1);
+	expect(sourceCropShortfall(239, 241)).toBeGreaterThan(1);
+	expect(sourceCropShortfall(335, 336.01)).toBe(1);
+	expect(sourceCropShortfall(335, 336.99)).toBe(1);
+	expect(sourceCropShortfall(335, 337.01)).toBeGreaterThan(1);
+});
+
 test('native portfolio Query Loop is populated, responsive, and accessible', async ({ page }, testInfo) => {
 	await page.goto(projectPath, { waitUntil: 'networkidle' });
 	const grid = page.locator('.browser-project-grid .wp-block-post-template');
@@ -1357,8 +1374,10 @@ test('native portfolio Query Loop is populated, responsive, and accessible', asy
 		expect(media.intrinsicHeight, 'Core must retain source height metadata').toBeGreaterThan(0);
 		expect(media.renderedWidth).toBeGreaterThan(0);
 		expect(media.renderedHeight).toBeGreaterThan(0);
-		expect(media.naturalWidth, 'selected source must cover rendered width').toBeGreaterThanOrEqual(Math.floor(media.renderedWidth));
-		expect(media.naturalHeight, 'selected source must cover rendered crop height').toBeGreaterThanOrEqual(Math.floor(media.renderedHeight));
+		// WordPress srcset crops have integer pixels while CSS grid dimensions can be fractional.
+		// Floor the rendered size once, then allow only one integer source pixel of rounding.
+		expect(sourceCropShortfall(media.naturalWidth, media.renderedWidth), 'selected source width crop shortfall').toBeLessThanOrEqual(1);
+		expect(sourceCropShortfall(media.naturalHeight, media.renderedHeight), 'selected source height crop shortfall').toBeLessThanOrEqual(1);
 		expect(media.candidatePaths.length, 'Core should offer multiple responsive sources').toBeGreaterThanOrEqual(2);
 		expect(media.candidatePaths, 'the decoded image must be a declared srcset candidate').toContain(media.currentPath);
 		expect(media.postTitle).toMatch(/^Portable project fixture [1-6]$/);

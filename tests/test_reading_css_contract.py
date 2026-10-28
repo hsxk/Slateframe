@@ -13,7 +13,7 @@ class SharedReadingCssTest(unittest.TestCase):
         self.assertEqual(css.count(":is(.slateframe-prose,.editor-styles-wrapper){"), 1)
         for selector in (
             "& h2{", "& h3{", "& h4{", "& :is(h5,h6){",
-            "& :is(ul,ol){", "& dl{", "& dt{", "& dd{", "& hr{",
+            "& :is(ul,ol):not(:where(.is-style-slateframe-steps,.is-style-slateframe-checklist)){", "& dl{", "& dt{", "& dd{", "& hr{",
             "& .wp-block-pullquote blockquote{", "& .wp-block-details summary{",
             "& .wp-block-footnotes li{",
         ):
