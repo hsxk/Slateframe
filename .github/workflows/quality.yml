@@ -1230,6 +1230,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Details evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_details_zoom_evidence.py test-artifacts/screenshots
+          # Core Post Date must prove actual computed 400% zoom, both directions and forced-colors focus.
+          for screenshot in core-post-date-390-ltr-400.png core-post-date-390-rtl-400.png core-post-date-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Post Date evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_post_date_zoom_evidence.py test-artifacts/screenshots
           # Focused skip-link evidence must remain a genuine 390x900 viewport at 400%.
           for screenshot in skip-link-390-ltr-400.png skip-link-390-rtl-400.png skip-link-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% skip-link evidence: $screenshot" >&2; exit 1; }

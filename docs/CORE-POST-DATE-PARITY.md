@@ -22,3 +22,24 @@ roundtrips native date options without modifying the editor post.
 Manual Safari/VoiceOver and Firefox review remains a release gate for localized
 date announcements and optional link semantics. Visual PASS requires opening
 screenshots from the exact HEAD SHA's real WordPress/Chromium Actions artifacts.
+
+## Computed 400% text and fail-closed evidence
+
+The acceptance matrix now uses the shared `setRootTextScale(page, font, dir)`
+helper. It waits for the real WordPress/Chromium computed root font size
+(16/32/64px) and computed LTR/RTL direction, instead of assuming an inline
+font assignment succeeded. Native `<time datetime>` values, Core permalink
+behavior, seven-width reflow, keyboard focus, forced-colors, Axe and Gutenberg
+serialization are unchanged.
+
+Three additional genuine 390×900 viewport screenshots are required:
+
+- `core-post-date-390-ltr-400.png`
+- `core-post-date-390-rtl-400.png`
+- `core-post-date-390-rtl-400-forced-colors.png` (linked date focused)
+
+The Theme quality gate verifies PNG signature, IHDR CRC and viewport dimensions;
+static negative tests reject missing, corrupt and incorrectly sized evidence.
+These are test and release-contract changes only, not a custom date formatter
+or additional theme runtime asset. Visual acceptance requires reviewing the
+exact PR HEAD SHA's successful WordPress/Chromium artifact before merging.
