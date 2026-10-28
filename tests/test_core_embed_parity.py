@@ -30,7 +30,9 @@ class CoreEmbedParity(unittest.TestCase):
         spec = (ROOT / "tests/browser/core-embed-parity.spec.js").read_text(encoding="utf-8")
         for needle in ("wp('post', 'create'", "wp('post', 'delete'", "finally",
                        "320, 375, 390, 412, 768, 1440, 1920", "'ltr', 'rtl'",
-                       "fontSize = '400%'", "forcedColors: 'active'",
+                       "await setRootTextScale(page, 16, direction);",
+                       "await setRootTextScale(page, 32, 'rtl');",
+                       "await setRootTextScale(page, 64, 'rtl');", "forcedColors: 'active'",
                        "new AxeBuilder", "page.keyboard.press('Tab')",
                        "core-embed-390-rtl-200-forced-colors.png",
                        "'slateframe-core-embed-inline-css'", "external.sheet",
