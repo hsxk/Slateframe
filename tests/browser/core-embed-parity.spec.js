@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -48,16 +49,13 @@ test('Core Embed bounds native iframe, fallback link and captions at seven width
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const direction of ['ltr', 'rtl']) {
-        await page.locator('html').evaluate((node, value) => {
-          node.dir = value;
-          node.style.fontSize = '16px';
-        }, direction);
+        await setRootTextScale(page, 16, direction);
         const geometry = await root.evaluate(node => ({
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           items: [...node.querySelectorAll('.wp-block-embed,.wp-block-embed__wrapper,iframe,figcaption,.wp-block-embed__wrapper a')].map(el => {
             const r = el.getBoundingClientRect(), p = el.parentElement.getBoundingClientRect();
             const style = getComputedStyle(el);
-            return { left: r.left, right: r.right, width: r.width,
+            return { left: r.left, right: r.right, width: r.width, height: r.height,
               parentLeft: p.left, parentRight: p.right,
               wrap: style.overflowWrap, align: style.textAlign, tag: el.tagName.toLowerCase() };
           }),
@@ -73,6 +71,10 @@ test('Core Embed bounds native iframe, fallback link and captions at seven width
             expect(item.wrap).toBe('anywhere');
             expect(item.align).toBe('start');
           }
+          if (item.tag === 'a') {
+            expect(item.height, label + ' fallback link 44px target').toBeGreaterThanOrEqual(43);
+            expect(item.wrap, label + ' fallback link wrapping').toBe('anywhere');
+          }
         }
         if ([320, 390, 1440].includes(width)) {
           await fs.mkdir('test-artifacts/screenshots', { recursive: true });
@@ -84,10 +86,7 @@ test('Core Embed bounds native iframe, fallback link and captions at seven width
     }
 
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => {
-      node.dir = 'rtl';
-      node.style.fontSize = '200%';
-    });
+    await setRootTextScale(page, 32, 'rtl');
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
@@ -111,9 +110,17 @@ test('Core Embed bounds native iframe, fallback link and captions at seven width
     await root.screenshot({
       path: 'test-artifacts/screenshots/core-embed-390-rtl-200-forced-colors.png',
     });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '400%'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await link.scrollIntoViewIfNeeded();
+    await link.focus();
+    await expect(link).toBeFocused();
+    expect(await link.evaluate(node => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(43);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-embed-390-rtl-400-forced-colors.png',
+      fullPage: false,
+    });
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() =>
       document.getElementById('slateframe-core-embed-inline-css') ||
