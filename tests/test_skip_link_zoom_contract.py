@@ -26,6 +26,7 @@ class SkipLinkZoomContract(unittest.TestCase):
         self.assertIn(".skip-link:focus{inset-inline-start:var(--slateframe-gutter)", css)
         self.assertIn("max-inline-size:calc(100vw - 2*var(--slateframe-gutter))", css)
         self.assertIn("white-space:normal;overflow-wrap:anywhere!important", css)
+        self.assertIn("margin:.75rem;padding:.8rem 1rem;", css)
         self.assertLessEqual(len(css.encode()), 16000)
 
     def test_computed_zoom_and_keyboard_contract(self):
@@ -38,6 +39,7 @@ class SkipLinkZoomContract(unittest.TestCase):
             "['ltr', 'rtl']",
             "await skip.focus()",
             "await skip.press('Enter')",
+            "expect(state.height, label + ' target height').toBeGreaterThanOrEqual(44)",
             "wordWrap: style.wordWrap",
             "expect(state.wordWrap, label + ' Core word-wrap alias').toBe('anywhere')",
             "toBeFocused()",
