@@ -26,6 +26,8 @@ test('Core Post Featured Image retains native image and permalink at seven width
     const attachmentAlt = '日本語 中文 العربية photo';
     wp('post', 'meta', 'update', attachmentId, '_wp_attachment_image_alt', attachmentAlt);
     expect(wp('post', 'meta', 'get', attachmentId, '_wp_attachment_image_alt')).toBe(attachmentAlt);
+    const caption = '日本語 中文 العربية ' + 'UnbrokenCaptionSegment'.repeat(3);
+    wp('post', 'update', attachmentId, '--post_excerpt=' + caption);
     const permalink = wp('eval', 'echo get_permalink(' + Number(postId) + ');');
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-featured-image-fixture');
@@ -33,6 +35,8 @@ test('Core Post Featured Image retains native image and permalink at seven width
     const hero = page.locator('.slateframe-entry-hero-image');
     await expect(hero).toBeVisible();
     await expect(hero).toHaveAttribute('fetchpriority', 'high');
+    const heroCaption = page.locator('.slateframe-entry-hero figcaption');
+    await expect(heroCaption).toHaveText(caption);
     const figures = root.locator('.wp-block-post-featured-image');
     await expect(figures).toHaveCount(2);
     const linked = figures.first().locator('a');
@@ -93,6 +97,16 @@ test('Core Post Featured Image retains native image and permalink at seven width
           expect(heroState.left, label + ' hero left').toBeGreaterThanOrEqual(-1);
           expect(heroState.right, label + ' hero right').toBeLessThanOrEqual(width + 1);
           expect(heroState.height, label + ' bounded hero height').toBeLessThanOrEqual(703);
+          const captionState = await heroCaption.evaluate(node => {
+            const r = node.getBoundingClientRect();
+            return { left: r.left, right: r.right, overflow: node.scrollWidth - node.clientWidth,
+              align: getComputedStyle(node).textAlign };
+          });
+          expect(captionState.left, label + ' caption left').toBeGreaterThanOrEqual(-1);
+          expect(captionState.right, label + ' caption right').toBeLessThanOrEqual(width + 1);
+          expect(captionState.overflow, label + ' caption text overflow').toBeLessThanOrEqual(1);
+          expect(['start', 'left', 'right'], label + ' caption logical alignment')
+            .toContain(captionState.align);
           if (font === 16 && dir === 'ltr' && [390, 1440].includes(width)) {
             await page.locator('.slateframe-entry-hero').screenshot({
               path: 'test-artifacts/screenshots/entry-hero-natural-' + width + '-ltr.png',

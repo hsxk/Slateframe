@@ -18,6 +18,8 @@ class FeaturedHeroNaturalGeometry(unittest.TestCase):
             ".slateframe-entry-hero-image{width:100%;max-height:78vh;object-fit:cover}",
             css,
         )
+        self.assertIn(".slateframe-entry-hero .wp-caption-text{max-inline-size:100%;", css)
+        self.assertIn("overflow-wrap:anywhere;text-align:start}", css)
         self.assertLessEqual(len(css.encode("utf-8")), 15000)
 
     def test_real_wordpress_ratio_matrix_and_visual_evidence(self):
@@ -29,6 +31,8 @@ class FeaturedHeroNaturalGeometry(unittest.TestCase):
             "heroState.naturalRatio",
             "heroState.renderedRatio",
             "heroState.objectFit",
+            "heroCaption.evaluate",
+            "UnbrokenCaptionSegment",
             "entry-hero-natural-390-rtl-400-forced-colors.png",
             "entry-hero-natural-' + width + '-ltr.png",
             "320, 375, 390, 412, 768, 1440, 1920",
