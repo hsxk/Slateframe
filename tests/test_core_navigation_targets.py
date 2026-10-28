@@ -35,6 +35,16 @@ class CoreNavigationTargets(unittest.TestCase):
         self.assertNotIn(".slateframe-primary-nav", css)
         self.assertNotIn("javascript", css.lower())
 
+    def test_close_button_preserves_exact_44px_floor_after_float_normalization(self):
+        browser = (ROOT / "tests/browser/core-navigation-targets.spec.js").read_text()
+        # A 43.999999px Chromium layout float must not fail an authored 44px
+        # control, but a genuinely undersized 43.99px control must still fail.
+        self.assertIn("minimum: parseFloat(getComputedStyle(node).minBlockSize)", browser)
+        self.assertIn("expect(closeMetrics.minimum).toBeGreaterThanOrEqual(44)", browser)
+        self.assertIn("Number(closeMetrics.rendered.toFixed(4))", browser)
+        self.assertIn("toBeGreaterThanOrEqual(44)", browser)
+        self.assertNotIn("expect(closeBox?.height || 0).toBeGreaterThanOrEqual(44)", browser)
+
     def test_real_wordpress_browser_coverage(self):
         browser = (ROOT / "tests/browser/core-navigation-targets.spec.js").read_text()
         for contract in ("getAnimations()", "overlaySurface.background", "animations: 'disabled'", "overlayBox"):
