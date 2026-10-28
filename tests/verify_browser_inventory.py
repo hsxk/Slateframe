@@ -63,6 +63,9 @@ CORE_ZOOM_EVIDENCE = frozenset((
     'core-query-no-results-390-ltr-400.png',
     'core-query-no-results-390-rtl-400.png',
     'core-query-no-results-390-rtl-400-forced-colors.png',
+    'core-categories-390-ltr-400.png',
+    'core-categories-390-rtl-400.png',
+    'core-categories-390-rtl-400-forced-colors.png',
     'core-search-extra-390-ltr-400.png',
     'core-search-extra-390-rtl-400.png',
 ))

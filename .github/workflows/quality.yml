@@ -1239,6 +1239,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Knowledge Steps evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_knowledge_step_zoom_evidence.py test-artifacts/screenshots
+          # Native Core Categories: 42-case computed 400% zoom and exact 390x900 focus evidence.
+          for screenshot in core-categories-390-ltr-400.png core-categories-390-rtl-400.png core-categories-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Categories evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_categories_zoom_evidence.py test-artifacts/screenshots
           # Native Core Search button-inside: 48-case computed zoom and real 390x900 screenshots.
           for screenshot in core-search-inside-390-ltr-400.png core-search-inside-390-rtl-400.png core-search-inside-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Search evidence: $screenshot" >&2; exit 1; }

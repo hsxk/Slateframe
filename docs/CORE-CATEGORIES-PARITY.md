@@ -14,9 +14,14 @@ Gutenberg receives the same stylesheet through `add_editor_style()`.
 A disposable WordPress fixture creates two real parent/child categories and
 posts, then renders native list and dropdown blocks. The browser verifies
 Core archive URLs, nested hierarchy, dropdown options, conditional assets,
-320/375/390/412/768/1440/1920px, LTR/RTL, 200%/400% text, keyboard,
-forced-colors, Axe and full-page screenshots at 320/390/1440 LTR/RTL and
-390 RTL 200% forced colors. An unrelated 404 must not load the asset.
+320/375/390/412/768/1440/1920px × LTR/RTL × computed 16/32/64px
+root text (42 cases), 44px bounded controls, keyboard, forced-colors and Axe.
+Existing full-page screenshots remain at 320/390/1440 LTR/RTL and 390 RTL
+200% forced colors. Three additional **real WordPress/Chromium 390×900 viewport**
+screenshots at 400% (LTR, RTL, RTL forced colors) must show the focused native
+select after scrolling it into view. CI rejects missing, corrupt, wrong-size,
+linked and truncated PNG evidence; CSS, Core navigation and Gutenberg markup
+remain unchanged. An unrelated 404 must not load the asset.
 Cleanup is in `finally`. Authenticated Gutenberg serialization checks
 both display modes without modifying the editor post.
 

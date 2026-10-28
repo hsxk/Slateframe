@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
 }).trim();
@@ -67,12 +68,11 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, value) => {
-            node.dir = value.dir;
-            node.style.fontSize = value.font + 'px';
-          }, { dir, font });
+        for (const font of [16, 32, 64]) {
+          await setRootTextScale(page, font, dir);
           const state = await root.evaluate(node => ({
+            rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
+            control: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             controls: [...node.querySelectorAll('a,select')].map(el => {
               const r = el.getBoundingClientRect();
@@ -81,6 +81,8 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
             }),
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
+          expect(state.rootFont, label + ' computed root font').toBeCloseTo(font, 1);
+          expect(state.control, label + ' bounded control token').toBeGreaterThanOrEqual(44);
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
           // Other real WordPress categories may also render; test every link/select.
           expect(state.controls.length).toBeGreaterThanOrEqual(3);
@@ -91,6 +93,15 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
             expect(item.height, label + ' target height').toBeGreaterThanOrEqual(43);
             if (item.tag === 'A') expect(item.wrap).toBe('anywhere');
           }
+          if (width === 390 && font === 64) {
+            await select.focus();
+            await select.scrollIntoViewIfNeeded();
+            await expect(select).toBeInViewport();
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/core-categories-390-' + dir + '-400.png',
+              animations: 'disabled',
+            });
+          }
           if (font === 16 && [320, 390, 1440].includes(width)) {
             await page.screenshot({ fullPage: true, path: 'test-artifacts/screenshots/core-categories-' + width + '-' + dir + '.png' });
           }
@@ -98,7 +109,7 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.keyboard.press('Tab');
     await links.first().focus();
     await expect(links.first()).toBeFocused();
@@ -114,7 +125,14 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
     expect(await links.first().evaluate(el => parseFloat(getComputedStyle(el).outlineWidth)))
       .toBeGreaterThanOrEqual(2);
     await page.screenshot({ fullPage: true, path: 'test-artifacts/screenshots/core-categories-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(el => { el.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await select.focus();
+    await select.scrollIntoViewIfNeeded();
+    await expect(select).toBeInViewport();
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-categories-390-rtl-400-forced-colors.png',
+      animations: 'disabled',
+    });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
     // Core dropdown values are category slugs; verify its native change handler navigates.
