@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add a separate exact-HEAD offline Photography screenshot review index with strict runtime manifest, PNG SHA-256/CRC/dimensions and linked-file safety, plus eight adversarial regression tests and accessible no-JS full-resolution review. No theme runtime changes.
+
 - Keep every exact-HEAD visual acceptance screenshot visible as a clearly labeled required thumbnail in the offline review index, even under tight optional thumbnail limits; add regression coverage. No theme runtime changes.
 
 - Harden the offline exact-HEAD visual evidence index: reject duplicate/non-finite manifest data, inconsistent names, duplicate acceptance entries, invalid PNG critical chunk/IHDR/IDAT ordering; keep all verified screenshots reachable through accessible no-JS remainder links, with adversarial regression coverage and deterministic mobile/desktop viewport-balanced thumbnails. No theme runtime changes.

@@ -52,3 +52,33 @@ automated visual assertion or CI acceptance substitute. The reviewer still
 checks exact-SHA GitHub Actions, the separate Photography artifact, the release
 ZIP and main merge SHA before approving a PR. No production WordPress site is
 accessed by this tool.
+
+
+## Photography runtime: separate exact-HEAD review
+
+The successful Photography runtime Actions artifact is **not** the Browser
+artifact. Confirm that both workflows correspond to the same exact PR HEAD.
+Inspect the ZIP member paths before extracting the isolated
+test-artifacts/photography-lightbox/ directory, then run:
+
+~~~bash
+python3 bin/photography-review-index.py /path/to/test-artifacts/photography-lightbox \
+  0123456789abcdef0123456789abcdef01234567 \
+  --output /path/to/test-artifacts/photography-review.html
+~~~
+
+Replace the sample SHA with the actual full PR HEAD. The new index validates
+the Photography manifest's exact commit, every PNG SHA-256, dimensions, CRC
+and chunk framing, rejecting unlisted or missing files, symlinks, hardlinks,
+duplicate JSON keys and invalid metadata. It provides accessible local
+full-resolution links and a deterministic bounded thumbnail overview with
+no JavaScript or remote requests. The HTML output must be **outside** the
+verified evidence directory.
+
+The optional manifest pixel_sha256 is validated for syntax, but this
+standard-library-only index does **not** recalculate decoded pixel hashes.
+The successful Photography runtime and a real raster decoder remain
+authoritative for that check. Manually inspect the 320/390/1440/1920 Gallery,
+portrait/landscape lightbox, RTL navigation, close-button focus and safe areas.
+A generated HTML index is not a visual pass or a substitute for the
+exact-SHA Actions, real WordPress browser evidence or release ZIP review.
