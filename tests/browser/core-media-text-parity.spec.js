@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8' }).trim();
 const src = '/wp-content/themes/slateframe/assets/images/pattern-placeholder-landscape.svg';
@@ -17,7 +18,9 @@ const fixture = '<!-- wp:group {"className":"slateframe-media-text-fixture"} -->
   '<div class="wp-block-media-text has-media-on-the-right">' + image + body + '</div><!-- /wp:media-text -->' +
   '<p id="media-text-end">End of reference.</p></div><!-- /wp:group -->';
 
-test('Core Media & Text stays bounded in seven widths, RTL, 200% text and forced colors', async ({ page }) => {
+test('Core Media & Text preserves both authored stacking modes at 100/200/400% text', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress fixture covers seven widths');
+  test.setTimeout(150000);
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
     '--post_title=Slateframe Media Text ' + randomUUID(), '--post_content=' + fixture, '--porcelain');
   try {
@@ -28,8 +31,11 @@ test('Core Media & Text stays bounded in seven widths, RTL, 200% text and forced
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = ''; }, dir);
+        for (const font of [16, 32, 64]) {
+        await setRootTextScale(page, font, dir);
         const data = await root.evaluate(node => ({
+          rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
+          control: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
           blocks: [...node.querySelectorAll('.wp-block-media-text')].map(block => {
             const r = el => { const x = el.getBoundingClientRect(); return { left:x.left,right:x.right,top:x.top,bottom:x.bottom,width:x.width }; };
@@ -39,7 +45,10 @@ test('Core Media & Text stays bounded in seven widths, RTL, 200% text and forced
               min:getComputedStyle(content).minInlineSize,wrap:getComputedStyle(content).overflowWrap };
           }),
         }));
-        expect(data.overflow, width + ' ' + dir + ' page overflow').toBeLessThanOrEqual(1);
+        const label = width + 'px ' + dir + ' ' + font + 'px';
+        expect(data.rootFont, label + ' computed root').toBeCloseTo(font, 1);
+        expect(data.control, label + ' control token').toBeGreaterThanOrEqual(44);
+        expect(data.overflow, label + ' page overflow').toBeLessThanOrEqual(1);
         for (const block of data.blocks) {
           expect(block.min).toBe('0px');
           expect(block.wrap).toBe('anywhere');
@@ -53,14 +62,22 @@ test('Core Media & Text stays bounded in seven widths, RTL, 200% text and forced
           expect(data.blocks[0].content.top, 'Core mobile stack').toBeGreaterThanOrEqual(data.blocks[0].media.bottom - 1);
           expect(Math.min(data.blocks[1].content.bottom, data.blocks[1].media.bottom) - Math.max(data.blocks[1].content.top, data.blocks[1].media.top), 'Core unstacked mobile row overlap').toBeGreaterThan(0);
         }
-        if ([390, 1440].includes(width)) {
+        if (font === 16 && [390, 1440].includes(width)) {
           await fs.mkdir('test-artifacts/screenshots', { recursive: true });
           await root.screenshot({ path: 'test-artifacts/screenshots/core-media-text-' + width + '-' + dir + '.png' });
+        }
+        if (font === 64 && width === 390) {
+          const focus = root.locator('a').first();
+          await focus.focus();
+          await focus.scrollIntoViewIfNeeded();
+          await expect(focus).toBeInViewport();
+          await page.screenshot({ path: 'test-artifacts/screenshots/core-media-text-390-' + dir + '-400.png', animations: 'disabled' });
+        }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     const link = root.locator('a').first();
@@ -72,6 +89,13 @@ test('Core Media & Text stays bounded in seven widths, RTL, 200% text and forced
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(a11y.violations).toEqual([]);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-media-text-390-rtl-200-forced-colors.png' });
+    await setRootTextScale(page, 64, 'rtl');
+    await link.focus();
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeInViewport();
+    await page.screenshot({ path: 'test-artifacts/screenshots/core-media-text-390-rtl-400-forced-colors.png', animations: 'disabled' });
+    await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
+    await expect(page.locator('.wp-block-media-text')).toHaveCount(0);
   } finally {
     wp('post', 'delete', id, '--force');
   }

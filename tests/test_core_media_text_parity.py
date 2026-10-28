@@ -25,7 +25,9 @@ class CoreMediaTextParity(unittest.TestCase):
         spec = (ROOT / "tests/browser/core-media-text-parity.spec.js").read_text(encoding="utf-8")
         for width in (320, 375, 390, 412, 768, 1440, 1920):
             self.assertIn(str(width), spec)
-        for needle in ("'ltr', 'rtl'", "fontSize = '200%'", "forcedColors: 'active'",
+        for needle in ("'ltr', 'rtl'", "for (const font of [16, 32, 64])",
+                       "setRootTextScale(page, font, dir)", "data.rootFont",
+                       "core-media-text-390-rtl-400-forced-colors.png", "forcedColors: 'active'",
                        "AxeBuilder", "openAuthenticatedEditor", "blocks.parse(first)",
                        "core-media-text-390-rtl-200-forced-colors.png", "has-media-on-the-right",
                        "is-stacked-on-mobile", "wp('post', 'delete'"):
