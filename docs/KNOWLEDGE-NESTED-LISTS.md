@@ -27,8 +27,9 @@ introduced. The existing conditional content-modes.css remains under 7000
 bytes and is shared with Gutenberg.
 
 An independent isolated Chromium layout probe (not WordPress acceptance)
-at 320px / 64px root text showed the first long step height changing from
-about 6080px to 4429px; at 390px, from about 4209px to 3108px. The exact
+using the actual .75rem component gap at 320px / 64px root text showed
+the first long step height changing from about 8062px to 5090px; at
+390px, from about 4759px to 4209px. The exact
 height depends on font metrics and authored content, so this is evidence of
 the mechanism, not a cross-browser guarantee.
 
