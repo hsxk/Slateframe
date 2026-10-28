@@ -114,8 +114,10 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
           tracks:getComputedStyle(n).gridTemplateColumns.split(' ').filter(Boolean).length,
           rootPx:parseFloat(getComputedStyle(document.documentElement).fontSize),
           containerWidth:parseFloat(getComputedStyle(n.closest('.slateframe-project-grid')).width),
+          paddingStart:getComputedStyle(n).paddingInlineStart,
         }));
         expect(baseline.rootPx,`${width} ${direction} computed normal-size root`).toBeCloseTo(16, 1);
+        expect(baseline.paddingStart,`${width} ${direction} Core Query Loop baseline padding`).toBe('0px');
         expect(baseline.tracks,`${width} ${direction} normal-size columns (container ${baseline.containerWidth}px, root ${baseline.rootPx}px)`).toBe(width<=640?1:width<=900?2:3);
         await page.locator('html').evaluate(n=>{n.style.setProperty('font-size','32px','important');});
         // The real WordPress browser fixture has previously exposed a stale
@@ -175,6 +177,7 @@ add_filter('slateframe_query_loop_styles_needed',static function($needed){return
     await link.focus();
     await expect(link).toBeFocused();
     expect(await page.evaluate(()=>parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
+    expect(await list.evaluate(n=>getComputedStyle(n).paddingInlineStart),'400% RTL plugin Query Loop padding').toBe('0px');
     expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.screenshot({path:'test-artifacts/screenshots/plugin-coexistence-portfolio-390-rtl-400-forced-colors.png',fullPage:true});
     await page.emulateMedia({forcedColors:'none'});
