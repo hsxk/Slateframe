@@ -1231,6 +1231,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% discovery/recovery evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_related_reading_zoom_evidence.py test-artifacts/screenshots
+          # Real native Knowledge Steps badge and nested-list reflow at 400% text zoom.
+          for screenshot in knowledge-steps-390-ltr-400.png knowledge-steps-390-rtl-400.png knowledge-steps-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Knowledge Steps evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_knowledge_step_zoom_evidence.py test-artifacts/screenshots
           # Native Core quotations must prove computed 400% text, RTL and forced-colors.
           for screenshot in core-quote-390-ltr-400.png core-quote-390-rtl-400.png core-quote-390-rtl-400-forced-colors.png core-pullquote-390-ltr-400.png core-pullquote-390-rtl-400.png core-pullquote-390-rtl-400-forced-colors.png core-verse-390-ltr-400.png core-verse-390-rtl-400.png core-verse-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% quotation evidence: $screenshot" >&2; exit 1; }
