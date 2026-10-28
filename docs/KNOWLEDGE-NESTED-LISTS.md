@@ -24,7 +24,10 @@ than em is important: the badge's .72rem font size otherwise makes its
 custom-property dimensions resolve differently from the list item's padding.
 No text is truncated, clipped or reduced, and no JavaScript or new block is
 introduced. The existing conditional content-modes.css remains under 7000
-bytes and is shared with Gutenberg.
+bytes and is shared with Gutenberg. The editor's higher-specificity Core List
+padding override also consumes --slateframe-step (not the old 2.15rem),
+preventing overlap when Appearance raises the control size to 56px. The
+editor stylesheet retains its existing 5000-byte budget.
 
 An independent isolated Chromium layout probe (not WordPress acceptance)
 using the actual .75rem component gap at 320px / 64px root text showed
