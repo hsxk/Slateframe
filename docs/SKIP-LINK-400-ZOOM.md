@@ -14,6 +14,14 @@ focused skip link computed to `normal` even though the theme selector existed.
 The focused selector now explicitly overrides this Core `!important` rule,
 and the browser test checks both computed aliases without changing Core markup.
 
+A subsequent real WordPress/Chromium run at `f2fbd561` found a second
+issue at 768px LTR with 16px computed text: the focused link measured
+43.375px high, below the 44px touch target contract. Increasing the
+existing focused screen-reader/skip-link block padding from `.7rem` to
+`.8rem` restores the minimum target without adding selectors or bytes to
+the strict runtime CSS budgets. The browser still measures actual geometry
+at each viewport and text scale; the static contract protects the padding.
+
 The focused `.skip-link` now uses logical `inset-inline-start` (LTR/RTL),
 a viewport-bounded maximum inline size, normal wrapping and
 `overflow-wrap:anywhere`. This changes **only the visible focused state**:
