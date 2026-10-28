@@ -55,6 +55,10 @@ class CoreNavigationTargets(unittest.TestCase):
         self.assertNotIn("width === 390 ? [16, 32, 64] : [16, 32]", browser)
         self.assertIn("rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize)", browser)
         self.assertIn("expect(state.rootFont", browser)
+        self.assertIn("await links.first().scrollIntoViewIfNeeded()", browser)
+        self.assertIn("await expect(links.first(), label + ' screenshot content must be in view').toBeInViewport()", browser)
+        self.assertIn("await first.scrollIntoViewIfNeeded()", browser)
+        self.assertIn("await expect(first, 'forced-colors screenshot content must be in view').toBeInViewport()", browser)
         workflow = (ROOT / ".github/workflows/quality.yml").read_text()
         for capture in ("core-navigation-390-ltr-400.png", "core-navigation-390-rtl-400.png",
                         "core-navigation-390-rtl-400-forced-colors.png"):
