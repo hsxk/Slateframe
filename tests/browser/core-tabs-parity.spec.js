@@ -15,10 +15,10 @@ const content = '<!-- wp:group {"className":"slateframe-core-tabs-fixture"} -->'
   '<button type="button" role="tab">Second / 次へ / التالي</button>' +
   '</div><!-- /wp:tab-list -->' +
   '<!-- wp:tab-panels --><div class="wp-block-tab-panels">' +
-  '<!-- wp:tab-panel {"label":"First"} --><section role="tabpanel" tabindex="0" class="wp-block-tab-panel">' +
+  '<!-- wp:tab-panel {"label":' + JSON.stringify(longLabel) + '} --><section role="tabpanel" tabindex="0" class="wp-block-tab-panel">' +
   '<!-- wp:paragraph --><p>First native panel / 第一部分</p><!-- /wp:paragraph -->' +
   '</section><!-- /wp:tab-panel -->' +
-  '<!-- wp:tab-panel {"label":"Second"} --><section role="tabpanel" tabindex="0" class="wp-block-tab-panel">' +
+  '<!-- wp:tab-panel {"label":"Second / 次へ / التالي"} --><section role="tabpanel" tabindex="0" class="wp-block-tab-panel">' +
   '<!-- wp:paragraph --><p>Second native panel / 第二部分</p><!-- /wp:paragraph -->' +
   '</section><!-- /wp:tab-panel -->' +
   '</div><!-- /wp:tab-panels --></div><!-- /wp:tabs -->' +
