@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Extend native Core Image linked/unlinked captions to 42 computed 100/200/400% WordPress viewport cases, with 390×900 LTR/RTL/forced-colors focused evidence, strict PNG/symlink CI verification, and no runtime asset growth.
+
 - Expand native Core Cover to a 42-case real WordPress computed 100/200/400% multilingual/RTL reflow acceptance matrix, with three mandatory 390×900 400% focused screenshots, strict PNG/symlink-negative CI gates, and no runtime asset growth.
 
 - Retain the existing zero-extra-CSS native Core Media & Text containment and expand real WordPress/Gutenberg parity to 42 computed-text viewport cases, LTR/RTL and three 390×900 400% focused screenshots with strict evidence gates.

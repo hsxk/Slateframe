@@ -1249,6 +1249,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Categories evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_categories_zoom_evidence.py test-artifacts/screenshots
+          # Native Core Image: 42 computed text-scale cases, focused media link and complete PNG evidence.
+          for screenshot in core-image-caption-390-ltr-400.png core-image-caption-390-rtl-400.png core-image-caption-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing Core Image caption 400% evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_image_caption_zoom_evidence.py test-artifacts/screenshots
           # Native Core Cover: computed 400% multilingual text, decorative media, and keyboard focus.
           for screenshot in core-cover-390-ltr-400.png core-cover-390-rtl-400.png core-cover-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing Core Cover 400% evidence: $screenshot" >&2; exit 1; }
