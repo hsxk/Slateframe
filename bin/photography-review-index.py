@@ -28,10 +28,12 @@ def load_photography(directory: Path, head: str) -> list[dict]:
     screenshots = manifest.get("screenshots")
     if not isinstance(screenshots, dict) or not screenshots:
         raise ValueError("empty Photography screenshot inventory")
-    allowed = set(screenshots) | {"gallery-evidence-manifest.json"}
+    allowed = set(screenshots) | {"gallery-evidence-manifest.json", "playwright-results.json"}
     for item in directory.iterdir():
         if item.is_symlink() or not item.is_file() or item.name not in allowed:
             raise ValueError(f"unexpected Photography evidence entry: {item.name}")
+    if (directory / "playwright-results.json").exists():
+        review.read_regular(directory / "playwright-results.json", 20 * 1024 * 1024)
     entries = []
     for name, metadata in screenshots.items():
         if (not isinstance(name, str) or not review.NAME_RE.fullmatch(name)

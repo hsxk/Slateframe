@@ -119,6 +119,16 @@ class PhotographyReviewIndex(unittest.TestCase):
         with self.assertRaises(ValueError):
             photo.load_photography(self.root, HEAD)
 
+
+    def test_known_playwright_report_is_allowed_but_linked_report_is_rejected(self):
+        report = self.root / "playwright-results.json"
+        report.write_text("{}")
+        self.assertEqual(len(photo.load_photography(self.root, HEAD)), 2)
+        report.unlink()
+        report.symlink_to(self.root / self.names[0])
+        with self.assertRaisesRegex(ValueError, "unexpected"):
+            photo.load_photography(self.root, HEAD)
+
     def test_hardlinked_image_rejected(self):
         alias = self.root.parent / "alias.png"
         alias.hardlink_to(self.root / self.names[0])

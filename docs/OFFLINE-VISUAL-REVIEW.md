@@ -82,3 +82,11 @@ authoritative for that check. Manually inspect the 320/390/1440/1920 Gallery,
 portrait/landscape lightbox, RTL navigation, close-button focus and safe areas.
 A generated HTML index is not a visual pass or a substitute for the
 exact-SHA Actions, real WordPress browser evidence or release ZIP review.
+
+
+The Photography workflow now runs this validator against its **real** generated
+artifact on the exact checked-out HEAD, before uploading evidence. The generated
+photography-review.html is included alongside the original screenshots. The
+known Playwright JSON results file is permitted inside the Photography evidence
+directory, but unknown files, linked reports and invalid screenshots are not.
+The HTML remains a review aid; the workflow cannot certify human visual quality.
