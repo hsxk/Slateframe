@@ -35,7 +35,8 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
     await expect(tabs).toBeVisible();
     const buttons = tabs.getByRole('tab');
     await expect(buttons).toHaveCount(2);
-    await expect(tabs.getByRole('tabpanel')).toHaveCount(2);
+    // Core hides inactive panels with hidden="until-found"; keep them in the structural assertion.
+    await expect(tabs.getByRole('tabpanel', { includeHidden: true })).toHaveCount(2);
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
@@ -87,7 +88,7 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
     await expect(buttons.nth(1)).toBeFocused();
     await page.keyboard.press('Space');
     await expect(buttons.nth(1)).toHaveAttribute('aria-selected', 'true');
-    await expect(tabs.getByRole('tabpanel').nth(1)).toBeVisible();
+    await expect(tabs.getByRole('tabpanel', { includeHidden: true }).nth(1)).toBeVisible();
     const axe = await new AxeBuilder({ page }).include('.slateframe-core-tabs-fixture')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
