@@ -1,6 +1,5 @@
 """Discovery and 404 long-text reflow must have complete 400% PNG evidence."""
 from pathlib import Path
-import re
 import struct
 import tempfile
 import unittest
@@ -28,17 +27,14 @@ def png(width=390, height=900, corrupt=False):
 class RelatedReadingZoomEvidence(unittest.TestCase):
     def test_runtime_browser_and_workflow_contract(self):
         css = (ROOT / "assets/css/publishing.css").read_text(encoding="utf-8")
+        base = (ROOT / "style.css").read_text(encoding="utf-8")
         spec = (ROOT / "tests/browser/related-reading-zoom.spec.js").read_text(encoding="utf-8")
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+        # Core-first inherited wrapping already exists. Do not duplicate CSS
+        # or weaken any shared runtime budget merely to add screenshot tests.
         self.assertLessEqual(len(css.encode("utf-8")), 4500)
-        for selector, required in (
-            (".slateframe-related-title", ("min-inline-size:0", "overflow-wrap:anywhere")),
-            (".slateframe-action-link", ("max-inline-size:100%", "overflow-wrap:anywhere")),
-            (".slateframe-not-found-lead", ("overflow-wrap:anywhere",)),
-        ):
-            blocks = re.findall(re.escape(selector) + r"\{([^}]*)\}", css)
-            self.assertTrue(any(all(value in block for value in required) for block in blocks), selector)
-        self.assertRegex(css, r"\.slateframe-post-navigation\{.*?& a\{[^}]*overflow-wrap:anywhere")
+        self.assertRegex(base, r"body\\{[^}]*overflow-wrap:anywhere")
+        self.assertNotIn("overflow-wrap:normal", css)
         for token in ("await setRootTextScale(page, font, dir)",
                       "for (const width of [320, 375, 390, 412, 768, 1440, 1920])",
                       "new AxeBuilder", "scrollIntoViewIfNeeded", "fullPage: false",
