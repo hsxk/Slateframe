@@ -35,3 +35,20 @@ Printing a Knowledge article must not silently omit answers from its initially c
 The dedicated real-WordPress print regression uses the registered pattern and checks all three answers at seven viewport widths, both text directions and 200% root text size. It captures 390px and 1440px print evidence; verify those actual screenshots from the exact PR HEAD Actions before release.
 
 This relies on browser support for the native `::details-content` pseudo-element. Older engines without that support may still omit closed answers from print output; use print preview and open the disclosures before printing in those browsers. Do not add a custom accordion or a runtime JavaScript print handler as a workaround.
+
+
+### Complete 400% native FAQ viewport evidence
+
+A separate disposable real WordPress page now renders the registered FAQ pattern
+and tests all seven 320/375/390/412/768/1440/1920px widths × LTR/RTL ×
+computed 16/32/64px root text (42 combinations). Each native summary must
+remain within the viewport, preserve its 44px target and avoid document overflow.
+At 390×900, the browser captures actual 400% LTR, RTL and RTL forced-colors
+viewport PNGs after scrolling the focused summary into view. Enter/Space still
+operate native Core Details; no custom accordion or runtime JS is added.
+
+The exact-SHA Theme quality gate rejects missing, wrong-size, truncated, corrupt,
+non-PNG and linked screenshots, with negative regression tests. These screenshots
+supplement, rather than replace, Gutenberg editor, print, keyboard and axe checks.
+Do not merge until both required Actions pass and reviewers inspect the actual
+WordPress/Chromium images and distributable ZIP.

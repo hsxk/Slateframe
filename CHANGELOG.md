@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add registered Core Knowledge FAQ 400% computed-text reflow coverage across seven viewports and LTR/RTL, with three real 390×900 focused WordPress screenshots, strict PNG/symlink gates and native Enter/Space checks; no runtime assets added.
+
 - Extend native Core Categories hierarchy/dropdown to a complete seven-viewport × LTR/RTL × computed 100/200/400% reflow matrix, with focused 390×900 400% evidence, strict PNG/symlink checks and no runtime asset growth.
 
 - Extend native Core Search button-inside to all eight responsive widths × LTR/RTL × computed 100/200/400% text scaling, with strict real 390×900 400% focus/forced-colors evidence, CRC/symlink-negative tests and no runtime asset growth.
