@@ -182,7 +182,9 @@ test('native Core Footnotes long return labels reflow at computed 400% in both d
           await expect(returnLink).toBeFocused();
           await returnLink.evaluate(node => node.scrollIntoView({ block: 'start' }));
           await page.screenshot({
-            path: 'test-artifacts/screenshots/core-footnotes-long-return-390-' + dir + '-400.png',
+            path: 'test-artifacts/screenshots/' + (dir === 'ltr'
+              ? 'core-footnotes-long-return-390-ltr-400.png'
+              : 'core-footnotes-long-return-390-rtl-400.png'),
             fullPage: false,
           });
         }
