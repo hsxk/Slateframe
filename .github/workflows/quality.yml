@@ -1318,6 +1318,14 @@ jobs:
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
           python3 tests/verify_browser_inventory.py generate
           python3 tests/verify_browser_inventory.py verify
+      - name: Generate exact-HEAD browser visual review
+        env:
+          SLATEFRAME_EVIDENCE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA"
+          python3 bin/visual-review-index.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA" --output test-artifacts/browser-review.html
+          test -s test-artifacts/browser-review.html
       - name: Upload browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -1325,6 +1333,7 @@ jobs:
           name: slateframe-browser
           path: |
             test-artifacts/screenshots/
+            test-artifacts/browser-review.html
             test-artifacts/browser-failure/
             playwright-report/
             test-results/
