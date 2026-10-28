@@ -13,3 +13,20 @@ The regression fixture explicitly checks both Core source-reference structures (
 Footer evidence uses representative 390px and 1440px browser projects to avoid redundant CI work. Its own source reference is keyboard-accessible, and forced-colors focus, fragment navigation, axe and screenshots are asserted in the same isolated test.
 
 The existing authenticated Gutenberg browser suite now also injects a temporary native Core Footnotes structure into the real editor canvas, checks the bounded return target, inline source semantics, RTL, forced-colors focus, overflow and an editor screenshot. This DOM-only probe does not change or save the author's blocks.
+
+
+## Long multilingual return labels at 400% text zoom
+
+The scoped `overflow-wrap:normal` override for Core Footnotes links
+prevented Slateframe's inherited `body{overflow-wrap:anywhere}` from
+breaking a long unspaced, multilingual return label. Removing this
+redundant override restores native wrapping without changing Core
+footnote markup, default arrow labels, link target dimensions, print
+rules, JavaScript or editor behavior. A replay of exact WordPress
+HTML and CSS in isolated Chromium (not WordPress acceptance) found
+16/42 overflow cases before and 0/42 after the correction, including
+320px RTL at a computed 64px root. The real WordPress browser test
+checks seven widths, both directions, 16/32/64px roots, 44px targets,
+keyboard return navigation, forced-colors focus, Axe and three
+mandatory 390x900 screenshots. The existing strict runtime budgets
+are preserved; fresh exact-SHA Actions and visual review are required.

@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Restore inherited Core Footnotes link wrapping for long CJK/Arabic/Latin return labels at 400% text zoom, preventing mobile horizontal overflow without increasing runtime CSS; add seven-width keyboard/RTL/forced-colors and PNG evidence regression.
+
 - Fix a 400% Knowledge Steps/Checklist cascade conflict: generic Core List indentation overrode their intentional zero outer padding, causing nested-list horizontal overflow at 320px; preserve native nested markers, editor parity and the existing 7000-byte reading CSS budget.
 
 - Reduce excessive 400% text-zoom whitespace in native Knowledge Steps by bounding the numbered badge and logical gutter to a shared Appearance-aware dimension, with real seven-width LTR/RTL WordPress checks, Axe, forced-colors and strict screenshot evidence; preserve Core list semantics and the 7000-byte CSS budget.
