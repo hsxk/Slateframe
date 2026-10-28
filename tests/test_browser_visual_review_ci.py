@@ -39,7 +39,7 @@ class BrowserReviewActions(unittest.TestCase):
         step = source[generate:upload]
         self.assertIn("SLATEFRAME_EVIDENCE_SHA:", step)
         self.assertIn('test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA"', step)
-        self.assertIn('python3 bin/visual-review-index.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA" --output test-artifacts/browser-review.html', step)
+        self.assertIn('python3 bin/visual-review-index.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA" --output test-artifacts/browser-review.html --require-cross-page', step)
         self.assertIn("test -s test-artifacts/browser-review.html", step)
         self.assertIn("test-artifacts/browser-review.html", source[upload:source.index("\n  package:", upload)])
 

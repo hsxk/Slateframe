@@ -37,6 +37,56 @@ GROUPS = (
 )
 
 
+# Curated exact-name review contract: existing real WordPress/Chromium
+# captures, not synthetic images or filename-prefix substitutes.
+CROSS_PAGE_CASES = (
+    ("Appearance compact", ("appearance-compact-viewport-390-knowledge.png",
+                            "appearance-compact-viewport-1440-knowledge.png")),
+    ("Appearance default", ("appearance-default-viewport-390-knowledge.png",
+                            "appearance-default-viewport-1440-knowledge.png")),
+    ("Appearance spacious", ("appearance-spacious-viewport-390-knowledge.png",
+                             "appearance-spacious-viewport-1440-knowledge.png")),
+    ("Photography", ("appearance-default-viewport-390-photography.png",
+                     "gutenberg-viewport-390-photography-media.png")),
+    ("Portfolio", ("portfolio-reflow-390-ltr-400.png",
+                   "portfolio-reflow-1440-ltr-400.png")),
+    ("Knowledge", ("knowledge-faq-390-ltr-400.png", "knowledge-faq-1440-ltr.png")),
+    ("Article", ("appearance-default-viewport-390-page.png",
+                 "appearance-default-viewport-1440-page.png")),
+    ("Header", ("mobile-header-inline-viewport-320.png",
+                "appearance-default-viewport-1440-home-controls.png")),
+    ("Search / forms", ("search-core-390-rtl-200-forced-colors-viewport-390.png",
+                        "form-validation-ltr-forced-colors-viewport-1440.png")),
+    ("Footer", ("footer-intrinsic-viewport-390.png",
+                "footer-intrinsic-viewport-1440.png")),
+    ("Gutenberg", ("gutenberg-viewport-390-knowledge.png",
+                   "gutenberg-viewport-1440-knowledge.png")),
+)
+
+
+def cross_page_entries(entries: list[dict], strict: bool = False) -> list[dict]:
+    """Select real cross-domain captures, failing closed in CI when absent."""
+    lookup = {}
+    for entry in entries:
+        name = entry["name"]
+        if name in lookup:
+            raise ValueError("duplicate cross-page screenshot inventory entry: " + name)
+        lookup[name] = entry
+    selected = []
+    seen = set()
+    for label, names in CROSS_PAGE_CASES:
+        for name in names:
+            if name in seen:
+                raise ValueError("duplicate cross-page review contract: " + name)
+            seen.add(name)
+            if name not in lookup:
+                if strict:
+                    raise ValueError("missing cross-page visual evidence: " + name)
+                continue
+            selected.append({**lookup[name], "review_domain": label})
+    return selected
+
+
 def strict_json(data: bytes) -> dict:
     """Reject duplicate keys and non-finite constants in evidence manifests."""
     def unique_object(pairs):
@@ -323,9 +373,33 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
         f'<li><a href="#required-visual-evidence">Required visual evidence ({len(required)})</a></li>'
         if required else ""
     )
+    cross_page = cross_page_entries(entries)
+    cross_page_cards = []
+    for entry in cross_page:
+        name = html.escape(entry["name"], quote=True)
+        image_url = html.escape(asset_prefix + quote(entry["name"]), quote=True)
+        label = html.escape(entry["review_domain"])
+        cross_page_cards.append(
+            f'<figure><a href="{image_url}"><img src="{image_url}" loading="lazy" alt="{name}" '
+            f'width="{entry["width"]}" height="{entry["height"]}"></a>'
+            f'<figcaption><strong class="required">Review priority: {label}</strong> '
+            f'{name} <small>{entry["width"]} × {entry["height"]}</small></figcaption></figure>'
+        )
+    cross_page_section = (
+        f'<section id="cross-page-visual-review"><h2>Cross-page visual review '
+        f'({len(cross_page)})</h2><p>Inspect mobile and desktop, all Appearance modes, '
+        f'Photography, Portfolio, Knowledge, Article, Header, Search, Forms, Footer '
+        f'and Gutenberg. Presence is verified, not visual approval.</p>'
+        f'<div class="grid">{"".join(cross_page_cards)}</div></section>'
+        if cross_page else ""
+    )
+    cross_page_link = (
+        f'<li><a href="#cross-page-visual-review">Cross-page visual review '
+        f'({len(cross_page)})</a></li>' if cross_page else ""
+    )
     navigation_html = (
         '<nav aria-label="Screenshot review sections"><ul>'
-        + required_link + "".join(navigation) + '</ul></nav>'
+        + required_link + cross_page_link + "".join(navigation) + '</ul></nav>'
     )
     css = ('body{font:16px/1.5 system-ui,sans-serif;margin:2rem auto;padding:0 1rem;max-width:96rem;'
            'background:#f5f5f5;color:#171717}h1,h2{line-height:1.2;overflow-wrap:anywhere}.grid{display:grid;'
@@ -346,7 +420,7 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
             '<h1>Slateframe visual review — exact HEAD ' + html.escape(head) + '</h1>'
             '<p>Offline index of verified real WordPress/Chromium captures. This is not a visual pass; '
             'inspect each image at full resolution before approving a PR.</p>'
-            + navigation_html + required_section + ''.join(sections) + '</body></html>\n')
+            + navigation_html + required_section + cross_page_section + ''.join(sections) + '</body></html>\n')
 
 
 
@@ -406,9 +480,11 @@ def main() -> None:
     parser.add_argument("screenshots", type=Path)
     parser.add_argument("head", help="Exact 40-character Git commit SHA")
     parser.add_argument("--limit-per-group", type=int, default=24)
+    parser.add_argument("--require-cross-page", action="store_true", help="Fail if any curated real Browser capture is absent")
     parser.add_argument("--output", type=Path, help="HTML path (default: screenshots/../visual-review.html)")
     args = parser.parse_args()
     entries = load_evidence(args.screenshots, args.head)
+    cross_page_entries(entries, strict=args.require_cross_page)
     output = args.output or args.screenshots.parent / "visual-review.html"
     relative = os.path.relpath(args.screenshots, output.parent).replace(os.sep, "/")
     prefix = "/".join(quote(part) for part in relative.split("/")) + "/"

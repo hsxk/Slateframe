@@ -1324,7 +1324,7 @@ jobs:
         run: |
           set -euo pipefail
           test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA"
-          python3 bin/visual-review-index.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA" --output test-artifacts/browser-review.html
+          python3 bin/visual-review-index.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA" --output test-artifacts/browser-review.html --require-cross-page
           test -s test-artifacts/browser-review.html
       - name: Upload browser artifacts
         if: ${{ always() }}

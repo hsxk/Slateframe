@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Require 22 exact-HEAD, real WordPress/Chromium cross-page screenshots across 11 release-review domains; surface them in a dedicated no-JavaScript gallery, fail the Browser gate on missing evidence, and preserve the existing focused Footnotes checks and full inventory. No theme runtime changes.
+
 - Surface all mandatory exact-HEAD Browser captures in a dedicated first-class, keyboard-navigable review gallery, with section jump links and verified category counts; retain every original screenshot and add HTML navigation regressions. No theme runtime changes.
 
 - Write Browser and Photography offline visual review HTML atomically through no-follow directory descriptors; reject linked output files, hardlinks, linked parents and writes inside verified evidence while preserving safe local regeneration. Add adversarial output-path tests; no theme runtime changes.
