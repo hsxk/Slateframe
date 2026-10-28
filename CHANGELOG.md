@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Reduce excessive 400% text-zoom whitespace in native Knowledge Steps by bounding the numbered badge and logical gutter to a shared Appearance-aware dimension, with real seven-width LTR/RTL WordPress checks, Axe, forced-colors and strict screenshot evidence; preserve Core list semantics and the 7000-byte CSS budget.
+
 - Guard the existing Core-first inherited wrapping of long multilingual related-reading, native previous/next post titles and 404 recovery labels at 400% text zoom with real seven-width LTR/RTL keyboard/Axe checks and seven required complete PNG captures; preserve all runtime CSS/JS budgets and WordPress queries.
 
 - Preserve native Core Table fixed layouts, CJK/RTL cell and caption reflow, logical caption alignment and forced-colors stripe dividers with a conditional Gutenberg-shared stylesheet, real WordPress/Chromium evidence, editor roundtrip and ZIP checks.
