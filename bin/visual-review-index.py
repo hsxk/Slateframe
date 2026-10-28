@@ -36,6 +36,22 @@ GROUPS = (
 )
 
 
+def strict_json(data: bytes) -> dict:
+    """Reject duplicate keys and non-finite constants in evidence manifests."""
+    def unique_object(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError(f"duplicate JSON key: {key}")
+            value[key] = item
+        return value
+
+    def reject_constant(value):
+        raise ValueError(f"invalid JSON constant: {value}")
+
+    return json.loads(data, object_pairs_hook=unique_object, parse_constant=reject_constant)
+
+
 def read_regular(path: Path, maximum: int = 20 * 1024 * 1024) -> bytes:
     """Reject symlinks, hardlinks, non-regular files and oversized evidence.
 
@@ -72,12 +88,20 @@ def read_regular(path: Path, maximum: int = 20 * 1024 * 1024) -> bytes:
 
 
 def png_dimensions(data: bytes) -> tuple[int, int]:
-    """Check complete PNG chunk framing/CRC before trusting manifest dimensions."""
+    """Check PNG framing, CRC, legal IHDR and critical chunk ordering.
+
+    This does not decode pixels. The browser gate independently validates
+    decoded rasters; the offline index validates the archived PNG container.
+    """
     if len(data) < 45 or not data.startswith(SIGNATURE):
         raise ValueError("invalid PNG signature")
     offset = len(SIGNATURE)
     dimensions = None
-    saw_data = False
+    color_type = None
+    palette_seen = False
+    saw_idat = False
+    image_data_bytes = 0
+    image_data_closed = False
     ended = False
     while offset < len(data):
         if offset + 12 > len(data):
@@ -87,26 +111,45 @@ def png_dimensions(data: bytes) -> tuple[int, int]:
         if end > len(data):
             raise ValueError("truncated PNG chunk")
         kind = data[offset + 4:offset + 8]
+        if not all(65 <= c <= 90 or 97 <= c <= 122 for c in kind) or not 65 <= kind[2] <= 90:
+            raise ValueError("invalid PNG chunk type")
         if zlib.crc32(data[offset + 4:end - 4]) & 0xFFFFFFFF != struct.unpack_from(">I", data, end - 4)[0]:
             raise ValueError("invalid PNG CRC")
         if dimensions is None:
             if kind != b"IHDR" or size != 13:
                 raise ValueError("invalid PNG IHDR")
-            dimensions = struct.unpack_from(">II", data, offset + 8)
-            if not (1 <= dimensions[0] <= 8192 and 1 <= dimensions[1] <= 50000 and
-                    dimensions[0] * dimensions[1] <= 40_000_000):
-                raise ValueError("invalid PNG dimensions")
+            width, height, depth, color_type, compression, filtering, interlace = struct.unpack_from(
+                ">IIBBBBB", data, offset + 8)
+            dimensions = (width, height)
+            legal_depths = {0: (1, 2, 4, 8, 16), 2: (8, 16), 3: (1, 2, 4, 8),
+                            4: (8, 16), 6: (8, 16)}
+            if (not (1 <= width <= 8192 and 1 <= height <= 50000 and width * height <= 40_000_000)
+                    or depth not in legal_depths.get(color_type, ())
+                    or compression != 0 or filtering != 0 or interlace not in (0, 1)):
+                raise ValueError("invalid PNG IHDR values")
         elif kind == b"IHDR":
             raise ValueError("duplicate PNG IHDR")
-        if kind == b"IDAT":
-            saw_data = True
-        if kind == b"IEND":
-            if size != 0 or end != len(data):
+        elif kind == b"PLTE":
+            if (palette_seen or saw_idat or color_type in (0, 4)
+                    or not 3 <= size <= 768 or size % 3):
+                raise ValueError("invalid PNG palette")
+            palette_seen = True
+        elif kind == b"IDAT":
+            if image_data_closed or (color_type == 3 and not palette_seen):
+                raise ValueError("invalid PNG IDAT ordering")
+            saw_idat = True
+            image_data_bytes += size
+        elif kind == b"IEND":
+            if size != 0 or end != len(data) or not image_data_bytes:
                 raise ValueError("invalid PNG end")
             ended = True
             break
+        elif not kind[0] & 0x20:
+            raise ValueError("unknown critical PNG chunk")
+        if kind != b"IDAT" and saw_idat:
+            image_data_closed = True
         offset = end
-    if not saw_data or not ended:
+    if not ended:
         raise ValueError("incomplete PNG")
     return dimensions
 
@@ -119,25 +162,30 @@ def load_evidence(directory: Path, expected_head: str) -> list[dict]:
     marker = read_regular(directory / "HEAD_SHA.txt", 128).decode("ascii").strip()
     if marker != expected_head:
         raise ValueError("HEAD_SHA.txt does not match requested commit")
-    inventory = json.loads(read_regular(directory / "BROWSER_SCREENSHOT_INVENTORY.json", 4 * 1024 * 1024))
-    if inventory.get("schema_version") != 1 or inventory.get("head_sha") != expected_head:
+    inventory = strict_json(read_regular(directory / "BROWSER_SCREENSHOT_INVENTORY.json", 4 * 1024 * 1024))
+    if not isinstance(inventory, dict) or type(inventory.get("schema_version")) is not int or inventory.get("schema_version") != 1 or inventory.get("head_sha") != expected_head:
         raise ValueError("browser inventory does not match requested commit")
     screenshots = inventory.get("screenshots")
     if not isinstance(screenshots, dict) or not screenshots:
         raise ValueError("empty browser screenshot inventory")
-    entries = [{"name": name, **metadata} for name, metadata in screenshots.items()
-               if isinstance(metadata, dict)]
-    if len(entries) != len(screenshots):
-        raise ValueError("invalid browser inventory record")
-    visual = json.loads(read_regular(directory / "VISUAL_EVIDENCE.json", 2 * 1024 * 1024))
-    if visual.get("schema_version") != 1 or visual.get("head_sha") != expected_head:
+    entries = []
+    for name, metadata in screenshots.items():
+        if not isinstance(metadata, dict) or metadata.get("name", name) != name:
+            raise ValueError("invalid browser inventory record")
+        entries.append({**metadata, "name": name})
+    visual = strict_json(read_regular(directory / "VISUAL_EVIDENCE.json", 2 * 1024 * 1024))
+    if not isinstance(visual, dict) or type(visual.get("schema_version")) is not int or visual.get("schema_version") != 1 or visual.get("head_sha") != expected_head:
         raise ValueError("visual evidence manifest does not match requested commit")
     subset = visual.get("files")
     if not isinstance(subset, list) or not subset:
         raise ValueError("empty visual evidence manifest")
+    subset_names = set()
     for record in subset:
-        if not isinstance(record, dict) or record.get("name") not in screenshots:
+        if not isinstance(record, dict) or not isinstance(record.get("name"), str) or record["name"] not in screenshots:
             raise ValueError("visual evidence not present in browser inventory")
+        if record["name"] in subset_names:
+            raise ValueError("duplicate visual evidence record")
+        subset_names.add(record["name"])
         source = screenshots[record["name"]]
         if any(source.get(key) != record.get(key) for key in ("sha256", "width", "height")):
             raise ValueError("visual evidence disagrees with browser inventory")
@@ -205,8 +253,20 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
             figures.append(f'<figure><a href="{image_url}"><img src="{image_url}" loading="lazy" alt="{name}" '
                            f'width="{entry["width"]}" height="{entry["height"]}"></a>'
                            f'<figcaption>{name} <small>{dimensions}</small></figcaption></figure>')
+        selected = {entry["name"] for entry in chosen}
+        remaining = sorted((entry for entry in members if entry["name"] not in selected),
+                           key=lambda entry: entry["name"])
+        extra = ""
+        if remaining:
+            links = []
+            for entry in remaining:
+                name = html.escape(entry["name"], quote=True)
+                url = html.escape(asset_prefix + quote(entry["name"]), quote=True)
+                links.append(f'<li><a href="{url}">{name}</a></li>')
+            extra = (f'<details><summary>Browse remaining {len(remaining)} verified screenshots</summary>'
+                     f'<ul class="files">{"".join(links)}</ul></details>')
         sections.append(f'<section><h2>{html.escape(label)}</h2><p>{len(chosen)} of {len(members)} '
-                        f'verified screenshots shown</p><div class="grid">{"".join(figures)}</div></section>')
+                        f'verified screenshots shown</p><div class="grid">{"".join(figures)}</div>{extra}</section>')
     css = ('body{font:16px/1.5 system-ui,sans-serif;margin:2rem auto;padding:0 1rem;max-width:96rem;'
            'background:#f5f5f5;color:#171717}h1,h2{line-height:1.2}.grid{display:grid;'
            'grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:1rem}'

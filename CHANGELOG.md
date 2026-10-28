@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Harden the offline exact-HEAD visual evidence index: reject duplicate/non-finite manifest data, inconsistent names, duplicate acceptance entries, invalid PNG critical chunk/IHDR/IDAT ordering; keep all verified screenshots reachable through accessible no-JS remainder links, with adversarial regression coverage. No theme runtime changes.
+
 - Add an offline, exact-HEAD visual review index for all browser screenshots, with secure no-follow file reads, full inventory/manifest/hash/PNG validation, 15 negative and functional tests, accessible local HTML contact sheets, and zero theme runtime changes.
 
 

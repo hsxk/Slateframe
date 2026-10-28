@@ -22,13 +22,20 @@ Replace the sample SHA with the actual 40-character PR HEAD. The index verifies
 byte counts, dimensions, chunk framing and CRC. It rejects malformed names, duplicates, missing or
 oversized files, symlinks (including ancestors), hardlinks and non-regular files.
 File opens use anchored `O_NOFOLLOW` descriptors on POSIX to resist path swaps.
+JSON manifests reject duplicate keys, non-finite constants, inconsistent filename
+metadata and duplicate visual-subset records. The PNG parser also rejects
+invalid IHDR color/depth combinations, unknown critical chunks and invalid
+palette/IDAT ordering; the CI browser gate remains responsible for decoding
+raster pixels.
 
 The generated HTML groups compact/default/spacious Appearance separately and
 includes every inventory image in its verified source set. It is offline, read-only and uses **only local PNGs**; it has no
 JavaScript, remote styles, fonts, analytics or network requests. Images remain
 unchanged. Categories show a deterministic representative selection, with a
-24-image-per-category default to keep the review manageable; use
-`--limit-per-group 10000` to list everything. The output must live **outside**
+24-image-per-category default to keep the review manageable. Every verified
+image omitted from the thumbnail selection remains reachable through a native
+keyboard-accessible **Browse remaining** disclosure and full-resolution link.
+Use `--limit-per-group 10000` to display all thumbnails. The output must live **outside**
 the verified screenshot directory so that it does not invalidate the original
 artifact manifest. Clicking a thumbnail opens the full-resolution PNG.
 
