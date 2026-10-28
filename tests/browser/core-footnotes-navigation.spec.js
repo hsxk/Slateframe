@@ -154,7 +154,7 @@ test('native Core Footnotes long return labels reflow at computed 400% in both d
   const returnLink = page.locator('.slateframe-core-footnotes-fixture a[href="#fnref-slateframe-core"]');
   await returnLink.evaluate(node => {
     node.textContent = 'LongFootnoteReturn日本語中文العربيةNoBreak'.repeat(9);
-    node.setAttribute('aria-label', 'Return to the original footnote reference');
+    node.removeAttribute('aria-label'); // The accessible name must contain the visible label.
   });
   await fs.mkdir('test-artifacts/screenshots', { recursive: true });
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
