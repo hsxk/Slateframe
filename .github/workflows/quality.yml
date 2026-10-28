@@ -1215,6 +1215,9 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing computed 400% Core prose evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_prose_zoom_evidence.py test-artifacts/screenshots
+          # Core Embed fallback links must retain 44px targets and a real 400% RTL focus capture.
+          test -s test-artifacts/screenshots/core-embed-390-rtl-400-forced-colors.png
+          python3 tests/verify_core_embed_zoom_evidence.py test-artifacts/screenshots
           # Native Core quotations must prove computed 400% text, RTL and forced-colors.
           for screenshot in core-quote-390-ltr-400.png core-quote-390-rtl-400.png core-quote-390-rtl-400-forced-colors.png core-pullquote-390-ltr-400.png core-pullquote-390-rtl-400.png core-pullquote-390-rtl-400-forced-colors.png core-verse-390-ltr-400.png core-verse-390-rtl-400.png core-verse-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% quotation evidence: $screenshot" >&2; exit 1; }
