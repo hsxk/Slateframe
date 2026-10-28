@@ -1225,6 +1225,16 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core structure evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_structure_zoom_evidence.py test-artifacts/screenshots
+          # Native Details 400% must retain its actual viewport and focus evidence.
+          for screenshot in core-details-390-ltr-400.png core-details-390-rtl-400.png core-details-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Details evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_details_zoom_evidence.py test-artifacts/screenshots
+          # Focused skip-link evidence must remain a genuine 390x900 viewport at 400%.
+          for screenshot in skip-link-390-ltr-400.png skip-link-390-rtl-400.png skip-link-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% skip-link evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_skip_link_zoom_evidence.py test-artifacts/screenshots
           python3 bin/check-screenshot.py test-artifacts/screenshots/wordpress-org-screenshot-candidate.png
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
           python3 tests/verify_browser_inventory.py generate
