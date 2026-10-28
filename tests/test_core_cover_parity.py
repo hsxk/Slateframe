@@ -20,9 +20,11 @@ class CoreCoverParity(unittest.TestCase):
         spec = (ROOT / "tests/browser/core-cover-parity.spec.js").read_text(encoding="utf-8")
         for width in (320, 375, 390, 412, 768, 1440, 1920):
             self.assertIn(str(width), spec)
-        for required in ("'ltr', 'rtl'", "fontSize = '200%'", "forcedColors: 'active'",
+        for required in ("'ltr', 'rtl'", "for (const font of [16, 32, 64])", "setRootTextScale(page, font, dir)",
+                         "data.rootFont", "data.control", "forcedColors: 'active'",
                          "AxeBuilder", "openAuthenticatedEditor", "blocks.parse(serialized)",
                          "objectPosition", "core-cover-390-rtl-200-forced-colors.png",
+                         "core-cover-390-rtl-400-forced-colors.png",
                          "wp('post', 'delete'", "getComputedStyle(inner).minInlineSize"):
             self.assertIn(required, spec)
 
