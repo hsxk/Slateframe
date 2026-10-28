@@ -260,9 +260,15 @@ class VisualReviewIndex(unittest.TestCase):
         required = {entry['name'] for entry in entries if entry['required']}
         self.assertEqual(required, set(self.names[:3]))
         page = review.render(HEAD, entries, 1, 'screenshots/')
-        self.assertEqual(page.count('Required visual evidence'), 3)
+        # Required evidence appears once in the first-class review gallery and
+        # once in its topical section. Count actual figures, not nav/headings.
+        gallery = page.split('<section id="required-visual-evidence">', 1)[1].split('</section>', 1)[0]
+        self.assertEqual(gallery.count('<img src='), 3)
+        self.assertEqual(gallery.count('<strong class="required">Required visual evidence</strong>'), 3)
+        self.assertEqual(page.count('<strong class="required">Required visual evidence</strong>'), 6)
+        self.assertLess(page.index('id="required-visual-evidence"'), page.index('id="review-appearance-compact"'))
         for name in self.names[:3]:
-            self.assertIn(f'<img src="screenshots/{name}"', page)
+            self.assertEqual(page.count(f'<img src="screenshots/{name}"'), 2)
 
     def test_all_required_thumbnails_survive_a_smaller_optional_limit(self):
         entries = [{'name': f'appearance-default-390-variant-{index}.png',
@@ -274,8 +280,13 @@ class VisualReviewIndex(unittest.TestCase):
              'width': 1920, 'height': 900, 'required': True},
         ])
         page = review.render(HEAD, entries, limit=1, asset_prefix='screenshots/')
-        self.assertEqual(page.count('<img src='), 2)
-        self.assertEqual(page.count('Required visual evidence'), 2)
+        gallery = page.split('<section id="required-visual-evidence">', 1)[1].split('</section>', 1)[0]
+        self.assertEqual(gallery.count('<img src='), 2)
+        self.assertEqual(gallery.count('<strong class="required">Required visual evidence</strong>'), 2)
+        self.assertEqual(page.count('<img src='), 4)
+        self.assertEqual(page.count('<strong class="required">Required visual evidence</strong>'), 4)
+        for name in ('appearance-default-1440-rtl-400.png', 'appearance-default-1920-ltr-400.png'):
+            self.assertEqual(page.count(f'<img src="screenshots/{name}"'), 2)
         self.assertIn('Browse remaining 40 verified screenshots', page)
         self.assertIn('appearance-default-1440-rtl-400.png', page)
         self.assertIn('appearance-default-1920-ltr-400.png', page)
