@@ -7,3 +7,35 @@ The badge is now positioned in the logical inline-start inset while the native l
 The real WordPress browser regression creates and removes a temporary page, checks all seven viewport widths in both directions, verifies alignment and document containment, and captures 1440px and 390px/RTL/200%/forced-colors screenshots. It also checks the print counter and native nested markers. The contextual CSS remains within its existing 7000-byte budget; no threshold is raised.
 
 Gutenberg parity also reserves the same logical inline-start badge gutter in Core List editing markup at narrow RTL widths. The editor-specific rule consumes the existing component-gap token and does not change the frontend list or add runtime JavaScript. The authenticated 390/1440px editor test now measures the gutter against the native numbered badge before recording Knowledge screenshots; visual review remains mandatory. The badge's logical start inset must resolve to the same physical edge as the list item's logical start padding; inheriting direction on the pseudo-element prevents an RTL number badge from occupying the opposite edge and overlapping the first line.
+
+
+## Bounded 400% numbered badge and gutter
+
+The original 2.15rem badge consumed roughly 138px at a 64px root font before
+the component gap. At 320px this left a very narrow text column and made long
+CJK/RTL instructional steps unnecessarily tall. The Core List content, order,
+nested native bullets and counters were correct; this was a presentation issue.
+
+The list item now shares one logical --slateframe-step dimension between its
+badge, minimum block size and inline-start gutter. It is computed as
+max(var(--slateframe-control), 1.3rem), retaining the 44px Appearance floor
+while allowing two-digit counters to grow with 400% text. Using rem rather
+than em is important: the badge's .72rem font size otherwise makes its
+custom-property dimensions resolve differently from the list item's padding.
+No text is truncated, clipped or reduced, and no JavaScript or new block is
+introduced. The existing conditional content-modes.css remains under 7000
+bytes and is shared with Gutenberg.
+
+An independent isolated Chromium layout probe (not WordPress acceptance)
+at 320px / 64px root text showed the first long step height changing from
+about 6080px to 4429px; at 390px, from about 4209px to 3108px. The exact
+height depends on font metrics and authored content, so this is evidence of
+the mechanism, not a cross-browser guarantee.
+
+The real WordPress Playwright suite verifies seven viewport widths, LTR/RTL,
+computed 16/32/64px root sizes, logical badge alignment, native nested
+list markers, document containment, forced colors and Axe. Three 390x900
+viewport PNGs are mandatory (LTR/RTL 400%, RTL forced colors). CI validates
+their PNG signature, full chunk CRC chain, dimensions, image data and end
+marker; missing or malformed captures block release. Visual acceptance
+requires downloading and reviewing those screenshots for the exact PR SHA.
