@@ -29,12 +29,16 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
     def test_core_first_bounded_css_and_editor_parity(self):
         css = (ROOT / "assets/css/content-modes.css").read_text(encoding="utf-8")
         bootstrap = (ROOT / "functions.php").read_text(encoding="utf-8")
+        editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         self.assertIn("--slateframe-step:max(var(--slateframe-control),1.3rem)", css)
         self.assertIn("min-block-size:var(--slateframe-step)", css)
         self.assertIn("padding-inline-start:calc(var(--slateframe-step) + var(--slateframe-component-gap))", css)
         self.assertIn("inline-size:var(--slateframe-step);block-size:var(--slateframe-step)", css)
         self.assertIn("inset-inline-start:0", css)
         self.assertIn("'assets/css/content-modes.css'", bootstrap)
+        self.assertIn(".editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + var(--slateframe-component-gap))}", editor)
+        self.assertNotIn("2.15rem", editor)
+        self.assertLessEqual(len(editor.encode("utf-8")), 5000)
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
         self.assertNotIn("2.15rem", css.split(".is-style-slateframe-checklist", 1)[0])
 
