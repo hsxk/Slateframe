@@ -33,7 +33,7 @@ class RelatedReadingZoomEvidence(unittest.TestCase):
         # Core-first inherited wrapping already exists. Do not duplicate CSS
         # or weaken any shared runtime budget merely to add screenshot tests.
         self.assertLessEqual(len(css.encode("utf-8")), 4500)
-        self.assertRegex(base, r"body\\{[^}]*overflow-wrap:anywhere")
+        self.assertRegex(base, r"body\{[^}]*overflow-wrap:anywhere")
         self.assertNotIn("overflow-wrap:normal", css)
         for token in ("await setRootTextScale(page, font, dir)",
                       "for (const width of [320, 375, 390, 412, 768, 1440, 1920])",
