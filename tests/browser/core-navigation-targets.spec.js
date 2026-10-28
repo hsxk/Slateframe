@@ -74,6 +74,9 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
           if (width === 390 && font === 64) {
             await fs.mkdir('test-artifacts/screenshots', { recursive: true });
             const capture = dir === 'ltr' ? 'core-navigation-390-ltr-400.png' : 'core-navigation-390-rtl-400.png';
+            // A viewport PNG is not useful evidence when the article navigation sits below the fold.
+            await links.first().scrollIntoViewIfNeeded();
+            await expect(links.first(), label + ' screenshot content must be in view').toBeInViewport();
             await page.screenshot({ path: 'test-artifacts/screenshots/' + capture, animations: 'disabled' });
           }
           if (font === 16 && [320, 390, 1440].includes(width)) {
@@ -172,6 +175,8 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
       path: 'test-artifacts/screenshots/core-navigation-390-rtl-forced-colors.png',
     });
     expect(await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
+    await first.scrollIntoViewIfNeeded();
+    await expect(first, 'forced-colors screenshot content must be in view').toBeInViewport();
     await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-390-rtl-400-forced-colors.png', animations: 'disabled' });
   } finally {
     wp('post', 'delete', id, '--force');
