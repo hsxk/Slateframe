@@ -61,3 +61,13 @@ failure trace (not release acceptance) reduced four 400% mobile overflow
 cases to zero across 42 width/direction/scale combinations. The shared
 reading stylesheet remains under its unchanged 7000-byte limit. Fresh
 exact-HEAD Actions and screenshot review are required before merge.
+
+## Full-width scale and evidence provenance
+
+The Knowledge Steps browser matrix exercises **all seven** responsive widths in
+both writing directions at computed 16/32/64px root text, including desktop
+400% reflow. It asserts nested Core List geometry and the computed badge font,
+not only the CSS token value. The screenshot verifier rejects symlinked evidence
+as well as missing, corrupt, incomplete or incorrectly sized PNGs. These checks
+are regression guards; only real WordPress/Chromium Actions at the exact commit
+SHA and downloaded visual review establish release acceptance.

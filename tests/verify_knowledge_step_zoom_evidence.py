@@ -15,7 +15,10 @@ CAPTURES = (
 
 def verify(root: Path) -> None:
     for name in CAPTURES:
-        check_complete_png(root / name)
+        path = root / name
+        if path.is_symlink():
+            raise ValueError(f"{name}: linked screenshot")
+        check_complete_png(path)
 
 
 if __name__ == "__main__":

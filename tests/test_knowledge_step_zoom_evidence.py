@@ -58,6 +58,8 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
             "fullPage: false",
             "badge and text do not overlap",
             "native nested bullets",
+            "for (const font of [16, 32, 64])",
+            "nested list right",
         ):
             self.assertIn(token, spec)
         self.assertEqual(len(CAPTURES), 3)
@@ -92,6 +94,19 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
                     verify(root)
                 path.write_bytes(png())
             verify(root)
+
+    def test_symlink_capture_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for name in CAPTURES:
+                (root / name).write_bytes(png())
+            target = root / "real.png"
+            target.write_bytes(png())
+            linked = root / CAPTURES[0]
+            linked.unlink()
+            linked.symlink_to(target)
+            with self.assertRaisesRegex(ValueError, "linked screenshot"):
+                verify(root)
 
 
 if __name__ == "__main__":
