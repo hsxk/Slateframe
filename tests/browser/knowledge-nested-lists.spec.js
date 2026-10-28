@@ -128,7 +128,7 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width <= 412 ? [16, 32, 64] : [16, 32]) {
+        for (const font of [16, 32, 64]) {
           await setRootTextScale(page, font, dir);
           const result = await first.evaluate(node => {
             const li = getComputedStyle(node);
@@ -145,6 +145,7 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
               markerInset: li.direction === 'rtl' ? badge.right : badge.left,
               overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               nested: getComputedStyle(node.querySelector('.nested-checks')).listStyleType,
+              nestedBox: (() => { const r = node.querySelector('.nested-checks').getBoundingClientRect(); return { left: r.left, right: r.right, width: r.width }; })(),
               stepsPadding: parseFloat(getComputedStyle(node.parentElement).paddingInlineStart),
               checklistPadding: parseFloat(getComputedStyle(document.querySelector('.slateframe-prose .is-style-slateframe-checklist')).paddingInlineStart),
             };
@@ -165,6 +166,10 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
             .toBeGreaterThanOrEqual(result.badgeWidth + font * .75 - 1);
           expect(result.markerInset, label + ' logical badge start').toBe('0px');
           expect(result.nested, label + ' native nested bullets').not.toBe('none');
+          expect(result.badgeFont, label + ' computed counter font').toBeCloseTo(font * .72, 0);
+          expect(result.nestedBox.width, label + ' nested list width').toBeGreaterThan(0);
+          expect(result.nestedBox.left, label + ' nested list left').toBeGreaterThanOrEqual(-1);
+          expect(result.nestedBox.right, label + ' nested list right').toBeLessThanOrEqual(width + 1);
           if (font === 64) {
             expect(result.badgeWidth, label + ' avoid old oversized 2.15rem badge').toBeLessThan(font * 1.4);
           }
