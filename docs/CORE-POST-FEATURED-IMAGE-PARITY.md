@@ -27,3 +27,17 @@ changing the editor fixture. Review exact-SHA screenshots before merging.
 
 Manual Safari/VoiceOver and Firefox review remains a release gate, particularly
 image alternative-text announcements and focus at 400% zoom.
+
+## Full computed 400% featured-image acceptance
+
+The disposable real WordPress featured-image fixture now measures seven widths
+(320/375/390/412/768/1440/1920px), LTR/RTL, and verified computed root font
+sizes 16/32/64px: 42 combinations. It checks native permalink and unlinked
+behavior, Core's distinct linked/unlinked alt text, real media `srcset`, image
+containment, minimum 44px link geometry, keyboard focus and editor roundtrips.
+
+Three 390×900 viewport screenshots at 400% are mandatory: LTR, RTL, and RTL
+forced colors, with the native image link scrolled into view and focused. The
+CI gate checks PNG chunk CRCs, dimensions, IEND and rejects symlinked, missing,
+truncated, corrupt or non-PNG captures. Inspect actual exact-HEAD WordPress
+and Chromium images before merging. No new runtime CSS, PHP or JS is needed.
