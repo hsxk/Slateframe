@@ -39,7 +39,7 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
+        for (const font of [16, 32, 64]) {
           await page.locator('html').evaluate((node, value) => {
             node.dir = value.dir;
             node.style.fontSize = value.font + 'px';
@@ -51,6 +51,7 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
                 left: el.getBoundingClientRect().left, right: el.getBoundingClientRect().right }))
               .filter(el => el.left < -1 || el.right > document.documentElement.clientWidth + 1).slice(0, 5),
             viewport: document.documentElement.clientWidth,
+            rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
             target: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
             links: [...node.querySelectorAll('a.wp-block-navigation-item__content')].map(link => {
               const r = link.getBoundingClientRect();
@@ -60,6 +61,7 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(state.overflow, label + ' document reflow: ' + JSON.stringify(state.offenders)).toBeLessThanOrEqual(1);
+          expect(state.rootFont, label + ' actual root font').toBeCloseTo(font, 1);
           expect(state.target, label + ' bounded token').toBeGreaterThanOrEqual(44);
           expect(state.links).toHaveLength(3);
           for (const link of state.links) {
@@ -68,6 +70,10 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
             expect(link.left, label + ' left').toBeGreaterThanOrEqual(-1);
             expect(link.right, label + ' right').toBeLessThanOrEqual(state.viewport + 1);
             expect(link.wrap, label + ' mixed-script wrap').toBe('anywhere');
+          }
+          if (width === 390 && font === 64) {
+            await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+            await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-390-' + dir + '-400.png', animations: 'disabled' });
           }
           if (font === 16 && [320, 390, 1440].includes(width)) {
             await fs.mkdir('test-artifacts/screenshots', { recursive: true });
@@ -152,8 +158,10 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
     const axe = await new AxeBuilder({ page }).include('.slateframe-core-navigation-fixture')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
+    await page.setViewportSize({ width: 390, height: 900 });
     await page.emulateMedia({ forcedColors: 'active' });
     await page.reload({ waitUntil: 'networkidle' });
+    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '64px'; });
     const first = page.locator('.slateframe-core-navigation-fixture a.wp-block-navigation-item__content').first();
     await page.keyboard.press('Tab');
     await first.focus();
@@ -162,6 +170,8 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
     await page.locator('.slateframe-core-navigation-fixture nav').first().screenshot({
       path: 'test-artifacts/screenshots/core-navigation-390-rtl-forced-colors.png',
     });
+    expect(await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize))).toBeCloseTo(64, 1);
+    await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-390-rtl-400-forced-colors.png', animations: 'disabled' });
   } finally {
     wp('post', 'delete', id, '--force');
   }

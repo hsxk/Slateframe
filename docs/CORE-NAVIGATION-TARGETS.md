@@ -14,6 +14,8 @@ Slateframe leaves WordPress Core Navigation, its overlay, submenu, and keyboard 
 
 ## Acceptance
 
-`tests/browser/core-navigation-targets.spec.js` creates a real published WordPress page and checks 320/375/390/412/768/1440/1920 widths, both directions, 100%/200%/400% root text, settled and opaque native overlay controls, keyboard focus, Axe, forced colors, and exact-SHA Chromium screenshots. The test deletes its fixture even after failure.
+`tests/browser/core-navigation-targets.spec.js` creates a real published WordPress page and checks the full 320/375/390/412/768/1440/1920 × LTR/RTL × 16/32/64px computed-root-font matrix (42 cases), settled and opaque native overlay controls, keyboard focus, Axe, forced colors, and exact-SHA Chromium screenshots. The test deletes its fixture even after failure.
 
 Automated Chromium checks do not replace manual Safari/VoiceOver and Firefox review. The theme adds no navigation interception, custom content ownership, extra JavaScript, or plugin dependencies.
+
+Three mandatory real 390×900 viewport PNGs capture 400% LTR, RTL, and RTL forced-colors navigation. The CI verifier rejects missing, linked, truncated, corrupt, non-PNG or incorrectly sized evidence; the static contract prevents narrowing the 42-case matrix to a single 400% viewport. Screenshots are manually reviewed before merge.

@@ -51,6 +51,16 @@ class CoreNavigationTargets(unittest.TestCase):
             self.assertIn(contract, browser)
         for contract in ('"overlayMenu":"mobile"', "mobileOpen", "toBeHidden()", "core-navigation-desktop-no-opener"):
             self.assertIn(contract, browser)
+        self.assertIn("for (const font of [16, 32, 64])", browser)
+        self.assertNotIn("width === 390 ? [16, 32, 64] : [16, 32]", browser)
+        self.assertIn("rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize)", browser)
+        self.assertIn("expect(state.rootFont", browser)
+        workflow = (ROOT / ".github/workflows/quality.yml").read_text()
+        for capture in ("core-navigation-390-ltr-400.png", "core-navigation-390-rtl-400.png",
+                        "core-navigation-390-rtl-400-forced-colors.png"):
+            self.assertIn(capture, browser)
+            self.assertIn(capture, workflow)
+        self.assertIn("python3 tests/verify_core_navigation_zoom_evidence.py", workflow)
         for value in ("320", "375", "390", "412", "768", "1440", "1920",
                       "rtl", "ltr", "64", "AxeBuilder", "forcedColors", "overlay"):
             with self.subTest(value=value):
