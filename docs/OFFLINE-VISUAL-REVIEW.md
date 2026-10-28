@@ -97,3 +97,8 @@ The HTML remains a review aid; the workflow cannot certify human visual quality.
 The real WordPress/Chromium Browser smoke job now runs the offline visual review index **after** the screenshot inventory and required evidence have been verified. The job binds the generator to the immutable checkout HEAD, requires a nonempty `test-artifacts/browser-review.html`, and uploads that HTML next to the unmodified screenshot directory in the `slateframe-browser` artifact. Relative links continue to work when the archive is extracted.
 
 This is a blocking CI generation and integrity check, **not** an automatic visual approval. Reviewers must download the exact-HEAD artifact, open the index and inspect full-resolution Appearance, Photography, Portfolio, Knowledge, Article, header/search/forms/footer, RTL/CJK, Gutenberg and high-zoom/forced-colors captures before merging. The standalone Photography workflow retains its separate index and gate.
+
+
+## Safe output handling
+
+Both offline review CLIs use the same atomic output writer. It opens every parent directory with `O_NOFOLLOW`, refuses a symlinked parent, a linked or non-regular existing output, and any output within the verified screenshot directory. It writes a private temporary file, flushes it, then atomically renames within the anchored directory. Existing ordinary single-link HTML outputs can be regenerated safely. Failed writes remove the temporary file. This is intentionally Linux/POSIX-only, matching GitHub Actions; the scripts fail closed if descriptor-relative secure operations are unavailable. Screenshot bytes and the distributable theme ZIP remain unchanged.

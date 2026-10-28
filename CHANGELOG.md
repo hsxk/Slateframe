@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Write Browser and Photography offline visual review HTML atomically through no-follow directory descriptors; reject linked output files, hardlinks, linked parents and writes inside verified evidence while preserving safe local regeneration. Add adversarial output-path tests; no theme runtime changes.
+
 - Generate and gate the exact-HEAD offline Browser visual review HTML in real WordPress/Chromium Actions, upload the index alongside all screenshots, and exercise the CLI with positive, stale-SHA, linked-file and unsafe-output regression tests. No theme runtime changes.
 
 - Add a separate exact-HEAD offline Photography screenshot review index with strict runtime manifest, PNG SHA-256/CRC/dimensions and linked-file safety, plus eight adversarial regression tests and accessible no-JS full-resolution review. No theme runtime changes.

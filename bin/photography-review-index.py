@@ -68,11 +68,9 @@ def main() -> None:
     args = parser.parse_args()
     entries = load_photography(args.screenshots, args.head)
     output = args.output or args.screenshots.parent / "photography-review.html"
-    if args.screenshots.resolve() in (output.resolve(), *output.resolve().parents):
-        raise ValueError("write review index outside verified Photography directory")
     relative = os.path.relpath(args.screenshots, output.parent).replace(os.sep, "/")
     prefix = "/".join(review.quote(part) for part in relative.split("/")) + "/"
-    output.write_text(review.render(args.head, entries, args.limit_per_group, prefix), encoding="utf-8")
+    review.write_review_index(args.screenshots, output, review.render(args.head, entries, args.limit_per_group, prefix))
     print(f"Indexed {len(entries)} verified Photography screenshots for {args.head}: {output}")
 
 

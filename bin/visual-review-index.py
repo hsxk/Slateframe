@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path
 import re
+import secrets
 import stat
 import struct
 import sys
@@ -316,6 +317,58 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
             + ''.join(sections) + '</body></html>\n')
 
 
+
+def write_review_index(evidence: Path, output: Path, document: str) -> None:
+    """Atomically write HTML without following linked output paths.
+
+    An existing ordinary, single-link HTML file may be replaced. Keep the
+    original screenshot evidence untouched and anchor the final rename to an
+    O_NOFOLLOW-opened directory so a swapped path cannot redirect the write.
+    """
+    if (not all(hasattr(os, attr) for attr in ("O_NOFOLLOW", "O_DIRECTORY"))
+            or os.open not in os.supports_dir_fd
+            or os.rename not in os.supports_dir_fd):
+        raise ValueError("secure review output unavailable")
+    evidence_real = evidence.resolve(strict=True)
+    target = Path(os.path.abspath(output))
+    parent_real = target.parent.resolve(strict=True)
+    if evidence_real in (parent_real, *parent_real.parents):
+        raise ValueError("write review index outside verified screenshot directory")
+    if any(part.is_symlink() for part in (target.parent, *target.parent.parents)):
+        raise ValueError("linked review output directory")
+
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    parts = target.parent.parts
+    directory = os.open(parts[0], flags)
+    try:
+        for part in parts[1:]:
+            child = os.open(part, flags, dir_fd=directory)
+            os.close(directory)
+            directory = child
+        try:
+            current = os.stat(target.name, dir_fd=directory, follow_symlinks=False)
+        except FileNotFoundError:
+            pass
+        else:
+            if not stat.S_ISREG(current.st_mode) or current.st_nlink != 1:
+                raise ValueError("unsafe review output (linked or non-regular file)")
+        temporary = f".slateframe-review-{secrets.token_hex(12)}.tmp"
+        descriptor = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW,
+                             0o600, dir_fd=directory)
+        try:
+            with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as stream:
+                stream.write(document)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.rename(temporary, target.name, src_dir_fd=directory, dst_dir_fd=directory)
+        finally:
+            try:
+                os.unlink(temporary, dir_fd=directory)
+            except FileNotFoundError:
+                pass
+    finally:
+        os.close(directory)
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("screenshots", type=Path)
@@ -325,11 +378,9 @@ def main() -> None:
     args = parser.parse_args()
     entries = load_evidence(args.screenshots, args.head)
     output = args.output or args.screenshots.parent / "visual-review.html"
-    if args.screenshots.resolve() in (output.resolve(), *output.resolve().parents):
-        raise ValueError("write review index outside verified screenshot directory")
     relative = os.path.relpath(args.screenshots, output.parent).replace(os.sep, "/")
     prefix = "/".join(quote(part) for part in relative.split("/")) + "/"
-    output.write_text(render(args.head, entries, args.limit_per_group, prefix), encoding="utf-8")
+    write_review_index(args.screenshots, output, render(args.head, entries, args.limit_per_group, prefix))
     print(f"Indexed {len(entries)} verified screenshots for {args.head}: {output}")
 
 
