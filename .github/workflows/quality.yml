@@ -1221,6 +1221,11 @@ jobs:
           # Require the native Tag Cloud count at 400% RTL, not a stale artifact.
           test -s test-artifacts/screenshots/core-tag-cloud-count-390-rtl-400-forced-colors.png
           python3 tests/verify_core_tag_cloud_count_zoom_evidence.py test-artifacts/screenshots
+          # Native Core RSS and Archives must prove 400% RTL focus in real 390x900 viewports.
+          for screenshot in core-rss-390-rtl-400-forced-colors.png core-archives-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing Core RSS/Archives 400% evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_feeds_zoom_evidence.py test-artifacts/screenshots
           # Native Core quotations must prove computed 400% text, RTL and forced-colors.
           for screenshot in core-quote-390-ltr-400.png core-quote-390-rtl-400.png core-quote-390-rtl-400-forced-colors.png core-pullquote-390-ltr-400.png core-pullquote-390-rtl-400.png core-pullquote-390-rtl-400-forced-colors.png core-verse-390-ltr-400.png core-verse-390-rtl-400.png core-verse-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% quotation evidence: $screenshot" >&2; exit 1; }

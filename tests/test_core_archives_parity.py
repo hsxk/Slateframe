@@ -35,6 +35,10 @@ class CoreArchivesParity(unittest.TestCase):
                        "320, 375, 390, 412, 768, 1440, 1920", "'ltr', 'rtl'",
                        "forcedColors: 'active'", "new AxeBuilder",
                        "core-archives-390-rtl-200-forced-colors.png",
+                       "core-archives-390-rtl-400-forced-colors.png",
+                       "await setRootTextScale(page, font, dir);",
+                       "await setRootTextScale(page, 32, 'rtl');",
+                       "await setRootTextScale(page, 64, 'rtl');",
                        "openAuthenticatedEditor", "blocks.serialize", "blocks.parse"):
             with self.subTest(needle=needle):
                 self.assertIn(needle, js)
