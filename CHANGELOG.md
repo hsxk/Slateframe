@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add conditional native Core Media & Text intrinsic containment without changing authored stacking, crop or column order; expand real WordPress/Gutenberg parity to 42 computed-text viewport cases, LTR/RTL and three 390×900 400% focused screenshots with strict evidence gates.
+
 - Add registered Core Knowledge FAQ 400% computed-text reflow coverage across seven viewports and LTR/RTL, with three real 390×900 focused WordPress screenshots, strict PNG/symlink gates and native Enter/Space checks; no runtime assets added.
 
 - Extend native Core Categories hierarchy/dropdown to a complete seven-viewport × LTR/RTL × computed 100/200/400% reflow matrix, with focused 390×900 400% evidence, strict PNG/symlink checks and no runtime asset growth.
