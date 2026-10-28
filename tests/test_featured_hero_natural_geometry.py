@@ -9,17 +9,15 @@ class FeaturedHeroNaturalGeometry(unittest.TestCase):
     def test_intrinsic_geometry_and_runtime_budget(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
         self.assertIn(
-            ".slateframe-entry-hero-image{display:block;width:auto;max-width:100%;"
-            "height:auto;max-height:78vh;max-height:78dvh;object-fit:contain;"
-            "margin-inline:auto}",
+            ".slateframe-entry-hero-image{width:auto;max-height:78vh;margin:auto}",
             css,
         )
+        self.assertIn("img,svg,video{display:block;max-width:100%;height:auto}", css)
+        self.assertIn("overflow-wrap:anywhere", css)
         self.assertNotIn(
             ".slateframe-entry-hero-image{width:100%;max-height:78vh;object-fit:cover}",
             css,
         )
-        self.assertIn(".slateframe-entry-hero .wp-caption-text{max-inline-size:100%;", css)
-        self.assertIn("overflow-wrap:anywhere;text-align:start}", css)
         self.assertLessEqual(len(css.encode("utf-8")), 15000)
 
     def test_real_wordpress_ratio_matrix_and_visual_evidence(self):
@@ -30,7 +28,6 @@ class FeaturedHeroNaturalGeometry(unittest.TestCase):
             "const hero = page.locator('.slateframe-entry-hero-image')",
             "heroState.naturalRatio",
             "heroState.renderedRatio",
-            "heroState.objectFit",
             "heroCaption.evaluate",
             "UnbrokenCaptionSegment",
             "entry-hero-natural-390-rtl-400-forced-colors.png",

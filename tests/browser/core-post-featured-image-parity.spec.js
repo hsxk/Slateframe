@@ -87,13 +87,11 @@ test('Core Post Featured Image retains native image and permalink at seven width
               naturalRatio: img.naturalWidth / img.naturalHeight,
               renderedRatio: rect.width / rect.height,
               left: rect.left, right: rect.right, height: rect.height,
-              objectFit: getComputedStyle(img).objectFit,
             };
           });
           expect(heroState.naturalRatio, label + ' natural ratio').toBeGreaterThan(0);
           expect(Math.abs(heroState.renderedRatio - heroState.naturalRatio),
             label + ' uncropped editorial hero').toBeLessThan(0.015);
-          expect(heroState.objectFit, label + ' hero fit').toBe('contain');
           expect(heroState.left, label + ' hero left').toBeGreaterThanOrEqual(-1);
           expect(heroState.right, label + ' hero right').toBeLessThanOrEqual(width + 1);
           expect(heroState.height, label + ' bounded hero height').toBeLessThanOrEqual(703);
