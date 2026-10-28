@@ -75,6 +75,8 @@ test('Core Post Author Biography preserves native author context and empty profi
       path: 'test-artifacts/screenshots/core-post-author-biography-390-rtl-200-forced-colors.png',
     });
     await setRootTextScale(page, 64, 'rtl');
+    await bio.scrollIntoViewIfNeeded();
+    await expect(bio).toBeVisible();
     await page.screenshot({ path: 'test-artifacts/screenshots/core-post-author-biography-390-rtl-400-forced-colors.png', fullPage: false });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);

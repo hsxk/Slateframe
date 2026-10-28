@@ -92,6 +92,8 @@ test('Core Post Author Name preserves native author links and responsive wrappin
     await root.screenshot({ path: 'test-artifacts/screenshots/core-post-author-name-390-rtl-200-forced-colors.png' });
     await setRootTextScale(page, 64, 'rtl');
     await link.focus();
+    await expect(link).toBeFocused();
+    expect(await link.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth))).toBeGreaterThanOrEqual(2);
     await page.screenshot({ path: 'test-artifacts/screenshots/core-post-author-name-390-rtl-400-forced-colors.png', fullPage: false });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);

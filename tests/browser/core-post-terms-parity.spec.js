@@ -111,6 +111,8 @@ test('Core Post Terms retains native taxonomy links and bounded multilingual con
       path: 'test-artifacts/screenshots/core-post-terms-390-rtl-200-forced-colors.png' });
     await setRootTextScale(page, 64, 'rtl');
     await first.focus();
+    await expect(first).toBeFocused();
+    expect(await first.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth))).toBeGreaterThanOrEqual(2);
     await page.screenshot({ path: 'test-artifacts/screenshots/core-post-terms-390-rtl-400-forced-colors.png', fullPage: false });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
