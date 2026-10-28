@@ -28,6 +28,14 @@ invalid IHDR color/depth combinations, unknown critical chunks and invalid
 palette/IDAT ordering; the CI browser gate remains responsible for decoding
 raster pixels.
 
+The generated HTML begins with a keyboard-accessible section navigation and a
+dedicated **Required visual evidence** gallery containing every mandatory
+acceptance image before the larger category galleries. Section links show
+verified screenshot counts and target stable heading anchors. This makes
+mobile/desktop, RTL/CJK and 400% required captures directly discoverable
+without searching through hundreds of optional screenshots. These are
+navigation and review aids, not automatic visual approval.
+
 The generated HTML groups compact/default/spacious Appearance separately and
 includes every inventory image in its verified source set. It is offline, read-only and uses **only local PNGs**; it has no
 JavaScript, remote styles, fonts, analytics or network requests. Images remain
