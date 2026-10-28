@@ -145,10 +145,14 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
               markerInset: li.direction === 'rtl' ? badge.right : badge.left,
               overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               nested: getComputedStyle(node.querySelector('.nested-checks')).listStyleType,
+              stepsPadding: parseFloat(getComputedStyle(node.parentElement).paddingInlineStart),
+              checklistPadding: parseFloat(getComputedStyle(document.querySelector('.slateframe-prose .is-style-slateframe-checklist')).paddingInlineStart),
             };
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(result.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          expect(result.stepsPadding, label + ' native steps reset').toBeLessThanOrEqual(1);
+          expect(result.checklistPadding, label + ' native checklist reset').toBeLessThanOrEqual(1);
           expect(result.left, label + ' list left').toBeGreaterThanOrEqual(-1);
           expect(result.right, label + ' list right').toBeLessThanOrEqual(width + 1);
           expect(result.control, label + ' Appearance control floor').toBeGreaterThanOrEqual(44);

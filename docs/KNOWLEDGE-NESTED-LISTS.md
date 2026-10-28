@@ -43,3 +43,21 @@ viewport PNGs are mandatory (LTR/RTL 400%, RTL forced colors). CI validates
 their PNG signature, full chunk CRC chain, dimensions, image data and end
 marker; missing or malformed captures block release. Visual acceptance
 requires downloading and reviewing those screenshots for the exact PR SHA.
+
+
+## 400% nested-list cascade correction
+
+The real WordPress/Chromium Browser smoke at `4df26a99` found 53px of
+horizontal document overflow at 320px LTR with a 64px root. The global
+reading rule for all Core lists had greater selector specificity than the
+Steps and Checklist styles' `padding-inline-start:0`, reintroducing an
+86.4px outer indent. That consumed the nested list's remaining inline
+space even after bounding the numbered badge. The shared reading selector
+now excludes only those two explicitly unindented Core List styles; native
+nested list padding, bullets, counters, RTL direction and Gutenberg parity
+remain intact. The browser test asserts both computed zero indents as well
+as seven-width containment. An isolated Chromium replay of the exact
+failure trace (not release acceptance) reduced four 400% mobile overflow
+cases to zero across 42 width/direction/scale combinations. The shared
+reading stylesheet remains under its unchanged 7000-byte limit. Fresh
+exact-HEAD Actions and screenshot review are required before merge.
