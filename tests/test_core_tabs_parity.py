@@ -25,6 +25,7 @@ class CoreTabsParity(unittest.TestCase):
         self.assertLessEqual(len(css.encode("utf-8")), 550)
         self.assertNotIn("display:none", css)
         self.assertNotIn("!important", css)
+        self.assertNotIn("text-align:", css, "Core Tab authored alignment must win")
         self.assertNotIn("javascript", css.lower())
 
     def test_real_wordpress_browser_and_exact_evidence_gate(self):
