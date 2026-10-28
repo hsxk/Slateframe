@@ -4,7 +4,7 @@ WordPress 7.1 ships native `core/tabs` with Core-owned ARIA tablist, roving focu
 
 ## Bounded presentation
 
-The small `assets/css/core-tabs.css` stylesheet applies only when a native Tabs block renders, and is included in Gutenberg editor styles. It gives tab buttons a minimum 44px inline/block hit target using `--slateframe-control`, bounds the tab list/panels to the containing column, and allows long Japanese/Chinese/Arabic/unbroken labels to wrap at 400% text scaling. It does not override authored colors, tab selection, hidden panels, Core button display, or Core's interactivity store. Forced-colors focus uses a system color.
+The small `assets/css/core-tabs.css` stylesheet applies only when a native Tabs block renders, and is included in Gutenberg editor styles. It gives tab buttons a minimum 44px inline/block hit target using `--slateframe-control`, bounds the tab list/panels to the containing column, and allows long Japanese/Chinese/Arabic/unbroken labels to wrap at 400% text scaling. It does not override authored colors or text alignment, tab selection, hidden panels, Core button display, or Core's interactivity store. Forced-colors focus uses a system color.
 
 ## Acceptance
 
