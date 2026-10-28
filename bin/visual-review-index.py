@@ -235,10 +235,13 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
     for entry in entries:
         groups.setdefault(entry.get("group") or group_for(entry["name"]), []).append(entry)
     sections = []
+    navigation = []
     for label, _ in (*GROUPS, ("Other Core / responsive", ())):
         members = groups.get(label, [])
         if not members:
             continue
+        section_id = "review-" + re.sub(r"[^a-z0-9]+", "-", label.lower()).strip("-")
+        navigation.append(f'<li><a href="#{section_id}">{html.escape(label)} ({len(members)})</a></li>')
         # Prefer representative mobile/desktop and RTL/400% captures, while
         # keeping selection deterministic and preserving all images on disk.
         def priority(entry):
@@ -296,8 +299,34 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
                 links.append(f'<li><a href="{url}">{name}</a></li>')
             extra = (f'<details><summary>Browse remaining {len(remaining)} verified screenshots</summary>'
                      f'<ul class="files">{"".join(links)}</ul></details>')
-        sections.append(f'<section><h2>{html.escape(label)}</h2><p>{len(chosen)} of {len(members)} '
+        sections.append(f'<section id="{section_id}"><h2>{html.escape(label)}</h2><p>{len(chosen)} of {len(members)} '
                         f'verified screenshots shown</p><div class="grid">{"".join(figures)}</div>{extra}</section>')
+    required = sorted((entry for entry in entries if entry.get("required", False)),
+                      key=lambda entry: entry["name"])
+    required_cards = []
+    for entry in required:
+        name = html.escape(entry["name"], quote=True)
+        image_url = html.escape(asset_prefix + quote(entry["name"]), quote=True)
+        required_cards.append(
+            f'<figure><a href="{image_url}"><img src="{image_url}" loading="lazy" alt="{name}" '
+            f'width="{entry["width"]}" height="{entry["height"]}"></a>'
+            f'<figcaption><strong class="required">Required visual evidence</strong> '
+            f'{name} <small>{entry["width"]} × {entry["height"]}</small></figcaption></figure>'
+        )
+    required_section = (
+        f'<section id="required-visual-evidence"><h2>Required visual evidence '
+        f'({len(required)})</h2><p>Inspect every full-resolution required image before approval.</p>'
+        f'<div class="grid">{"".join(required_cards)}</div></section>'
+        if required else ""
+    )
+    required_link = (
+        f'<li><a href="#required-visual-evidence">Required visual evidence ({len(required)})</a></li>'
+        if required else ""
+    )
+    navigation_html = (
+        '<nav aria-label="Screenshot review sections"><ul>'
+        + required_link + "".join(navigation) + '</ul></nav>'
+    )
     css = ('body{font:16px/1.5 system-ui,sans-serif;margin:2rem auto;padding:0 1rem;max-width:96rem;'
            'background:#f5f5f5;color:#171717}h1,h2{line-height:1.2;overflow-wrap:anywhere}.grid{display:grid;'
            'grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:1rem}'
@@ -305,6 +334,9 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
            'img{display:block;max-width:100%;height:auto;max-height:24rem;object-fit:contain;margin:auto}'
            'figcaption,.files a{overflow-wrap:anywhere}figcaption{margin-top:.6rem;font-size:.85rem}'
            '.required{display:block;font-size:.85rem}'
+           'nav ul{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;padding:0}'
+           'nav a{display:inline-flex;align-items:center;min-height:44px;padding:.4rem .7rem}'
+           'section{scroll-margin-top:1rem}'
            'small{display:block}a:focus-visible{outline:3px solid #1264bb;outline-offset:3px}'
            '@media(prefers-color-scheme:dark){body{background:#181818;color:#f6f6f6}'
            'figure{background:#272727;border-color:#888}a{color:#b6d9ff}}')
@@ -314,7 +346,7 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
             '<h1>Slateframe visual review — exact HEAD ' + html.escape(head) + '</h1>'
             '<p>Offline index of verified real WordPress/Chromium captures. This is not a visual pass; '
             'inspect each image at full resolution before approving a PR.</p>'
-            + ''.join(sections) + '</body></html>\n')
+            + navigation_html + required_section + ''.join(sections) + '</body></html>\n')
 
 
 
