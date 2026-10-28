@@ -6,21 +6,20 @@ The shared frontend/editor rules only let the grid container, media track, and t
 
 The real disposable WordPress browser fixture checks 320/375/390/412/768/1440/1920px in LTR and RTL, stacked and non-stacked author intent, multilingual content, 200% text zoom, forced-colors keyboard focus, Axe, and screenshots `core-media-text-{390,1440}-{ltr,rtl}.png` and `core-media-text-390-rtl-200-forced-colors.png`. The authenticated Gutenberg test verifies both mobile stacking attributes round-trip and the existing editor post remains unchanged. Evidence must match the exact HEAD SHA; static assertions alone are insufficient. No production site or plugin dependency.
 
-## Computed 400% acceptance and conditional CSS
+## Computed 400% acceptance without runtime growth
 
-A 278-byte `assets/css/core-media-text.css` file is registered only for native
-`core/media-text` through `wp_enqueue_block_style()` and shared with Gutenberg
-through `add_editor_style()`. It bounds intrinsic media and content widths and
-wraps long multilingual text without changing Core's grid, crop or stacking.
-The static CI budget is 400 bytes; the base theme's existing Core rule remains.
+The existing 41-byte shared `.wp-block-media-text>*{min-inline-size:0}`
+rule remains authoritative. No extra stylesheet, JavaScript, new block,
+forced stacking or changed Core media crop is introduced. The test coverage
+is expanded without increasing the distributable runtime assets.
 
 The disposable WordPress fixture preserves **both** author choices: stacked
 mobile media and explicitly unstacked media on the right. It checks seven
 320/375/390/412/768/1440/1920px widths × LTR/RTL × computed 16/32/64px
 root font sizes (42 combinations), image/media/content containment, no page
-horizontal overflow, 44px control token, conditional asset delivery, native
-keyboard focus and axe. The Gutenberg test still round-trips both author
-choices without modifying the editor document.
+horizontal overflow, 44px control token, native keyboard focus and axe.
+The Gutenberg test still round-trips both author choices without modifying
+the editor document.
 
 CI requires three additional real WordPress/Chromium 390×900 viewport PNGs at
 400%: LTR, RTL and RTL forced-colors, with the native link focused and
