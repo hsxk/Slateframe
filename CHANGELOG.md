@@ -4,6 +4,9 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add conditional WordPress 7.1 native Core Tabs presentation: bounded 44px tab controls, 400% RTL/CJK wrapping, Gutenberg parity, real 42-case WordPress/Chromium keyboard/Axe coverage, and strict 390×900 visual evidence. Core retains all tab interactivity and older WordPress support.
+
+
 - Extend native Core Navigation to a real 42-case seven-width × LTR/RTL × 100/200/400% computed-root-font regression, with three required complete 390×900 400% screenshots (including forced colors), strict CI evidence and symlink/corruption negative tests. Preserve WordPress-owned overlay behavior, 44px controls and runtime budgets.
 
 - Preserve native Portfolio Query Loop list resets in plugin/shortcode content: keep generic Core List indentation low-specificity with `:where()` exclusions so Steps/Checklist remain unindented while plugin grids retain zero padding at 100–400% text zoom, LTR and RTL.

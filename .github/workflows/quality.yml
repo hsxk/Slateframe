@@ -101,6 +101,7 @@ jobs:
           test $(wc -c < assets/css/portfolio-reflow.css) -le 260
           test $(wc -c < assets/css/core-buttons.css) -le 400
           test $(wc -c < assets/css/core-navigation.css) -le 850
+          test $(wc -c < assets/css/core-tabs.css) -le 550
           test $(wc -c < assets/css/core-post-navigation.css) -le 550
           test $(wc -c < assets/css/core-video.css) -le 350
           test $(wc -c < assets/css/core-audio.css) -le 350
@@ -1243,6 +1244,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Navigation evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_navigation_zoom_evidence.py test-artifacts/screenshots
+          # WordPress 7.1 Core Tabs: complete 400% LTR/RTL/forced-colors evidence.
+          for screenshot in core-tabs-390-ltr-400.png core-tabs-390-rtl-400.png core-tabs-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Tabs evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_tabs_zoom_evidence.py test-artifacts/screenshots
           # Native Core quotations must prove computed 400% text, RTL and forced-colors.
           for screenshot in core-quote-390-ltr-400.png core-quote-390-rtl-400.png core-quote-390-rtl-400-forced-colors.png core-pullquote-390-ltr-400.png core-pullquote-390-rtl-400.png core-pullquote-390-rtl-400-forced-colors.png core-verse-390-ltr-400.png core-verse-390-rtl-400.png core-verse-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% quotation evidence: $screenshot" >&2; exit 1; }
