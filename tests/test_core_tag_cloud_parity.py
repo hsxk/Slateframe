@@ -25,7 +25,7 @@ class CoreTagCloudParity(unittest.TestCase):
             "min-inline-size:min(100%,var(--slateframe-control))",
             "min-block-size:var(--slateframe-control)",
             "overflow-wrap:anywhere", "display:inline-block",
-            "box-sizing:border-box", ".tag-link-count{white-space:nowrap}",
+            "box-sizing:border-box", ".tag-link-count{white-space:normal;overflow-wrap:anywhere}",
         ):
             with self.subTest(needle=needle):
                 self.assertIn(needle, css)
@@ -47,6 +47,10 @@ class CoreTagCloudParity(unittest.TestCase):
             "320, 375, 390, 412, 768, 1440, 1920", "'ltr', 'rtl'",
             "forcedColors: 'active'", "new AxeBuilder",
             "core-tag-cloud-390-rtl-200-forced-colors.png",
+            "core-tag-cloud-count-390-rtl-400-forced-colors.png",
+            "await setRootTextScale(page, 64, 'rtl');",
+            "getComputedStyle(node).fontSize",
+            "countWhiteSpace",
             "openAuthenticatedEditor", "blocks.serialize", "blocks.parse",
         ):
             with self.subTest(needle=needle):

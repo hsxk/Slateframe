@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -66,10 +67,10 @@ test('Core Tag Cloud retains native term links and bounded CJK/RTL controls', as
       await expect(link).toHaveAttribute('aria-label', /\(.+\)/);
       await expect(link.locator('.tag-link-count')).toContainText(String(index + 1));
     }
-    // A Tag Cloud count is one inline unit, never a detached flex item.
+    // Native inline count can wrap if numeric values exceed the viewport.
     expect(await links.first().evaluate(el => getComputedStyle(el).display)).toBe('inline-block');
     expect(await links.first().locator('.tag-link-count').evaluate(el =>
-      getComputedStyle(el).whiteSpace)).toBe('nowrap');
+      getComputedStyle(el).whiteSpace)).toBe('normal');
     // Core owns the variable per-term font sizes.
     const sizes = await links.evaluateAll(nodes => nodes.map(node => node.style.fontSize));
     expect(new Set(sizes.filter(Boolean)).size).toBeGreaterThan(1);
@@ -126,9 +127,49 @@ test('Core Tag Cloud retains native term links and bounded CJK/RTL controls', as
       .toBeGreaterThanOrEqual(2);
     await page.screenshot({ fullPage: true,
       path: 'test-artifacts/screenshots/core-tag-cloud-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
-      .toBeLessThanOrEqual(1);
+    await setRootTextScale(page, 64, 'rtl');
+    // Core controls per-term absolute font sizes: stress only the rendered DOM.
+    const stressLink = links.first();
+    const stressCount = stressLink.locator('.tag-link-count');
+    const nativeCount = await stressCount.textContent();
+    const nativeStyle = await stressLink.getAttribute('style');
+    await stressCount.evaluate(node => { node.textContent = '(' + '1234567890'.repeat(3) + ')'; });
+    await stressLink.evaluate(node => node.style.setProperty('font-size', '64px', 'important'));
+    for (const viewportWidth of [320, 390]) {
+      await page.setViewportSize({ width: viewportWidth, height: 900 });
+      const state = await stressLink.evaluate(node => {
+        const r = node.getBoundingClientRect();
+        return {
+          rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
+          linkFont: parseFloat(getComputedStyle(node).fontSize),
+          countWhiteSpace: getComputedStyle(node.querySelector('.tag-link-count')).whiteSpace,
+          overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+          left: r.left, right: r.right, width: r.width, height: r.height,
+        };
+      });
+      const label = viewportWidth + 'px RTL 400% Tag Cloud count';
+      expect(state.rootFont, label + ' root font').toBe(64);
+      expect(state.linkFont, label + ' link font').toBe(64);
+      expect(state.countWhiteSpace, label + ' wrapping').toBe('normal');
+      expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+      expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);
+      expect(state.right, label + ' right').toBeLessThanOrEqual(viewportWidth + 1);
+      expect(state.width, label + ' width').toBeGreaterThanOrEqual(43);
+      expect(state.height, label + ' height').toBeGreaterThanOrEqual(43);
+    }
+    await page.setViewportSize({ width: 390, height: 900 });
+    await stressLink.scrollIntoViewIfNeeded();
+    await stressLink.focus();
+    await expect(stressLink).toBeFocused();
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-tag-cloud-count-390-rtl-400-forced-colors.png',
+      fullPage: false,
+    });
+    await stressCount.evaluate((node, value) => { node.textContent = value; }, nativeCount);
+    await stressLink.evaluate((node, value) => {
+      if (value === null) node.removeAttribute('style');
+      else node.setAttribute('style', value);
+    }, nativeStyle);
     await page.emulateMedia({ forcedColors: 'none' });
     await cloud.locator('a[href="' + expected[0] + '"]').click();
     await expect.poll(() => page.url()).toBe(expected[0]);
