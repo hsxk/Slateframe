@@ -4,6 +4,9 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add an offline, exact-HEAD visual review index for all browser screenshots, with secure no-follow file reads, full inventory/manifest/hash/PNG validation, 15 negative and functional tests, accessible local HTML contact sheets, and zero theme runtime changes.
+
+
 - Expand native Core Post Featured Image to 42 verified computed 100/200/400% WordPress viewport/direction cases, preserving Core permalink and alt behavior with three focused 390×900 LTR/RTL/forced-colors screenshots, strict PNG/symlink evidence gates, and no runtime asset growth.
 
 - Extend native Core Image linked/unlinked captions to 42 computed 100/200/400% WordPress viewport cases, with 390×900 LTR/RTL/forced-colors focused evidence, strict PNG/symlink CI verification, and no runtime asset growth.
