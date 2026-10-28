@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Preserve natural aspect ratios for editorial featured-image heroes at desktop and 400% zoom: remove the forced full-width/78vh cover crop, center intrinsic media within the viewport bound, and add real WordPress seven-width LTR/RTL computed-zoom geometry and screenshot regression coverage. No new JavaScript or image processing.
+
 - Require 22 exact-HEAD, real WordPress/Chromium cross-page screenshots across 11 release-review domains; surface them in a dedicated no-JavaScript gallery, fail the Browser gate on missing evidence, and preserve the existing focused Footnotes checks and full inventory. No theme runtime changes.
 
 - Surface all mandatory exact-HEAD Browser captures in a dedicated first-class, keyboard-navigable review gallery, with section jump links and verified category counts; retain every original screenshot and add HTML navigation regressions. No theme runtime changes.
