@@ -19,7 +19,8 @@ class CoreTabsParity(unittest.TestCase):
         for token in (".wp-block-tabs", ".wp-block-tab-list", ".wp-block-tab-panel",
                       "button[role=tab]", "min-inline-size:var(--slateframe-control)",
                       "min-block-size:var(--slateframe-control)", "max-inline-size:100%",
-                      "overflow-wrap:anywhere", "white-space:normal", "forced-colors:active"):
+                      "overflow-wrap:anywhere", "white-space:normal", "forced-colors:active",
+                      "[aria-selected=true]", "border-block-end:3px solid Highlight"):
             with self.subTest(token=token):
                 self.assertIn(token, css)
         self.assertLessEqual(len(css.encode("utf-8")), 550)
@@ -37,7 +38,8 @@ class CoreTabsParity(unittest.TestCase):
                       "ArrowRight", "toBeFocused()", "AxeBuilder", "forcedColors"):
             self.assertIn(token, browser)
         for name in ("core-tabs-390-ltr-400.png", "core-tabs-390-rtl-400.png",
-                     "core-tabs-390-rtl-400-forced-colors.png"):
+                     "core-tabs-390-rtl-400-forced-colors.png",
+                     "core-tabs-390-rtl-400-selected-forced-colors.png"):
             self.assertIn(name, workflow)
             self.assertIn(name, workflow)
         self.assertIn("python3 tests/verify_core_tabs_zoom_evidence.py", workflow)

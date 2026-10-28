@@ -102,6 +102,24 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
     await first.scrollIntoViewIfNeeded();
     await expect(first).toBeInViewport();
     expect(await first.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth))).toBeGreaterThanOrEqual(2);
+    const second = page.locator('.slateframe-core-tabs-fixture [role="tab"]').nth(1);
+    await second.click();
+    await expect(second).toHaveAttribute('aria-selected', 'true');
+    const selectedMarker = await second.evaluate(node => ({
+      width: parseFloat(getComputedStyle(node).borderBlockEndWidth),
+      style: getComputedStyle(node).borderBlockEndStyle,
+    }));
+    expect(selectedMarker.width).toBeGreaterThanOrEqual(3);
+    expect(selectedMarker.style).toBe('solid');
+    await second.scrollIntoViewIfNeeded();
+    await expect(second).toBeInViewport();
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-tabs-390-rtl-400-selected-forced-colors.png',
+      animations: 'disabled',
+    });
+    await first.click();
+    await first.focus();
+    await expect(first).toHaveAttribute('aria-selected', 'true');
     await page.screenshot({
       path: 'test-artifacts/screenshots/core-tabs-390-rtl-400-forced-colors.png',
       animations: 'disabled',

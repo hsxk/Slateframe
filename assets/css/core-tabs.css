@@ -2,4 +2,4 @@
 .wp-block-tab-list{flex-wrap:wrap}
 .wp-block-tab-list button[role=tab]{min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere;white-space:normal}
 .wp-block-tab-panel{overflow-wrap:anywhere}
-@media(forced-colors:active){.wp-block-tab-list button[role=tab]:focus-visible{outline:2px solid Highlight;outline-offset:2px}}
+@media(forced-colors:active){.wp-block-tab-list :focus-visible{outline:2px solid Highlight}.wp-block-tab-list [aria-selected=true]{border-block-end:3px solid Highlight}}

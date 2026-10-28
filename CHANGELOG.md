@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Preserve the selected native WordPress Core Tab's visible state in forced-colors mode with a 3px logical Highlight indicator, separate from keyboard focus. Verify real Core activation, RTL 400% visibility, and a fourth exact-HEAD screenshot while retaining the existing 550-byte block CSS budget and no runtime JavaScript.
+
 - Preserve natural aspect ratios for editorial featured-image heroes by replacing forced full-width/cover cropping with the shared responsive image sizing and centered intrinsic geometry. Validate inherited mixed-script caption wrapping and real WordPress seven-width LTR/RTL 100–400% zoom with screenshot regressions; reduce runtime CSS bytes rather than relaxing strict budgets.
 
 - Require 22 exact-HEAD, real WordPress/Chromium cross-page screenshots across 11 release-review domains; surface them in a dedicated no-JavaScript gallery, fail the Browser gate on missing evidence, and preserve the existing focused Footnotes checks and full inventory. No theme runtime changes.
