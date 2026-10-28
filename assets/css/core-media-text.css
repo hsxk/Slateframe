@@ -1,4 +1,0 @@
-.wp-block-media-text{min-inline-size:0;max-inline-size:100%}
-.wp-block-media-text__media,.wp-block-media-text__content{min-inline-size:0;max-inline-size:100%}
-.wp-block-media-text__media :is(img,video){max-inline-size:100%}
-.wp-block-media-text__content{overflow-wrap:anywhere}
