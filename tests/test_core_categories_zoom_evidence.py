@@ -37,7 +37,7 @@ class CoreCategoriesZoomEvidence(unittest.TestCase):
             self.assertIn(name, workflow)
         # Two LTR/RTL captures use one generated filename; the forced-colors
         # capture is a fixed name. Check both branches without weakening the gate.
-        self.assertIn("'core-categories-390-' + dir + '-400.png'", browser)
+        self.assertIn("path: 'test-artifacts/screenshots/core-categories-390-' + dir + '-400.png'", browser)
         self.assertIn("for (const dir of ['ltr', 'rtl'])", browser)
         self.assertIn(CAPTURES[2], browser)
         for direction, name in zip(('ltr', 'rtl'), CAPTURES[:2]):
