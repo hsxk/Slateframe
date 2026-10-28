@@ -123,6 +123,14 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/verify_gallery_screenshots.py
+      - name: Generate exact-HEAD Photography visual review
+        env:
+          SLATEFRAME_EVIDENCE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA"
+          python3 bin/photography-review-index.py test-artifacts/photography-lightbox "$SLATEFRAME_EVIDENCE_SHA" --output test-artifacts/photography-review.html
+          test -s test-artifacts/photography-review.html
       - name: Upload photography artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -130,6 +138,7 @@ jobs:
           name: slateframe-photography-runtime
           path: |
             test-artifacts/photography-lightbox/
+            test-artifacts/photography-review.html
             playwright-report/
             test-results/
             /tmp/slateframe-photo-server.log

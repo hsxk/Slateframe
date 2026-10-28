@@ -232,7 +232,7 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
         raise ValueError("limit must be positive")
     groups = {}
     for entry in entries:
-        groups.setdefault(group_for(entry["name"]), []).append(entry)
+        groups.setdefault(entry.get("group") or group_for(entry["name"]), []).append(entry)
     sections = []
     for label, _ in (*GROUPS, ("Other Core / responsive", ())):
         members = groups.get(label, [])
