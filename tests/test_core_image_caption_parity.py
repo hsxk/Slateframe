@@ -34,11 +34,13 @@ class CoreImageCaptionParity(unittest.TestCase):
                       "wp('post', 'delete'", 'finally', 'wp_get_attachment_url',
                       'linkDestination', 'figcaption', 'core/image',
                       '320, 375, 390, 412, 768, 1440, 1920',
-                      "'ltr', 'rtl'", "fontSize = '64px'",
+                      "'ltr', 'rtl'", 'for (const font of [16, 32, 64])',
+                      'await setRootTextScale(page, font, dir)',
                       "forcedColors: 'active'", 'new AxeBuilder',
                       'openAuthenticatedEditor', 'blocks.serialize', 'blocks.parse',
                       "page.keyboard.press('Tab')",
                       'core-image-caption-390-rtl-200-forced-colors.png',
+                      'core-image-caption-390-rtl-400-forced-colors.png',
                       "page.goto('/?p=999999999'"):
             with self.subTest(token=token):
                 self.assertIn(token, js)

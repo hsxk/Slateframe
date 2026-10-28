@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -58,14 +59,13 @@ test('Core Image keeps native links, alt and captions inside responsive bounds',
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((el, value) => {
-            el.dir = value.dir; el.style.fontSize = value.font + 'px';
-          }, { dir, font });
+        for (const font of [16, 32, 64]) {
+          await setRootTextScale(page, font, dir);
           const state = await root.evaluate(node => {
             const figures = [...node.querySelectorAll('figure.wp-block-image')];
             return {
               overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
               items: figures.map(figure => {
                 const image = figure.querySelector('img');
                 const caption = figure.querySelector('figcaption');
@@ -74,11 +74,13 @@ test('Core Image keeps native links, alt and captions inside responsive bounds',
                 return { figureLeft: a.left, figureRight: a.right, imageLeft: b.left,
                   imageRight: b.right, imageWidth: b.width, captionLeft: c.left,
                   captionRight: c.right, captionHeight: c.height,
-                  captionWrap: getComputedStyle(caption).overflowWrap };
+                  captionWrap: getComputedStyle(caption).overflowWrap,
+                  captionFont: parseFloat(getComputedStyle(caption).fontSize) };
               }),
             };
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
+          expect(state.rootFont, label + ' computed root text').toBe(font);
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
           expect(state.items).toHaveLength(2);
           for (const item of state.items) {
@@ -91,10 +93,19 @@ test('Core Image keeps native links, alt and captions inside responsive bounds',
             expect(item.captionRight, label + ' caption right').toBeLessThanOrEqual(width + 1);
             expect(item.captionHeight).toBeGreaterThan(0);
             expect(item.captionWrap).toBe('anywhere');
+            expect(item.captionFont, label + ' readable caption text').toBeGreaterThanOrEqual(font * 0.75);
           }
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-image-caption-' + width + '-' + dir + '.png',
           });
+          if (width === 390 && font === 64) {
+            await link.scrollIntoViewIfNeeded();
+            await link.focus();
+            await expect(link).toBeFocused();
+            expect(await link.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth)))
+              .toBeGreaterThanOrEqual(2);
+            await page.screenshot({ path: 'test-artifacts/screenshots/core-image-caption-390-' + dir + '-400.png' });
+          }
         }
       }
     }
@@ -111,7 +122,13 @@ test('Core Image keeps native links, alt and captions inside responsive bounds',
     await link.focus();
     expect(await link.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth))).toBeGreaterThanOrEqual(2);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-image-caption-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(el => { el.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await link.scrollIntoViewIfNeeded();
+    await link.focus();
+    await expect(link).toBeFocused();
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-image-caption-390-rtl-400-forced-colors.png',
+    });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.emulateMedia({ forcedColors: 'none' });
