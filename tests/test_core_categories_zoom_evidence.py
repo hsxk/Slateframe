@@ -35,7 +35,13 @@ class CoreCategoriesZoomEvidence(unittest.TestCase):
         self.assertIn("python3 tests/verify_core_categories_zoom_evidence.py", workflow)
         for name in CAPTURES:
             self.assertIn(name, workflow)
-            self.assertIn(name, browser)
+        # Two LTR/RTL captures use one generated filename; the forced-colors
+        # capture is a fixed name. Check both branches without weakening the gate.
+        self.assertIn("'core-categories-390-' + dir + '-400.png'", browser)
+        self.assertIn("for (const dir of ['ltr', 'rtl'])", browser)
+        self.assertIn(CAPTURES[2], browser)
+        for direction, name in zip(('ltr', 'rtl'), CAPTURES[:2]):
+            self.assertEqual('core-categories-390-' + direction + '-400.png', name)
 
     def test_missing_corrupt_truncated_wrong_size_non_png(self):
         with tempfile.TemporaryDirectory() as tmp:

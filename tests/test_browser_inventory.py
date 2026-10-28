@@ -213,7 +213,12 @@ class InventoryContract(unittest.TestCase):
                                  hashlib.sha256((self.root / name).read_bytes()).hexdigest())
 
     def test_core_400_percent_evidence_crops_are_bounded(self):
-        self.assertEqual(len(CORE_ZOOM_EVIDENCE), 5)
+        self.assertEqual(len(CORE_ZOOM_EVIDENCE), 8)
+        self.assertTrue({
+            'core-categories-390-ltr-400.png',
+            'core-categories-390-rtl-400.png',
+            'core-categories-390-rtl-400-forced-colors.png',
+        }.issubset(CORE_ZOOM_EVIDENCE))
         for name in sorted(CORE_ZOOM_EVIDENCE):
             with self.subTest(name=name):
                 path = self.root / name
