@@ -1235,6 +1235,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Post Date evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_post_date_zoom_evidence.py test-artifacts/screenshots
+          # Native Post Terms and author metadata must show real 400% reflow and forced-colors evidence.
+          for screenshot in core-post-terms-390-ltr-400.png core-post-terms-390-rtl-400.png core-post-terms-390-rtl-400-forced-colors.png core-post-author-name-390-ltr-400.png core-post-author-name-390-rtl-400.png core-post-author-name-390-rtl-400-forced-colors.png core-post-author-biography-390-ltr-400.png core-post-author-biography-390-rtl-400.png core-post-author-biography-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core metadata evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_metadata_zoom_evidence.py test-artifacts/screenshots
           # Focused skip-link evidence must remain a genuine 390x900 viewport at 400%.
           for screenshot in skip-link-390-ltr-400.png skip-link-390-rtl-400.png skip-link-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% skip-link evidence: $screenshot" >&2; exit 1; }

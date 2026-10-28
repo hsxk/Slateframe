@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
   encoding: 'utf8', timeout: 30000,
@@ -61,9 +62,7 @@ test('Core Post Terms retains native taxonomy links and bounded multilingual con
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, value) => {
-            node.dir = value.dir; node.style.fontSize = value.font + 'px';
-          }, { dir, font });
+          await setRootTextScale(page, font, dir);
           const state = await root.evaluate(node => ({
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             links: [...node.querySelectorAll('.wp-block-post-terms a')].map(el => {
@@ -86,11 +85,15 @@ test('Core Post Terms retains native taxonomy links and bounded multilingual con
             await page.screenshot({ fullPage: true,
               path: 'test-artifacts/screenshots/core-post-terms-' + width + '-' + dir + '.png' });
           }
+          if (width === 390 && font === 64) {
+            await groups.first().locator('a').first().scrollIntoViewIfNeeded();
+            await page.screenshot({ path: 'test-artifacts/screenshots/core-post-terms-390-' + dir + '-400.png', fullPage: false });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     const first = groups.first().locator('a').first();
     await page.keyboard.press('Tab');
     await first.focus();
@@ -106,7 +109,9 @@ test('Core Post Terms retains native taxonomy links and bounded multilingual con
       .toBeGreaterThanOrEqual(2);
     await page.screenshot({ fullPage: true,
       path: 'test-artifacts/screenshots/core-post-terms-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await first.focus();
+    await page.screenshot({ path: 'test-artifacts/screenshots/core-post-terms-390-rtl-400-forced-colors.png', fullPage: false });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
     await page.emulateMedia({ forcedColors: 'none' });

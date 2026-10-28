@@ -45,7 +45,7 @@ class CorePostTermsParity(unittest.TestCase):
             "wp('post', 'term', 'set'", "get_term_link(",
             "post_tag", "category", "finally",
             "320, 375, 390, 412, 768, 1440, 1920",
-            "'ltr', 'rtl'", "fontSize = '64px'",
+            "'ltr', 'rtl'", "await setRootTextScale(page, font, dir);",
             "forcedColors: 'active'", "new AxeBuilder",
             "openAuthenticatedEditor", "blocks.serialize",
             "blocks.parse", "page.keyboard.press('Tab')",
