@@ -4,11 +4,12 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8', timeout: 30000 }).trim();
 
 test('Core Post Featured Image retains native image and permalink at seven widths', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress image covers seven widths');
-  test.setTimeout(150000);
+  test.setTimeout(180000);
   const slug = 'slateframe-featured-image-' + randomUUID().slice(0, 12);
   const content = '<!-- wp:group {"className":"slateframe-featured-image-fixture"} -->' +
     '<div class="wp-block-group slateframe-featured-image-fixture">' +
@@ -53,10 +54,8 @@ test('Core Post Featured Image retains native image and permalink at seven width
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
-          await page.locator('html').evaluate((node, value) => {
-            node.dir = value.dir; node.style.fontSize = value.font + 'px';
-          }, { dir, font });
+        for (const font of [16, 32, 64]) {
+          await setRootTextScale(page, font, dir);
           const state = await root.evaluate(node => {
             const anchor = node.querySelector('.wp-block-post-featured-image a');
             const r = anchor.getBoundingClientRect();
@@ -65,9 +64,13 @@ test('Core Post Featured Image retains native image and permalink at seven width
               return { left: b.left, right: b.right, width: b.width };
             });
             return { overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
+              direction: getComputedStyle(document.documentElement).direction,
               left: r.left, right: r.right, width: r.width, height: r.height, imgs };
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
+          expect(state.rootFont, label + ' computed root font').toBe(font);
+          expect(state.direction, label + ' computed direction').toBe(dir);
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
           expect(state.left, label + ' link left').toBeGreaterThanOrEqual(-1);
           expect(state.right, label + ' link right').toBeLessThanOrEqual(width + 1);
@@ -81,11 +84,21 @@ test('Core Post Featured Image retains native image and permalink at seven width
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-post-featured-image-' + width + '-' + dir + '.png'
           });
+          if (width === 390 && font === 64) {
+            await linked.scrollIntoViewIfNeeded();
+            await linked.focus();
+            await expect(linked).toBeFocused();
+            expect(await linked.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth)))
+              .toBeGreaterThanOrEqual(2);
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/core-post-featured-image-390-' + dir + '-400.png',
+            });
+          }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.keyboard.press('Tab');
     await linked.focus();
     await expect(linked).toBeFocused();
@@ -97,7 +110,15 @@ test('Core Post Featured Image retains native image and permalink at seven width
     await linked.focus();
     expect(await linked.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth))).toBeGreaterThanOrEqual(2);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-post-featured-image-390-rtl-200-forced-colors.png' });
-    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await setRootTextScale(page, 64, 'rtl');
+    await linked.scrollIntoViewIfNeeded();
+    await linked.focus();
+    await expect(linked).toBeFocused();
+    expect(await linked.evaluate(el => parseFloat(getComputedStyle(el).outlineWidth)))
+      .toBeGreaterThanOrEqual(2);
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-post-featured-image-390-rtl-400-forced-colors.png',
+    });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
       .toBeLessThanOrEqual(1);
     await page.emulateMedia({ forcedColors: 'none' });

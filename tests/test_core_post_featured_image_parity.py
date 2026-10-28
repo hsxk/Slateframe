@@ -32,8 +32,15 @@ class CorePostFeaturedImageParity(unittest.TestCase):
                       'AxeBuilder', 'openAuthenticatedEditor', 'permalink',
                       "'--force'", "'/?p=999999999'", 'toBeFocused',
                       'media', 'import', '_wp_attachment_image_alt',
-                      'core-post-featured-image-390-rtl-200-forced-colors.png'):
+                      'for (const font of [16, 32, 64])',
+                      'await setRootTextScale(page, font, dir)',
+                      'state.rootFont', 'state.direction',
+                      'await linked.scrollIntoViewIfNeeded()',
+                      'core-post-featured-image-390-rtl-200-forced-colors.png',
+                      'core-post-featured-image-390-rtl-400-forced-colors.png',
+                      "'test-artifacts/screenshots/core-post-featured-image-390-' + dir + '-400.png'"):
             self.assertIn(value, spec)
+        self.assertNotIn('width === 390 ? [16, 32, 64] : [16, 32]', spec)
         self.assertNotIn('route.fulfill', spec)
         self.assertNotIn('test.fixme', spec)
         self.assertNotIn('test.only', spec)

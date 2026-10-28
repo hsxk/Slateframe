@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Expand native Core Post Featured Image to 42 verified computed 100/200/400% WordPress viewport/direction cases, preserving Core permalink and alt behavior with three focused 390×900 LTR/RTL/forced-colors screenshots, strict PNG/symlink evidence gates, and no runtime asset growth.
+
 - Extend native Core Image linked/unlinked captions to 42 computed 100/200/400% WordPress viewport cases, with 390×900 LTR/RTL/forced-colors focused evidence, strict PNG/symlink CI verification, and no runtime asset growth.
 
 - Expand native Core Cover to a 42-case real WordPress computed 100/200/400% multilingual/RTL reflow acceptance matrix, with three mandatory 390×900 400% focused screenshots, strict PNG/symlink-negative CI gates, and no runtime asset growth.
