@@ -4,6 +4,7 @@ const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding: 'utf8' }).trim();
 const src = '/wp-content/themes/slateframe/assets/images/pattern-placeholder-landscape.svg';
 const words = '日本語 中文 العربية ' + 'LongUnbrokenKnowledgeReference'.repeat(8);
@@ -18,8 +19,9 @@ const fixture = '<!-- wp:group {"className":"slateframe-cover-fixture"} --><div 
   '<div class="wp-block-cover__inner-container"><p>Native Cover media</p></div></div><!-- /wp:cover -->' +
   '<p id="cover-end">End of reference.</p></div><!-- /wp:group -->';
 
-test('native Core Cover bounds multilingual text and decorative media in LTR/RTL', async ({ page }, info) => {
+test('native Core Cover bounds multilingual text and decorative media at computed 100/200/400% in LTR/RTL', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'One WordPress fixture checks seven viewport widths');
+  test.setTimeout(150000);
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
     '--post_title=Slateframe Cover ' + randomUUID(), '--post_content=' + fixture, '--porcelain');
   try {
@@ -30,10 +32,13 @@ test('native Core Cover bounds multilingual text and decorative media in LTR/RTL
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = ''; }, dir);
+        for (const font of [16, 32, 64]) {
+        await setRootTextScale(page, font, dir);
         const data = await root.evaluate(node => {
           const rect = el => { const b = el.getBoundingClientRect(); return { left: b.left, right: b.right, width: b.width, height: b.height }; };
           return {
+            rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
+            control: parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
             overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             covers: [...node.querySelectorAll('.wp-block-cover')].map(cover => {
               const inner = cover.querySelector('.wp-block-cover__inner-container');
@@ -44,7 +49,10 @@ test('native Core Cover bounds multilingual text and decorative media in LTR/RTL
             }),
           };
         });
-        expect(data.overflow, width + ' ' + dir + ' page overflow').toBeLessThanOrEqual(1);
+        const label = width + 'px ' + dir + ' ' + font + 'px';
+        expect(data.rootFont, label + ' computed root font').toBeCloseTo(font, 1);
+        expect(data.control, label + ' bounded control token').toBeGreaterThanOrEqual(44);
+        expect(data.overflow, label + ' page overflow').toBeLessThanOrEqual(1);
         for (const cover of data.covers) {
           expect(cover.min).toBe('0px');
           expect(cover.wrap).toBe('anywhere');
@@ -55,14 +63,22 @@ test('native Core Cover bounds multilingual text and decorative media in LTR/RTL
         expect(data.covers[0].box.height).toBeGreaterThanOrEqual(319);
         expect(data.covers[1].media.width).toBeGreaterThan(0);
         expect(data.covers[1].objectPosition).toBe('80% 30%');
-        if ([390, 1440].includes(width)) {
+        if (font === 16 && [390, 1440].includes(width)) {
           await fs.mkdir('test-artifacts/screenshots', { recursive: true });
           await root.screenshot({ path: 'test-artifacts/screenshots/core-cover-' + width + '-' + dir + '.png' });
+        }
+        if (width === 390 && font === 64) {
+          const focus = root.locator('.slateframe-cover-text-fixture a');
+          await focus.focus();
+          await focus.scrollIntoViewIfNeeded();
+          await expect(focus).toBeInViewport();
+          await page.screenshot({ path: 'test-artifacts/screenshots/core-cover-390-' + dir + '-400.png', animations: 'disabled' });
+        }
         }
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
-    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '200%'; });
+    await setRootTextScale(page, 32, 'rtl');
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     const link = root.locator('.slateframe-cover-text-fixture a');
@@ -74,6 +90,12 @@ test('native Core Cover bounds multilingual text and decorative media in LTR/RTL
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
     await root.screenshot({ path: 'test-artifacts/screenshots/core-cover-390-rtl-200-forced-colors.png' });
+    await setRootTextScale(page, 64, 'rtl');
+    await link.focus();
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeInViewport();
+    expect(await link.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth))).toBeGreaterThanOrEqual(2);
+    await page.screenshot({ path: 'test-artifacts/screenshots/core-cover-390-rtl-400-forced-colors.png', animations: 'disabled' });
   } finally {
     wp('post', 'delete', id, '--force');
   }
