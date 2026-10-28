@@ -90,3 +90,10 @@ photography-review.html is included alongside the original screenshots. The
 known Playwright JSON results file is permitted inside the Photography evidence
 directory, but unknown files, linked reports and invalid screenshots are not.
 The HTML remains a review aid; the workflow cannot certify human visual quality.
+
+
+## Browser Actions integration
+
+The real WordPress/Chromium Browser smoke job now runs the offline visual review index **after** the screenshot inventory and required evidence have been verified. The job binds the generator to the immutable checkout HEAD, requires a nonempty `test-artifacts/browser-review.html`, and uploads that HTML next to the unmodified screenshot directory in the `slateframe-browser` artifact. Relative links continue to work when the archive is extracted.
+
+This is a blocking CI generation and integrity check, **not** an automatic visual approval. Reviewers must download the exact-HEAD artifact, open the index and inspect full-resolution Appearance, Photography, Portfolio, Knowledge, Article, header/search/forms/footer, RTL/CJK, Gutenberg and high-zoom/forced-colors captures before merging. The standalone Photography workflow retains its separate index and gate.
