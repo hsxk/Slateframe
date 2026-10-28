@@ -1,0 +1,5 @@
+.wp-block-tabs,.wp-block-tab-list,.wp-block-tab-panels,.wp-block-tab-panel{min-inline-size:0;max-inline-size:100%}
+.wp-block-tab-list{flex-wrap:wrap}
+.wp-block-tab-list button[role=tab]{min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere;white-space:normal}
+.wp-block-tab-panel{overflow-wrap:anywhere}
+@media(forced-colors:active){.wp-block-tab-list button[role=tab]:focus-visible{outline:2px solid Highlight;outline-offset:2px}}
