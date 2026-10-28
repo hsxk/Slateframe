@@ -35,6 +35,9 @@ unchanged. Categories show a deterministic representative selection, with a
 24-image-per-category default to keep the review manageable. Every verified
 image omitted from the thumbnail selection remains reachable through a native
 keyboard-accessible **Browse remaining** disclosure and full-resolution link.
+The representative selection reserves mobile and desktop captures across the
+seven supported viewport widths before filling remaining slots, so a large
+390px set cannot hide 1440px/1920px evidence.
 Use `--limit-per-group 10000` to display all thumbnails. The output must live **outside**
 the verified screenshot directory so that it does not invalidate the original
 artifact manifest. Clicking a thumbnail opens the full-resolution PNG.

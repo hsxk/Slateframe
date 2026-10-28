@@ -238,6 +238,17 @@ class VisualReviewIndex(unittest.TestCase):
             with self.subTest(size=len(bad)), self.assertRaises(ValueError):
                 review.png_dimensions(bad)
 
+    def test_representative_index_covers_mobile_and_desktop_in_large_groups(self):
+        entries = [{'name': f'appearance-default-390-variant-{index}.png',
+                    'width': 390, 'height': 900} for index in range(40)]
+        for width in (320, 375, 412, 768, 1440, 1920):
+            entries.append({'name': f'appearance-default-{width}-rtl-400.png',
+                            'width': width, 'height': 900})
+        page = review.render(HEAD, entries, limit=24, asset_prefix='screenshots/')
+        for width in (320, 375, 390, 412, 768, 1440, 1920):
+            self.assertIn(f'<img src="screenshots/appearance-default-{width}', page)
+        self.assertIn('Browse remaining', page)
+
     def test_png_trailing_data_and_bad_crc_rejected(self):
         for data in (png() + b'junk', png()[:-4] + b'bad!'):
             with self.assertRaises(ValueError):

@@ -244,7 +244,33 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
             return (0 if "390" in name else 1 if "1440" in name else 2 if "320" in name else 3,
                     0 if "400" in name else 1, 0 if "rtl" in name else 1,
                     0 if "forced-colors" in name else 1, name)
-        chosen = sorted(members, key=priority)[:limit]
+        # A mobile-heavy group must still surface desktop evidence. Reserve
+        # one representative per available viewport before filling by priority.
+        ordered = sorted(members, key=priority)
+        chosen = []
+        selected_names = set()
+
+        def choose(predicate):
+            if len(chosen) >= limit:
+                return
+            for candidate in ordered:
+                name = candidate["name"]
+                if name not in selected_names and predicate(name):
+                    chosen.append(candidate)
+                    selected_names.add(name)
+                    return
+
+        for width in (390, 1440, 320, 375, 412, 768, 1920):
+            viewport = re.compile(rf"(?<![0-9]){width}(?![0-9])")
+            choose(lambda name, pattern=viewport: bool(pattern.search(name)))
+        for marker in ("-rtl", "-ltr", "forced-colors", "-400", "-200", "gutenberg", "editor"):
+            choose(lambda name, keyword=marker: keyword in name)
+        for candidate in ordered:
+            if len(chosen) >= limit:
+                break
+            if candidate["name"] not in selected_names:
+                chosen.append(candidate)
+                selected_names.add(candidate["name"])
         figures = []
         for entry in chosen:
             name = html.escape(entry["name"], quote=True)
@@ -268,11 +294,11 @@ def render(head: str, entries: list[dict], limit: int = 24, asset_prefix: str = 
         sections.append(f'<section><h2>{html.escape(label)}</h2><p>{len(chosen)} of {len(members)} '
                         f'verified screenshots shown</p><div class="grid">{"".join(figures)}</div>{extra}</section>')
     css = ('body{font:16px/1.5 system-ui,sans-serif;margin:2rem auto;padding:0 1rem;max-width:96rem;'
-           'background:#f5f5f5;color:#171717}h1,h2{line-height:1.2}.grid{display:grid;'
+           'background:#f5f5f5;color:#171717}h1,h2{line-height:1.2;overflow-wrap:anywhere}.grid{display:grid;'
            'grid-template-columns:repeat(auto-fit,minmax(min(100%,19rem),1fr));gap:1rem}'
            'figure{margin:0;padding:.6rem;background:white;border:1px solid #aaa;min-width:0}'
            'img{display:block;max-width:100%;height:auto;max-height:24rem;object-fit:contain;margin:auto}'
-           'figcaption{overflow-wrap:anywhere;margin-top:.6rem;font-size:.85rem}'
+           'figcaption,.files a{overflow-wrap:anywhere}figcaption{margin-top:.6rem;font-size:.85rem}'
            'small{display:block}a:focus-visible{outline:3px solid #1264bb;outline-offset:3px}'
            '@media(prefers-color-scheme:dark){body{background:#181818;color:#f6f6f6}'
            'figure{background:#272727;border-color:#888}a{color:#b6d9ff}}')
