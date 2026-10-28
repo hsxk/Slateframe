@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const { execFileSync } = require('node:child_process');
 const fs = require('node:fs/promises');
 const AxeBuilder = require('@axe-core/playwright').default;
+const { setRootTextScale } = require('./support/root-text-scale');
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], { encoding:'utf8', timeout:20000 }).trim();
 
 // The block is rendered by WordPress Core; no DOM imitation or search implementation.
@@ -26,19 +27,21 @@ test('Core Search button-inside reflows without losing native semantics', async 
     for (const width of [320,375,390,412,640,768,1440,1920]) {
       await page.setViewportSize({ width, height:900 });
       for (const dir of ['ltr','rtl']) {
-        for (const font of (width <= 640 ? [16,32,64] : [16,32])) {
-          await page.locator('html').evaluate((node, state) => {
-            node.dir=state.dir; node.style.fontSize=state.font+'px';
-          }, {dir,font});
+        for (const font of [16,32,64]) {
+          await setRootTextScale(page, font, dir);
           const g = await form.evaluate(node => {
             const wrap=node.querySelector('.wp-block-search__inside-wrapper');
             const box=el=>{const r=el.getBoundingClientRect();return {left:r.left,right:r.right,width:r.width,height:r.height}};
-            return { overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+            return { rootFont:parseFloat(getComputedStyle(document.documentElement).fontSize),
+              control:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--slateframe-control')),
+              overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
               display:getComputedStyle(wrap).display,form:box(node),wrapper:box(wrap),
               input:box(node.querySelector('input[type=search]')),
               button:box(node.querySelector('button[type=submit]')) };
           });
           const label=width+'px '+dir+' '+font+'px';
+          expect(g.rootFont,label+' computed root font').toBeCloseTo(font,1);
+          expect(g.control,label+' bounded control token').toBeGreaterThanOrEqual(44);
           expect(g.overflow,label+' document overflow').toBeLessThanOrEqual(1);
           for (const key of ['wrapper','input','button']) {
             expect(g[key].left,label+' '+key+' left').toBeGreaterThanOrEqual(g.form.left-1);
@@ -55,6 +58,12 @@ test('Core Search button-inside reflows without losing native semantics', async 
             expect(g.button.left,label+' alignment').toBeGreaterThanOrEqual(g.input.left-2);
             expect(g.button.right,label+' alignment').toBeLessThanOrEqual(g.input.right+2);
           }
+          if (width===390 && font===64) {
+            const capture = dir==='ltr' ? 'core-search-inside-390-ltr-400.png' : 'core-search-inside-390-rtl-400.png';
+            await button.scrollIntoViewIfNeeded();
+            await expect(button).toBeInViewport();
+            await page.screenshot({path:'test-artifacts/screenshots/'+capture,animations:'disabled'});
+          }
           if (font===16 && ((width===320 && dir==='rtl') || (width===1440 && dir==='ltr'))) {
             await form.screenshot({path:'test-artifacts/screenshots/core-search-inside-'+width+'-'+dir+'.png'});
           }
@@ -65,7 +74,7 @@ test('Core Search button-inside reflows without losing native semantics', async 
       }
     }
     await page.setViewportSize({width:390,height:900});
-    await page.locator('html').evaluate(node=>{node.dir='rtl';node.style.fontSize='32px'});
+    await setRootTextScale(page,32,'rtl');
     await input.focus(); await expect(input).toBeFocused();
     await page.keyboard.press('Tab'); await expect(button).toBeFocused();
     await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
@@ -76,6 +85,10 @@ test('Core Search button-inside reflows without losing native semantics', async 
       .withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
     expect(a11y.violations).toEqual([]);
     await form.screenshot({path:'test-artifacts/screenshots/core-search-inside-390-rtl-200-forced-colors.png'});
+    await setRootTextScale(page,64,'rtl');
+    await button.scrollIntoViewIfNeeded();
+    await expect(button).toBeInViewport();
+    await page.screenshot({path:'test-artifacts/screenshots/core-search-inside-390-rtl-400-forced-colors.png',animations:'disabled'});
   } finally {
     wp('post','delete',id,'--force');
   }

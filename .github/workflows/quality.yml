@@ -1239,6 +1239,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Knowledge Steps evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_knowledge_step_zoom_evidence.py test-artifacts/screenshots
+          # Native Core Search button-inside: 48-case computed zoom and real 390x900 screenshots.
+          for screenshot in core-search-inside-390-ltr-400.png core-search-inside-390-rtl-400.png core-search-inside-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Search evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_core_search_inside_zoom_evidence.py test-artifacts/screenshots
           # Native Core Navigation: real seven-width 400% reflow and exact 390x900 evidence.
           for screenshot in core-navigation-390-ltr-400.png core-navigation-390-rtl-400.png core-navigation-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Navigation evidence: $screenshot" >&2; exit 1; }
