@@ -73,7 +73,8 @@ test('native Core Navigation keeps 44px multilingual links within RTL and zoom v
           }
           if (width === 390 && font === 64) {
             await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-            await page.screenshot({ path: 'test-artifacts/screenshots/core-navigation-390-' + dir + '-400.png', animations: 'disabled' });
+            const capture = dir === 'ltr' ? 'core-navigation-390-ltr-400.png' : 'core-navigation-390-rtl-400.png';
+            await page.screenshot({ path: 'test-artifacts/screenshots/' + capture, animations: 'disabled' });
           }
           if (font === 16 && [320, 390, 1440].includes(width)) {
             await fs.mkdir('test-artifacts/screenshots', { recursive: true });
