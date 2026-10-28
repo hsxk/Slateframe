@@ -1226,6 +1226,11 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing Core RSS/Archives 400% evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_feeds_zoom_evidence.py test-artifacts/screenshots
+          # Long native related/previous/next titles and 404 recovery at 400% RTL.
+          for screenshot in related-reading-390-ltr-400.png related-reading-390-rtl-400.png related-reading-390-rtl-400-forced-colors.png 404-recovery-390-rtl-400-forced-colors.png post-navigation-390-ltr-400.png post-navigation-390-rtl-400.png post-navigation-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% discovery/recovery evidence: $screenshot" >&2; exit 1; }
+          done
+          python3 tests/verify_related_reading_zoom_evidence.py test-artifacts/screenshots
           # Native Core quotations must prove computed 400% text, RTL and forced-colors.
           for screenshot in core-quote-390-ltr-400.png core-quote-390-rtl-400.png core-quote-390-rtl-400-forced-colors.png core-pullquote-390-ltr-400.png core-pullquote-390-rtl-400.png core-pullquote-390-rtl-400-forced-colors.png core-verse-390-ltr-400.png core-verse-390-rtl-400.png core-verse-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% quotation evidence: $screenshot" >&2; exit 1; }
