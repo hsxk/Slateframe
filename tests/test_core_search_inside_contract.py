@@ -21,8 +21,17 @@ class CoreSearchInsideContract(unittest.TestCase):
         for marker in ('wp:search', 'button-inside', 'FormData', 'toHaveAccessibleName',
                        'ltr', 'rtl', '[16,32,64]', 'forcedColors', 'AxeBuilder',
                        'keyboard.press', 'scrollWidth', 'wp(\'post\',\'delete\'',
-                       'core-search-inside-320-rtl-400.png'):
+                       'core-search-inside-320-rtl-400.png',
+                       'setRootTextScale(page, font, dir)', 'expect(g.rootFont',
+                       'for (const font of [16,32,64])'):
             self.assertIn(marker, js)
+        self.assertNotIn('width <= 640 ? [16,32,64] : [16,32]', js)
+        ci = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
+        for name in ('core-search-inside-390-ltr-400.png', 'core-search-inside-390-rtl-400.png',
+                     'core-search-inside-390-rtl-400-forced-colors.png'):
+            self.assertIn(name, js)
+            self.assertIn(name, ci)
+        self.assertIn('python3 tests/verify_core_search_inside_zoom_evidence.py', ci)
 
 
 if __name__ == '__main__':

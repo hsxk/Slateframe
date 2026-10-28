@@ -4,6 +4,12 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add registered Core Knowledge FAQ 400% computed-text reflow coverage across seven viewports and LTR/RTL, with three real 390×900 focused WordPress screenshots, strict PNG/symlink gates and native Enter/Space checks; no runtime assets added.
+
+- Extend native Core Categories hierarchy/dropdown to a complete seven-viewport × LTR/RTL × computed 100/200/400% reflow matrix, with focused 390×900 400% evidence, strict PNG/symlink checks and no runtime asset growth.
+
+- Extend native Core Search button-inside to all eight responsive widths × LTR/RTL × computed 100/200/400% text scaling, with strict real 390×900 400% focus/forced-colors evidence, CRC/symlink-negative tests and no runtime asset growth.
+
 - Add conditional WordPress 7.1 native Core Tabs presentation: bounded 44px tab controls, 400% RTL/CJK wrapping, Gutenberg parity, real 42-case WordPress/Chromium keyboard/Axe coverage, and strict 390×900 visual evidence. Core retains all tab interactivity and older WordPress support.
 
 
