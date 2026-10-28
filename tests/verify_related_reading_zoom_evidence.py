@@ -11,6 +11,8 @@ CAPTURES = (
     "related-reading-390-ltr-400.png",
     "related-reading-390-rtl-400.png",
     "related-reading-390-rtl-400-forced-colors.png",
+    "404-recovery-390-ltr-400.png",
+    "404-recovery-390-rtl-400.png",
     "404-recovery-390-rtl-400-forced-colors.png",
     "post-navigation-390-ltr-400.png",
     "post-navigation-390-rtl-400.png",
