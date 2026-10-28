@@ -115,3 +115,90 @@ test('Core step badges and checklist marks survive 200% RTL, forced colors and p
       getComputedStyle(node, '::before').content)).not.toBe('none');
   });
 });
+
+
+test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoom', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One real WordPress fixture covers seven widths');
+  test.setTimeout(180000);
+  const { setRootTextScale } = require('./support/root-text-scale');
+  const AxeBuilder = require('@axe-core/playwright').default;
+  await withFixture(page, async steps => {
+    const first = steps.locator(':scope > li').first();
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const dir of ['ltr', 'rtl']) {
+        for (const font of width <= 412 ? [16, 32, 64] : [16, 32]) {
+          await setRootTextScale(page, font, dir);
+          const result = await first.evaluate(node => {
+            const li = getComputedStyle(node);
+            const badge = getComputedStyle(node, '::before');
+            const box = node.getBoundingClientRect();
+            const gap = parseFloat(getComputedStyle(document.documentElement)
+              .getPropertyValue('--slateframe-component-gap')) ||
+              parseFloat(getComputedStyle(node).getPropertyValue('--slateframe-space-3'));
+            const badgeSize = parseFloat(badge.width);
+            return {
+              badgeWidth: badgeSize, badgeHeight: parseFloat(badge.height),
+              badgeFont: parseFloat(badge.fontSize),
+              padding: parseFloat(li.paddingInlineStart),
+              control: parseFloat(li.getPropertyValue('--slateframe-control')),
+              gap, minHeight: parseFloat(li.minBlockSize),
+              left: box.left, right: box.right,
+              markerInset: dirFromStyle(li) === 'rtl' ? badge.right : badge.left,
+              overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              nested: getComputedStyle(node.querySelector('.nested-checks')).listStyleType,
+            };
+            function dirFromStyle(style) { return style.direction; }
+          });
+          const label = width + 'px ' + dir + ' ' + font + 'px';
+          expect(result.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          expect(result.left, label + ' list left').toBeGreaterThanOrEqual(-1);
+          expect(result.right, label + ' list right').toBeLessThanOrEqual(width + 1);
+          expect(result.badgeWidth, label + ' badge minimum').toBeGreaterThanOrEqual(44);
+          expect(result.badgeWidth, label + ' badge bounded').toBeLessThanOrEqual(Math.max(44, font * 1.3) + 1);
+          expect(result.badgeHeight, label + ' badge square').toBeCloseTo(result.badgeWidth, 0);
+          expect(result.minHeight, label + ' reserve badge height').toBeGreaterThanOrEqual(result.badgeHeight - 1);
+          expect(result.padding, label + ' badge and text do not overlap')
+            .toBeGreaterThanOrEqual(result.badgeWidth + font * .75 - 1);
+          expect(result.markerInset, label + ' logical badge start').toBe('0px');
+          expect(result.nested, label + ' native nested bullets').not.toBe('none');
+          if (font === 64) {
+            expect(result.badgeWidth, label + ' avoid old oversized 2.15rem badge').toBeLessThan(font * 1.4);
+          }
+          if (width === 390 && font === 64) {
+            await first.evaluate(node => node.scrollIntoView({ block: 'start' }));
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/knowledge-steps-390-' + dir + '-400.png',
+              fullPage: false,
+            });
+          }
+        }
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 900 });
+    await setRootTextScale(page, 64, 'rtl');
+    const axe = await new AxeBuilder({ page }).include('.is-style-slateframe-steps')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(axe.violations).toEqual([]);
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    const forced = await first.evaluate(node => {
+      const badge = getComputedStyle(node, '::before');
+      return {
+        border: badge.borderTopStyle,
+        width: parseFloat(badge.width),
+        color: badge.color,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    expect(forced.border).toBe('solid');
+    expect(forced.width).toBeGreaterThanOrEqual(44);
+    expect(forced.color).not.toBe('transparent');
+    expect(forced.overflow).toBeLessThanOrEqual(1);
+    await first.evaluate(node => node.scrollIntoView({ block: 'start' }));
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/knowledge-steps-390-rtl-400-forced-colors.png',
+      fullPage: false,
+    });
+  });
+});
