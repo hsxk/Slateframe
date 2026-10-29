@@ -48,8 +48,10 @@ class KnowledgeEvidenceTrailContract(unittest.TestCase):
             '[320, 375, 390, 412, 768, 1440, 1920]',
             "['ltr', 'rtl']", '[16, 32, 64]', 'AxeBuilder',
             'knowledge-evidence-390-rtl-200-forced-colors.png',
+            'knowledge-evidence-390-rtl-400-forced-colors.png',
             'knowledge-evidence-1440-ltr.png', 'openAuthenticatedEditor',
             'core/missing', "wp('post', 'delete', id, '--force')",
+            "[[390, 'rtl', '200%'], [1440, 'ltr', '']]",
         ):
             with self.subTest(needle=needle):
                 self.assertIn(needle, source)

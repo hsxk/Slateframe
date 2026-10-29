@@ -43,10 +43,17 @@ test('registered evidence trail preserves source context across responsive and a
                 const box = column.getBoundingClientRect();
                 return { left: box.left, right: box.right };
               }),
+              textOutside: [...node.querySelectorAll('h2, h3, p')].some(child => {
+                const range = document.createRange();
+                range.selectNodeContents(child);
+                return [...range.getClientRects()].some(rect =>
+                  rect.width > 0 && (rect.left < -1 || rect.right > document.documentElement.clientWidth + 1));
+              }),
             };
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(geometry.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          expect(geometry.textOutside, label + ' text fragment clipping').toBe(false);
           expect(geometry.left, label + ' trail left').toBeGreaterThanOrEqual(-1);
           expect(geometry.right, label + ' trail right').toBeLessThanOrEqual(geometry.viewport + 1);
           expect(geometry.columns, label + ' columns').toHaveLength(3);
@@ -66,6 +73,10 @@ test('registered evidence trail preserves source context across responsive and a
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await trail.scrollIntoViewIfNeeded();
     await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-evidence-390-rtl-200-forced-colors.png',
+      animations: 'disabled' });
+    await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
+    await trail.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-evidence-390-rtl-400-forced-colors.png',
       animations: 'disabled' });
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
@@ -102,6 +113,24 @@ test('evidence trail remains native and valid inside Gutenberg', async ({ page }
     expect(result.names.filter(name => name === 'core/columns')).toHaveLength(1);
     expect(result.names.filter(name => name === 'core/column')).toHaveLength(3);
     expect(result.names.filter(name => name === 'core/heading')).toHaveLength(4);
+    const framed = await page.locator('iframe[name="editor-canvas"]').count() > 0;
+    const canvas = framed ? page.frameLocator('iframe[name="editor-canvas"]') : page;
+    const editor = canvas.locator('.editor-styles-wrapper').first();
+    const trail = editor.locator('.slateframe-knowledge-evidence-trail').first();
+    await expect(trail).toBeVisible();
+    for (const [width, dir, font] of [[390, 'rtl', '200%'], [1440, 'ltr', '']]) {
+      await page.setViewportSize({ width, height: 900 });
+      await editor.evaluate((node, state) => { node.dir = state.dir; node.style.fontSize = state.font; }, { dir, font });
+      const geometry = await trail.evaluate(node => {
+        const root = node.closest('.editor-styles-wrapper');
+        return { overflow: root.scrollWidth - root.clientWidth,
+          columns: node.querySelectorAll('.wp-block-column').length,
+          headings: node.querySelectorAll('h2, h3').length };
+      });
+      expect(geometry.overflow, width + 'px Gutenberg overflow').toBeLessThanOrEqual(1);
+      expect(geometry.columns).toBe(3);
+      expect(geometry.headings).toBe(4);
+    }
   } finally {
     wp('post', 'delete', id, '--force');
   }
