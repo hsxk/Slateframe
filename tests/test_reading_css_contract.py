@@ -71,7 +71,7 @@ class SharedReadingCssTest(unittest.TestCase):
         self.assertRegex(css, r"@media\s*\(max-width:781px\)\{")
         self.assertIn("is-style-slateframe-metrics:not(.is-not-stacked-on-mobile)", css)
         self.assertIn("min-inline-size:0;padding:min(var(--slateframe-space-4),20px)", css)
-        self.assertIn("overflow-wrap:anywhere;", css)
+        self.assertIn("min-inline-size:0;padding:min(var(--slateframe-space-4),20px);border-inline-start:var(--slateframe-rule);overflow-wrap:anywhere}", css)
         self.assertIn("border-inline-start:0;border-block-start:var(--slateframe-rule)", css)
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
 
