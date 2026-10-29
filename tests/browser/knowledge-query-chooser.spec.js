@@ -90,3 +90,58 @@ test('native Knowledge Query chooser renders articles with responsive RTL/CJK an
     wp('post', 'delete', postId, '--force');
   }
 });
+
+test('native Knowledge Query chooser preserves the empty state without fake posts', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'Single empty-state fixture');
+  const registered = wp('eval',
+    "echo WP_Block_Patterns_Registry::get_instance()->get_registered('slateframe/knowledge-query-loop')['content'];");
+  const needle = '"search":""';
+  expect(registered.split(needle)).toHaveLength(2);
+  const content = registered.replace(needle,
+    '"search":"slateframe-no-match-' + randomUUID().replaceAll('-', '') + '"');
+  const pageId = wp('post', 'create', '--post_type=page', '--post_status=publish',
+    '--post_title=Knowledge empty Query fixture', '--post_content=' + content, '--porcelain');
+  try {
+    await page.goto('/?page_id=' + pageId, { waitUntil: 'networkidle' });
+    const query = page.locator('.slateframe-knowledge-query');
+    await expect(query).toBeVisible();
+    await expect(query.locator('.wp-block-post-template > .wp-block-post')).toHaveCount(0);
+    await expect(query.locator('.wp-block-query-no-results')).toContainText('No articles are available yet.');
+    await expect(query.locator('.wp-block-query-pagination a')).toHaveCount(0);
+  } finally {
+    wp('post', 'delete', pageId, '--force');
+  }
+});
+
+test('native Knowledge Query chooser remains valid and editable in Gutenberg', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'Authenticated editor fixture');
+  test.setTimeout(120000);
+  const { openAuthenticatedEditor } = require('./support/editor-login');
+  const registered = wp('eval',
+    "echo WP_Block_Patterns_Registry::get_instance()->get_registered('slateframe/knowledge-query-loop')['content'];");
+  const pageId = wp('post', 'create', '--post_type=page', '--post_status=draft',
+    '--post_title=Knowledge Query editor fixture', '--post_content=' + registered, '--porcelain');
+  try {
+    await openAuthenticatedEditor(page, pageId);
+    const blocks = await page.evaluate(() => {
+      const roots = window.wp.data.select('core/block-editor').getBlocks();
+      const names = [], invalid = [];
+      const walk = entries => entries.forEach(block => {
+        names.push(block.name);
+        if (block.isValid === false) invalid.push(block.name);
+        walk(block.innerBlocks || []);
+      });
+      walk(roots);
+      return { root: roots[0]?.name, names, invalid };
+    });
+    expect(blocks.root).toBe('core/query');
+    expect(blocks.invalid).toEqual([]);
+    expect(blocks.names).not.toContain('core/missing');
+    for (const name of ['core/post-template', 'core/post-title', 'core/post-date',
+      'core/post-excerpt', 'core/query-pagination', 'core/query-no-results']) {
+      expect(blocks.names).toContain(name);
+    }
+  } finally {
+    wp('post', 'delete', pageId, '--force');
+  }
+});
