@@ -28,7 +28,8 @@ class KnowledgeGlossaryContract(unittest.TestCase):
         for expected in ('320, 375, 390, 412, 768, 1440, 1920', "'ltr', 'rtl'",
                          '[16, 32, 64]', 'AxeBuilder', 'openAuthenticatedEditor',
                          'knowledge-glossary-390-rtl-400', 'knowledge-glossary-1440-ltr',
-                         'core/missing'):
+                         'core/missing', '日本語', '中文术语', 'مصطلح',
+                         'UnbrokenGlossaryIdentifier'):
             self.assertIn(expected, source)
 
 
