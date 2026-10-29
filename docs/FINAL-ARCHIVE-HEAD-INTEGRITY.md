@@ -21,6 +21,9 @@ image, pattern, or PHP file fails even if every remaining member has a valid
 Git object hash and ZIP CRC. Conversely, committed development-only docs,
 tests, and workflows are forbidden inside the distributable. Uncommitted
 changes to `.distignore` cannot redefine the accepted release inventory.
+Optional ZIP directory entries are also checked against the parent paths of
+committed distributable files: an injected empty `docs/`, `tests/`, or
+untracked directory fails, while real asset parent directories remain valid.
 Unknown negated or absolute exclusion rules fail closed rather than silently
 changing packaging semantics. The source snapshot currently contains 121
 regular distributable files (the number may change as the theme evolves).
