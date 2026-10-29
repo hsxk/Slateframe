@@ -12,14 +12,22 @@ const pattern = () => wp('eval',
 test('registered glossary retains text at all widths, directions and zoom levels', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390, 'Single WordPress fixture covers seven widths');
   test.setTimeout(180000);
+  // Exercise actual mixed-script content rather than testing only English under RTL.
+  const fixture = pattern()
+    .replace('First term', '日本語の長い専門用語と説明')
+    .replace('Second term', '中文术语与UnbrokenGlossaryIdentifier'.repeat(3))
+    .replace('Third term', 'مصطلح عربي مع شرح مختصر');
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
-    '--post_title=Glossary test', '--post_content=' + pattern(), '--porcelain');
+    '--post_title=Glossary test', '--post_content=' + fixture, '--porcelain');
   try {
     await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
     const glossary = page.locator('.slateframe-prose .slateframe-knowledge-glossary').first();
     await expect(glossary).toBeVisible();
     await expect(glossary.locator('h2')).toHaveCount(1);
     await expect(glossary.locator('h3')).toHaveCount(3);
+    await expect(glossary).toContainText('日本語');
+    await expect(glossary).toContainText('中文术语');
+    await expect(glossary).toContainText('مصطلح');
     await expect(glossary.locator('.is-style-slateframe-definition')).toHaveCount(3);
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
