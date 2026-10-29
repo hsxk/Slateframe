@@ -33,7 +33,7 @@ class DistributionArtifactContract(unittest.TestCase):
     def test_distributable_artifact_is_complete_and_non_optional(self):
         job = self.job
         self.assertIn("name: slateframe-distribution", job)
-        self.assertIn("uses: actions/upload-artifact@v4", job)
+        self.assertIn("uses: actions/upload-artifact@v7", job)
         for name in ("slateframe.zip", "HEAD_SHA.txt", "SHA256SUMS"):
             self.assertIn("/tmp/slateframe-theme-check-dist/" + name, job)
         self.assertIn("if-no-files-found: error", job)

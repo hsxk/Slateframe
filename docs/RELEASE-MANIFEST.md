@@ -44,3 +44,7 @@ cat HEAD_SHA.txt
 
 Match `HEAD_SHA.txt` to the intended GitHub Actions run and PR head. Compare the `slateframe.zip` SHA-256 between the successful PR and main-push artifacts: it must be identical when the distributable tree is unchanged. The archive contains only `.distignore`-permitted theme files; `HEAD_SHA.txt` and `SHA256SUMS` are **outside** the theme ZIP. Do not use an artifact from a failed or older SHA as acceptance evidence. Retention is seven days.
 
+
+## GitHub Actions runtime maintenance
+
+The two CI workflows use the maintained Node 24-based v7 majors of `actions/checkout`, `actions/setup-node`, and `actions/upload-artifact` on GitHub-hosted `ubuntu-latest` runners. `shivammathur/setup-php@v2` already declares a Node 24 action runtime. The `node-version: '22'` input remains intentional: it selects the JavaScript environment for the Playwright fixture, **not** the action's internal runtime. Both workflows explicitly set `package-manager-cache: false` to avoid implicit npm cache state, keep `contents: read`, and check out the exact PR head with `persist-credentials: false`. This migration does not change WordPress, PHP compatibility, screenshot requirements, runtime theme assets, or distribution ZIP contents.

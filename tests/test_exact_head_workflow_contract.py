@@ -11,7 +11,7 @@ PHOTO = ROOT / '.github/workflows/photography.yml'
 class ExactHeadWorkflowContract(unittest.TestCase):
     def test_every_quality_checkout_uses_exact_head(self):
         text = QUALITY.read_text(encoding='utf-8')
-        blocks = re.findall(r'^\s+- uses: actions/checkout@v4\n((?:\s+[^\n]*\n){0,6})', text, re.M)
+        blocks = re.findall(r'^\s+- uses: actions/checkout@v7\n((?:\s+[^\n]*\n){0,6})', text, re.M)
         self.assertGreaterEqual(len(blocks), 7, 'Every quality job must check out the same head SHA')
         for block in blocks:
             with self.subTest(checkout=block[:90]):

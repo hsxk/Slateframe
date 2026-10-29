@@ -18,7 +18,7 @@ jobs:
     name: Static quality
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -214,7 +214,7 @@ jobs:
     name: WordPress coding standards
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -257,7 +257,7 @@ jobs:
           --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -299,7 +299,7 @@ jobs:
           --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -357,7 +357,7 @@ jobs:
           sha256sum slateframe.zip > SHA256SUMS
           sha256sum --check SHA256SUMS
       - name: Upload exact-HEAD distributable
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: slateframe-distribution
           path: |
@@ -369,7 +369,7 @@ jobs:
           retention-days: 7
       - name: Upload Theme Check report
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: slateframe-theme-check
           path: /tmp/slateframe-theme-check.json
@@ -390,7 +390,7 @@ jobs:
           --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -502,7 +502,7 @@ jobs:
           --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -512,9 +512,10 @@ jobs:
           php-version: '8.3'
           extensions: mysqli
           coverage: none
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
+          package-manager-cache: false
       - name: Install fixture site
         shell: bash
         run: |
@@ -1356,7 +1357,7 @@ jobs:
           test -s test-artifacts/browser-review.html
       - name: Upload browser artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: slateframe-browser
           path: |
@@ -1374,7 +1375,7 @@ jobs:
     needs: [static, coding-standards, compatibility, theme-check, wordpress-smoke, browser-smoke]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           repository: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}
           ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
@@ -1416,7 +1417,7 @@ jobs:
           if grep -qx "slateframe/.distignore" /tmp/package.txt; then echo "Packaging manifest leaked into theme ZIP" >&2; exit 1; fi
           if grep -Eq '^slateframe/(README\.md|package(-lock)?\.json|playwright\.config\.js|phpcs\.xml\.dist)$' /tmp/package.txt; then exit 1; fi
           if grep -E '^slateframe/(\.git|\.github|docs|bin|dist|node_modules|tests|test-artifacts|playwright-report|test-results)/' /tmp/package.txt; then exit 1; fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: slateframe-theme
           path: dist/slateframe.zip

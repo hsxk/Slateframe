@@ -28,7 +28,7 @@ jobs:
           --health-cmd="mariadb --protocol=tcp --host=127.0.0.1 --user=root --password=root --database=wordpress --execute='SHOW ENGINE INNODB STATUS' >/dev/null"
           --health-interval=10s --health-timeout=5s --health-retries=10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # The PR event defaults to a synthetic merge commit. Evidence must
           # identify the actual head being tested, not the synthetic merge SHA.
@@ -40,9 +40,10 @@ jobs:
           php-version: '8.3'
           extensions: mysqli,gd
           coverage: none
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'
+          package-manager-cache: false
       - name: Install WordPress and raster fixture
         shell: bash
         run: |
@@ -133,7 +134,7 @@ jobs:
           test -s test-artifacts/photography-review.html
       - name: Upload photography artifacts
         if: ${{ always() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: slateframe-photography-runtime
           path: |
