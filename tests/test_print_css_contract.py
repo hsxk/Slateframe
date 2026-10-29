@@ -53,6 +53,27 @@ class PrintPresentationContractTest(unittest.TestCase):
         self.assertNotIn("@page", screen_css)
         self.assertEqual(print_css.count("@media print"), 1)
 
+    def test_native_core_pagination_print_stays_conditional_and_bounded(self):
+        php = (ROOT / "functions.php").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
+        for name, budget, capture in (
+            ("query-pagination", 400, "core-query-pagination-print-390-rtl.png"),
+            ("comments-pagination", 550, "core-comments-pagination-print-390-rtl-400.png"),
+        ):
+            with self.subTest(block=name):
+                css = (ROOT / "assets/css" / f"core-{name}.css").read_text(encoding="utf-8")
+                self.assertIn(f"@media print{{.wp-block-{name}{{display:none!important}}}}", css)
+                self.assertLessEqual(len(css.encode("utf-8")), budget)
+                self.assertIn(f"'core/{name}'", php)
+                self.assertIn(capture, workflow)
+        self.assertIn("python3 tests/verify_core_pagination_print_evidence.py", workflow)
+        comments = (ROOT / "tests/browser/core-comments-pagination-parity.spec.js").read_text()
+        self.assertIn("await expect(nav).toBeHidden()", comments)
+        self.assertIn("await expect(nav).toBeVisible()", comments)
+        self.assertIn("await expect(printedComment).toBeVisible()", comments)
+        self.assertIn("printed discussion starts inside the screenshot", comments)
+        self.assertIn("printed discussion fits in the screenshot", comments)
+
     def test_actions_artifact_gate(self):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
         self.assertIn("print-article-viewport-" + chr(36) + "{viewport}.png", workflow)

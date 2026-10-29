@@ -121,7 +121,16 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   expect(a11y.violations).toEqual([]);
   await pagination.screenshot({ path: 'test-artifacts/screenshots/core-query-pagination-390-rtl-200-forced-colors.png' });
 
-  await page.emulateMedia({ forcedColors: 'none' });
+  // Print the authored posts, not the non-functional pagination controls.
+  await page.emulateMedia({ media: 'print', forcedColors: 'none' });
+  await expect(pagination).toBeHidden();
+  await expect(grid.locator('.wp-block-post-template')).toBeVisible();
+  await page.screenshot({
+    path: 'test-artifacts/screenshots/core-query-pagination-print-390-rtl.png',
+    animations: 'disabled',
+  });
+  await page.emulateMedia({ media: 'screen', forcedColors: 'none' });
+  await expect(pagination).toBeVisible();
   await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.removeProperty('font-size'); });
   await next.click();
   const pageTwo = page.locator('.browser-project-grid .wp-block-query-pagination').first();
@@ -164,4 +173,9 @@ test('Core Query Pagination retains native emphasis without the Portfolio presen
     expect(nextBox?.width || 0).toBeGreaterThanOrEqual(44);
     expect(nextBox?.height || 0).toBeGreaterThanOrEqual(44);
   }
+  // The conditional Core stylesheet applies outside the Portfolio wrapper.
+  await page.emulateMedia({ media: 'print' });
+  await expect(nav).toBeHidden();
+  await page.emulateMedia({ media: 'screen' });
+  await expect(nav).toBeVisible();
 });

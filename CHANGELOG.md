@@ -4,6 +4,12 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Fail closed on truncated, corrupt, wrong-size or symlinked 390×900 Core Query/Comments Pagination print screenshots; clarify the boundary between Core block content and intentionally omitted classic comment templates.
+
+- Keep native Core Comments Pagination out of printed discussions while preserving comment content and screen controls; retain 44px targets, RTL/CJK and forced-colors parity within the original CSS budget, with real 400% RTL print evidence.
+
+- Hide native Core Query Pagination controls when printing without hiding Query Loop posts; verify Portfolio and generic Core print media, restore screen navigation, and require exact-HEAD RTL print evidence within the existing conditional CSS budget.
+
 - Require complete real WordPress Core Social Links 400% LTR/RTL/forced-colors viewport evidence with focus, Axe and touch-geometry assertions; reject missing, corrupt or symlinked captures in CI without duplicating existing Core CSS.
 
 - Add conditional Core Query Title and Term Description presentation with bounded CJK/RTL/400% reflow, Gutenberg editor parity, real WordPress browser evidence, Axe checks and documentation; Core retains archive queries and taxonomy semantics.

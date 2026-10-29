@@ -87,6 +87,25 @@ test('Core Comments Pagination preserves navigation, targets, 44px controls and 
     await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    // Printed discussions keep their content, not dead pagination controls.
+    await page.emulateMedia({ media: 'print', forcedColors: 'none' });
+    await expect(nav).toBeHidden();
+    const printedComment = root.locator('#slateframe-comments-start');
+    await expect(printedComment).toBeVisible();
+    // At 400% the page heading fills the initial viewport. Capture the
+    // actual discussion text rather than a misleading title-only screenshot.
+    await printedComment.evaluate(node => node.scrollIntoView({ block: 'center', inline: 'nearest' }));
+    const printedBox = await printedComment.boundingBox();
+    expect(printedBox, 'printed discussion text has a viewport rectangle').not.toBeNull();
+    expect(printedBox.y, 'printed discussion starts inside the screenshot').toBeGreaterThanOrEqual(0);
+    expect(printedBox.y + printedBox.height, 'printed discussion fits in the screenshot')
+      .toBeLessThanOrEqual(901);
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-comments-pagination-print-390-rtl-400.png',
+      animations: 'disabled',
+    });
+    await page.emulateMedia({ media: 'screen', forcedColors: 'none' });
+    await expect(nav).toBeVisible();
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => document.getElementById('slateframe-core-comments-pagination-inline-css') ||
       document.getElementById('slateframe-core-comments-pagination-css'))).toBeNull();
