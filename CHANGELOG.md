@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Bound native inline MathML in paragraphs, headings and lists to the containing reading/editor column at 100–400% text sizes, preserving standalone Core Math and RTL/CJK wrapping. Add real WordPress 42-case reflow, Gutenberg roundtrip and six exact-HEAD visual evidence gates without a renderer, JavaScript, or budget relaxation.
+
 - Extend native Core Accordion acceptance to keyboard Space activation with retained focus and print/screen DOM-state immutability, preventing a theme presentation change from mutating WordPress-owned hidden/inert semantics. No runtime CSS or JavaScript growth.
 
 - Add native WordPress 6.9+ Core Accordion presentation parity: conditional scoped CSS, Gutenberg-shared 44px CJK/RTL headings, forced-colors focus, print-only collapsed-panel visibility, real WordPress 42-case reflow/keyboard/Axe/roundtrip checks and four mandatory exact-HEAD PNGs without runtime JavaScript.
