@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Improve native Core Cover and Media & Text reflow for CJK/RTL and 400% zoom with conditional Gutenberg-parity styles, forced-colors readability, real WordPress browser evidence, Axe and native serialization tests. Preserve Core image cropping and responsive stacking; no runtime JS.
+
 - Add conditional Core Query Title and Term Description presentation with bounded CJK/RTL/400% reflow, Gutenberg editor parity, real WordPress browser evidence, Axe checks and documentation; Core retains archive queries and taxonomy semantics.
 
 - Upgrade official GitHub Actions checkout, setup-node and artifact uploads to maintained Node 24-based v7 releases across both CI workflows. Preserve exact-HEAD, read-only checkouts, keep browser tests on Node 22, explicitly disable automatic npm caching, and update static regression contracts.

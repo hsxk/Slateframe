@@ -29,7 +29,7 @@ function slateframe_setup() {
 	add_theme_support( 'align-wide' );
 	add_theme_support( 'wp-block-styles' );
 	add_theme_support( 'editor-styles' );
-	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-comments-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-query-title.css', 'assets/css/core-term-description.css', 'assets/css/core-tabs.css', 'assets/css/core-accordion.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-rss.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-post-comments-link.css', 'assets/css/core-comments-title.css', 'assets/css/core-post-comments-count.css', 'assets/css/core-query-no-results.css', 'assets/css/core-post-comments-form.css', 'assets/css/core-file.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-image.css', 'assets/css/core-table.css', 'assets/css/core-heading.css', 'assets/css/core-paragraph.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-columns.css', 'assets/css/core-group.css', 'assets/css/core-details.css', 'assets/css/core-separator.css', 'assets/css/core-quote.css', 'assets/css/core-pullquote.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/portfolio-reflow.css', 'assets/css/editor.css' ) );
+	add_editor_style( array( 'style.css', 'assets/css/footer.css', 'assets/css/core-buttons.css', 'assets/css/core-query-pagination.css', 'assets/css/core-comments-pagination.css', 'assets/css/core-navigation.css', 'assets/css/core-query-title.css', 'assets/css/core-term-description.css', 'assets/css/core-cover.css', 'assets/css/core-media-text.css', 'assets/css/core-tabs.css', 'assets/css/core-accordion.css', 'assets/css/core-post-navigation.css', 'assets/css/core-video.css', 'assets/css/core-audio.css', 'assets/css/core-embed.css', 'assets/css/core-rss.css', 'assets/css/core-latest-posts.css', 'assets/css/core-latest-comments.css', 'assets/css/core-categories.css', 'assets/css/core-archives.css', 'assets/css/core-tag-cloud.css', 'assets/css/core-page-list.css', 'assets/css/core-post-terms.css', 'assets/css/core-post-comments-link.css', 'assets/css/core-comments-title.css', 'assets/css/core-post-comments-count.css', 'assets/css/core-query-no-results.css', 'assets/css/core-post-comments-form.css', 'assets/css/core-file.css', 'assets/css/core-loginout.css', 'assets/css/core-post-date.css', 'assets/css/core-post-author-name.css', 'assets/css/core-post-author-biography.css', 'assets/css/core-avatar.css', 'assets/css/core-image.css', 'assets/css/core-table.css', 'assets/css/core-heading.css', 'assets/css/core-paragraph.css', 'assets/css/core-site-logo.css', 'assets/css/core-site-title.css', 'assets/css/core-site-tagline.css', 'assets/css/core-columns.css', 'assets/css/core-group.css', 'assets/css/core-details.css', 'assets/css/core-separator.css', 'assets/css/core-quote.css', 'assets/css/core-pullquote.css', 'assets/css/core-post-excerpt.css', 'assets/css/core-read-more.css', 'assets/css/core-post-title.css', 'assets/css/core-post-featured-image.css', 'assets/css/forms.css', 'assets/css/form-content.css', 'assets/css/reading.css', 'assets/css/photography.css', 'assets/css/content-modes.css', 'assets/css/query-loop.css', 'assets/css/portfolio-reflow.css', 'assets/css/editor.css' ) );
 
 	add_theme_support(
 		'html5',
@@ -141,6 +141,25 @@ function slateframe_register_core_navigation_styles() {
 	);
 }
 add_action( 'init', 'slateframe_register_core_navigation_styles', 20 );
+
+/**
+ * Bound native Cover and Media & Text compositions without replacing Core.
+ * Core retains overlays, background crops, grids and mobile stacking.
+ */
+function slateframe_register_core_media_composition_styles() {
+	foreach ( array( 'cover', 'media-text' ) as $block ) {
+		wp_enqueue_block_style(
+			'core/' . $block,
+			array(
+				'handle' => 'slateframe-core-' . $block,
+				'src'    => get_template_directory_uri() . '/assets/css/core-' . $block . '.css',
+				'path'   => get_template_directory() . '/assets/css/core-' . $block . '.css',
+				'ver'    => wp_get_theme()->get( 'Version' ),
+			)
+		);
+	}
+}
+add_action( 'init', 'slateframe_register_core_media_composition_styles', 20 );
 
 /**
  * Keep native archive headings and term descriptions readable at high zoom.
