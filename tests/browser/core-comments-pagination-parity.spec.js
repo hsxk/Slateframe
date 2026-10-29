@@ -87,6 +87,16 @@ test('Core Comments Pagination preserves navigation, targets, 44px controls and 
     await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    // Printed discussions keep their content, not dead pagination controls.
+    await page.emulateMedia({ media: 'print', forcedColors: 'none' });
+    await expect(nav).toBeHidden();
+    await expect(root.locator('#slateframe-comments-start')).toBeVisible();
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-comments-pagination-print-390-rtl-400.png',
+      animations: 'disabled',
+    });
+    await page.emulateMedia({ media: 'screen', forcedColors: 'none' });
+    await expect(nav).toBeVisible();
     await page.goto('/?p=999999999', { waitUntil: 'networkidle' });
     expect(await page.evaluate(() => document.getElementById('slateframe-core-comments-pagination-inline-css') ||
       document.getElementById('slateframe-core-comments-pagination-css'))).toBeNull();

@@ -1294,6 +1294,8 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing Core Media & Text 400% evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_media_text_zoom_evidence.py test-artifacts/screenshots
+          # Native Core Comments Pagination: printed discussion content without page controls.
+          test -s test-artifacts/screenshots/core-comments-pagination-print-390-rtl-400.png || { echo "Missing Core Comments Pagination print evidence" >&2; exit 1; }
           # Native Core Query Pagination: print keeps posts, not page controls.
           test -s test-artifacts/screenshots/core-query-pagination-print-390-rtl.png || { echo "Missing Core Query Pagination print evidence" >&2; exit 1; }
           # Native Core Social Links: full 400% keyboard focus, touch targets and exact viewport evidence.
