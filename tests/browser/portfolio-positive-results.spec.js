@@ -21,6 +21,8 @@ test('native Portfolio Query Loop renders matching posts and hides its empty sta
     const blocks = portfolioWithSearch(marker);
     expect(blocks).toContain('<!-- wp:query-no-results -->');
     expect(blocks).toContain('"postType":"post"');
+    // Core Query does not register displayLayout; keep the pattern editor-roundtrip safe.
+    expect(blocks).not.toContain('"displayLayout"');
     expect(blocks).toContain('"search":"' + marker + '"');
     pageId = wp('post', 'create', '--post_type=page', '--post_status=publish',
       '--post_title=Slateframe Portfolio positive fixture', '--post_content=' + blocks, '--porcelain');
