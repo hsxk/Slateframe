@@ -29,6 +29,11 @@ class PatternDocumentationCount(unittest.TestCase):
         self.assertIn('26. **Knowledge glossary**', readme)
         self.assertTrue((ROOT / 'patterns/knowledge-glossary.php').is_file())
 
+    def test_portfolio_query_chooser_inventory(self):
+        readme = (ROOT / 'README.md').read_text(encoding='utf-8')
+        self.assertIn('27. **Portfolio Query Loop**', readme)
+        self.assertTrue((ROOT / 'patterns/portfolio-query-loop.php').is_file())
+
     def test_wordpress_readme_mentions_native_faq(self):
         readme = (ROOT / 'readme.txt').read_text(encoding='utf-8')
         self.assertIn('knowledge outlines/definitions/checkpoints/procedures/comparisons/questions-and-answers', readme)

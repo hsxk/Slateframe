@@ -84,3 +84,54 @@ test('native Portfolio Query Loop renders matching posts and hides its empty sta
     wp('post', 'delete', postId, '--force');
   }
 });
+
+test('Portfolio Query Loop is selectable through the native Core chooser and renders its cards', async ({ page }, info) => {
+  const registered = JSON.parse(wp('eval', "echo wp_json_encode( WP_Block_Patterns_Registry::get_instance()->get_registered('slateframe/portfolio-query-loop') );"));
+  expect(registered).toBeTruthy();
+  expect(registered.blockTypes).toContain('core/query');
+  expect(registered.content.trim()).toMatch(/^<!-- wp:query /);
+  expect(registered.content).not.toContain('"displayLayout"');
+  const marker = 'slateframe-query-choice-' + randomUUID().replaceAll('-', '').slice(0, 12);
+  const postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
+    '--post_title=' + marker, '--post_content=Portable Core Query fixture', '--porcelain');
+  let pageId;
+  try {
+    const original = '"search":""';
+    expect(registered.content.split(original)).toHaveLength(2);
+    const blocks = registered.content.replace(original, '"search":"' + marker + '"');
+    pageId = wp('post', 'create', '--post_type=page', '--post_status=publish',
+      '--post_title=Slateframe Core Query chooser fixture', '--post_content=' + blocks, '--porcelain');
+    await page.goto('/?page_id=' + pageId, { waitUntil: 'networkidle' });
+    const grid = page.locator('.wp-block-query.slateframe-project-grid').first();
+    const cards = grid.locator('.wp-block-post-template > .wp-block-post');
+    await expect(grid).toBeVisible();
+    await expect(cards).toHaveCount(1);
+    await expect(cards.first().locator('.wp-block-post-title a')).toHaveText(marker);
+    await expect(grid.locator('.wp-block-query-no-results')).toHaveCount(0);
+    const { setRootTextScale } = require('./support/root-text-scale');
+    await setRootTextScale(page, 64, 'rtl');
+    const link = cards.first().locator('.wp-block-post-title a');
+    await link.focus();
+    await expect(link).toBeFocused();
+    const geometry = await grid.evaluate((node) => {
+      const root = document.documentElement;
+      const card = node.querySelector('.wp-block-post');
+      const rect = card.getBoundingClientRect();
+      return { document: root.scrollWidth, viewport: root.clientWidth, left: rect.left, right: rect.right };
+    });
+    expect(geometry.document - geometry.viewport).toBeLessThanOrEqual(1);
+    expect(geometry.left).toBeGreaterThanOrEqual(-1);
+    expect(geometry.right).toBeLessThanOrEqual(geometry.viewport + 1);
+    if ([390, 1440].includes(viewport(info))) {
+      const dir = path.resolve('test-artifacts/screenshots');
+      await fs.mkdir(dir, { recursive: true });
+      await page.screenshot({
+        path: path.join(dir, 'viewport-' + viewport(info) + '-portfolio-query-chooser-rtl-400.png'),
+        fullPage: true,
+      });
+    }
+  } finally {
+    if (pageId) wp('post', 'delete', pageId, '--force');
+    wp('post', 'delete', postId, '--force');
+  }
+});
