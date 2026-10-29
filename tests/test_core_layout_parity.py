@@ -9,9 +9,13 @@ class ResponsiveCoreContracts(unittest.TestCase):
     def test_portfolio_front_end_and_editor_match(self):
         front = (ROOT / "assets/css/content-modes.css").read_text()
         editor = (ROOT / "assets/css/editor.css").read_text()
-        self.assertIn(".slateframe-project-card > :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date)", front)
+        # Shared frontend/editor rule: Core Query grid scope, direct children,
+        # and all three constraints preventing narrow-card overflow.
+        scoped = ".slateframe-project-grid .slateframe-project-card>:is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date)"
+        self.assertIn(scoped + "{inline-size:100%;min-inline-size:0;overflow-wrap:anywhere}", front)
+        self.assertIn(":is(.slateframe-main,.editor-styles-wrapper) .slateframe-project-grid", front)
         self.assertIn("max-width:none", editor)
-        self.assertIn(".slateframe-project-card :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date)", editor)
+        self.assertIn(".slateframe-project-grid .slateframe-project-card :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date){inline-size:100%;min-inline-size:0;overflow-wrap:anywhere}", editor)
 
     def test_plugin_query_loop_list_reset_and_editor_asset_parity(self):
         """Core-compatible plugin markup must not expose browser list bullets."""

@@ -46,13 +46,25 @@ test('registered glossary retains text at all widths, directions and zoom levels
                 (r.left < -1 || r.right > root.clientWidth + 1));
             });
             return { overflow: root.scrollWidth - root.clientWidth,
-              left: rect.left, right: rect.right, width: root.clientWidth, clipped };
+              left: rect.left, right: rect.right, width: root.clientWidth, clipped,
+              entries: [...node.querySelectorAll('.is-style-slateframe-definition')].map(entry => {
+                const style = getComputedStyle(entry);
+                return { inlineStart: parseFloat(style.paddingInlineStart),
+                  inlineEnd: parseFloat(style.paddingInlineEnd),
+                  blockStart: parseFloat(style.paddingBlockStart) };
+              }) };
           });
           const label = width + ' ' + dir + ' ' + font;
           expect(result.overflow, label).toBeLessThanOrEqual(1);
           expect(result.left, label).toBeGreaterThanOrEqual(-1);
           expect(result.right, label).toBeLessThanOrEqual(result.width + 1);
           expect(result.clipped, label).toBe(false);
+          expect(result.entries, label + ' glossary entries').toHaveLength(3);
+          for (const entry of result.entries) {
+            expect(entry.inlineStart, label + ' logical start').toBeCloseTo(Math.min(font * 1.1, 24), 1);
+            expect(entry.inlineEnd, label + ' logical end').toBeCloseTo(Math.min(font * 1.1, 24), 1);
+            expect(entry.blockStart, label + ' block padding').toBeCloseTo(Math.min(font, 20), 1);
+          }
         }
       }
     }

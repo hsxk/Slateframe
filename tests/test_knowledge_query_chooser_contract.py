@@ -35,6 +35,7 @@ class KnowledgeQueryChooserContract(unittest.TestCase):
         self.assertEqual(self.attributes["align"], "wide")
         self.assertEqual(self.attributes["className"], "slateframe-knowledge-query")
         self.assertNotIn("displayLayout", self.attributes)
+        self.assertIn('<!-- wp:post-title {"isLink":true,"fontSize":"lead"} /-->', self.source)
         for block in ("post-template", "post-title", "post-date", "post-excerpt",
                       "query-pagination", "query-no-results"):
             self.assertIn("<!-- wp:" + block, self.source)
@@ -47,7 +48,8 @@ class KnowledgeQueryChooserContract(unittest.TestCase):
         for token in ("slateframe/knowledge-query-loop", "registered.blockTypes",
                       "await expect(cards).toHaveCount(1)", "AxeBuilder",
                       "knowledge-query-chooser-390-rtl-400",
-                      "knowledge-query-chooser-1440-ltr"):
+                      "knowledge-query-chooser-1440-ltr", "has-lead-font-size",
+                      "titleFonts", "letterSpacing"):
             self.assertIn(token, browser)
 
 
