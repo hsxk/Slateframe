@@ -41,7 +41,7 @@ class CoreAccordionParity(unittest.TestCase):
                      "core-accordion-390-rtl-400-forced-colors.png",
                      "core-accordion-print-390-rtl-400.png"):
             self.assertIn(name, verifier)
-        self.assertIn("'core-accordion-390-' + dir + '-400.png'", browser)
+        self.assertIn("'test-artifacts/screenshots/core-accordion-390-' + dir + '-400.png'", browser)
         self.assertIn("['ltr', 'rtl']", browser)
         for name in ("core-accordion-390-rtl-400-forced-colors.png",
                      "core-accordion-print-390-rtl-400.png"):
