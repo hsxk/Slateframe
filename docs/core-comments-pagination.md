@@ -9,3 +9,5 @@ A disposable real WordPress Page checks Core's server-rendered `<nav>`, link tar
 ## Print boundary
 
 The conditionally loaded Core Comments Pagination stylesheet now hides only the native navigation wrapper in print media. The comment text, authored article content and surrounding discussion remain under WordPress control. A real WordPress disposable-page test checks that 400% RTL print hides the navigation, preserves its content, and restores visible controls on screen; exact-HEAD CI requires a 390×900 screenshot. The nested selector preserves the existing 44px touch targets, active-page emphasis and forced-colors behavior without raising the 550-byte CSS budget.
+
+The screenshot gate validates the complete PNG stream (IHDR dimensions, chunk CRCs, IDAT and IEND) and rejects symlinked evidence, rather than treating a nonempty file as proof. This Core block fixture is distinct from the theme's classic `.slateframe-comments` template, which remains intentionally omitted by the global article-print stylesheet; it does not establish that classic comment threads are printed.

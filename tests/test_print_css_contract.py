@@ -66,6 +66,7 @@ class PrintPresentationContractTest(unittest.TestCase):
                 self.assertLessEqual(len(css.encode("utf-8")), budget)
                 self.assertIn(f"'core/{name}'", php)
                 self.assertIn(capture, workflow)
+        self.assertIn("python3 tests/verify_core_pagination_print_evidence.py", workflow)
         comments = (ROOT / "tests/browser/core-comments-pagination-parity.spec.js").read_text()
         self.assertIn("await expect(nav).toBeHidden()", comments)
         self.assertIn("await expect(nav).toBeVisible()", comments)
