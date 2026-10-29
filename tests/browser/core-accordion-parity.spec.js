@@ -93,8 +93,14 @@ test('native Core Accordion reflow, interactions, forced-colors and print', asyn
     const axe = await new AxeBuilder({ page }).include('.slateframe-core-accordion-fixture')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
-    await toggles.first().click();
+    // Native Space activation must preserve focus and require no theme-owned script.
+    await page.keyboard.press('Space');
+    await expect(toggles.first()).toHaveAttribute('aria-expanded', 'false');
+    await expect(toggles.first()).toBeFocused();
     await expect(panels.first()).toBeHidden();
+    const collapsedAttributes = await panels.first().evaluate(node => ({
+      hidden: node.getAttribute('hidden'), inert: node.getAttribute('inert'),
+    }));
     await page.emulateMedia({ forcedColors: 'active' });
     await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '64px'; });
     await toggles.first().focus();
@@ -118,6 +124,10 @@ test('native Core Accordion reflow, interactions, forced-colors and print', asyn
     await page.emulateMedia({ media: 'screen' });
     await expect(panels.first()).toBeHidden();
     await expect(toggles.first()).toHaveAttribute('aria-expanded', 'false');
+    // Print-only visibility cannot mutate Core's hidden/inert DOM attributes.
+    expect(await panels.first().evaluate(node => ({
+      hidden: node.getAttribute('hidden'), inert: node.getAttribute('inert'),
+    }))).toEqual(collapsedAttributes);
     await page.goto('/?p=999999', { waitUntil: 'networkidle' });
     await expect(page.locator('style#slateframe-core-accordion-inline-css, link#slateframe-core-accordion-css')).toHaveCount(0);
   } finally {

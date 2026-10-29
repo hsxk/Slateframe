@@ -51,7 +51,8 @@ class CoreAccordionParity(unittest.TestCase):
         browser = (ROOT / "tests/browser/core-accordion-parity.spec.js").read_text()
         for token in ("[320, 375, 390, 412, 768, 1440, 1920]",
                       "['ltr', 'rtl']", "[16, 32, 64]", "AxeBuilder",
-                      "aria-expanded", "openAuthenticatedEditor", "blocks.serialize",
+                      "aria-expanded", "page.keyboard.press('Space')", "collapsedAttributes",
+                      "openAuthenticatedEditor", "blocks.serialize",
                       "media: 'print'", "media: 'screen'"):
             self.assertIn(token, browser)
 

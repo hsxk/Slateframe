@@ -10,6 +10,6 @@ Collapsed panels are shown only under `@media print`; the original `hidden` / `i
 
 ## Acceptance
 
-Real WordPress + Chromium Playwright covers 320/375/390/412/768/1440/1920px, LTR/RTL and computed 16/32/64px root text, Core mouse/Enter interaction, Axe, forced colors, print/screen restoration, conditional asset delivery, and Gutenberg serialize/parse roundtrip. Four 390px/400% exact-HEAD screenshots are mandatory, checked for valid complete PNG and symlink safety by the CI verifier. The WordPress 6.7 / PHP 7.4 matrix must continue to pass. Browser tests and screenshot inspection, not static contracts alone, determine merge readiness.
+Real WordPress + Chromium Playwright covers 320/375/390/412/768/1440/1920px, LTR/RTL and computed 16/32/64px root text, native mouse/Enter/Space activation with focus retention, Axe, forced colors, print/screen restoration with unchanged Core `hidden`/`inert` attributes, conditional asset delivery, and Gutenberg serialize/parse roundtrip. Four 390px/400% exact-HEAD screenshots are mandatory, checked for valid complete PNG and symlink safety by the CI verifier. The WordPress 6.7 / PHP 7.4 matrix must continue to pass. Browser tests and screenshot inspection, not static contracts alone, determine merge readiness.
 
 Manual release checks remain Safari/VoiceOver and Firefox.
