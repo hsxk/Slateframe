@@ -1280,7 +1280,7 @@ jobs:
           done
           python3 tests/verify_core_navigation_zoom_evidence.py test-artifacts/screenshots
           # WordPress 7.1 Core Tabs: complete 400% LTR/RTL/forced-colors evidence.
-          for screenshot in core-tabs-390-ltr-400.png core-tabs-390-rtl-400.png core-tabs-390-rtl-400-forced-colors.png; do
+          for screenshot in core-tabs-390-ltr-400.png core-tabs-390-rtl-400.png core-tabs-390-rtl-400-forced-colors.png core-tabs-390-rtl-400-selected-forced-colors.png core-tabs-print-390-ltr-400.png core-tabs-print-390-rtl-400.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Core Tabs evidence: $screenshot" >&2; exit 1; }
           done
           python3 tests/verify_core_tabs_zoom_evidence.py test-artifacts/screenshots

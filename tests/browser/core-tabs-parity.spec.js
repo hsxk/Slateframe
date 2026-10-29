@@ -102,10 +102,69 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
     await first.scrollIntoViewIfNeeded();
     await expect(first).toBeInViewport();
     expect(await first.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth))).toBeGreaterThanOrEqual(2);
+    const second = page.locator('.slateframe-core-tabs-fixture [role="tab"]').nth(1);
+    await second.click();
+    await expect(second).toHaveAttribute('aria-selected', 'true');
+    const selectedMarker = await second.evaluate(node => ({
+      width: parseFloat(getComputedStyle(node).borderBlockEndWidth),
+      style: getComputedStyle(node).borderBlockEndStyle,
+    }));
+    expect(selectedMarker.width).toBeGreaterThanOrEqual(3);
+    expect(selectedMarker.style).toBe('solid');
+    await second.scrollIntoViewIfNeeded();
+    await expect(second).toBeInViewport();
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/core-tabs-390-rtl-400-selected-forced-colors.png',
+      animations: 'disabled',
+    });
+    await first.click();
+    await first.focus();
+    await expect(first).toHaveAttribute('aria-selected', 'true');
     await page.screenshot({
       path: 'test-artifacts/screenshots/core-tabs-390-rtl-400-forced-colors.png',
       animations: 'disabled',
     });
+
+    // Print inactive native panels without changing Core's selected screen tab.
+    await page.emulateMedia({ media: 'screen', forcedColors: 'none' });
+    const panels = tabs.getByRole('tabpanel', { includeHidden: true });
+    await expect(buttons.first()).toHaveAttribute('aria-selected', 'true');
+    await expect(panels.nth(1)).toBeHidden();
+    // Core 7.1 currently emits hidden=""; other versions may use until-found.
+    // Both must print without changing Core's bound screen state.
+    const inactiveHiddenAttribute = await panels.nth(1).getAttribute('hidden');
+    expect(['', 'until-found']).toContain(inactiveHiddenAttribute);
+    for (const dir of ['ltr', 'rtl']) {
+      await page.locator('html').evaluate((node, direction) => {
+        node.dir = direction;
+        node.style.fontSize = '64px';
+      }, dir);
+      await page.emulateMedia({ media: 'print' });
+      await expect(panels.nth(0)).toBeVisible();
+      await expect(panels.nth(1)).toBeVisible();
+      const printState = await panels.nth(1).evaluate(node => ({
+        contentVisibility: getComputedStyle(node).contentVisibility,
+        display: getComputedStyle(node).display,
+        hidden: node.getAttribute('hidden'),
+        height: node.getBoundingClientRect().height,
+        overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      }));
+      expect(printState.contentVisibility).toBe('visible');
+      expect(printState.hidden).toBe(inactiveHiddenAttribute);
+      expect(printState.display).not.toBe('none');
+      expect(printState.height).toBeGreaterThan(0);
+      expect(printState.overflow).toBeLessThanOrEqual(1);
+      await panels.nth(1).scrollIntoViewIfNeeded();
+      await expect(panels.nth(1)).toBeInViewport();
+      await page.screenshot({
+        path: 'test-artifacts/screenshots/core-tabs-print-390-' + dir + '-400.png',
+        animations: 'disabled',
+      });
+      await page.emulateMedia({ media: 'screen' });
+      await expect(panels.nth(1)).toBeHidden();
+      expect(await panels.nth(1).getAttribute('hidden')).toBe(inactiveHiddenAttribute);
+      await expect(buttons.first()).toHaveAttribute('aria-selected', 'true');
+    }
   } finally {
     wp('post', 'delete', id, '--force');
   }

@@ -19,7 +19,8 @@ class CoreTabsParity(unittest.TestCase):
         for token in (".wp-block-tabs", ".wp-block-tab-list", ".wp-block-tab-panel",
                       "button[role=tab]", "min-inline-size:var(--slateframe-control)",
                       "min-block-size:var(--slateframe-control)", "max-inline-size:100%",
-                      "overflow-wrap:anywhere", "white-space:normal", "forced-colors:active"):
+                      "overflow-wrap:anywhere", "white-space:normal", "forced-colors:active",
+                      "[aria-selected=true]", "border-block-end:3px solid Highlight"):
             with self.subTest(token=token):
                 self.assertIn(token, css)
         self.assertLessEqual(len(css.encode("utf-8")), 550)
@@ -27,6 +28,24 @@ class CoreTabsParity(unittest.TestCase):
         self.assertNotIn("!important", css)
         self.assertNotIn("text-align:", css, "Core Tab authored alignment must win")
         self.assertNotIn("javascript", css.lower())
+
+    def test_print_reveals_inactive_core_panels_without_changing_screen_state(self):
+        css = (ROOT / "assets/css/print.css").read_text()
+        tabs_css = (ROOT / "assets/css/core-tabs.css").read_text()
+        browser = (ROOT / "tests/browser/core-tabs-parity.spec.js").read_text()
+        self.assertIn("@media print", css)
+        self.assertIn('.wp-block-tab-panel[hidden]', css)
+        self.assertIn('display:block!important', css)
+        self.assertLessEqual(len(css.encode('utf-8')), 3000)
+        self.assertIn("content-visibility:visible!important", css)
+        self.assertNotIn("content-visibility:visible", tabs_css)
+        for token in ("media: 'print'", "media: 'screen'",
+                      "printState.hidden", "printState.contentVisibility", "printState.display",
+                      "inactiveHiddenAttribute",
+                      "toBeHidden()", "toBeVisible()", "aria-selected",
+                      "core-tabs-print-390-"):
+            with self.subTest(token=token):
+                self.assertIn(token, browser)
 
     def test_real_wordpress_browser_and_exact_evidence_gate(self):
         browser = (ROOT / "tests/browser/core-tabs-parity.spec.js").read_text()
@@ -36,10 +55,14 @@ class CoreTabsParity(unittest.TestCase):
                       "metrics.rootFont", "metrics.overflow", "toBeInViewport()",
                       "ArrowRight", "toBeFocused()", "AxeBuilder", "forcedColors"):
             self.assertIn(token, browser)
+        verifier = (ROOT / "tests/verify_core_tabs_zoom_evidence.py").read_text()
         for name in ("core-tabs-390-ltr-400.png", "core-tabs-390-rtl-400.png",
-                     "core-tabs-390-rtl-400-forced-colors.png"):
+                     "core-tabs-390-rtl-400-forced-colors.png",
+                     "core-tabs-390-rtl-400-selected-forced-colors.png",
+                     "core-tabs-print-390-ltr-400.png",
+                     "core-tabs-print-390-rtl-400.png"):
             self.assertIn(name, workflow)
-            self.assertIn(name, workflow)
+            self.assertIn(name, verifier)
         self.assertIn("python3 tests/verify_core_tabs_zoom_evidence.py", workflow)
 
 
