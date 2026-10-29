@@ -130,6 +130,10 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
     const panels = tabs.getByRole('tabpanel', { includeHidden: true });
     await expect(buttons.first()).toHaveAttribute('aria-selected', 'true');
     await expect(panels.nth(1)).toBeHidden();
+    // Core 7.1 currently emits hidden=""; other versions may use until-found.
+    // Both must print without changing Core's bound screen state.
+    const inactiveHiddenAttribute = await panels.nth(1).getAttribute('hidden');
+    expect(['', 'until-found']).toContain(inactiveHiddenAttribute);
     for (const dir of ['ltr', 'rtl']) {
       await page.locator('html').evaluate((node, direction) => {
         node.dir = direction;
@@ -140,12 +144,14 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
       await expect(panels.nth(1)).toBeVisible();
       const printState = await panels.nth(1).evaluate(node => ({
         contentVisibility: getComputedStyle(node).contentVisibility,
+        display: getComputedStyle(node).display,
         hidden: node.getAttribute('hidden'),
         height: node.getBoundingClientRect().height,
         overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
       }));
       expect(printState.contentVisibility).toBe('visible');
-      expect(printState.hidden).toBe('until-found');
+      expect(printState.hidden).toBe(inactiveHiddenAttribute);
+      expect(printState.display).not.toBe('none');
       expect(printState.height).toBeGreaterThan(0);
       expect(printState.overflow).toBeLessThanOrEqual(1);
       await panels.nth(1).scrollIntoViewIfNeeded();
@@ -156,6 +162,7 @@ test('native WordPress 7.1 Tabs preserve 44px controls, reflow and keyboard beha
       });
       await page.emulateMedia({ media: 'screen' });
       await expect(panels.nth(1)).toBeHidden();
+      expect(await panels.nth(1).getAttribute('hidden')).toBe(inactiveHiddenAttribute);
       await expect(buttons.first()).toHaveAttribute('aria-selected', 'true');
     }
   } finally {

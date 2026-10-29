@@ -8,7 +8,7 @@ The small `assets/css/core-tabs.css` stylesheet applies only when a native Tabs 
 
 ## Print completeness
 
-Core's inactive tab panels use `hidden="until-found"`, which Chromium otherwise keeps at zero content height in print media. Slateframe's existing print-only stylesheet reveals those native panels on paper without removing the attribute, selecting a different tab, or changing interactive screen and Gutenberg behavior. The original tab labels remain available for context. Real WordPress acceptance verifies LTR/RTL at 390px and computed 400% root text, print visibility and horizontal bounds, two exact-HEAD screenshots, and the restored screen-hidden state after print.
+The real WordPress 7.1 fixture currently emits `hidden=""` on inactive tab panels (Core's interactivity binding), while other Core implementations may emit `hidden="until-found"`. Both hide content in print unless print CSS explicitly restores display and content visibility. Slateframe's print-only stylesheet reveals either form on paper without removing or changing the original attribute, selecting another tab, or changing interactive screen and Gutenberg behavior. The original tab labels remain available for context. Real WordPress acceptance verifies LTR/RTL at 390px and computed 400% root text, print visibility and horizontal bounds, two exact-HEAD screenshots, and the restored screen-hidden state after print.
 
 ## Acceptance
 

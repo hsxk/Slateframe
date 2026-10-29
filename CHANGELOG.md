@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Restore printed native Core Tabs panels for WordPress 7.1's actual `hidden=""` output as well as `hidden="until-found"`; preserve the original attribute and screen state, strengthen browser/contract checks, and remove redundant print Cover minimum-height CSS to stay within the unchanged 3,000-byte budget.
+
 - Print all native WordPress 7.1 Core Tabs panels, including inactive `hidden="until-found"` content, without changing screen selection or editor behavior. Add real WordPress 390px LTR/RTL 400% print/screen regression, two exact-SHA PNG gates and strict evidence verification; no runtime JavaScript or universal CSS growth.
 
 - Preserve the selected native WordPress Core Tab's visible state in forced-colors mode with a 3px logical Highlight indicator, separate from keyboard focus. Verify real Core activation, RTL 400% visibility, and a fourth exact-HEAD screenshot while retaining the existing 550-byte block CSS budget and no runtime JavaScript.
