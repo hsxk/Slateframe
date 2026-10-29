@@ -79,8 +79,34 @@ test('Core Social Links retain names, SVGs, colors and 44px targets at seven wid
     expect(axe.violations).toEqual([]);
     await root.screenshot({path:'test-artifacts/screenshots/core-social-links-390-rtl-200-forced-colors.png'});
     await page.locator('html').evaluate(el=>{el.style.fontSize='400%';});
-    expect(await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth))
-      .toBeLessThanOrEqual(1);
+    const large = await root.evaluate(el => ({
+      overflow: document.documentElement.scrollWidth-document.documentElement.clientWidth,
+      links: [...el.querySelectorAll('.wp-social-link a')].map(link => {
+        const r = link.getBoundingClientRect();
+        return { left:r.left, right:r.right, width:r.width, height:r.height };
+      })
+    }));
+    expect(large.overflow).toBeLessThanOrEqual(1);
+    for (const link of large.links) {
+      expect(link.width).toBeGreaterThanOrEqual(44);
+      expect(link.height).toBeGreaterThanOrEqual(44);
+      expect(link.left).toBeGreaterThanOrEqual(-1);
+      expect(link.right).toBeLessThanOrEqual(391);
+    }
+    await links.nth(1).focus();
+    await links.nth(1).scrollIntoViewIfNeeded();
+    await expect(links.nth(1)).toBeFocused();
+    await expect.poll(()=>links.nth(1).evaluate(el=>parseFloat(getComputedStyle(el).outlineWidth)))
+      .toBeGreaterThanOrEqual(2);
+    const largeAxe = await new AxeBuilder({page}).include('.slateframe-social-fixture')
+      .withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+    expect(largeAxe.violations).toEqual([]);
+    await page.screenshot({path:'test-artifacts/screenshots/core-social-links-390-rtl-400-forced-colors.png',animations:'disabled'});
+    await page.emulateMedia({forcedColors:'none',reducedMotion:'reduce'});
+    await page.screenshot({path:'test-artifacts/screenshots/core-social-links-390-rtl-400.png',animations:'disabled'});
+    await page.locator('html').evaluate(el=>{el.dir='ltr';});
+    await links.nth(1).scrollIntoViewIfNeeded();
+    await page.screenshot({path:'test-artifacts/screenshots/core-social-links-390-ltr-400.png',animations:'disabled'});
   } finally { wp('post','delete',id,'--force'); }
 });
 

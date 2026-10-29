@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Require complete real WordPress Core Social Links 400% LTR/RTL/forced-colors viewport evidence with focus, Axe and touch-geometry assertions; reject missing, corrupt or symlinked captures in CI without duplicating existing Core CSS.
+
 - Add conditional Core Query Title and Term Description presentation with bounded CJK/RTL/400% reflow, Gutenberg editor parity, real WordPress browser evidence, Axe checks and documentation; Core retains archive queries and taxonomy semantics.
 
 - Upgrade official GitHub Actions checkout, setup-node and artifact uploads to maintained Node 24-based v7 releases across both CI workflows. Preserve exact-HEAD, read-only checkouts, keep browser tests on Node 22, explicitly disable automatic npm caching, and update static regression contracts.
