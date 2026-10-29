@@ -1,3 +1,4 @@
+- fix(spatial): Bound native Knowledge checklist checkpoint padding under 200–400% enlargement, preserving Core mobile stacking and Gutenberg parity; add real WordPress responsive/Axe/visual tests.
 # Changelog
 
 All notable changes to Slateframe will be documented here.
