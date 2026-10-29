@@ -70,7 +70,9 @@ class PrintPresentationContractTest(unittest.TestCase):
         comments = (ROOT / "tests/browser/core-comments-pagination-parity.spec.js").read_text()
         self.assertIn("await expect(nav).toBeHidden()", comments)
         self.assertIn("await expect(nav).toBeVisible()", comments)
-        self.assertIn("await expect(root.locator('#slateframe-comments-start')).toBeVisible()", comments)
+        self.assertIn("await expect(printedComment).toBeVisible()", comments)
+        self.assertIn("printed discussion starts inside the screenshot", comments)
+        self.assertIn("printed discussion fits in the screenshot", comments)
 
     def test_actions_artifact_gate(self):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
