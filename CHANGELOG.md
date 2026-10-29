@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Extend native Core Accordion acceptance to keyboard Space activation with retained focus and print/screen DOM-state immutability, preventing a theme presentation change from mutating WordPress-owned hidden/inert semantics. No runtime CSS or JavaScript growth.
+
 - Add native WordPress 6.9+ Core Accordion presentation parity: conditional scoped CSS, Gutenberg-shared 44px CJK/RTL headings, forced-colors focus, print-only collapsed-panel visibility, real WordPress 42-case reflow/keyboard/Axe/roundtrip checks and four mandatory exact-HEAD PNGs without runtime JavaScript.
 
 - Restore printed native Core Tabs panels for WordPress 7.1's actual `hidden=""` output as well as `hidden="until-found"`; preserve the original attribute and screen state, strengthen browser/contract checks, and remove redundant print Cover minimum-height CSS to stay within the unchanged 3,000-byte budget.
