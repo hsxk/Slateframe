@@ -18,6 +18,7 @@ class CoreMediaCompositionContract(unittest.TestCase):
         for block in ("cover", "media-text"):
             css = (ROOT / "assets/css" / ("core-" + block + ".css")).read_text()
             self.assertIn("max-inline-size:100%", css)
+            self.assertIn(":not(.alignfull):not(.alignwide)", css)
             self.assertIn("overflow-wrap:anywhere", css)
             self.assertLessEqual(len(css.encode()), 400)
             for forbidden in ("!important", "@import", "display:none", "object-fit", "grid-template"):
