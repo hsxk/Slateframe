@@ -16,12 +16,16 @@ class CrossPageReview(unittest.TestCase):
         self.entries = [{"name": name, "width": 390, "height": 900, "required": False}
                         for name in self.names]
 
-    def test_22_unique_captures_cover_11_domains(self):
+    def test_26_unique_captures_cover_11_domains(self):
         self.assertEqual(len(review.CROSS_PAGE_CASES), 11)
-        self.assertEqual(len(self.names), 22)
-        self.assertEqual(len(set(self.names)), 22)
+        self.assertEqual(len(self.names), 26)
+        self.assertEqual(len(set(self.names)), 26)
         self.assertTrue(all(name.endswith(".png") for name in self.names))
-        self.assertTrue(all(len(names) == 2 for _, names in review.CROSS_PAGE_CASES))
+        self.assertTrue(all(len(names) >= 2 for _, names in review.CROSS_PAGE_CASES))
+        knowledge = dict(review.CROSS_PAGE_CASES)['Knowledge']
+        self.assertEqual(len(knowledge), 6)
+        for column in ('claim', 'source', 'limits'):
+            self.assertIn(f'knowledge-evidence-390-rtl-400-{column}-column.png', knowledge)
 
     def test_appearance_mobile_desktop_and_rtl_zoom_evidence(self):
         names = set(self.names)
@@ -54,7 +58,7 @@ class CrossPageReview(unittest.TestCase):
         self.assertIn('id="cross-page-visual-review"', html)
         self.assertIn('href="#cross-page-visual-review"', html)
         gallery = html.split('<section id="cross-page-visual-review">', 1)[1].split("</section>", 1)[0]
-        self.assertEqual(gallery.count("<figure>"), 22)
+        self.assertEqual(gallery.count("<figure>"), 26)
         self.assertLess(html.index('id="cross-page-visual-review"'),
                         html.index('id="review-appearance-compact"'))
         self.assertNotIn("<script", html)
