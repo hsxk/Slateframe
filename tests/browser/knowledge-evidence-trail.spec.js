@@ -1,0 +1,108 @@
+const { test, expect } = require('@playwright/test');
+const { execFileSync } = require('node:child_process');
+const fs = require('node:fs/promises');
+const AxeBuilder = require('@axe-core/playwright').default;
+const { openAuthenticatedEditor } = require('./support/editor-login');
+
+const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
+  encoding: 'utf8', timeout: 30000,
+}).trim();
+const pattern = () => wp('eval',
+  "echo WP_Block_Patterns_Registry::get_instance()->get_registered('slateframe/knowledge-evidence-trail')['content'];");
+
+test('registered evidence trail preserves source context across responsive and accessible Core layouts', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One WordPress fixture covers all seven viewports');
+  test.setTimeout(180000);
+  const blocks = pattern();
+  expect(blocks).toContain('<!-- wp:columns');
+  const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
+    '--post_title=Knowledge evidence presentation', '--post_content=' + blocks, '--porcelain');
+  try {
+    await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
+    const trail = page.locator('.slateframe-prose .slateframe-knowledge-evidence-trail').first();
+    await expect(trail).toBeVisible();
+    await expect(trail.locator('.wp-block-column')).toHaveCount(3);
+    await expect(trail.locator('h2')).toHaveCount(1);
+    await expect(trail.locator('h3')).toHaveCount(3);
+    for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const dir of ['ltr', 'rtl']) {
+        for (const font of [16, 32, 64]) {
+          await page.locator('html').evaluate((node, state) => {
+            node.dir = state.dir;
+            node.style.fontSize = state.font + 'px';
+          }, { dir, font });
+          const geometry = await trail.evaluate(node => {
+            const outer = node.getBoundingClientRect();
+            const columns = [...node.querySelectorAll('.wp-block-column')];
+            return {
+              viewport: document.documentElement.clientWidth,
+              overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              left: outer.left, right: outer.right,
+              columns: columns.map(column => {
+                const box = column.getBoundingClientRect();
+                return { left: box.left, right: box.right };
+              }),
+            };
+          });
+          const label = width + 'px ' + dir + ' ' + font + 'px';
+          expect(geometry.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          expect(geometry.left, label + ' trail left').toBeGreaterThanOrEqual(-1);
+          expect(geometry.right, label + ' trail right').toBeLessThanOrEqual(geometry.viewport + 1);
+          expect(geometry.columns, label + ' columns').toHaveLength(3);
+          for (const box of geometry.columns) {
+            expect(box.left, label + ' column left').toBeGreaterThanOrEqual(-1);
+            expect(box.right, label + ' column right').toBeLessThanOrEqual(geometry.viewport + 1);
+          }
+        }
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '32px'; });
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    const axe = await new AxeBuilder({ page }).include('.slateframe-knowledge-evidence-trail')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(axe.violations).toEqual([]);
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    await trail.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-evidence-390-rtl-200-forced-colors.png',
+      animations: 'disabled' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+    await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-evidence-1440-ltr.png',
+      animations: 'disabled' });
+  } finally {
+    wp('post', 'delete', id, '--force');
+  }
+});
+
+test('evidence trail remains native and valid inside Gutenberg', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'Authenticated editor fixture');
+  test.setTimeout(120000);
+  const blocks = pattern();
+  const id = wp('post', 'create', '--post_type=page', '--post_status=draft',
+    '--post_title=Knowledge evidence editor', '--post_content=' + blocks, '--porcelain');
+  try {
+    await openAuthenticatedEditor(page, id);
+    const result = await page.evaluate(() => {
+      const names = [], invalid = [];
+      const visit = blocks => blocks.forEach(block => {
+        names.push(block.name);
+        if (block.isValid === false) invalid.push(block.name);
+        visit(block.innerBlocks || []);
+      });
+      const editor = window.wp.data.select('core/block-editor');
+      visit(editor.getBlocks());
+      return { names, invalid };
+    });
+    expect(result.invalid).toEqual([]);
+    expect(result.names).not.toContain('core/missing');
+    expect(result.names.filter(name => name === 'core/columns')).toHaveLength(1);
+    expect(result.names.filter(name => name === 'core/column')).toHaveLength(3);
+    expect(result.names.filter(name => name === 'core/heading')).toHaveLength(4);
+  } finally {
+    wp('post', 'delete', id, '--force');
+  }
+});
