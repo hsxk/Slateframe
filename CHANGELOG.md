@@ -4,7 +4,7 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-- Improve native Core Cover and Media & Text reflow for CJK/RTL and 400% zoom with conditional Gutenberg-parity styles, forced-colors readability, real WordPress browser evidence, Axe and native serialization tests. Preserve Core image cropping and responsive stacking; no runtime JS.
+- Give native Core Social Links 44px keyboard/touch targets, bounded wrapping, visible focus and forced-colors affordances, with conditional Gutenberg-parity CSS, RTL/400%/Axe browser evidence and no custom icons or JavaScript.
 
 - Add conditional Core Query Title and Term Description presentation with bounded CJK/RTL/400% reflow, Gutenberg editor parity, real WordPress browser evidence, Axe checks and documentation; Core retains archive queries and taxonomy semantics.
 

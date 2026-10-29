@@ -1,0 +1,4 @@
+.wp-block-social-links{min-inline-size:0;max-inline-size:100%;flex-wrap:wrap}
+.wp-block-social-links .wp-block-social-link-anchor{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;min-inline-size:44px;min-block-size:44px}
+.wp-block-social-links .wp-block-social-link-anchor:focus-visible{outline:2px solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}
+@media(forced-colors:active){.wp-block-social-links .wp-block-social-link-anchor:focus-visible{outline-color:Highlight}}
