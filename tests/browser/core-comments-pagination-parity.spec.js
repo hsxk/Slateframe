@@ -90,7 +90,16 @@ test('Core Comments Pagination preserves navigation, targets, 44px controls and 
     // Printed discussions keep their content, not dead pagination controls.
     await page.emulateMedia({ media: 'print', forcedColors: 'none' });
     await expect(nav).toBeHidden();
-    await expect(root.locator('#slateframe-comments-start')).toBeVisible();
+    const printedComment = root.locator('#slateframe-comments-start');
+    await expect(printedComment).toBeVisible();
+    // At 400% the page heading fills the initial viewport. Capture the
+    // actual discussion text rather than a misleading title-only screenshot.
+    await printedComment.scrollIntoViewIfNeeded();
+    const printedBox = await printedComment.boundingBox();
+    expect(printedBox, 'printed discussion text has a viewport rectangle').not.toBeNull();
+    expect(printedBox.y, 'printed discussion starts inside the screenshot').toBeGreaterThanOrEqual(0);
+    expect(printedBox.y + printedBox.height, 'printed discussion fits in the screenshot')
+      .toBeLessThanOrEqual(901);
     await page.screenshot({
       path: 'test-artifacts/screenshots/core-comments-pagination-print-390-rtl-400.png',
       animations: 'disabled',
