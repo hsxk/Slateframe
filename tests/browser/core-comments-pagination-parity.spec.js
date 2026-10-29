@@ -94,7 +94,7 @@ test('Core Comments Pagination preserves navigation, targets, 44px controls and 
     await expect(printedComment).toBeVisible();
     // At 400% the page heading fills the initial viewport. Capture the
     // actual discussion text rather than a misleading title-only screenshot.
-    await printedComment.scrollIntoViewIfNeeded();
+    await printedComment.evaluate(node => node.scrollIntoView({ block: 'center', inline: 'nearest' }));
     const printedBox = await printedComment.boundingBox();
     expect(printedBox, 'printed discussion text has a viewport rectangle').not.toBeNull();
     expect(printedBox.y, 'printed discussion starts inside the screenshot').toBeGreaterThanOrEqual(0);
