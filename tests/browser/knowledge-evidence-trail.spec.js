@@ -22,7 +22,7 @@ test('registered evidence trail preserves source context across responsive and a
     'العربية: توضيح القيود والافتراضات والبيانات الناقصة عند التحقق.'
   ];
   let sampleIndex = 0;
-  const fixture = blocks.replace(/<!-- \/wp:column -->/g, marker => {
+  const fixture = blocks.replace(/<\/div><!-- \/wp:column -->/g, marker => {
     const sample = samples[sampleIndex++];
     return '<!-- wp:paragraph --><p>' + sample + '</p><!-- /wp:paragraph -->' + marker;
   });
