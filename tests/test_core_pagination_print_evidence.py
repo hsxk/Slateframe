@@ -34,7 +34,7 @@ class PaginationPrintEvidenceTest(unittest.TestCase):
             self.assertTrue(any(name in source for source in sources))
         # A 400% print viewport can otherwise show only the giant page title,
         # passing the PNG gate without showing any discussion text.
-        self.assertIn("await printedComment.scrollIntoViewIfNeeded()", sources[0])
+        self.assertIn("scrollIntoView({ block: 'center', inline: 'nearest' })", sources[0])
         self.assertIn("printed discussion fits in the screenshot", sources[0])
 
     def test_valid_and_reject_missing_bad_size_truncated_corrupt_and_linked(self):
