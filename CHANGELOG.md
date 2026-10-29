@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Publish the exact-HEAD, Theme Check-validated WordPress.org distribution ZIP as a short-lived CI artifact with a separate SHA-256 checksum and commit provenance, enabling independent PR/main byte comparisons without changing theme runtime or package contents.
+
 - Strengthen the Core Knowledge evidence trail's real WordPress visual evidence: multilingual and unbroken-text fixtures, per-column fragment containment, heading-anchored RTL 200%/400% viewport captures, and three full 400% column screenshots. Preserve the original portable pattern and theme runtime without extra CSS or JS.
 
 - Add a Core-only Knowledge evidence trail pattern for claim, source/method and limits, with localized neutral prompts, responsive/RTL/CJK/400% text-fragment and screenshot evidence, Gutenberg responsive containment, Axe checks and portable documentation; no runtime CSS, JavaScript or plugin-owned data.
