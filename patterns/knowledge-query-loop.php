@@ -17,7 +17,7 @@
 <!-- wp:post-template -->
 <!-- wp:group {"layout":{"type":"constrained"}} -->
 <div class="wp-block-group">
-<!-- wp:post-title {"isLink":true} /-->
+<!-- wp:post-title {"isLink":true,"fontSize":"lead"} /-->
 <!-- wp:post-date /-->
 <!-- wp:post-excerpt {"moreText":""} /-->
 </div>

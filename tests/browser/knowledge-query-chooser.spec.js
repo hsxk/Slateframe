@@ -34,6 +34,23 @@ test('native Knowledge Query chooser renders articles with responsive RTL/CJK an
     await expect(query.locator('.wp-block-query-no-results')).toHaveCount(0);
     const link = cards.first().locator('.wp-block-post-title a');
     await expect(link).toContainText(marker);
+    const title = cards.first().locator('.wp-block-post-title');
+    await expect(title).toHaveJSProperty('tagName', 'H2');
+    await expect(title).toHaveClass(/has-lead-font-size/);
+    // Core's fluid lead preset must stay readable without defeating 400% text zoom.
+    for (const rootPx of [16, 64]) {
+      await page.locator('html').evaluate((node, px) => { node.style.fontSize = px + 'px'; }, rootPx);
+      const sizes = await title.evaluate(node => ({
+        title: parseFloat(getComputedStyle(node).fontSize),
+        root: parseFloat(getComputedStyle(document.documentElement).fontSize)
+      }));
+      expect(sizes.title / sizes.root, rootPx + 'px Core lead preset').toBeGreaterThanOrEqual(1.05);
+      expect(sizes.title / sizes.root, rootPx + 'px Core lead preset').toBeLessThanOrEqual(1.35);
+    }
+    await title.evaluate(node => { node.lang = 'ja'; });
+    expect(await title.evaluate(node => getComputedStyle(node).letterSpacing)).toBe('normal');
+    await title.evaluate(node => { node.lang = 'en'; });
+    expect(await title.evaluate(node => getComputedStyle(node).letterSpacing)).not.toBe('normal');
     await link.focus();
     await expect(link).toBeFocused();
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
@@ -125,17 +142,19 @@ test('native Knowledge Query chooser remains valid and editable in Gutenberg', a
     await openAuthenticatedEditor(page, pageId);
     const blocks = await page.evaluate(() => {
       const roots = window.wp.data.select('core/block-editor').getBlocks();
-      const names = [], invalid = [];
+      const names = [], invalid = [], titleFonts = [];
       const walk = entries => entries.forEach(block => {
         names.push(block.name);
+        if (block.name === 'core/post-title') titleFonts.push(block.attributes?.fontSize);
         if (block.isValid === false) invalid.push(block.name);
         walk(block.innerBlocks || []);
       });
       walk(roots);
-      return { root: roots[0]?.name, names, invalid };
+      return { root: roots[0]?.name, names, invalid, titleFonts };
     });
     expect(blocks.root).toBe('core/query');
     expect(blocks.invalid).toEqual([]);
+    expect(blocks.titleFonts).toContain('lead');
     expect(blocks.names).not.toContain('core/missing');
     for (const name of ['core/post-template', 'core/post-title', 'core/post-date',
       'core/post-excerpt', 'core/query-pagination', 'core/query-no-results']) {
