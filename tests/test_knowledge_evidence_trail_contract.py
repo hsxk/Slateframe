@@ -50,6 +50,8 @@ class KnowledgeEvidenceTrailContract(unittest.TestCase):
             'knowledge-evidence-390-rtl-200-forced-colors.png',
             'knowledge-evidence-390-rtl-400-forced-colors.png',
             'knowledge-evidence-1440-ltr.png', 'openAuthenticatedEditor',
+            'UnbrokenEvidenceIdentifier', 'textOutsideColumn',
+            "['claim', 'source', 'limits']", 'scrollIntoViewIfNeeded',
             'core/missing', "wp('post', 'delete', id, '--force')",
             "[[390, 'rtl', '200%'], [1440, 'ltr', '']]",
         ):

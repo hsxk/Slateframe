@@ -15,8 +15,20 @@ test('registered evidence trail preserves source context across responsive and a
   test.setTimeout(180000);
   const blocks = pattern();
   expect(blocks).toContain('<!-- wp:columns');
+  // Test multilingual content inside the actual Core columns, not only English prompts.
+  const samples = [
+    '日本語の出典確認と測定条件を記録する。長い文章でも文字が画面外へ逃げないこと。',
+    '中文原始资料与日期必须可追溯。UnbrokenEvidenceIdentifier'.repeat(3),
+    'العربية: توضيح القيود والافتراضات والبيانات الناقصة عند التحقق.'
+  ];
+  let sampleIndex = 0;
+  const fixture = blocks.replace(/<!-- \/wp:column -->/g, marker => {
+    const sample = samples[sampleIndex++];
+    return '<!-- wp:paragraph --><p>' + sample + '</p><!-- /wp:paragraph -->' + marker;
+  });
+  expect(sampleIndex).toBe(3);
   const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
-    '--post_title=Knowledge evidence presentation', '--post_content=' + blocks, '--porcelain');
+    '--post_title=Knowledge evidence presentation', '--post_content=' + fixture, '--porcelain');
   try {
     await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
     const trail = page.locator('.slateframe-prose .slateframe-knowledge-evidence-trail').first();
@@ -43,6 +55,15 @@ test('registered evidence trail preserves source context across responsive and a
                 const box = column.getBoundingClientRect();
                 return { left: box.left, right: box.right };
               }),
+              textOutsideColumn: columns.some(column => {
+                const bounds = column.getBoundingClientRect();
+                return [...column.querySelectorAll('h3, p')].some(child => {
+                  const range = document.createRange();
+                  range.selectNodeContents(child);
+                  return [...range.getClientRects()].some(rect => rect.width > 0 &&
+                    (rect.left < bounds.left - 1 || rect.right > bounds.right + 1));
+                });
+              }),
               textOutside: [...node.querySelectorAll('h2, h3, p')].some(child => {
                 const range = document.createRange();
                 range.selectNodeContents(child);
@@ -54,6 +75,7 @@ test('registered evidence trail preserves source context across responsive and a
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(geometry.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
           expect(geometry.textOutside, label + ' text fragment clipping').toBe(false);
+          expect(geometry.textOutsideColumn, label + ' column text clipping').toBe(false);
           expect(geometry.left, label + ' trail left').toBeGreaterThanOrEqual(-1);
           expect(geometry.right, label + ' trail right').toBeLessThanOrEqual(geometry.viewport + 1);
           expect(geometry.columns, label + ' columns').toHaveLength(3);
@@ -71,13 +93,22 @@ test('registered evidence trail preserves source context across responsive and a
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(axe.violations).toEqual([]);
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-    await trail.scrollIntoViewIfNeeded();
+    // The whole trail is taller than the viewport at zoom. Anchor the heading
+    // instead of centering the huge container and photographing a mid-paragraph.
+    await trail.locator('h2').scrollIntoViewIfNeeded();
     await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-evidence-390-rtl-200-forced-colors.png',
       animations: 'disabled' });
     await page.locator('html').evaluate(node => { node.style.fontSize = '64px'; });
-    await trail.scrollIntoViewIfNeeded();
+    await trail.locator('h2').scrollIntoViewIfNeeded();
     await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-evidence-390-rtl-400-forced-colors.png',
       animations: 'disabled' });
+    // Capture each complete column so reviewers can inspect all text at 400%.
+    for (const [index, label] of ['claim', 'source', 'limits'].entries()) {
+      await trail.locator('.wp-block-column').nth(index).screenshot({
+        path: 'test-artifacts/screenshots/knowledge-evidence-390-rtl-400-' + label + '-column.png',
+        animations: 'disabled'
+      });
+    }
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
     await page.emulateMedia({ forcedColors: 'none' });
