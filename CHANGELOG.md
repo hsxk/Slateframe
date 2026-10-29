@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Promote the visually reviewed, real WordPress/Chromium Field Notes preview as the distributable 1200×900 `screenshot.png`, preserving the exact source PNG bytes and excluding temporary transfer diagnostics from the final tree.
+
 - Add a dry-run-first exact-HEAD release screenshot promotion tool with safe ZIP inventory/path validation, complete PNG validation, atomic unchanged-byte replacement, and ten negative/positive regression tests. No automatic promotion or new theme runtime.
 
 - Replace the advertising-style WordPress.org screenshot fixture with a separate neutral Field Notes page rendered by real WordPress/Chromium. Require native Core blocks, local imagery, no personal or promotional copy, a single screenshot producer, and five regression contracts; keep the shipped PNG unchanged until the exact-HEAD candidate is visually approved.

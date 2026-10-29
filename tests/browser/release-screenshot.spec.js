@@ -29,18 +29,11 @@ test('capture a neutral WordPress.org preview from real WordPress and Core block
     expect(overflow).toBeLessThanOrEqual(1);
     const dir = path.resolve('test-artifacts/screenshots');
     await fs.mkdir(dir, { recursive: true });
-    const releaseScreenshotBytes = await page.screenshot({
+    await page.screenshot({
       path: path.join(dir, 'wordpress-org-screenshot-candidate.png'),
       fullPage: false,
       animations: 'disabled',
     });
-    // One-time public screenshot transfer; remove before the release commit.
-    const encoded = releaseScreenshotBytes.toString('base64');
-    console.log('SLATEFRAME_TRANSFER_BEGIN ' + info.project.name);
-    for (let offset = 0, index = 0; offset < encoded.length; offset += 2048, index++) {
-      console.log('SLATEFRAME_TRANSFER_' + String(index).padStart(3, '0') + '=' + encoded.slice(offset, offset + 2048));
-    }
-    console.log('SLATEFRAME_TRANSFER_END');
   } finally {
     wp('post', 'delete', id, '--force');
   }

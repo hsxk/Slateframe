@@ -9,3 +9,7 @@ The isolated stateful `tests/browser/release-screenshot.spec.js` creates the dis
 ## Safe promotion after review
 
 Download the exact-HEAD Browser Actions ZIP, inspect its actual WordPress screenshot, then run `python3 bin/promote-release-screenshot.py browser-artifact.zip FULL_HEAD_SHA` to verify the inventory SHA, PNG integrity, dimensions and path safety without changing files. Only after review, add `--apply` to atomically copy the **unchanged PNG bytes** into `screenshot.png`. Commit the PNG and rerun the new SHA's entire Actions and ZIP reproducibility gates. A stale or linked artifact is rejected.
+
+## Promoted distributable (2026-10-29)
+
+The reviewed real WordPress+Chromium screenshot from source HEAD `4ac91c602ab3f982645b6e14283cda524bdf5dcd` was promoted byte-for-byte into the tracked `screenshot.png` (1200 × 900, 55,376 bytes, SHA-256 `00ef3d0f4e1980e973448940709b06da74ac1913470fa156ba25ebcc3e469428`). The Git blob is `cb676b163ee8c1da5f0dad52abd0ba41eb0f8fcc`; the release CI must still confirm the final commit's package and browser behavior. The one-time read-only transfer workflow and temporary diagnostic output are not part of the distributable or final repository state.
