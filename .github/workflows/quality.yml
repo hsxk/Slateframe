@@ -1287,6 +1287,8 @@ jobs:
           python3 tests/verify_core_tabs_zoom_evidence.py test-artifacts/screenshots
           # Native Core Accordion evidence must be from the exact browser HEAD.
           python3 tests/verify_core_accordion_zoom_evidence.py test-artifacts/screenshots
+          # Exact-HEAD inline MathML reflow captures.
+          python3 tests/verify_inline_math_zoom_evidence.py test-artifacts/screenshots
           # Native Core quotations must prove computed 400% text, RTL and forced-colors.
           for screenshot in core-quote-390-ltr-400.png core-quote-390-rtl-400.png core-quote-390-rtl-400-forced-colors.png core-pullquote-390-ltr-400.png core-pullquote-390-rtl-400.png core-pullquote-390-rtl-400-forced-colors.png core-verse-390-ltr-400.png core-verse-390-rtl-400.png core-verse-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% quotation evidence: $screenshot" >&2; exit 1; }
