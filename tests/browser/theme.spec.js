@@ -1212,26 +1212,6 @@ test('knowledge callouts respect RTL direction and logical layout', async ({ pag
 	await expectNoHorizontalOverflow(page, knowledgePath);
 });
 
-test('capture WordPress.org screenshot candidate from the real showcase fixture', async ({ page }, testInfo) => {
-	test.skip(projectWidth(testInfo) !== 1440, 'The release screenshot candidate is captured once.');
-
-	await page.setViewportSize({ width: 1200, height: 900 });
-	await page.goto(showcasePath, { waitUntil: 'networkidle' });
-	await expect(page.locator('[data-menu-toggle]')).toBeVisible();
-	await expect(page.locator('[data-primary-nav]')).toHaveAttribute('inert', '');
-	await expect(page.locator('h1')).toHaveText('A clean frame for whatever you publish');
-	await expect(page.locator('.slateframe-showcase-feature img')).toBeVisible();
-	await expect(page.locator('.slateframe-showcase-grid .wp-block-column')).toHaveCount(3);
-	await expectNoHorizontalOverflow(page, showcasePath);
-
-	const screenshotDir = path.resolve('test-artifacts/screenshots');
-	await fs.mkdir(screenshotDir, { recursive: true });
-	await page.screenshot({
-		path: path.join(screenshotDir, 'wordpress-org-screenshot-candidate.png'),
-		fullPage: false,
-	});
-});
-
 test('capture content-mode showcase screenshots', async ({ page }, testInfo) => {
 	test.skip(![390, 1440].includes(projectWidth(testInfo)), 'Representative mobile and desktop screenshots only.');
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
