@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add a localized Core-only Knowledge glossary pattern with three editable term/meaning/context entries, responsive RTL/CJK/400% WordPress and Gutenberg tests, Axe and full-entry screenshots; reuse existing presentation without new CSS or JavaScript.
+
 - Fail closed on truncated, corrupt, wrong-size or symlinked 390×900 Core Query/Comments Pagination print screenshots; clarify the boundary between Core block content and intentionally omitted classic comment templates.
 
 - Keep native Core Comments Pagination out of printed discussions while preserving comment content and screen controls; retain 44px targets, RTL/CJK and forced-colors parity within the original CSS budget, with real 400% RTL print evidence.
