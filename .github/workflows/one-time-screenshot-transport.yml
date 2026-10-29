@@ -1,0 +1,43 @@
+name: One-time reviewed screenshot transport
+
+on:
+  push:
+    branches: [automation/continuous-development]
+    paths: [.github/workflows/one-time-screenshot-transport.yml]
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  transport:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Export previously reviewed public screenshot as verifiable text
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/reviewed"
+          gh run download 40820755478 --repo hsxk/Slateframe --name slateframe-browser --dir "$RUNNER_TEMP/reviewed"
+          python3 - "$RUNNER_TEMP/reviewed" <<'PY'
+          import base64, hashlib, json, pathlib, sys
+          root = pathlib.Path(sys.argv[1])
+          candidates = list(root.rglob('wordpress-org-screenshot-candidate.png'))
+          inventories = list(root.rglob('BROWSER_SCREENSHOT_INVENTORY.json'))
+          assert len(candidates) == len(inventories) == 1, 'ambiguous screenshot artifact'
+          data = candidates[0].read_bytes()
+          manifest = json.loads(inventories[0].read_text())
+          expected = '4ac91c602ab3f982645b6e14283cda524bdf5dcd'
+          record = manifest['screenshots']['wordpress-org-screenshot-candidate.png']
+          digest = hashlib.sha256(data).hexdigest()
+          assert manifest['head_sha'] == expected and digest == record['sha256']
+          assert digest == '00ef3d0f4e1980e973448940709b06da74ac1913470fa156ba25ebcc3e469428'
+          assert len(data) == 55376 and data[:8] == b'\\x89PNG\\r\\n\\x1a\\n'
+          print('SLATEFRAME_TRANSFER_BEGIN', expected, digest, flush=True)
+          encoded = base64.b64encode(data).decode('ascii')
+          for i in range(0, len(encoded), 2048):
+              print(f'SLATEFRAME_TRANSFER_{i//2048:03d}=' + encoded[i:i+2048], flush=True)
+          print('SLATEFRAME_TRANSFER_END', flush=True)
+          PY
