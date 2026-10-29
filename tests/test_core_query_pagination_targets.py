@@ -21,6 +21,7 @@ class CoreQueryPaginationTargets(unittest.TestCase):
         self.assertIn(".wp-block-query-pagination .current{background:var(--slateframe-text);color:var(--slateframe-bg);font-weight:700}", block_css)
         self.assertIn(".wp-block-query-pagination .current{outline:2px solid Highlight;outline-offset:0", block_css)
         self.assertNotIn(".wp-block-query-pagination .current{background:", css)
+        self.assertIn("@media print{.wp-block-query-pagination{display:none!important}}", block_css)
         self.assertLessEqual(len(block_css.encode("utf-8")), 400)
         self.assertNotIn(".slateframe-project-grid " + selector, css)
         self.assertIn("add_theme_support( 'editor-styles' )", php)
@@ -40,6 +41,12 @@ class CoreQueryPaginationTargets(unittest.TestCase):
         self.assertLessEqual(style + nav + footer + js + forms, 24500)
         self.assertLessEqual((ROOT / "assets/css/core-query-pagination.css").stat().st_size, 400)
         browser = (ROOT / "tests/browser/portfolio-pagination-controls.spec.js").read_text()
+        workflow = (ROOT / ".github/workflows/quality.yml").read_text()
+        self.assertIn("core-query-pagination-print-390-rtl.png", browser)
+        self.assertIn("core-query-pagination-print-390-rtl.png", workflow)
+        self.assertIn("await expect(pagination).toBeHidden()", browser)
+        self.assertIn("await expect(nav).toBeHidden()", browser)
+        self.assertIn("await expect(grid.locator('.wp-block-post-template')).toBeVisible()", browser)
         for marker in ("320, 375, 390, 412, 768, 1440, 1920", "16, 32, 64",
                        "'ltr', 'rtl'", "forcedColors: 'active'", "toBeFocused()",
                        "new AxeBuilder", ".page-numbers.current", "await next.click()",
