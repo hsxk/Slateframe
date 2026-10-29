@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Bound Core Knowledge learning-callout and Metrics column padding at 200–400% zoom without shrinking text, preserve the 16px baseline, RTL/CJK and Gutenberg behavior, and retain the strict 7,000-byte CSS budget with real WordPress regression evidence.
+
 - Bound Knowledge glossary Definition padding at 200–400% text enlargement without shrinking accessible text: preserve the 16px baseline, cap logical inline padding at 24px and block padding at 20px, retain the existing 7,000-byte CSS budget, and assert real WordPress RTL/CJK computed geometry across seven widths and three font sizes.
 
 - Preserve native Core Comments thread reflow at 400% RTL/CJK with 44px author/date/edit/reply targets, bounded nested replies and media, Gutenberg parity, conditional CSS, and real WordPress/Chromium evidence; no custom comment logic or JavaScript.

@@ -135,3 +135,98 @@ test('glossary remains editable and valid in Gutenberg', async ({ page }, info) 
     wp('post', 'delete', id, '--force');
   }
 });
+
+
+const spatialFixture = '<!-- wp:group {"className":"is-style-slateframe-learning-callout"} -->' +
+  '<div class="wp-block-group is-style-slateframe-learning-callout">' +
+  '<!-- wp:paragraph --><p>日本語 中文 العربية ' + 'UnbrokenKnowledgeIdentifier'.repeat(8) +
+  '</p><!-- /wp:paragraph --></div><!-- /wp:group -->' +
+  '<!-- wp:columns {"className":"is-style-slateframe-metrics"} -->' +
+  '<div class="wp-block-columns is-style-slateframe-metrics">' +
+  '<!-- wp:column --><div class="wp-block-column">' +
+  '<!-- wp:paragraph --><p>日本語 中文 العربية ' + 'UnbrokenKnowledgeIdentifier'.repeat(8) +
+  '</p><!-- /wp:paragraph --></div><!-- /wp:column --></div><!-- /wp:columns -->';
+
+test('native Knowledge callout and Metrics retain bounded 400% padding in real WordPress', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'Single WordPress fixture covers seven widths');
+  test.setTimeout(180000);
+  const id = wp('post', 'create', '--post_type=page', '--post_status=publish',
+    '--post_title=Knowledge spatial bounds', '--post_content=' + spatialFixture, '--porcelain');
+  try {
+    await page.goto('/?page_id=' + id, { waitUntil: 'networkidle' });
+    const callout = page.locator('.wp-block-group.is-style-slateframe-learning-callout').first();
+    const metrics = page.locator('.wp-block-columns.is-style-slateframe-metrics').first();
+    await expect(callout).toBeVisible();
+    await expect(metrics).toBeVisible();
+    await expect(callout).toContainText('日本語');
+    await expect(metrics).toContainText('العربية');
+    for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const dir of ['ltr', 'rtl']) {
+        for (const font of [16, 32, 64]) {
+          await page.locator('html').evaluate((node, state) => {
+            node.dir = state.dir; node.style.fontSize = state.font + 'px';
+          }, { dir, font });
+          const state = await page.evaluate(() => {
+            const el = document.querySelector('.is-style-slateframe-learning-callout');
+            const column = document.querySelector('.is-style-slateframe-metrics>.wp-block-column');
+            const box = el.getBoundingClientRect();
+            const callout = getComputedStyle(el), metric = getComputedStyle(column);
+            return { overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              left: box.left, right: box.right,
+              inline: parseFloat(callout.paddingInlineStart),
+              block: parseFloat(callout.paddingBlockStart),
+              metric: parseFloat(metric.paddingBlockStart) };
+          });
+          const label = width + 'px ' + dir + ' ' + font + 'px';
+          expect(state.overflow, label).toBeLessThanOrEqual(1);
+          expect(state.left, label).toBeGreaterThanOrEqual(-1);
+          expect(state.right, label).toBeLessThanOrEqual(width + 1);
+          for (const key of ['inline', 'block', 'metric']) {
+            expect(state[key], label + ' ' + key).toBeCloseTo(Math.min(font, 20), 1);
+          }
+        }
+      }
+    }
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.locator('html').evaluate(node => { node.dir = 'rtl'; node.style.fontSize = '64px'; });
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    const axe = await new AxeBuilder({ page }).include('.is-style-slateframe-learning-callout')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(axe.violations).toEqual([]);
+    await callout.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-spatial-390-rtl-400.png',
+      animations: 'disabled' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = '16px'; });
+    await page.emulateMedia({ forcedColors: 'none' });
+    await callout.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-artifacts/screenshots/knowledge-spatial-1440-ltr.png',
+      animations: 'disabled' });
+  } finally {
+    wp('post', 'delete', id, '--force');
+  }
+});
+
+test('Knowledge callout and Metrics remain valid Core blocks in Gutenberg', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'Authenticated editor fixture');
+  const id = wp('post', 'create', '--post_type=page', '--post_status=draft',
+    '--post_title=Knowledge spatial editor', '--post_content=' + spatialFixture, '--porcelain');
+  try {
+    await openAuthenticatedEditor(page, id);
+    const state = await page.evaluate(() => {
+      const roots = window.wp.data.select('core/block-editor').getBlocks();
+      return { names: roots.map(block => block.name),
+        classes: roots.map(block => block.attributes.className),
+        valid: roots.every(block => block.isValid !== false),
+        missing: roots.some(block => block.name === 'core/missing') };
+    });
+    expect(state.valid).toBe(true);
+    expect(state.missing).toBe(false);
+    expect(state.names).toEqual(['core/group', 'core/columns']);
+    expect(state.classes).toEqual(['is-style-slateframe-learning-callout', 'is-style-slateframe-metrics']);
+  } finally {
+    wp('post', 'delete', id, '--force');
+  }
+});

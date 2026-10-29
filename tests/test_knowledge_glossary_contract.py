@@ -42,6 +42,18 @@ class KnowledgeGlossaryContract(unittest.TestCase):
                          'UnbrokenGlossaryIdentifier'):
             self.assertIn(expected, source)
 
+    def test_shared_knowledge_spatial_bounds_and_browser_evidence(self):
+        css = CSS.read_text(encoding='utf-8')
+        self.assertEqual(css.count('padding:min(var(--slateframe-space-4),20px)'), 2)
+        self.assertLessEqual(len(CSS.read_bytes()), 7000)
+        self.assertIn('is-not-stacked-on-mobile', css)
+        browser = BROWSER.read_text(encoding='utf-8')
+        for token in ('320, 375, 390, 412, 768, 1440, 1920',
+                      "['ltr', 'rtl']", '[16, 32, 64]', 'AxeBuilder',
+                      'openAuthenticatedEditor', 'knowledge-spatial-390-rtl-400.png',
+                      'knowledge-spatial-1440-ltr.png', 'UnbrokenKnowledgeIdentifier'):
+            self.assertIn(token, browser)
+
 
 if __name__ == '__main__':
     unittest.main()
