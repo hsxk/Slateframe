@@ -35,6 +35,8 @@ class CoreSocialLinksParity(unittest.TestCase):
                       "has-icon-background-color", "toHaveAccessibleName",
                       "toBeGreaterThanOrEqual(44)", "['ltr','rtl']",
                       "fontSize='200%'", "fontSize='400%'",
+                      "core-social-links-390-rtl-400-forced-colors.png",
+                      "core-social-links-390-ltr-400.png", "largeAxe",
                       "keyboard.press('Tab')", "forcedColors:'active'",
                       "AxeBuilder", "core-social-links-390-rtl-200-forced-colors.png",
                       "openAuthenticatedEditor", "blocks.parse(first)",

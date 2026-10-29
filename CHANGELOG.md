@@ -4,7 +4,7 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-- Give native Core Social Links 44px keyboard/touch targets, bounded wrapping, visible focus and forced-colors affordances, with conditional Gutenberg-parity CSS, RTL/400%/Axe browser evidence and no custom icons or JavaScript.
+- Require complete real WordPress Core Social Links 400% LTR/RTL/forced-colors viewport evidence with focus, Axe and touch-geometry assertions; reject missing, corrupt or symlinked captures in CI without duplicating existing Core CSS.
 
 - Add conditional Core Query Title and Term Description presentation with bounded CJK/RTL/400% reflow, Gutenberg editor parity, real WordPress browser evidence, Axe checks and documentation; Core retains archive queries and taxonomy semantics.
 
