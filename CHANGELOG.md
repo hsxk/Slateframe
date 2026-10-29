@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add a Core-only Knowledge evidence trail pattern for claim, source/method and limits, with localized neutral prompts, responsive/RTL/CJK/400% text-fragment and screenshot evidence, Gutenberg responsive containment, Axe checks and portable documentation; no runtime CSS, JavaScript or plugin-owned data.
+
 - Promote the visually reviewed, real WordPress/Chromium Field Notes preview as the distributable 1200×900 `screenshot.png`, preserving the exact source PNG bytes and excluding temporary transfer diagnostics from the final tree.
 
 - Add a dry-run-first exact-HEAD release screenshot promotion tool with safe ZIP inventory/path validation, complete PNG validation, atomic unchanged-byte replacement, and ten negative/positive regression tests. No automatic promotion or new theme runtime.
