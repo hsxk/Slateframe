@@ -1,0 +1,6 @@
+.wp-block-comments,.wp-block-comment-template,.wp-block-comment-template li,.wp-block-comment-content{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-comment-template{padding-inline-start:0;list-style:none}
+.wp-block-comment-template :is(.wp-block-comment-author-name,.wp-block-comment-date,.wp-block-comment-edit-link,.wp-block-comment-reply-link) a{display:inline-flex;align-items:center;min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-comment-content :is(img,video,iframe,embed,object){max-inline-size:100%}
+.wp-block-comment-content pre{max-inline-size:100%;overflow:auto}
+@media(max-width:640px){.wp-block-comment-template .children{padding-inline-start:var(--slateframe-inline-gap);min-inline-size:0}}

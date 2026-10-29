@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Preserve native Core Comments thread reflow at 400% RTL/CJK with 44px author/date/edit/reply targets, bounded nested replies and media, Gutenberg parity, conditional CSS, and real WordPress/Chromium evidence; no custom comment logic or JavaScript.
+
 - Refine the Knowledge article Query Loop's native linked H2 titles with the existing fluid `lead` preset, preserving 400% text scaling, natural Japanese/Chinese/Korean tracking, RTL layout and Gutenberg roundtrip; add computed-style and editor regression coverage without new CSS/JS.
 
 - Add a native Core Knowledge article Query Loop chooser pattern with portable typography-led post lists, pagination, translatable empty state, 42-case responsive RTL/CJK/400% browser checks, keyboard focus, Axe and exact-HEAD visual evidence; no new runtime CSS/JS or custom data types.
