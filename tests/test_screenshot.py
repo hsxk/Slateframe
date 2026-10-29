@@ -67,6 +67,20 @@ class ScreenshotIntegrityTests(unittest.TestCase):
             offset += 12 + size
         return chunks
 
+    @classmethod
+    def indexed_fixture_chunks(cls):
+        """Construct a valid indexed PNG independently of the shipped screenshot format."""
+        width, height = 1200, 900
+        header = struct.pack(">IIBBBBB", width, height, 1, 3, 0, 0, 0)
+        palette = b"\x00\x00\x00\xff\xff\xff"
+        scanline = b"\x00" + b"\x00" * ((width + 7) // 8)
+        image = zlib.compress(scanline * height)
+        return [(b"IHDR", header), (b"PLTE", palette),
+                (b"IDAT", image), (b"IEND", b"")]
+
+    def test_synthetic_indexed_fixture_decodes(self):
+        self.validate_bytes(self.rebuild_chunks(self.indexed_fixture_chunks()))
+
     def test_rejects_symlinked_screenshot(self):
         with tempfile.TemporaryDirectory() as directory:
             original = Path(directory) / 'original.png'
@@ -124,21 +138,21 @@ class ScreenshotIntegrityTests(unittest.TestCase):
         self.assertTrue((ROOT / "bin" / "build-theme-zip.sh").stat().st_mode & 0o111)
 
     def test_rejects_indexed_png_without_palette(self):
-        parts = [(kind, content) for kind, content in self.source_chunks() if kind != b"PLTE"]
+        parts = [(kind, content) for kind, content in self.indexed_fixture_chunks() if kind != b"PLTE"]
         with self.assertRaisesRegex(ValueError, "palette"):
             self.validate_bytes(self.rebuild_chunks(parts))
 
     def test_rejects_idat_before_palette(self):
-        parts = self.source_chunks()
+        parts = self.indexed_fixture_chunks()
         parts[1], parts[2] = parts[2], parts[1]
-        with self.assertRaises(ValueError):
+        with self.assertRaisesRegex(ValueError, "PLTE"):
             self.validate_bytes(self.rebuild_chunks(parts))
 
     def test_rejects_nonconsecutive_idat(self):
-        parts = self.source_chunks()
-        image = next(content for kind, content in parts if kind == b"IDAT")
-        parts = [(kind, content) for kind, content in parts if kind != b"IDAT"]
-        parts[2:2] = [(b"IDAT", image[:100]), (b"tEXt", b"Comment\x00valid"), (b"IDAT", image[100:])]
+        parts = self.indexed_fixture_chunks()
+        image = parts[2][1]
+        parts[2:3] = [(b"IDAT", image[:8]), (b"tEXt", b"Comment\x00valid"),
+                      (b"IDAT", image[8:])]
         with self.assertRaisesRegex(ValueError, "consecutive"):
             self.validate_bytes(self.rebuild_chunks(parts))
 
@@ -148,7 +162,7 @@ class ScreenshotIntegrityTests(unittest.TestCase):
             self.validate_bytes(self.rebuild_chunks(parts))
 
     def test_rejects_invalid_indexed_bit_depth(self):
-        parts = self.source_chunks()
+        parts = self.indexed_fixture_chunks()
         header = bytearray(parts[0][1])
         header[8] = 16
         parts[0] = (b"IHDR", bytes(header))
