@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add a standalone native Core Query Loop Portfolio chooser pattern, registered for `core/query` with a Query root, portable post cards, pagination and empty state; preserve the existing full-section Project grid, 44px controls, responsive RTL/CJK presentation, and zero additional runtime CSS/JS. Include registered-pattern WordPress/Chromium and static contract coverage.
+
 - Remove obsolete `displayLayout` from the Portfolio Core Query pattern; preserve existing three-column fallback and author-controlled Post Template Grid, with browser and static metadata regression coverage.
 
 - Add a localized Core-only Knowledge glossary pattern with three editable term/meaning/context entries, responsive RTL/CJK/400% WordPress and Gutenberg tests, Axe and full-entry screenshots; reuse existing presentation without new CSS or JavaScript.
