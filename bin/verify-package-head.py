@@ -104,6 +104,13 @@ def verify(root, archive_path):
     """Fail closed if any final ZIP file differs from the source revision."""
     committed = committed_blobs(root)
     expected = expected_distribution_paths(root, committed)
+    # ZIP directories are optional, but any present directory must contain
+    # a distributable HEAD file. Do not accept injected empty excluded trees.
+    expected_directories = set()
+    for path in expected:
+        parts = path.split("/")
+        for depth in range(1, len(parts)):
+            expected_directories.add("/".join(parts[:depth]))
     with zipfile.ZipFile(archive_path, "r") as archive:
         if archive.comment:
             raise ValueError("Refusing commented ZIP archive")
@@ -114,6 +121,9 @@ def verify(root, archive_path):
         for member in archive.infolist():
             validate_archive_member(member, seen, portable_seen)
             if member.is_dir():
+                relative_dir = member.filename[len("slateframe/"):].rstrip("/")
+                if relative_dir and relative_dir not in expected_directories:
+                    raise ValueError(f"Refusing unexpected ZIP directory: {member.filename}")
                 continue
             files += 1
             name = member.filename

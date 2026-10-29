@@ -122,6 +122,31 @@ class ReleaseHeadIntegrityTests(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("Unsupported distribution exclusion", result.stderr)
 
+    def test_untracked_empty_directory_in_final_zip_is_rejected(self):
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n"),
+                       ("slateframe/assets/写真 中文.txt", "Public multilingual media\n"),
+                       ("slateframe/untracked-empty/", "")])
+        result = self.verify()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("unexpected ZIP directory: slateframe/untracked-empty/", result.stderr)
+
+    def test_excluded_empty_directory_in_final_zip_is_rejected(self):
+        self.write("docs/private.md", "Internal documentation\n")
+        self.commit()
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n"),
+                       ("slateframe/assets/写真 中文.txt", "Public multilingual media\n"),
+                       ("slateframe/docs/", "")])
+        result = self.verify()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("unexpected ZIP directory: slateframe/docs/", result.stderr)
+
+    def test_expected_parent_directories_in_final_zip_are_allowed(self):
+        self.make_zip([("slateframe/", ""),
+                       ("slateframe/assets/", ""),
+                       ("slateframe/style.css", "Theme Name: Slateframe\n"),
+                       ("slateframe/assets/写真 中文.txt", "Public multilingual media\n")])
+        self.assertEqual(0, self.verify().returncode)
+
     def test_git_sha256_object_format_when_supported(self):
         sha256_root = self.root / "sha256-repo"
         init = subprocess.run(["git", "init", "-q", "--object-format=sha256", str(sha256_root)],
