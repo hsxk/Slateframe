@@ -6,6 +6,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PATTERN = ROOT / 'patterns/knowledge-glossary.php'
 BROWSER = ROOT / 'tests/browser/knowledge-glossary.spec.js'
+CSS = ROOT / 'assets/css/content-modes.css'
 
 
 class KnowledgeGlossaryContract(unittest.TestCase):
@@ -22,6 +23,15 @@ class KnowledgeGlossaryContract(unittest.TestCase):
         self.assertEqual(source.count('esc_html_x('), source.count("'slateframe' );"))
         for forbidden in ('https://', 'time2log', 'time2analyze', 'upgrade to pro'):
             self.assertNotIn(forbidden, source.lower())
+
+    def test_definition_padding_remains_bounded_without_relaxing_css_budget(self):
+        css = CSS.read_text(encoding='utf-8')
+        self.assertIn('padding:min(1rem,20px) min(1.1rem,24px)', css)
+        self.assertNotIn('padding:1rem 1.1rem;', css)
+        self.assertLessEqual(len(CSS.read_bytes()), 7000)
+        browser = BROWSER.read_text(encoding='utf-8')
+        self.assertIn('Math.min(font * 1.1, 24)', browser)
+        self.assertIn('Math.min(font, 20)', browser)
 
     def test_real_wordpress_editor_and_responsive_coverage(self):
         source = BROWSER.read_text(encoding='utf-8')
