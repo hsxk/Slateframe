@@ -29,3 +29,18 @@ Run `bash bin/build-theme-zip.sh` from a **clean, committed** checkout. Do not
 use the release archive as a place to store build logs, credentials, private
 photos, or generated development fixtures. These controls complement, rather
 than replace, manual release review and WordPress.org Theme Check.
+
+## CI artifact provenance
+
+The successful **WordPress.org Theme Check** job now uploads a `slateframe-distribution` artifact containing the actual validated `slateframe.zip`, a `HEAD_SHA.txt` with the exact checked-out commit, and `SHA256SUMS` for the ZIP bytes. This is evidence, not an automatic publication. The job verifies its checkout matches the PR head (or main push SHA), writes the checksum only after the production builder and Theme Check pass, and fails if the ZIP is absent or its checksum disagrees. The upload is uncompressed at the artifact transport layer; it does not change the reproducible theme ZIP.
+
+For an extracted artifact, independently run:
+
+```sh
+sha256sum --check SHA256SUMS
+unzip -t slateframe.zip
+cat HEAD_SHA.txt
+```
+
+Match `HEAD_SHA.txt` to the intended GitHub Actions run and PR head. Compare the `slateframe.zip` SHA-256 between the successful PR and main-push artifacts: it must be identical when the distributable tree is unchanged. The archive contains only `.distignore`-permitted theme files; `HEAD_SHA.txt` and `SHA256SUMS` are **outside** the theme ZIP. Do not use an artifact from a failed or older SHA as acceptance evidence. Retention is seven days.
+

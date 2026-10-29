@@ -344,6 +344,29 @@ jobs:
           if [ "$theme_check_exit" -ne 0 ]; then
             echo "Theme Check reported advisory findings; no REQUIRED findings remain."
           fi
+      - name: Attest exact-HEAD distributable
+        shell: bash
+        env:
+          SLATEFRAME_EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          cd /tmp/slateframe-theme-check-dist
+          test -s slateframe.zip
+          test "$(git -C "$GITHUB_WORKSPACE" rev-parse HEAD)" = "$SLATEFRAME_EXPECTED_SHA"
+          printf '%s\n' "$SLATEFRAME_EXPECTED_SHA" > HEAD_SHA.txt
+          sha256sum slateframe.zip > SHA256SUMS
+          sha256sum --check SHA256SUMS
+      - name: Upload exact-HEAD distributable
+        uses: actions/upload-artifact@v4
+        with:
+          name: slateframe-distribution
+          path: |
+            /tmp/slateframe-theme-check-dist/slateframe.zip
+            /tmp/slateframe-theme-check-dist/HEAD_SHA.txt
+            /tmp/slateframe-theme-check-dist/SHA256SUMS
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
       - name: Upload Theme Check report
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
