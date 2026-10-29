@@ -34,7 +34,7 @@ jobs:
           digest = hashlib.sha256(data).hexdigest()
           assert manifest['head_sha'] == expected and digest == record['sha256']
           assert digest == '00ef3d0f4e1980e973448940709b06da74ac1913470fa156ba25ebcc3e469428'
-          assert len(data) == 55376 and data[:8] == b'\\x89PNG\\r\\n\\x1a\\n'
+          assert len(data) == 55376 and data[:8] == b'\x89PNG\r\n\x1a\n'
           print('SLATEFRAME_TRANSFER_BEGIN', expected, digest, flush=True)
           encoded = base64.b64encode(data).decode('ascii')
           for i in range(0, len(encoded), 2048):
