@@ -1,6 +1,8 @@
 # Core Query Loop column parity
 
-The Portfolio pattern is a native WordPress Query Loop. Slateframe must respect the author's Core `columns-1` through `columns-6` choice instead of forcing three desktop columns. On tablet widths (641–900px) the layout caps at two columns without turning a deliberate single-column layout into two. At 640px and below it uses one column.
+The Portfolio pattern is a native WordPress Query Loop. Its Query block contains only Core-supported query attributes; the legacy `displayLayout` key is intentionally absent because current Core registers layout on the Post Template block rather than on Query. Slateframe's opt-in legacy-flex presentation still supplies the initial three-column grid, and an author may choose a native Core Grid in Gutenberg without Slateframe overriding that grid. A real WordPress browser assertion checks the registered pattern for stale Query metadata.
+
+Slateframe must respect the author's Core `columns-1` through `columns-6` choice instead of forcing three desktop columns. On tablet widths (641–900px) the layout caps at two columns without turning a deliberate single-column layout into two. At 640px and below it uses one column.
 
 When Core chooses `is-layout-grid`, the Core grid layout remains authoritative; Slateframe only overrides the legacy flex template. The footer retains its own single-column rule. All controls, typography, links, dates and featured-image behavior remain unchanged.
 
