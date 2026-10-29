@@ -63,7 +63,8 @@ class ReleaseHeadIntegrityTests(unittest.TestCase):
     def test_committed_but_excluded_file_does_not_change_other_hashes(self):
         self.write("docs/release.md", "Development-only documentation\n")
         self.commit()
-        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n")])
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n"),
+                       ("slateframe/assets/写真 中文.txt", "Public multilingual media\n")])
         self.assertEqual(0, self.verify().returncode)
 
     def test_untracked_member_is_rejected_even_with_valid_zip_crc(self):
@@ -77,6 +78,49 @@ class ReleaseHeadIntegrityTests(unittest.TestCase):
     def test_corrupt_archive_fails_closed(self):
         self.archive.write_bytes(b"not a zip")
         self.assertNotEqual(0, self.verify().returncode)
+
+
+    def test_missing_committed_distributable_asset_is_rejected(self):
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n")])
+        result = self.verify()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("missing=['assets/写真 中文.txt']", result.stderr)
+
+    def test_committed_excluded_document_cannot_be_injected(self):
+        self.write("docs/private.md", "Internal docs\n")
+        self.commit()
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n"),
+                       ("slateframe/assets/写真 中文.txt", "Public multilingual media\n"),
+                       ("slateframe/docs/private.md", "Internal docs\n")])
+        result = self.verify()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("excluded=['docs/private.md']", result.stderr)
+
+    def test_head_distignore_not_uncommitted_worktree_controls_distribution(self):
+        self.write(".distignore", "docs/\n.distignore\n")
+        self.commit()
+        self.write(".distignore", "assets/\ndocs/\n.distignore\n")
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n")])
+        result = self.verify()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("assets/写真 中文.txt", result.stderr)
+
+    def test_committed_exclusion_allows_omitting_documentation(self):
+        self.write(".distignore", "docs/\n.distignore\n")
+        self.write("docs/internal.md", "Not for distribution\n")
+        self.commit()
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n"),
+                       ("slateframe/assets/写真 中文.txt", "Public multilingual media\n")])
+        self.assertEqual(0, self.verify().returncode)
+
+    def test_unrecognized_negated_distignore_rule_fails_closed(self):
+        self.write(".distignore", "!assets/\n")
+        self.commit()
+        self.make_zip([("slateframe/style.css", "Theme Name: Slateframe\n"),
+                       ("slateframe/assets/写真 中文.txt", "Public multilingual media\n")])
+        result = self.verify()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("Unsupported distribution exclusion", result.stderr)
 
     def test_git_sha256_object_format_when_supported(self):
         sha256_root = self.root / "sha256-repo"

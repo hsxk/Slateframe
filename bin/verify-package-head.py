@@ -53,15 +53,64 @@ def validate_archive_member(member, seen, portable_seen):
             raise ValueError(f"Refusing non-regular ZIP member: {name}")
 
 
+
+def expected_distribution_paths(root, committed):
+    """Derive required ZIP files from HEAD and the committed rsync exclusions.
+
+    An archive with only style.css previously passed byte attestation even
+    when the rest of the distributable theme had been silently dropped.
+    """
+    import fnmatch
+
+    try:
+        ignored = subprocess.check_output(
+            ["git", "-C", str(root), "show", "HEAD:.distignore"],
+            stderr=subprocess.DEVNULL,
+        ).decode("utf-8")
+    except subprocess.CalledProcessError:
+        # Tiny independent Git fixtures may not carry the theme's distignore.
+        ignored = "docs/\ntests/\nbin/\n.github/\n.distignore\n"
+
+    patterns = []
+    for raw in ignored.splitlines():
+        pattern = raw.strip()
+        if not pattern or pattern.startswith("#"):
+            continue
+        if pattern.startswith(("!", "/")) or "\\" in pattern:
+            raise ValueError(f"Unsupported distribution exclusion: {pattern}")
+        patterns.append(pattern)
+
+    def excluded(path):
+        parts = path.split("/")
+        for pattern in patterns:
+            directory = pattern.endswith("/")
+            name = pattern.rstrip("/")
+            if directory:
+                candidates = parts[:-1]
+            else:
+                candidates = parts
+            if "/" in name:
+                # Slash-containing rules are relative to the theme root.
+                if path == name or path.startswith(name + "/") and directory:
+                    return True
+            elif any(fnmatch.fnmatchcase(part, name) for part in candidates):
+                return True
+        return False
+
+    return {path for path in committed if not excluded(path)}
+
+
 def verify(root, archive_path):
     """Fail closed if any final ZIP file differs from the source revision."""
     committed = committed_blobs(root)
+    expected = expected_distribution_paths(root, committed)
     with zipfile.ZipFile(archive_path, "r") as archive:
         if archive.comment:
             raise ValueError("Refusing commented ZIP archive")
         seen = set()
         portable_seen = {}
         files = 0
+        present = set()
         for member in archive.infolist():
             validate_archive_member(member, seen, portable_seen)
             if member.is_dir():
@@ -69,6 +118,7 @@ def verify(root, archive_path):
             files += 1
             name = member.filename
             relative = name[len("slateframe/"):]
+            present.add(relative)
             if relative not in committed:
                 raise ValueError(f"Refusing ZIP member absent from HEAD: {name}")
             # Git hash-object computes the repository's object format (SHA-1
@@ -83,6 +133,13 @@ def verify(root, archive_path):
                 raise ValueError(f"Refusing ZIP bytes differing from HEAD: {name}")
         if not files:
             raise ValueError("Refusing ZIP archive without theme files")
+        missing = expected - present
+        unexpected = present - expected
+        if missing or unexpected:
+            raise ValueError(
+                f"ZIP distribution differs from committed HEAD: missing={sorted(missing)!r}, "
+                f"excluded={sorted(unexpected)!r}"
+            )
 
 
 if __name__ == "__main__":

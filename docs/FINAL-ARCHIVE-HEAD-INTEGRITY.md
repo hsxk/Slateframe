@@ -14,6 +14,17 @@ from the exact HEAD blob. Git's hashing command supports both SHA-1 and SHA-256
 repositories; no text decoding, Git filters, or archive CRC assumptions are
 used for content equality.
 
+The final gate also checks **completeness**: it derives the expected set of
+regular, distributable HEAD files using the committed `.distignore` rules,
+then requires the ZIP's file inventory to match exactly. An omitted CSS,
+image, pattern, or PHP file fails even if every remaining member has a valid
+Git object hash and ZIP CRC. Conversely, committed development-only docs,
+tests, and workflows are forbidden inside the distributable. Uncommitted
+changes to `.distignore` cannot redefine the accepted release inventory.
+Unknown negated or absolute exclusion rules fail closed rather than silently
+changing packaging semantics. The source snapshot currently contains 121
+regular distributable files (the number may change as the theme evolves).
+
 This is a final artifact-to-source check, not an alternative to the existing
 staged manifest, ZIP inventory/metadata verification, or WordPress.org gates.
 The atomic replacement happens **only after** all checks succeed. A rejected
@@ -22,6 +33,7 @@ ZIP. Runtime theme behavior, WordPress content, site URLs, and editor output
 are unchanged.
 
 `tests/test_release_head_integrity.py` checks valid multilingual paths,
+omitted distributable assets, injected excluded docs, tampered ignore rules,
 same-length and different-length tampering with valid ZIP CRCs, uncommitted
 worktree bytes, untracked members, wrong theme roots, corrupt archives, and
 Git SHA-256 object format. `tests/test_release_manifest_guard.py` also
