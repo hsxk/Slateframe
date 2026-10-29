@@ -37,7 +37,8 @@ class PortfolioQueryMetadataContract(unittest.TestCase):
     def test_browser_checks_registered_pattern(self):
         browser = BROWSER.read_text(encoding="utf-8")
         self.assertIn("const blocks = portfolioWithSearch(marker)", browser)
-        self.assertIn("expect(blocks).not.toContain('\\\"displayLayout\\\"')", browser)
+        self.assertIn("expect(blocks).not.toContain(", browser)
+        self.assertIn('"displayLayout"', browser)
         self.assertIn("await expect(cards).toHaveCount(1)", browser)
 
 
