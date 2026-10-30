@@ -1,0 +1,33 @@
+# Offline Actions artifact provenance audit
+
+The release reviewer must verify three **downloaded GitHub Actions ZIP artifacts**
+from the **same exact pull-request HEAD SHA** before inspecting the actual
+WordPress/Chromium screenshots and merging. This offline utility does not call
+GitHub, deploy a site, or change theme runtime assets.
+
+Download the slateframe-browser, slateframe-photography-runtime, and
+slateframe-distribution artifacts from the successful HEAD-specific
+Theme quality and Photography runs. Run:
+
+    python3 bin/audit-actions-artifacts.py \
+      --head FULL_40_CHARACTER_COMMIT_SHA \
+      --browser browser.zip \
+      --photography photography.zip \
+      --distribution distribution.zip
+
+The utility validates all ZIP CRCs, unsafe entries and duplicate paths,
+manifest/HEAD identity, the exact screenshot inventory, per-PNG SHA-256,
+PNG CRC and dimensions, the nested theme checksum, Theme Name/Text Domain,
+the 1200×900 WordPress.org screenshot, and absence of symlink/path traversal
+inside the distributable. It fails closed on missing, stale, or tampered
+evidence. Unit tests cover malicious and corrupted fixtures.
+
+**Passing this tool does not mean visual approval.** Reviewers must still
+actually open genuine WordPress/Chromium screenshots for Appearance
+compact/default/spacious, mobile/desktop, Photography/Lightbox, Portfolio,
+Knowledge, article, header, search, forms, footer, RTL/CJK, forced colors,
+and Gutenberg. Verify that all required Actions Jobs succeeded on the
+same HEAD SHA; then merge and independently verify the new main merge SHA.
+Never treat an isolated browser preview or a PR success as proof of
+main merge-SHA success. The tool only checks artifact integrity, not
+pixel semantics, accessibility tree, Safari/VoiceOver, or user-device behavior.
