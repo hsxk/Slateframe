@@ -15,10 +15,11 @@ class SharedReadingCssTest(unittest.TestCase):
             "& h2{", "& h3{", "& h4{", "& :is(h5,h6){",
             "& :is(ul,ol):not(:where(.is-style-slateframe-steps,.is-style-slateframe-checklist)){", "& dl{", "& dt{", "& dd{", "& hr{",
             "& .wp-block-pullquote blockquote{", "& .wp-block-details summary{",
-            "& .wp-block-footnotes li{",
         ):
             with self.subTest(selector=selector):
                 self.assertIn(selector, css)
+        self.assertNotIn('& .wp-block-footnotes li{', css)
+        self.assertIn('.wp-block-footnotes li{', (ROOT / 'assets/css/core-footnotes.css').read_text())
 
     def test_core_details_keeps_native_disclosure_affordance(self):
         css = READING.read_text(encoding="utf-8")

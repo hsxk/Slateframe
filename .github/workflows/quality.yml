@@ -1272,6 +1272,8 @@ jobs:
           python3 tests/verify_content_feature_spacing_evidence.py test-artifacts/screenshots
           # Project Brief and Case Study 400% RTL evidence must be complete.
           python3 tests/verify_project_brief_zoom_evidence.py test-artifacts/screenshots
+          # Require complete native Core Footnotes evidence.
+          python3 tests/verify_core_footnotes_zoom_evidence.py test-artifacts/screenshots
           # Registered native Knowledge FAQ: computed 400% LTR/RTL and forced-colors focus.
           for screenshot in knowledge-faq-390-ltr-400.png knowledge-faq-390-rtl-400.png knowledge-faq-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing 400% Knowledge FAQ evidence: $screenshot" >&2; exit 1; }
