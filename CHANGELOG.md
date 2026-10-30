@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Bound native Core Project case study and Learning path feature-group vertical spacing at 200–400% text enlargement: preserve the 16px baseline, cap mobile padding at 40px and desktop at 64px, retain RTL/CJK, 44px Appearance controls, Gutenberg parity and original CSS budgets; add real WordPress 42-state, Axe, forced-colors, exact-viewport screenshot and editor regressions without new runtime assets.
+
 - Contain three-digit default Knowledge Steps counters at 400% enlargement by bounding only the decorative counter font to 24px; preserve native Core list semantics, 44–56px Appearance controls, RTL/CJK, Gutenberg parity, 42-state real WordPress geometry/Axe/forced-colors and exact-HEAD screenshots without new runtime assets or raised budgets.
 
 - Preserve authored Core List start, reversed and alphabetic/Roman type in Knowledge Steps using native accessible markers, proportional 400% scaling, RTL/CJK and Gutenberg parity; add 42-state browser checks, accessibility-tree ordinals, Axe, forced-colors, print and required screenshots without new assets or raised budgets.
