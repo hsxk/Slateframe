@@ -60,7 +60,7 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
               const css = getComputedStyle(node);
               return { rect: node.getBoundingClientRect().toJSON(),
                 border: parseFloat(css.borderInlineStartWidth),
-                padding: parseFloat(css.paddingInlineStart), wrap: css.overflowWrap };
+                padding: parseFloat(css.paddingInlineStart), blockPadding: parseFloat(css.paddingBlockStart), wrap: css.overflowWrap };
             };
             return { overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               standard: box('.slateframe-pullquote-default'), solid: box('.slateframe-pullquote-solid') };
@@ -71,6 +71,11 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
             expect(quote.rect.left, label + ' left bound').toBeGreaterThanOrEqual(-1);
             expect(quote.rect.right, label + ' right bound').toBeLessThanOrEqual(width + 1);
             expect(quote.wrap).toBe('anywhere');
+            // WordPress Core retains its 16px rhythm; 200–400% text must not
+            // inflate vertical whitespace beyond the 40px Spatial cap.
+            const corePadding = Math.max(font * 1.4, Math.min(width * .03, font * 2.4));
+            expect(quote.blockPadding, label + ' bounded block padding')
+              .toBeCloseTo(Math.min(corePadding, 40), 1);
           }
           if (font === 16) await page.screenshot({ fullPage: true,
             path: 'test-artifacts/screenshots/core-pullquote-' + width + '-' + dir + '.png' });
