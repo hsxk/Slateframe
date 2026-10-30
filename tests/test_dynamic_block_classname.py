@@ -61,7 +61,8 @@ class DynamicBlocks(unittest.TestCase):
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
         self.assertIn(".slateframe-project-card:not(:has(.wp-block-post-featured-image img))", css)
         self.assertIn("border-inline-start:2px solid var(--slateframe-accent)", css)
-        self.assertIn("padding-block-start:calc(var(--slateframe-stack-gap) + var(--slateframe-media-gap))", css)
+        self.assertIn("padding-block-start:min(var(--slateframe-stack-gap) + var(--slateframe-media-gap),40px)", css)
+        self.assertNotIn("padding-block-start:calc(var(--slateframe-stack-gap) + var(--slateframe-media-gap))", css)
         self.assertNotIn("justify-content:center", css)
         self.assertNotIn(".wp-block-post-date{margin-block-start:var(--slateframe-stack-gap)}", css)
 
