@@ -4,7 +4,7 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-- Prevent duplicate Home links in the unassigned WordPress Core page-menu fallback on static-front-page sites; mark Home current only on the actual front page, retain separate posts-page links, and reject malformed front-page IDs. Add five executable PHP-backed regression cases without new CSS/JS or plugin dependencies.
+- Prevent duplicate Home links in the unassigned WordPress Core page-menu fallback: use the native static-front-page link and preserve its child-page hierarchy, or show a translated Home link with the correct current-page state on posts-front-page sites. Keep separate blog links and malformed-ID fallback; add six executable PHP-backed regressions without CSS/JS or plugins.
 
 
 - Reject legacy project branding, paid unlock/license prompts, credential markers and remote CSS/JS/PHP network calls from the actual distributable ZIP; add 17 adversarial/positive tests and a packaging gate without changing runtime theme files or budgets.
