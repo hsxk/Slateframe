@@ -52,7 +52,7 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
+        for (const font of [16, 32, 64]) {
           await setRootTextScale(page, font, dir);
           const state = await page.evaluate(() => {
             const box = selector => {
