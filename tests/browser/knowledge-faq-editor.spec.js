@@ -89,7 +89,8 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
           left: bounds.left, right: bounds.right,
           summaries: [...node.querySelectorAll('details > summary')].map(summary => {
             const rect = summary.getBoundingClientRect();
-            return { left: rect.left, right: rect.right, height: rect.height };
+            return { left: rect.left, right: rect.right, height: rect.height,
+              padding: parseFloat(getComputedStyle(summary).paddingInlineStart) };
           }),
         };
       });
@@ -98,6 +99,7 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
         expect(rect.left).toBeGreaterThanOrEqual(zoom.left - 1);
         expect(rect.right).toBeLessThanOrEqual(zoom.right + 1);
         expect(rect.height).toBeGreaterThanOrEqual(44);
+        expect(rect.padding, width + 'px RTL 200% marker clearance').toBeGreaterThanOrEqual(16);
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
