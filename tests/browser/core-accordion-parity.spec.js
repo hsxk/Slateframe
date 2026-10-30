@@ -60,6 +60,11 @@ test('native Core Accordion reflow, interactions, forced-colors and print', asyn
               return { left: rect.left, right: rect.right, width: rect.width, height: rect.height,
                 wrap: getComputedStyle(button).overflowWrap };
             }),
+            icons: [...node.querySelectorAll('.wp-block-accordion-heading__toggle-icon')].map(icon => ({
+              fontSize: parseFloat(getComputedStyle(icon).fontSize),
+              flexShrink: getComputedStyle(icon).flexShrink,
+              width: icon.getBoundingClientRect().width,
+            })),
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(metrics.rootFont, label).toBeCloseTo(font, 1);
@@ -70,6 +75,13 @@ test('native Core Accordion reflow, interactions, forced-colors and print', asyn
             expect(button.left, label).toBeGreaterThanOrEqual(-1);
             expect(button.right, label).toBeLessThanOrEqual(metrics.viewport + 1);
             expect(button.wrap, label).toBe('anywhere');
+          }
+          expect(metrics.icons, label + ' native decorative icons').toHaveLength(2);
+          for (const icon of metrics.icons) {
+            expect(icon.fontSize, label + ' bounded decorative icon').toBeGreaterThan(0);
+            expect(icon.fontSize, label + ' bounded decorative icon').toBeLessThanOrEqual(24.1);
+            expect(icon.flexShrink, label + ' native icon flex').toBe('0');
+            expect(icon.width, label + ' visible native icon').toBeGreaterThan(0);
           }
           if (width === 390 && font === 64) {
             await toggles.first().scrollIntoViewIfNeeded();

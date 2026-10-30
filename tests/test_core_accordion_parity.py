@@ -24,6 +24,33 @@ class CoreAccordionParity(unittest.TestCase):
         self.assertNotIn("text-align:", css)
         self.assertLessEqual(len(css.encode()), 800)
 
+    def test_bounded_native_decorative_icon_and_inherited_title_wrap(self):
+        css = (ROOT / "assets/css/core-accordion.css").read_text()
+        self.assertIn(
+            ".wp-block-accordion-heading__toggle-icon{flex:none;font-size:min(1em,24px)}",
+            css,
+        )
+        self.assertIn(
+            ".wp-block-accordion-heading__toggle-title{min-inline-size:0}", css
+        )
+        self.assertIn(
+            ".wp-block-accordion-heading__toggle{box-sizing:border-box;", css
+        )
+        self.assertIn("overflow-wrap:anywhere", css)
+        self.assertNotIn("font-size:0", css)
+        self.assertLessEqual(len(css.encode()), 800)
+
+    def test_real_browser_icon_geometry_and_zoom(self):
+        browser = (ROOT / "tests/browser/core-accordion-parity.spec.js").read_text()
+        for token in (
+            "metrics.icons", "bounded decorative icon", "native icon flex",
+            "visible native icon", "fontSize", "flexShrink",
+            "[320, 375, 390, 412, 768, 1440, 1920]",
+            "['ltr', 'rtl']", "[16, 32, 64]",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, browser)
+
     def test_forced_colors_and_print_state(self):
         css = (ROOT / "assets/css/core-accordion.css").read_text()
         for token in ("forced-colors:active", "outline:2px solid Highlight",
