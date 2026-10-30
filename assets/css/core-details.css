@@ -2,3 +2,5 @@
 .wp-block-details:not(.alignwide):not(.alignfull){max-inline-size:100%}
 .wp-block-details>summary{box-sizing:border-box;min-block-size:var(--slateframe-control);cursor:pointer;overflow-wrap:anywhere}
 .wp-block-details>summary:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+/* Keep native disclosure markers inside the RTL Gutenberg canvas at 200–400% text scale. */
+.editor-styles-wrapper .wp-block-details>summary{padding-inline-start:min(.75em,24px)}
