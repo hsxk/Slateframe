@@ -89,7 +89,8 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
           left: bounds.left, right: bounds.right,
           summaries: [...node.querySelectorAll('details > summary')].map(summary => {
             const rect = summary.getBoundingClientRect();
-            return { left: rect.left, right: rect.right, height: rect.height };
+            return { left: rect.left, right: rect.right, height: rect.height,
+              padding: parseFloat(getComputedStyle(summary).paddingInlineStart) };
           }),
         };
       });
@@ -98,6 +99,7 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
         expect(rect.left).toBeGreaterThanOrEqual(zoom.left - 1);
         expect(rect.right).toBeLessThanOrEqual(zoom.right + 1);
         expect(rect.height).toBeGreaterThanOrEqual(44);
+        expect(rect.padding, width + 'px RTL 200% marker clearance').toBeGreaterThanOrEqual(16);
       }
     }
     await page.setViewportSize({ width: 390, height: 900 });
@@ -113,6 +115,8 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
       const canvas = node.closest('.editor-styles-wrapper');
       return {
         overflow: canvas.scrollWidth - canvas.clientWidth,
+        summaryPadding: [...node.querySelectorAll('details > summary')].map(summary =>
+          parseFloat(getComputedStyle(summary).paddingInlineStart)),
         clipped: [...node.querySelectorAll('h2, p, summary')].flatMap(child => {
           if (!child.getClientRects().length) return [];
           const box = child.getBoundingClientRect();
@@ -127,6 +131,10 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     });
     expect(zoomBounds.overflow).toBeLessThanOrEqual(1);
     expect(zoomBounds.clipped).toEqual([]);
+    expect(zoomBounds.summaryPadding).toHaveLength(3);
+    for (const padding of zoomBounds.summaryPadding) {
+      expect(padding, 'RTL native disclosure marker inset at 200%').toBeGreaterThanOrEqual(16);
+    }
     await faq.screenshot({ path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-390-rtl-200-forced-colors.png' });
     // At 200% zoom, the last paragraph may sit below Gutenberg's inner viewport.
     // Preserve separate evidence of its actual text rather than accepting a partial block image.
@@ -171,6 +179,19 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     await closingParagraph.screenshot({
       path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-final-paragraph-390-rtl-200-forced-colors.png',
     });
+    // At 400% the logical inset must still protect native RTL markers without scrolling.
+    await root.evaluate(node => { node.style.fontSize = '400%'; });
+    const extreme = await faq.evaluate(node => ({
+      overflow: node.closest('.editor-styles-wrapper').scrollWidth -
+        node.closest('.editor-styles-wrapper').clientWidth,
+      padding: [...node.querySelectorAll('details > summary')].map(summary =>
+        parseFloat(getComputedStyle(summary).paddingInlineStart)),
+    }));
+    expect(extreme.overflow, 'RTL 400% Gutenberg canvas').toBeLessThanOrEqual(1);
+    expect(extreme.padding).toHaveLength(3);
+    for (const padding of extreme.padding) {
+      expect(padding, 'RTL native marker inset at 400%').toBeGreaterThanOrEqual(16);
+    }
     await page.emulateMedia({ forcedColors: 'none' });
     await page.setViewportSize({ width: 1440, height: 900 });
     await root.evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });

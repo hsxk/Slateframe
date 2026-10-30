@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Keep native Core Details disclosure markers clear of the RTL Gutenberg canvas edge at 200–400% text scale with a bounded logical editor-only inset; add authenticated WordPress/Chromium zoom checks and static regressions without replacing Core interaction.
+
 - Recover an accessible, visibly current Home link when WordPress Core returns an empty or malformed static-front-page list, while retaining the native hierarchy when pages exist. Reuse the existing `current_page_item` styling and add executable PHP regressions without runtime CSS/JS changes.
 
 - Prevent duplicate Home links in the unassigned WordPress Core page-menu fallback: use the native static-front-page link and preserve its child-page hierarchy, or show a translated Home link with the correct current-page state on posts-front-page sites. Keep separate blog links and malformed-ID fallback; add six executable PHP-backed regressions without CSS/JS or plugins.
