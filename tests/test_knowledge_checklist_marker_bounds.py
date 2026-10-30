@@ -25,7 +25,10 @@ class KnowledgeChecklistMarkerBounds(unittest.TestCase):
         self.assertIn("overflow-wrap:anywhere", css)
         self.assertIn(":not(:where(.is-style-slateframe-steps,.is-style-slateframe-checklist))", reading)
         self.assertIn("'assets/css/content-modes.css'", bootstrap)
-        self.assertIn("'assets/css/core-list.css'", bootstrap)
+        list_module = (ROOT / "inc/core-list.php").read_text(encoding="utf-8")
+        self.assertIn("'assets/css/core-list.css'", list_module)
+        self.assertIn("wp_enqueue_block_style(", list_module)
+        self.assertIn("add_editor_style(", list_module)
         self.assertNotIn("register_block_type(", bootstrap)
 
     def test_real_wordpress_matrix_editor_and_visual_evidence(self):
