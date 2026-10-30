@@ -1,9 +1,12 @@
-- fix(spatial): Bound native Knowledge checklist checkpoint padding under 200–400% enlargement, preserving Core mobile stacking and Gutenberg parity; add real WordPress responsive/Axe/visual tests.
 # Changelog
 
 All notable changes to Slateframe will be documented here.
 
 ## Unreleased
+
+- Keep image-free Portfolio cards readable at 200–400% text enlargement by bounding accent fallback logical inline padding at 20px while preserving the 16px baseline, native Query Loop, RTL/CJK, Gutenberg parity and unchanged 7,000-byte CSS budget; add real WordPress/Chromium visual and accessibility coverage.
+
+- fix(spatial): Bound native Knowledge checklist checkpoint padding under 200–400% enlargement, preserving Core mobile stacking and Gutenberg parity; add real WordPress responsive/Axe/visual tests.
 
 - Bound Core Knowledge learning-callout and Metrics column padding at 200–400% zoom without shrinking text, preserve the 16px baseline, RTL/CJK and Gutenberg behavior, and retain the strict 7,000-byte CSS budget with real WordPress regression evidence.
 
