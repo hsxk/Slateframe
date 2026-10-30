@@ -349,10 +349,14 @@ test('authored native Steps start, reversed and type retain Core numbering at 40
           expect(list.left,label+' left').toBeGreaterThanOrEqual(-1);
           expect(list.right,label+' right').toBeLessThanOrEqual(width+1);
         }
-        if (width===390 && dir==='rtl' && font===64)
+        if (width===390 && dir==='rtl' && font===64) {
+          await lists.nth(1).evaluate(node=>node.scrollIntoView({block:'start'}));
           await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/knowledge-native-start-390-rtl-400.png'});
-        if (width===1440 && dir==='ltr' && font===16)
+        }
+        if (width===1440 && dir==='ltr' && font===16) {
+          await lists.nth(1).evaluate(node=>node.scrollIntoView({block:'start'}));
           await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/knowledge-native-start-1440-ltr.png'});
+        }
       }
     }
     await page.setViewportSize({width:1440,height:900});
@@ -378,6 +382,7 @@ test('authored native Steps start, reversed and type retain Core numbering at 40
     }));
     expect(forced.color).not.toBe('transparent');
     expect(forced.overflow).toBeLessThanOrEqual(1);
+    await lists.nth(1).evaluate(node=>node.scrollIntoView({block:'start'}));
     await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/knowledge-native-start-390-rtl-400-forced-colors.png'});
     await page.emulateMedia({media:'print',forcedColors:'none'});
     expect(await lists.nth(4).evaluate(node=>getComputedStyle(node).listStyleType)).toBe('upper-alpha');
