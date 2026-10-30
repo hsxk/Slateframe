@@ -11,11 +11,17 @@ test('Core Tabs remain native, portable Gutenberg blocks across editor widths', 
   const result = await page.evaluate(() => {
     const blocks = window.wp.blocks;
     const editor = window.wp.data.select('core/block-editor');
-    const before = blocks.serialize(editor.getBlocks());
+    const postEditor = window.wp.data.select('core/editor');
+    const snapshot = () => ({
+      markup: blocks.serialize(editor.getBlocks()),
+      ids: editor.getBlocks().map(block => block.clientId),
+      dirty: postEditor?.isEditedPostDirty?.(),
+    });
+    const before = snapshot();
     const required = ['core/tabs', 'core/tab-list', 'core/tab-panels', 'core/tab-panel'];
     const registered = required.map(name => Boolean(blocks.getBlockType(name)));
     if (registered.some(value => !value)) {
-      return { registered, before, after: blocks.serialize(editor.getBlocks()) };
+      return { registered, before, after: snapshot() };
     }
     const created = blocks.createBlock('core/tabs', {}, [
       blocks.createBlock('core/tab-list'),
@@ -34,7 +40,7 @@ test('Core Tabs remain native, portable Gutenberg blocks across editor widths', 
     return {
       registered,
       before,
-      after: blocks.serialize(editor.getBlocks()),
+      after: snapshot(),
       serialized,
       roundtrip: blocks.serialize(parsed),
       valid: first?.isValid,
@@ -46,7 +52,7 @@ test('Core Tabs remain native, portable Gutenberg blocks across editor widths', 
   });
 
   expect(result.registered).toEqual([true, true, true, true]);
-  expect(result.after).toBe(result.before);
+  expect(result.after).toEqual(result.before);
   expect(result.valid).toBe(true);
   expect(result.names).toEqual(['core/tabs', 'core/tab-list', 'core/tab-panels',
     'core/tab-panel', 'core/tab-panel']);
