@@ -1409,6 +1409,7 @@ jobs:
           set -euo pipefail
           php bin/check-release-metadata.php
           ./bin/build-theme-zip.sh
+          python3 bin/check-distribution-boundary.py dist/slateframe.zip
           first_sha="$(sha256sum dist/slateframe.zip | cut -d' ' -f1)"
           ./bin/build-theme-zip.sh /tmp/slateframe-reproducible
           second_sha="$(sha256sum /tmp/slateframe-reproducible/slateframe.zip | cut -d' ' -f1)"
