@@ -19,11 +19,17 @@ posts page also remains available in the Core list.
 The theme uses its existing strict positive-ID parser only to recognize a
 valid static-front-page configuration. If that option is malformed, the
 fallback keeps the explicit Home link rather than silently hiding a route.
+When Core returns an empty, whitespace-only or non-string page list (for
+example, an unpublished static front page), the fallback also restores a
+translated Home link rather than rendering an empty navigation. On the
+front page, that link receives both `aria-current="page"` and Core's
+`current_page_item` class, so the existing current-page underline works
+without new CSS. On other routes it receives neither current marker.
 The markup preserves `slateframe-menu-fallback`, native `page_item`
 classes, RTL/CJK and the existing responsive header. No new CSS or JS.
 
 Regression: `python3 -m unittest discover -s tests -p "test_*.py"`
-includes six PHP-backed cases for posts/static front pages, Core current
+includes executable PHP-backed cases for posts/static front pages, Core current
 state, retained child hierarchy, separate posts index, malformed IDs and
 the original list shape. These isolated Core API stubs are not a substitute
 for the exact-HEAD real WordPress browser and compatibility gates.
