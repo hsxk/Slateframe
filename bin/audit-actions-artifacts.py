@@ -103,11 +103,78 @@ def evidence(archive, manifest, expected, identity_key):
     return len(records)
 
 
+
+
+def audit_evidence_payload(archive, allowed_metadata):
+    """Prevent unrelated files from leaking through visual evidence ZIPs."""
+    for member in archive.infolist():
+        if member.is_dir() or member.filename.endswith(".png"):
+            continue
+        basename = member.filename.rsplit("/", 1)[-1]
+        require(basename in allowed_metadata,
+                "unexpected visual artifact file: " + member.filename)
+
+
+def audit_theme_paths(theme):
+    """Fail closed on non-distributable files, including nested hidden files."""
+    allowed_directories = {
+        "assets", "assets/css", "assets/js", "assets/images",
+        "assets/fonts", "inc", "patterns", "template-parts", "languages",
+    }
+    root_files = {
+        "LICENSE", "readme.txt", "theme.json", "screenshot.png",
+        "style.css", "rtl.css", "404.php", "archive.php", "attachment.php",
+        "author.php", "comments.php", "footer.php", "functions.php",
+        "header.php", "index.php", "page.php", "search.php",
+        "searchform.php", "single.php",
+    }
+    extensions = {
+        "assets/css": {".css"},
+        "assets/js": {".js"},
+        "assets/images": {".svg", ".png", ".jpg", ".jpeg", ".webp"},
+        "assets/fonts": {".woff", ".woff2"},
+        "inc": {".php"},
+        "patterns": {".php"},
+        "template-parts": {".php"},
+        "languages": {".po", ".mo", ".pot"},
+    }
+    for member in theme.infolist():
+        parts = PurePosixPath(member.filename).parts
+        require(parts and parts[0] == "slateframe",
+                "unexpected theme ZIP root")
+        relative = parts[1:]
+        if not relative:
+            require(member.is_dir(), "invalid theme root entry")
+            continue
+        require(all(not part.startswith(".") for part in relative),
+                "hidden distribution path: " + member.filename)
+        parent = "/".join(relative[:-1])
+        if member.is_dir():
+            require("/".join(relative) in allowed_directories,
+                    "unexpected distribution directory: " + member.filename)
+            continue
+        suffix = PurePosixPath(relative[-1]).suffix.lower()
+        if not parent:
+            permitted = relative[-1] in root_files
+        else:
+            permitted = parent in extensions and suffix in extensions[parent]
+        require(permitted, "non-distributable theme file: " + member.filename)
+
+
 def audit(browser, photo, distribution, head):
     require(SHA40.fullmatch(head) is not None, "expected a full lowercase HEAD SHA")
     with open_archive(browser) as b, open_archive(photo) as p, open_archive(distribution, 10 * 1024 * 1024) as d:
         require(b.read(unique_suffix(b, "HEAD_SHA.txt")).decode("ascii").strip() == head,
                 "browser HEAD mismatch")
+        audit_evidence_payload(b, {
+            "HEAD_SHA.txt", "BROWSER_SCREENSHOT_INVENTORY.json",
+            "VISUAL_EVIDENCE.json", "browser-review.html", "index.html",
+            "slateframe-server.log",
+        })
+        audit_evidence_payload(p, {
+            "gallery-evidence-manifest.json", "playwright-results.json",
+            "photography-review.html", "index.html", "slateframe-photo-server.log",
+        })
         browser_count = evidence(b, "BROWSER_SCREENSHOT_INVENTORY.json", head, "head_sha")
         photo_count = evidence(p, "gallery-evidence-manifest.json", head, "commit")
         require(set(d.namelist()) == {"slateframe.zip", "HEAD_SHA.txt", "SHA256SUMS"},
@@ -119,8 +186,7 @@ def audit(browser, photo, distribution, head):
         require(d.read("SHA256SUMS").decode("ascii").strip() == theme_hash + "  slateframe.zip",
                 "distribution checksum mismatch")
         with open_archive(io.BytesIO(theme_bytes), 40 * 1024 * 1024) as theme:
-            require(all(name.startswith("slateframe/") for name in theme.namelist()),
-                    "unexpected theme ZIP root")
+            audit_theme_paths(theme)
             style = theme.read("slateframe/style.css").decode("utf-8")
             require(re.search(r"(?m)^Theme Name: Slateframe$", style) is not None and
                     re.search(r"(?m)^Text Domain: slateframe$", style) is not None,

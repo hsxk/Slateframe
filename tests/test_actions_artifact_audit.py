@@ -170,5 +170,77 @@ class ArtifactAudit(unittest.TestCase):
             self.check()
 
 
+    def test_rejects_extra_browser_private_file(self):
+        self.browser["home/runner/screenshots/.env"] = "SECRET"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
+
+    def test_rejects_extra_photography_private_file(self):
+        self.photo["home/runner/photography/credentials.txt"] = "SECRET"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
+
+    def test_rejects_root_environment_file(self):
+        self.theme["slateframe/.env"] = "SECRET"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "hidden distribution path"):
+            self.check()
+
+    def test_rejects_nested_hidden_config(self):
+        self.theme["slateframe/assets/.private/config"] = "SECRET"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "hidden distribution path"):
+            self.check()
+
+    def test_rejects_sourcemap_in_assets(self):
+        self.theme["slateframe/assets/js/theme.js.map"] = "{}"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-distributable theme file"):
+            self.check()
+
+    def test_rejects_executable_inside_images(self):
+        self.theme["slateframe/assets/images/unsafe.php"] = "<?php"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-distributable theme file"):
+            self.check()
+
+    def test_rejects_unexpected_private_directory(self):
+        self.theme["slateframe/private/secret.php"] = "<?php"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-distributable theme file"):
+            self.check()
+
+    def test_rejects_unexpected_directory_entry(self):
+        self.theme["slateframe/backup/"] = b""
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected distribution directory"):
+            self.check()
+
+    def test_rejects_unreviewed_root_php(self):
+        self.theme["slateframe/credentials.php"] = "<?php"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-distributable theme file"):
+            self.check()
+
+    def test_rejects_unreviewed_root_markdown(self):
+        self.theme["slateframe/notes.md"] = "private draft"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-distributable theme file"):
+            self.check()
+
+    def test_allows_normal_core_theme_assets(self):
+        self.theme["slateframe/assets/css/blocks.css"] = "body {}"
+        self.theme["slateframe/assets/js/theme.js"] = "/* vanilla */"
+        self.theme["slateframe/assets/images/placeholder.svg"] = "<svg/>"
+        self.theme["slateframe/inc/render.php"] = "<?php"
+        self.theme["slateframe/patterns/example.php"] = "<?php"
+        self.theme["slateframe/languages/slateframe.pot"] = ""
+        self.write()
+        self.assertEqual(self.check()["theme_files"], 8)
+
+
+
 if __name__ == "__main__":
     unittest.main()
