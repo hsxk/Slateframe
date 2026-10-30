@@ -177,6 +177,19 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     await closingParagraph.screenshot({
       path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-final-paragraph-390-rtl-200-forced-colors.png',
     });
+    // At 400% the logical inset must still protect native RTL markers without scrolling.
+    await root.evaluate(node => { node.style.fontSize = '400%'; });
+    const extreme = await faq.evaluate(node => ({
+      overflow: node.closest('.editor-styles-wrapper').scrollWidth -
+        node.closest('.editor-styles-wrapper').clientWidth,
+      padding: [...node.querySelectorAll('details > summary')].map(summary =>
+        parseFloat(getComputedStyle(summary).paddingInlineStart)),
+    }));
+    expect(extreme.overflow, 'RTL 400% Gutenberg canvas').toBeLessThanOrEqual(1);
+    expect(extreme.padding).toHaveLength(3);
+    for (const padding of extreme.padding) {
+      expect(padding, 'RTL native marker inset at 400%').toBeGreaterThanOrEqual(16);
+    }
     await page.emulateMedia({ forcedColors: 'none' });
     await page.setViewportSize({ width: 1440, height: 900 });
     await root.evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
