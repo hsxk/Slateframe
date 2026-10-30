@@ -40,7 +40,7 @@ test('native Quote plain variant preserves citations, keyboard order and multili
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
+        for (const font of [16, 32, 64]) {
           await setRootTextScale(page, font, dir);
           const state = await page.evaluate(() => {
             const box = selector => {
@@ -62,6 +62,8 @@ test('native Quote plain variant preserves citations, keyboard order and multili
           }
           expect(state.plain.border, label + ' plain border').toBe(0);
           expect(state.plain.padding, label + ' plain padding').toBe(0);
+          expect(state.standard.padding, label + ' bounded Core Quote inset')
+            .toBeCloseTo(Math.min(font, 24), 1);
           if (font === 16) await page.screenshot({ fullPage: true,
             path: 'test-artifacts/screenshots/core-quote-' + width + '-' + dir + '.png' });
           if (width === 390 && font === 64) {
