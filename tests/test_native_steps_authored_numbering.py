@@ -7,7 +7,7 @@ class NativeStepsAuthoredNumbering(unittest.TestCase):
         reading=(ROOT/'assets/css/reading.css').read_text(encoding='utf-8')
         core=(ROOT/'assets/css/core-list.css').read_text(encoding='utf-8')
         modes=(ROOT/'assets/css/content-modes.css').read_text(encoding='utf-8')
-        self.assertIn('ol.is-style-slateframe-steps:is([start],[reversed],[type]){list-style-type:revert-layer;list-style-position:inside;&>li{padding-inline-start:0;&::before{content:none}}}',reading)
+        self.assertIn('ol.is-style-slateframe-steps:is([start],[reversed],[type]){list-style-type:revert;list-style-type:revert-layer;list-style-position:inside;&>li{padding-inline-start:0;&::before{content:none}}}',reading)
         self.assertIn('ol.is-style-slateframe-steps:is([start],[reversed],[type])>li::marker{font-size:.72rem}',core)
         self.assertIn('counter(slateframe-step,decimal-leading-zero)',modes)
         self.assertLessEqual(len(reading.encode()),7000)
