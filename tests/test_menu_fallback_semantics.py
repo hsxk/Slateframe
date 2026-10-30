@@ -1,4 +1,4 @@
-"""Exercise Slateframe's WordPress Core page-menu fallback with isolated PHP stubs."""
+"""Exercise Slateframe's native page-menu fallback with isolated PHP Core stubs."""
 import json
 from pathlib import Path
 import subprocess
@@ -17,11 +17,11 @@ function esc_html__($text, $domain) { return $text; }
 function wp_kses_post($text) { return $text; }
 function wp_list_pages($args) {
     $GLOBALS['menu_args'] = $args;
-    $html = '';
-    if (($args['exclude'] ?? '') !== '17') {
-        $html .= '<li class="page_item"><a href="/front">Front</a></li>';
-    }
-    return $html . '<li class="page_item"><a href="/other">Other</a></li>';
+    $static = ($GLOBALS['options']['show_on_front'] ?? '') === 'page';
+    $current = $static && $GLOBALS['front'] ? ' aria-current="page"' : '';
+    return '<li class="page_item page_item_has_children"><a href="/front"' . $current .
+        '>Front</a><ul class="children"><li class="page_item"><a href="/child">Child</a></li></ul></li>' .
+        '<li class="page_item"><a href="/blog">Blog</a></li>';
 }
 require $argv[3];
 ob_start(); slateframe_menu_fallback(); $html = ob_get_clean();
@@ -42,34 +42,42 @@ class MenuFallback(unittest.TestCase):
     def test_posts_front_page_has_one_current_home_link(self):
         data = render({'show_on_front': 'posts'}, True)
         self.assertIn('href="https://example.org/" aria-current="page">Home</a>', data['html'])
-        self.assertNotIn('exclude', data['args'])
+        self.assertEqual(data['html'].count('aria-current="page"'), 1)
+        self.assertIn('slateframe-home-link', data['html'])
+
+    def test_static_front_page_uses_core_current_link_once(self):
+        data = render({'show_on_front': 'page', 'page_on_front': '17'}, True)
+        self.assertNotIn('slateframe-home-link', data['html'])
+        self.assertEqual(data['html'].count('href="/front"'), 1)
+        self.assertIn('href="/front" aria-current="page"', data['html'])
         self.assertEqual(data['html'].count('aria-current="page"'), 1)
 
-    def test_static_front_page_not_duplicated(self):
-        data = render({'show_on_front': 'page', 'page_on_front': '17'}, True)
-        self.assertEqual(data['args']['exclude'], '17')
-        self.assertNotIn('href="/front"', data['html'])
-        self.assertIn('href="/other"', data['html'])
-        self.assertEqual(data['html'].count('aria-current="page"'), 1)
+    def test_static_front_page_retains_child_hierarchy(self):
+        data = render({'show_on_front': 'page', 'page_on_front': 17}, True)
+        self.assertNotIn('exclude', data['args'])
+        self.assertIn('page_item_has_children', data['html'])
+        self.assertIn('<ul class="children">', data['html'])
+        self.assertIn('href="/child"', data['html'])
 
     def test_separate_posts_page_does_not_mark_root_current(self):
         data = render({'show_on_front': 'page', 'page_on_front': 17}, False)
-        self.assertEqual(data['args']['exclude'], '17')
+        self.assertNotIn('slateframe-home-link', data['html'])
         self.assertNotIn('aria-current="page"', data['html'])
-        self.assertIn('href="/other"', data['html'])
+        self.assertIn('href="/blog"', data['html'])
 
-    def test_invalid_front_page_id_does_not_exclude_unrelated_page(self):
+    def test_invalid_front_page_id_retains_home_fallback(self):
         for bad in ([], {}, '17oops', '-17', '9999999999999999999999999999999999999'):
             with self.subTest(bad=bad):
                 data = render({'show_on_front': 'page', 'page_on_front': bad}, False)
+                self.assertIn('slateframe-home-link', data['html'])
                 self.assertNotIn('exclude', data['args'])
-                self.assertIn('href="/front"', data['html'])
 
-    def test_existing_menu_shape_and_no_current_state_on_other_pages(self):
+    def test_existing_list_shape_and_other_pages(self):
         data = render({'show_on_front': 'posts'}, False)
         self.assertTrue(data['html'].startswith('<ul class="slateframe-menu-fallback">'))
-        self.assertIn('class="page_item slateframe-home-link"', data['html'])
         self.assertTrue(data['html'].endswith('</ul>'))
+        self.assertIn('href="/blog"', data['html'])
+        self.assertIn('href="/child"', data['html'])
         self.assertNotIn('aria-current="page"', data['html'])
         self.assertIs(data['args']['echo'], False)
         self.assertEqual(data['args']['title_li'], '')
