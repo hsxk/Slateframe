@@ -206,6 +206,12 @@ class ArtifactAudit(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unexpected distribution directory"):
             self.check()
 
+    def test_rejects_unreviewed_root_php(self):
+        self.theme["slateframe/credentials.php"] = "<?php"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-distributable theme file"):
+            self.check()
+
     def test_rejects_unreviewed_root_markdown(self):
         self.theme["slateframe/notes.md"] = "private draft"
         self.write()
