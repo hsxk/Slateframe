@@ -13,7 +13,7 @@ class CoreFootnotesZoomContract(unittest.TestCase):
         css=(ROOT/'assets/css/core-footnotes.css').read_text()
         for token in ("'core/footnotes'", "'assets/css/core-footnotes.css'", 'wp_enqueue_block_style(', 'slateframe_register_core_footnotes_styles'):
             self.assertIn(token,php)
-        for token in ('padding-inline-start:min(1.35em,32px)','margin-block:min(.6rem,20px)','li>a[href$="-link"]','min-block-size:var(--slateframe-control)',':focus-visible'):
+        for token in ('padding-inline-start:min(1.35rem,32px)','margin-block:min(.6rem,20px)','li>a[href$="-link"]','min-block-size:var(--slateframe-control)',':focus-visible'):
             self.assertIn(token,css)
         self.assertNotIn('& .wp-block-footnotes{padding-inline-start:1.35rem',reading)
         self.assertLessEqual(len(reading.encode()),7000)
