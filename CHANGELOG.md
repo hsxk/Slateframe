@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Enforce a mandatory 98-state exact-HEAD WordPress/Chromium screenshot inventory before Browser artifact upload: three Appearance modes, seven responsive widths, RTL/forced colors, Core Photography/Lightbox, Portfolio, Knowledge, Gutenberg, article, header, search, forms and footer. Add 14 adversarial/positive regressions without changing runtime assets or weakening existing quality gates.
+
 - Reject malformed but CRC-correct PNG chunk structures in release evidence: duplicate IHDR, unknown critical chunks, nonconsecutive IDAT, illegal palette placement/size, missing indexed palettes, and invalid chunk type bytes. Add 14 positive/adversarial tests without changing runtime theme files or quality budgets.
 
 - Validate complete, bounded PNG zlib scanline streams in the exact-SHA release auditor, including Adam7 and filter bytes; reject CRC-correct but undecodable or oversized screenshot payloads with nine positive/adversarial regression tests. No runtime theme changes.
