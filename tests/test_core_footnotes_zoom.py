@@ -28,6 +28,7 @@ class CoreFootnotesZoomContract(unittest.TestCase):
         for name in CAPTURES:
             self.assertIn(name,spec)
         self.assertIn('python3 tests/verify_core_footnotes_zoom_evidence.py',workflow)
+        self.assertIn('decoder.eof', (ROOT/'tests/verify_core_footnotes_zoom_evidence.py').read_text())
 
     def test_png_rejects_missing_wrong_size_corruption_truncation_and_symlink(self):
         with tempfile.TemporaryDirectory() as tmp:

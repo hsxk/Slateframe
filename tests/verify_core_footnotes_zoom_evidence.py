@@ -19,6 +19,8 @@ def verify(root: Path) -> None:
             raise ValueError(f'{name}: missing PNG signature')
         offset = 8
         header = image = ending = False
+        compressed = bytearray()
+        pixel_bytes = None
         while offset < len(data):
             if offset + 12 > len(data):
                 raise ValueError(f'{name}: incomplete PNG')
@@ -36,9 +38,14 @@ def verify(root: Path) -> None:
                 size = struct.unpack('>II', data[offset+8:offset+16])
                 if size != expected:
                     raise ValueError(f'{name}: expected {expected[0]}x{expected[1]} viewport, got {size[0]}x{size[1]}')
+                depth, color_type = data[offset+16], data[offset+17]
+                if depth != 8 or color_type not in (2, 6):
+                    raise ValueError(f'{name}: unsupported PNG color format')
+                pixel_bytes = 3 if color_type == 2 else 4
                 header = True
             if kind == b'IDAT':
                 image = True
+                compressed.extend(data[offset+8:end-4])
             if kind == b'IEND':
                 if length != 0 or end != len(data):
                     raise ValueError(f'{name}: invalid PNG end')
@@ -47,6 +54,13 @@ def verify(root: Path) -> None:
             offset = end
         if not (header and image and ending):
             raise ValueError(f'{name}: incomplete PNG')
+        try:
+            decoder = zlib.decompressobj()
+            raw = decoder.decompress(bytes(compressed)) + decoder.flush()
+        except zlib.error as error:
+            raise ValueError(f'{name}: invalid compressed image') from error
+        if not decoder.eof or decoder.unused_data or len(raw) != expected[1] * (1 + expected[0] * pixel_bytes):
+            raise ValueError(f'{name}: incomplete decoded image')
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
