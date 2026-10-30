@@ -17,9 +17,10 @@ CJK/RTL instructional steps unnecessarily tall. The Core List content, order,
 nested native bullets and counters were correct; this was a presentation issue.
 
 The list item now shares one logical --slateframe-step dimension between its
-badge, minimum block size and inline-start gutter. It is computed as
+badge, minimum block size and inline-start gutter. The first bounded implementation used
 max(var(--slateframe-control), 1.3rem), retaining the 44px Appearance floor
-while allowing two-digit counters to grow with 400% text. Using rem rather
+while allowing two-digit counters to grow with 400% text. The later compact
+400% revision below adds a 64px ceiling without reducing the counter text. Using rem rather
 than em is important: the badge's .72rem font size otherwise makes its
 custom-property dimensions resolve differently from the list item's padding.
 No text is truncated, clipped or reduced, and no JavaScript or new block is
