@@ -25,10 +25,11 @@ test('Core Footnotes keep native backlinks and bounded RTL/CJK 400% reading widt
    await page.setViewportSize({width,height:900});
    for(const dir of ['ltr','rtl'])for(const font of [16,32,64]){
     await setRootTextScale(page,font,dir);
-    const a=await block.evaluate(n=>{const s=getComputedStyle(n),li=n.querySelector('li'),b=li.querySelector('a[href$="-link"]').getBoundingClientRect(),r=n.getBoundingClientRect();return{pad:parseFloat(s.paddingInlineStart),gap:parseFloat(getComputedStyle(li).marginBlockStart),scroll:parseFloat(getComputedStyle(li).scrollMarginBlockStart),w:b.width,h:b.height,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,left:r.left,right:r.right};});
+    const a=await block.evaluate(n=>{const s=getComputedStyle(n),li=n.querySelector('li'),b=li.querySelector('a[href$="-link"]').getBoundingClientRect(),r=n.getBoundingClientRect();return{pad:parseFloat(s.paddingInlineStart),gap:parseFloat(getComputedStyle(li).marginBlockStart),itemPad:parseFloat(getComputedStyle(li).paddingInlineStart),scroll:parseFloat(getComputedStyle(li).scrollMarginBlockStart),w:b.width,h:b.height,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,left:r.left,right:r.right};});
     const label=width+' '+dir+' '+font;
     expect(a.pad,label+' indent').toBeCloseTo(Math.min(font*1.35,32),1);
     expect(a.gap,label+' gap').toBeCloseTo(Math.min(font*.6,20),1);
+    expect(a.itemPad,label+' item inset').toBeCloseTo(Math.min(font*.25,8),1);
     expect(a.w,label+' backlink width').toBeGreaterThanOrEqual(44);
     expect(a.h,label+' backlink height').toBeGreaterThanOrEqual(44);
     expect(a.scroll,label+' anchor offset').toBeGreaterThan(0);

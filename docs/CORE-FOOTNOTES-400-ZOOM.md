@@ -2,7 +2,7 @@
 
 Slateframe retains the WordPress Core dynamic `core/footnotes` block and its post metadata. This is presentation only: no custom storage, JS navigation, or business logic.
 
-The generic `1.35em` list indent is 21.6px at a 16px root but grows to 86.4px at a 64px root because footnotes use 0.9rem. The conditional stylesheet preserves the original 16px baseline, bounds logical indentation at 32px, and caps item spacing at 20px. Its specificity overrides the generic prose rule independent of CSS loading order.
+The former Footnotes-specific `1.35rem` list indent is 21.6px at a 16px root but grows to 86.4px at a 64px root because footnotes use 0.9rem. The conditional stylesheet preserves the original 16px baseline, bounds logical indentation at 32px, caps item spacing at 20px, and caps the item inset at 8px. Its specificity overrides the generic prose rule independent of CSS loading order.
 
 Only direct-child Core-generated backlinks ending in `-link` receive 44–56px targets and visible focus. Other source links are untouched. The enlarged backlink hit area is screen-only, so print output keeps Core's compact inline return mark. Gutenberg loads the same CSS; the universal reading CSS sheds the old footnote rules.
 
