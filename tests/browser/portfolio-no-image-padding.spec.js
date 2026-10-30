@@ -23,6 +23,7 @@ test('image-free Portfolio cards preserve RTL/CJK width at 400% in seven viewpor
         return {
           root: parseFloat(getComputedStyle(document.documentElement).fontSize),
           start: parseFloat(style.paddingInlineStart), end: parseFloat(style.paddingInlineEnd),
+          top: parseFloat(style.paddingBlockStart),
           border: style.borderInlineStartStyle, left: box.left, right: box.right,
           linkWidth: node.querySelector('.wp-block-post-title a').getBoundingClientRect().width,
           overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -34,6 +35,7 @@ test('image-free Portfolio cards preserve RTL/CJK width at 400% in seven viewpor
       expect(state.missingImage, label).toBe(true);
       expect(state.start, label + ' bounded logical padding').toBeCloseTo(Math.min(font, 20), 1);
       expect(state.end, label + ' trailing padding').toBeCloseTo(0, 1);
+      expect(state.top, label + ' bounded media fallback spacing').toBeCloseTo(Math.min(font * 1.75, 40), 1);
       expect(state.border, label + ' accent border').not.toBe('none');
       expect(state.linkWidth, label + ' title').toBeGreaterThan(0);
       expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);

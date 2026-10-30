@@ -13,6 +13,8 @@ class PortfolioNoImagePaddingContract(unittest.TestCase):
         self.assertIn('wp:post-template', query)
         self.assertIn('slateframe-project-card:not(:has(.wp-block-post-featured-image img))', css)
         self.assertIn('padding-inline-start:min(var(--slateframe-stack-gap),20px)', css)
+        self.assertIn('padding-block-start:min(var(--slateframe-stack-gap) + var(--slateframe-media-gap),40px)', css)
+        self.assertNotIn('padding-block-start:calc(var(--slateframe-stack-gap) + var(--slateframe-media-gap))', css)
         self.assertNotIn('padding-inline-start:var(--slateframe-stack-gap)', css)
         self.assertLessEqual(len(css.encode('utf-8')), 7000)
 
@@ -21,7 +23,7 @@ class PortfolioNoImagePaddingContract(unittest.TestCase):
         for needle in ('SLATEFRAME_PROJECT_PATH', 'setRootTextScale',
                        '[320, 375, 390, 412, 768, 1440, 1920]',
                        "['ltr', 'rtl']", '[16, 32, 64]', 'Math.min(font, 20)',
-                       'wp-block-post-featured-image', 'AxeBuilder',
+                       'wp-block-post-featured-image', 'Math.min(font * 1.75, 40)', 'AxeBuilder',
                        "forcedColors: 'active'", 'toBeFocused',
                        'portfolio-no-image-390-rtl-400-forced-colors.png',
                        'portfolio-no-image-1440-ltr.png'):
