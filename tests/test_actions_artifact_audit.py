@@ -46,20 +46,20 @@ class ArtifactAudit(unittest.TestCase):
         self.addCleanup(temp.cleanup)
         self.root = Path(temp.name)
         self.picture = png()
-        self.browser_name = "home/runner/screenshots/example.png"
-        self.photo_name = "home/runner/photography/example.png"
+        self.browser_name = "home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/example.png"
+        self.photo_name = "home/runner/work/Slateframe/Slateframe/test-artifacts/photography-lightbox/example.png"
         meta = {"sha256": hashlib.sha256(self.picture).hexdigest(),
                 "width": 390, "height": 44, "bytes": len(self.picture)}
         self.browser = {
             self.browser_name: self.picture,
-            "home/runner/screenshots/HEAD_SHA.txt": HEAD + "\n",
-            "home/runner/screenshots/BROWSER_SCREENSHOT_INVENTORY.json": json.dumps({
+            "home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/HEAD_SHA.txt": HEAD + "\n",
+            "home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/BROWSER_SCREENSHOT_INVENTORY.json": json.dumps({
                 "head_sha": HEAD, "screenshots": {"example.png": meta}
             }),
         }
         self.photo = {
             self.photo_name: self.picture,
-            "home/runner/photography/gallery-evidence-manifest.json": json.dumps({
+            "home/runner/work/Slateframe/Slateframe/test-artifacts/photography-lightbox/gallery-evidence-manifest.json": json.dumps({
                 "commit": HEAD, "screenshots": {"example.png": meta}
             }),
         }
@@ -95,9 +95,9 @@ class ArtifactAudit(unittest.TestCase):
             self.check("b" * 40)
 
     def test_rejects_stale_photography_sha(self):
-        manifest = json.loads(self.photo["home/runner/photography/gallery-evidence-manifest.json"])
+        manifest = json.loads(self.photo["home/runner/work/Slateframe/Slateframe/test-artifacts/photography-lightbox/gallery-evidence-manifest.json"])
         manifest["commit"] = "b" * 40
-        self.photo["home/runner/photography/gallery-evidence-manifest.json"] = json.dumps(manifest)
+        self.photo["home/runner/work/Slateframe/Slateframe/test-artifacts/photography-lightbox/gallery-evidence-manifest.json"] = json.dumps(manifest)
         self.write()
         with self.assertRaisesRegex(ValueError, "stale gallery"):
             self.check()
@@ -162,22 +162,22 @@ class ArtifactAudit(unittest.TestCase):
         damaged = bytearray(self.picture)
         damaged[-5] ^= 1
         self.browser[self.browser_name] = bytes(damaged)
-        manifest = json.loads(self.browser["home/runner/screenshots/BROWSER_SCREENSHOT_INVENTORY.json"])
+        manifest = json.loads(self.browser["home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/BROWSER_SCREENSHOT_INVENTORY.json"])
         manifest["screenshots"]["example.png"]["sha256"] = hashlib.sha256(damaged).hexdigest()
-        self.browser["home/runner/screenshots/BROWSER_SCREENSHOT_INVENTORY.json"] = json.dumps(manifest)
+        self.browser["home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/BROWSER_SCREENSHOT_INVENTORY.json"] = json.dumps(manifest)
         self.write()
         with self.assertRaisesRegex(ValueError, "PNG CRC mismatch"):
             self.check()
 
 
     def test_rejects_extra_browser_private_file(self):
-        self.browser["home/runner/screenshots/.env"] = "SECRET"
+        self.browser["home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/.env"] = "SECRET"
         self.write()
         with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
             self.check()
 
     def test_rejects_extra_photography_private_file(self):
-        self.photo["home/runner/photography/credentials.txt"] = "SECRET"
+        self.photo["home/runner/work/Slateframe/Slateframe/test-artifacts/photography-lightbox/credentials.txt"] = "SECRET"
         self.write()
         with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
             self.check()
@@ -239,6 +239,77 @@ class ArtifactAudit(unittest.TestCase):
         self.theme["slateframe/languages/slateframe.pot"] = ""
         self.write()
         self.assertEqual(self.check()["theme_files"], 8)
+
+
+    def test_accepts_reviewed_browser_and_photo_metadata_paths(self):
+        root = "home/runner/work/Slateframe/Slateframe/"
+        self.browser[root + "test-artifacts/screenshots/VISUAL_EVIDENCE.json"] = "{}"
+        self.browser[root + "test-artifacts/browser-review.html"] = "<html></html>"
+        self.browser[root + "playwright-report/index.html"] = "<html></html>"
+        self.browser["tmp/slateframe-server.log"] = "log"
+        self.photo[root + "test-artifacts/photography-lightbox/playwright-results.json"] = "{}"
+        self.photo[root + "test-artifacts/photography-review.html"] = "<html></html>"
+        self.photo[root + "playwright-report/index.html"] = "<html></html>"
+        self.photo["tmp/slateframe-photo-server.log"] = "log"
+        self.write()
+        self.assertEqual(self.check()["browser_png"], 1)
+
+    def test_rejects_noncanonical_dot_segment(self):
+        self.theme["slateframe/assets/./images/placeholder.svg"] = "<svg/>"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-canonical ZIP path"):
+            self.check()
+
+    def test_rejects_noncanonical_double_separator(self):
+        self.theme["slateframe/assets//images/placeholder.svg"] = "<svg/>"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "non-canonical ZIP path"):
+            self.check()
+
+    def test_rejects_browser_png_outside_screenshot_directory(self):
+        self.browser["tmp/example.png"] = self.browser.pop(self.browser_name)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual screenshot path"):
+            self.check()
+
+    def test_rejects_photography_png_outside_fixture_directory(self):
+        self.photo["tmp/example.png"] = self.photo.pop(self.photo_name)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual screenshot path"):
+            self.check()
+
+    def test_rejects_nested_browser_screenshot(self):
+        misplaced = self.browser_name.replace("/example.png", "/nested/example.png")
+        self.browser[misplaced] = self.browser.pop(self.browser_name)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual screenshot path"):
+            self.check()
+
+    def test_rejects_browser_manifest_outside_fixture_directory(self):
+        old = "home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/BROWSER_SCREENSHOT_INVENTORY.json"
+        self.browser["home/runner/private/BROWSER_SCREENSHOT_INVENTORY.json"] = self.browser.pop(old)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual manifest location"):
+            self.check()
+
+    def test_rejects_photography_manifest_outside_fixture_directory(self):
+        old = "home/runner/work/Slateframe/Slateframe/test-artifacts/photography-lightbox/gallery-evidence-manifest.json"
+        self.photo["home/runner/private/gallery-evidence-manifest.json"] = self.photo.pop(old)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual manifest location"):
+            self.check()
+
+    def test_rejects_disguised_browser_html_outside_report_directory(self):
+        self.browser["home/runner/private/index.html"] = "<html>secret</html>"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
+
+    def test_rejects_disguised_photo_log_outside_tmp_directory(self):
+        self.photo["home/runner/private/slateframe-photo-server.log"] = "secret"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
 
 
 
