@@ -105,3 +105,9 @@ Older CSS engines that do not understand revert-layer retain a preceding list-st
 ### Authored Steps stylesheet budget (2026-10-30)
 
 The native `start`, `reversed`, and `type` marker override now lives beside the existing Steps presentation in `content-modes.css`, which the theme enqueues for the `is-style-slateframe-steps` marker and mirrors in Gutenberg. The rule itself is unchanged; equivalent CSS selector groups were nested without changing their specificity or declarations. This keeps shared article/discussion and Photography runtime envelopes below the existing 38 KB / 43 KB caps without adding a request, relaxing a budget, or hiding native list semantics.
+
+## Three-digit default Steps counters at 400% text enlargement
+
+Default Core Steps lists with 100 or more items previously rendered three-digit CSS counters at 46.08px inside a 64px circle at 400% root text size. In Chromium the digits measured about 77px and crossed the circle even though the document did not horizontally overflow. This is distinct from explicitly authored `start`, `reversed` and `type` lists, which retain native Core markers.
+
+Bound only the decorative counter font with `min(.72rem,24px)` while keeping the body text fully enlarged, the Appearance 44–56px control floor, 64px badge ceiling, logical RTL positioning, native list semantics and Gutenberg shared styles. At a 16px root the counter remains 11.52px; at 32px it remains 23.04px; at 64px it becomes 24px instead of 46.08px. The new real WordPress regression creates 101 native list items, checks seven widths × two directions × three root sizes, measures three-digit glyph width against the circle, verifies containment and forced-colors/Axe, and captures mandatory 390px RTL/400% screenshots plus desktop evidence. An independent Chromium 126-state Appearance preflight (three control sizes) found no glyph or overflow failures, but is not Actions acceptance. Existing CSS budgets are unchanged.

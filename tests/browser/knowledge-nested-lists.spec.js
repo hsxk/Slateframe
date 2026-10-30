@@ -167,7 +167,7 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
             .toBeCloseTo(result.badgeWidth + Math.min(font * .75, 20), 0);
           expect(result.markerInset, label + ' logical badge start').toBe('0px');
           expect(result.nested, label + ' native nested bullets').not.toBe('none');
-          expect(result.badgeFont, label + ' computed counter font').toBeCloseTo(font * .72, 0);
+          expect(result.badgeFont, label + ' computed counter font').toBeCloseTo(Math.min(font * .72, 24), 0);
           expect(result.nestedBox.width, label + ' nested list width').toBeGreaterThan(0);
           expect(result.nestedBox.left, label + ' nested list left').toBeGreaterThanOrEqual(-1);
           expect(result.nestedBox.right, label + ' nested list right').toBeLessThanOrEqual(width + 1);
