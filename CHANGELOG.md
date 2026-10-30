@@ -4,6 +4,11 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Recover an accessible, visibly current Home link when WordPress Core returns an empty or malformed static-front-page list, while retaining the native hierarchy when pages exist. Reuse the existing `current_page_item` styling and add executable PHP regressions without runtime CSS/JS changes.
+
+- Prevent duplicate Home links in the unassigned WordPress Core page-menu fallback: use the native static-front-page link and preserve its child-page hierarchy, or show a translated Home link with the correct current-page state on posts-front-page sites. Keep separate blog links and malformed-ID fallback; add six executable PHP-backed regressions without CSS/JS or plugins.
+
+
 - Reject legacy project branding, paid unlock/license prompts, credential markers and remote CSS/JS/PHP network calls from the actual distributable ZIP; add 17 adversarial/positive tests and a packaging gate without changing runtime theme files or budgets.
 
 - Enforce a mandatory 98-state exact-HEAD WordPress/Chromium screenshot inventory before Browser artifact upload: three Appearance modes, seven responsive widths, RTL/forced colors, Core Photography/Lightbox, Portfolio, Knowledge, Gutenberg, article, header, search, forms and footer. Add 14 adversarial/positive regressions without changing runtime assets or weakening existing quality gates.

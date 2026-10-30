@@ -361,17 +361,31 @@ function slateframe_pagination() {
  * shape to wp_nav_menu() output, which simplifies responsive navigation.
  */
 function slateframe_menu_fallback() {
-	$pages = wp_list_pages(
+	// Core must retain the static front page as a parent of its child pages.
+	$static_front = 'page' === get_option( 'show_on_front' ) && slateframe_positive_int( get_option( 'page_on_front' ) );
+	$pages        = wp_list_pages(
 		array(
 			'echo'     => false,
 			'title_li' => '',
 		)
 	);
 
+	$home = '';
+	// An unpublished or filtered static front page can leave Core's list empty.
+	if ( ! $static_front || ! is_string( $pages ) || '' === trim( $pages ) ) {
+		$is_current = is_front_page();
+		$home       = sprintf(
+			'<li class="page_item slateframe-home-link%1$s"><a href="%2$s"%3$s>%4$s</a></li>',
+			$is_current ? ' current_page_item' : '',
+			esc_url( home_url( '/' ) ),
+			$is_current ? ' aria-current="page"' : '',
+			esc_html__( 'Home', 'slateframe' )
+		);
+	}
+
 	printf(
-		'<ul class="slateframe-menu-fallback"><li class="page_item slateframe-home-link"><a href="%1$s">%2$s</a></li>%3$s</ul>',
-		esc_url( home_url( '/' ) ),
-		esc_html__( 'Home', 'slateframe' ),
+		'<ul class="slateframe-menu-fallback">%1$s%2$s</ul>',
+		$home, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Escaped above.
 		wp_kses_post( is_string( $pages ) ? $pages : '' )
 	);
 }
