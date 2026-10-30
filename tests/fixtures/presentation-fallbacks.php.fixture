@@ -22,6 +22,8 @@ function wp_kses_post( $html ) {
     return $html;
 }
 function wp_list_pages( $args ) { return $GLOBALS['slateframe_case']['pages']; }
+function get_option( $name ) { return $GLOBALS['slateframe_case']['options'][ $name ] ?? false; }
+function is_front_page() { return $GLOBALS['slateframe_case']['front'] ?? false; }
 function home_url( $path ) { return '/'; }
 function esc_url( $url ) { return $url; }
 function esc_html__( $text, $domain ) { return $text; }
@@ -83,4 +85,15 @@ foreach ( array( null, false, array( 'bad' ), new WP_Error() ) as $bad ) {
 $GLOBALS['slateframe_case']['pages'] = '<li class="page_item"><a href="/about">About</a></li>';
 $html = render_method( 'slateframe_menu_fallback' );
 verify_case( false !== strpos( $html, 'href="/about"' ), 'Valid Core page fallback lost' );
+$GLOBALS['slateframe_case']['options'] = array( 'show_on_front' => 'page', 'page_on_front' => 17 );
+$GLOBALS['slateframe_case']['front'] = true;
+$html = render_method( 'slateframe_menu_fallback' );
+verify_case( false === strpos( $html, 'slateframe-home-link' ), 'Static Core front page duplicated Home' );
+verify_case( false !== strpos( $html, 'href="/about"' ), 'Static Core page tree lost' );
+$GLOBALS['slateframe_case']['options'] = array( 'show_on_front' => 'posts' );
+$html = render_method( 'slateframe_menu_fallback' );
+verify_case( false !== strpos( $html, 'aria-current="page"' ), 'Posts front page missing current Home' );
+$GLOBALS['slateframe_case']['front'] = false;
+$html = render_method( 'slateframe_menu_fallback' );
+verify_case( false === strpos( $html, 'aria-current="page"' ), 'Non-front page marked Home current' );
 echo "Presentation fallbacks: {$cases} assertions passed\n";
