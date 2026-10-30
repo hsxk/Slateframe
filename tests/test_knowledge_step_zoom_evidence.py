@@ -40,6 +40,8 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
         self.assertIn("padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))", css)
         self.assertNotIn("padding-inline-start:calc(var(--slateframe-step) + var(--slateframe-component-gap))", css)
         self.assertIn("inline-size:var(--slateframe-step);block-size:var(--slateframe-step)", css)
+        self.assertIn("font-size:min(.72rem,24px);font-variant-numeric:tabular-nums", css)
+        self.assertNotIn("font-size:.72rem;font-variant-numeric:tabular-nums", css)
         self.assertIn("inset-inline-start:0", css)
         self.assertIn("'assets/css/content-modes.css'", bootstrap)
         self.assertIn(".editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))}", editor)
@@ -66,8 +68,15 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
             "nested list right",
         ):
             self.assertIn(token, spec)
-        self.assertEqual(len(CAPTURES), 3)
+        self.assertEqual(len(CAPTURES), 5)
         self.assertIn("python3 tests/verify_knowledge_step_zoom_evidence.py", workflow)
+        triple = (ROOT / "tests/browser/knowledge-steps-triple-digit.spec.js").read_text(encoding="utf-8")
+        for token in ("for (const width of [320, 375, 390, 412, 768, 1440, 1920])",
+                      "Math.min(font * .72, 24)", "context.measureText('100').width",
+                      "new AxeBuilder", "forcedColors: 'active'",
+                      "knowledge-steps-triple-digit-390-rtl-400.png",
+                      "knowledge-steps-triple-digit-390-rtl-400-forced-colors.png"):
+            self.assertIn(token, triple)
         for name in CAPTURES:
             self.assertIn(name, workflow)
 

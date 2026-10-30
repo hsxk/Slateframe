@@ -10,6 +10,8 @@ CAPTURES = (
     "knowledge-steps-390-ltr-400.png",
     "knowledge-steps-390-rtl-400.png",
     "knowledge-steps-390-rtl-400-forced-colors.png",
+    "knowledge-steps-triple-digit-390-rtl-400.png",
+    "knowledge-steps-triple-digit-390-rtl-400-forced-colors.png",
 )
 
 
