@@ -377,5 +377,90 @@ class ArtifactAudit(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "oversized PNG decoded payload"):
             self.check()
 
+
+    def check_png_chunk_contract(self, chunks, *, depth=8, color=2, error=None):
+        """Check PNG chunk ordering through the full exact-SHA evidence auditor."""
+        header = struct.pack(">IIBBBBB", 1, 1, depth, color, 0, 0, 0)
+        picture = (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header)
+                   + b"".join(chunks) + chunk(b"IEND"))
+        self.replace_browser_png(picture)
+        if error:
+            with self.assertRaisesRegex(ValueError, error):
+                self.check()
+        else:
+            self.assertEqual(self.check()["browser_png"], 1)
+
+    def test_accepts_rgb_png_with_optional_palette(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([chunk(b"PLTE", b"\x00\x00\x00"), stream])
+
+    def test_accepts_valid_indexed_png_palette(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x00"))
+        self.check_png_chunk_contract([chunk(b"PLTE", b"\x00\x00\x00"), stream],
+                                      color=3)
+
+    def test_accepts_ancillary_chunk_after_idat(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([stream, chunk(b"tEXt", b"note\x00ok")])
+
+    def test_rejects_duplicate_png_ihdr(self):
+        header = struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0)
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([chunk(b"IHDR", header), stream],
+                                      error="duplicate PNG IHDR")
+
+    def test_rejects_unknown_critical_png_chunk(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([chunk(b"ABCD"), stream],
+                                      error="unsupported PNG critical chunk")
+
+    def test_rejects_invalid_png_chunk_type(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([chunk(b"a1CD"), stream],
+                                      error="invalid PNG chunk type")
+
+    def test_rejects_lowercase_reserved_png_chunk_byte(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([chunk(b"abcd"), stream],
+                                      error="invalid PNG chunk type")
+
+    def test_rejects_png_palette_after_idat(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([stream, chunk(b"PLTE", b"\x00\x00\x00")],
+                                      error="invalid PNG palette")
+
+    def test_rejects_indexed_png_without_palette(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x00"))
+        self.check_png_chunk_contract([stream], color=3,
+                                      error="missing or oversized indexed PNG palette")
+
+    def test_rejects_duplicate_png_palette(self):
+        palette = chunk(b"PLTE", b"\x00\x00\x00")
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([palette, palette, stream],
+                                      error="invalid PNG palette")
+
+    def test_rejects_png_palette_with_invalid_length(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01\x02\x03"))
+        self.check_png_chunk_contract([chunk(b"PLTE", b"\x00\x00"), stream],
+                                      error="invalid PNG palette")
+
+    def test_rejects_png_palette_for_grayscale(self):
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x01"))
+        self.check_png_chunk_contract([chunk(b"PLTE", b"\x00\x00\x00"), stream],
+                                      color=0, error="PNG palette forbidden for grayscale")
+
+    def test_rejects_nonconsecutive_png_idat_chunks(self):
+        compressed = zlib.compress(b"\x00\x01\x02\x03")
+        chunks = [chunk(b"IDAT", compressed[:4]), chunk(b"tEXt", b"note\x00ok"),
+                  chunk(b"IDAT", compressed[4:])]
+        self.check_png_chunk_contract(chunks, error="nonconsecutive PNG IDAT")
+
+    def test_rejects_indexed_palette_larger_than_bit_depth(self):
+        palette = chunk(b"PLTE", b"\x00\x00\x00" * 3)
+        stream = chunk(b"IDAT", zlib.compress(b"\x00\x00"))
+        self.check_png_chunk_contract([palette, stream], depth=1, color=3,
+                                      error="missing or oversized indexed PNG palette")
+
 if __name__ == "__main__":
     unittest.main()

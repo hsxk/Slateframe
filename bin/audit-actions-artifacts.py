@@ -64,24 +64,39 @@ def png_dimensions(data):
     """Validate PNG structure, CRC and bounded, fully decoded scanline stream."""
     require(data.startswith(PNG), "invalid PNG signature")
     offset, header, compressed, ended = 8, None, [], False
+    saw_palette, palette_entries, saw_idat, finished_idat = False, 0, False, False
     while offset < len(data):
         require(offset + 12 <= len(data), "truncated PNG chunk")
         size = struct.unpack_from(">I", data, offset)[0]
         end = offset + size + 12
         require(end <= len(data), "truncated PNG payload")
         kind = data[offset + 4:offset + 8]
+        require(len(kind) == 4 and all(65 <= byte <= 90 or 97 <= byte <= 122 for byte in kind)
+                and 65 <= kind[2] <= 90, "invalid PNG chunk type")
         payload = data[offset + 8:end - 4]
         require((zlib.crc32(kind + payload) & 0xffffffff)
                 == struct.unpack_from(">I", data, end - 4)[0], "PNG CRC mismatch")
         if header is None:
             require(kind == b"IHDR" and size == 13, "missing PNG IHDR")
             header = struct.unpack(">IIBBBBB", payload)
+        elif kind == b"IHDR":
+            require(False, "duplicate PNG IHDR")
+        elif kind == b"PLTE":
+            require(not saw_palette and not saw_idat and 3 <= size <= 768 and size % 3 == 0,
+                    "invalid PNG palette")
+            saw_palette, palette_entries = True, size // 3
         elif kind == b"IDAT":
+            require(not finished_idat, "nonconsecutive PNG IDAT")
+            saw_idat = True
             compressed.append(payload)
         elif kind == b"IEND":
             require(size == 0 and end == len(data), "invalid PNG end")
             ended = True
             break
+        else:
+            require(kind[0] & 32, "unsupported PNG critical chunk")
+        if saw_idat and kind != b"IDAT":
+            finished_idat = True
         offset = end
     require(ended and compressed, "incomplete PNG")
     width, height, depth, color, compression, filtering, interlace = header
@@ -92,6 +107,10 @@ def png_dimensions(data):
     require(color in formats and depth in formats[color][1]
             and compression == 0 and filtering == 0 and interlace in (0, 1),
             "invalid PNG IHDR")
+    require(color != 3 or (saw_palette and palette_entries <= 2 ** depth),
+            "missing or oversized indexed PNG palette")
+    require(color not in (0, 4) or not saw_palette,
+            "PNG palette forbidden for grayscale")
     bits_per_pixel = formats[color][0] * depth
     passes = ((0, 0, 1, 1),) if interlace == 0 else ADAM7
     scanlines = []

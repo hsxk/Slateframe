@@ -17,7 +17,7 @@ Theme quality and Photography runs. Run:
 
 The utility validates all ZIP CRCs, unsafe entries and duplicate paths,
 manifest/HEAD identity, the exact screenshot inventory, per-PNG SHA-256,
-PNG CRC, IHDR legality, bounded full zlib scanline decompression (including Adam7), scanline filter bytes and dimensions, the nested theme checksum, Theme Name/Text Domain,
+PNG CRC, IHDR legality, critical chunk and palette ordering, consecutive IDAT, bounded full zlib scanline decompression (including Adam7), scanline filter bytes and dimensions, the nested theme checksum, Theme Name/Text Domain,
 the 1200×900 WordPress.org screenshot, and absence of symlink/path traversal
 inside the distributable. It also rejects hidden files, unexpected directories,
 source maps, executables in image folders, and files outside the explicit
