@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Preserve authored Core List start, reversed and alphabetic/Roman type in Knowledge Steps using native accessible markers, proportional 400% scaling, RTL/CJK and Gutenberg parity; add 42-state browser checks, accessibility-tree ordinals, Axe, forced-colors, print and required screenshots without new assets or raised budgets.
+
 - Bound native Core Knowledge Checklist decorative checkmarks to 24px and logical item gutters to 36px at 400% text enlargement, preserving the default 16px appearance, RTL/CJK, nested list markers and Gutenberg parity; add 42-state real WordPress checks, Axe, forced-colors and visual evidence without new runtime assets or raised CSS budgets.
 
 - Keep native Core Knowledge Steps counters and their logical text gutter compact at 400% zoom: cap the badge at 64px and its following gap at 20px while preserving the 44–56px Appearance floor, RTL/CJK, nested Core lists and Gutenberg parity. Extend exact-computed browser and static contracts without adding assets or increasing CSS budgets.

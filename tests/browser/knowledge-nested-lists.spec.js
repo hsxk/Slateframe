@@ -289,3 +289,132 @@ test('native Core checklist keeps a bounded marker and readable text column at 4
       path: 'test-artifacts/screenshots/knowledge-checklist-marker-390-rtl-400-forced-colors.png' });
   });
 });
+
+
+const nativeAuthoredMarkup = [
+  '<!-- wp:list {"ordered":true,"className":"is-style-slateframe-steps"} -->',
+  '<ol class="wp-block-list is-style-slateframe-steps"><li>Default 中文 العربية</li><li>Default second</li></ol><!-- /wp:list -->',
+  '<!-- wp:list {"ordered":true,"start":98,"className":"is-style-slateframe-steps"} -->',
+  '<ol class="wp-block-list is-style-slateframe-steps" start="98"><li>Start ninety-eight 中文 العربية</li><li>Start ninety-nine</li><li>Start one hundred <a href="#native-target">Reference</a></li></ol><!-- /wp:list -->',
+  '<!-- wp:list {"ordered":true,"start":103,"reversed":true,"className":"is-style-slateframe-steps"} -->',
+  '<ol class="wp-block-list is-style-slateframe-steps" start="103" reversed><li>Reverse one hundred three</li><li>Reverse one hundred two</li><li>Reverse one hundred one</li></ol><!-- /wp:list -->',
+  '<!-- wp:list {"ordered":true,"reversed":true,"className":"is-style-slateframe-steps"} -->',
+  '<ol class="wp-block-list is-style-slateframe-steps" reversed><li>Reverse three</li><li>Reverse two</li><li>Reverse one</li></ol><!-- /wp:list -->',
+  '<!-- wp:html --><ol type="A" class="wp-block-list is-style-slateframe-steps"><li>Alpha</li><li>Beta</li></ol><!-- /wp:html -->',
+  '<!-- wp:html --><ol type="i" reversed start="4" class="wp-block-list is-style-slateframe-steps"><li>Roman four</li><li>Roman three</li></ol><!-- /wp:html -->',
+  '<!-- wp:paragraph --><p id="native-target">Target</p><!-- /wp:paragraph -->',
+].join('');
+
+test('authored native Steps start, reversed and type retain Core numbering at 400%', async ({page}, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress fixture covers seven widths');
+  test.setTimeout(180000);
+  const {setRootTextScale}=require('./support/root-text-scale');
+  const AxeBuilder=require('@axe-core/playwright').default;
+  const id=wp('post','create','--post_type=page','--post_status=publish',
+    '--post_title=Native authored Steps','--post_content='+nativeAuthoredMarkup,'--porcelain');
+  try {
+    await page.goto('/?page_id='+id,{waitUntil:'networkidle'});
+    const lists=page.locator('.slateframe-prose ol.is-style-slateframe-steps');
+    await expect(lists).toHaveCount(6);
+    await expect(lists.nth(1)).toHaveAttribute('start','98');
+    await expect(lists.nth(2)).toHaveAttribute('start','103');
+    await expect(lists.nth(2)).toHaveAttribute('reversed','');
+    await expect(lists.nth(3)).toHaveAttribute('reversed','');
+    await expect(lists.nth(4)).toHaveAttribute('type','A');
+    await expect(lists.nth(5)).toHaveAttribute('type','i');
+    await fs.mkdir('test-artifacts/screenshots',{recursive:true});
+    for (const width of [320,375,390,412,768,1440,1920]) {
+      await page.setViewportSize({width,height:900});
+      for (const dir of ['ltr','rtl']) for (const font of [16,32,64]) {
+        await setRootTextScale(page,font,dir);
+        const state=await lists.evaluateAll(nodes=>({
+          overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+          lists:nodes.map(node=>{
+            const li=node.querySelector('li'),style=getComputedStyle(node),rect=node.getBoundingClientRect();
+            return {type:style.listStyleType,position:style.listStylePosition,
+              before:getComputedStyle(li,'::before').content,
+              markerFont:parseFloat(getComputedStyle(li,'::marker').fontSize),
+              left:rect.left,right:rect.right};
+          }),
+        }));
+        const label=width+'px '+dir+' '+font+'px';
+        expect(state.overflow,label+' horizontal overflow').toBeLessThanOrEqual(1);
+        expect(state.lists.map(item=>item.type),label+' authored list types')
+          .toEqual(['none','decimal','decimal','decimal','upper-alpha','lower-roman']);
+        expect(state.lists[0].before,label+' default circular badge').toContain('counter(');
+        for (const list of state.lists.slice(1)) {
+          expect(list.position,label+' native inside marker').toBe('inside');
+          expect(list.before,label+' no fake counter').toBe('none');
+          expect(list.markerFont,label+' proportional marker font').toBeCloseTo(font*.72,1);
+          expect(list.left,label+' left').toBeGreaterThanOrEqual(-1);
+          expect(list.right,label+' right').toBeLessThanOrEqual(width+1);
+        }
+        if (width===390 && dir==='rtl' && font===64)
+          await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/knowledge-native-start-390-rtl-400.png'});
+        if (width===1440 && dir==='ltr' && font===16)
+          await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/knowledge-native-start-1440-ltr.png'});
+      }
+    }
+    await page.setViewportSize({width:1440,height:900});
+    await setRootTextScale(page,16,'ltr');
+    const cdp=await page.context().newCDPSession(page);
+    const ax=await cdp.send('Accessibility.getFullAXTree');
+    const markers=ax.nodes.filter(node=>node.role?.value==='ListMarker').map(node=>node.name?.value?.trim());
+    for (const value of ['98.','99.','100.','103.','102.','101.','3.','2.','1.','A.','B.','iv.','iii.'])
+      expect(markers,'native list ordinal '+value).toContain(value);
+    await cdp.detach();
+    await page.setViewportSize({width:390,height:900});
+    await setRootTextScale(page,64,'rtl');
+    const axe=await new AxeBuilder({page}).include('.slateframe-prose')
+      .withTags(['wcag2a','wcag2aa','wcag21a','wcag21aa']).analyze();
+    expect(axe.violations).toEqual([]);
+    const link=page.locator('.slateframe-prose a[href="#native-target"]');
+    await link.focus();
+    await expect(link).toBeFocused();
+    await page.emulateMedia({forcedColors:'active',reducedMotion:'reduce'});
+    const forced=await lists.nth(1).locator('li').first().evaluate(li=>({
+      color:getComputedStyle(li,'::marker').color,
+      overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
+    }));
+    expect(forced.color).not.toBe('transparent');
+    expect(forced.overflow).toBeLessThanOrEqual(1);
+    await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/knowledge-native-start-390-rtl-400-forced-colors.png'});
+    await page.emulateMedia({media:'print',forcedColors:'none'});
+    expect(await lists.nth(4).evaluate(node=>getComputedStyle(node).listStyleType)).toBe('upper-alpha');
+  } finally {wp('post','delete',id,'--force');}
+});
+
+test('authored Steps retain valid Core List Gutenberg serialization',async ({page},info)=>{
+  test.skip(info.project.use.viewport?.width!==390,'Authenticated Gutenberg fixture');
+  test.setTimeout(120000);
+  const {openAuthenticatedEditor}=require('./support/editor-login');
+  const id=wp('post','create','--post_type=page','--post_status=draft',
+    '--post_title=Native Steps Gutenberg','--post_content='+nativeAuthoredMarkup,'--porcelain');
+  try {
+    await openAuthenticatedEditor(page,id);
+    const state=await page.evaluate(()=>{
+      const blocks=[];
+      const visit=items=>items.forEach(b=>{
+        blocks.push({name:b.name,valid:b.isValid,start:b.attributes?.start,reversed:b.attributes?.reversed});
+        visit(b.innerBlocks||[]);
+      });
+      visit(window.wp.data.select('core/block-editor').getBlocks());
+      return blocks;
+    });
+    expect(state.filter(b=>b.valid===false)).toEqual([]);
+    expect(state.some(b=>b.name==='core/missing')).toBe(false);
+    expect(state.filter(b=>b.name==='core/list')).toHaveLength(4);
+    expect(state.some(b=>b.name==='core/list' && b.start===98)).toBe(true);
+    expect(state.some(b=>b.name==='core/list' && b.start===103 && b.reversed===true)).toBe(true);
+    const framed=await page.locator('iframe[name="editor-canvas"]').count()>0;
+    const canvas=framed?page.frameLocator('iframe[name="editor-canvas"]'):page;
+    const authored=canvas.locator('.editor-styles-wrapper ol.is-style-slateframe-steps[start="98"]');
+    await expect(authored).toBeVisible();
+    const geometry=await authored.evaluate(node=>({
+      type:getComputedStyle(node).listStyleType,
+      marker:getComputedStyle(node.querySelector('li'),'::before').content,
+    }));
+    expect(geometry.type).toBe('decimal');
+    expect(geometry.marker).toBe('none');
+  } finally {wp('post','delete',id,'--force');}
+});

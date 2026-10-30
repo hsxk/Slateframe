@@ -1008,6 +1008,9 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA" || { echo "Browser evidence does not match PR HEAD" >&2; exit 1; }
           printf "%s\n" "$SLATEFRAME_EVIDENCE_SHA" > test-artifacts/screenshots/HEAD_SHA.txt
+          for screenshot in knowledge-native-start-390-rtl-400.png knowledge-native-start-1440-ltr.png knowledge-native-start-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing native authored Steps evidence: $screenshot" >&2; exit 1; }
+          done
           for width in 390 1440; do
             for direction in ltr rtl; do
               screenshot="test-artifacts/screenshots/core-photography-sequence-${width}-${direction}.png"

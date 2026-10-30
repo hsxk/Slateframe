@@ -1,2 +1,3 @@
 :is(.slateframe-prose,.editor-styles-wrapper) .wp-block-list{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere;word-break:normal;hyphens:auto}
 :is(.slateframe-prose,.editor-styles-wrapper) .wp-block-list li{min-inline-size:0;overflow-wrap:anywhere}
+ol.is-style-slateframe-steps:is([start],[reversed],[type])>li::marker{font-size:.72rem}
