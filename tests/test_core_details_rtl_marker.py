@@ -24,8 +24,8 @@ class CoreDetailsRTLMarker(unittest.TestCase):
         browser = (ROOT / "tests/browser/knowledge-faq-editor.spec.js").read_text(encoding="utf-8")
         for expected in (
             "gutenberg-knowledge-faq-390-rtl-200-forced-colors.png",
-            "root.style.fontSize = '200%'",
-            "root.style.fontSize = '400%'",
+            "node.style.fontSize = '200%'",
+            "node.style.fontSize = '400%'",
             "summaryPadding",
             "RTL native disclosure marker inset at 200%",
             "RTL native marker inset at 400%",
