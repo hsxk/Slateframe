@@ -104,6 +104,17 @@ def evidence(archive, manifest, expected, identity_key):
 
 
 
+
+def audit_evidence_payload(archive, allowed_metadata):
+    """Prevent unrelated files from leaking through visual evidence ZIPs."""
+    for member in archive.infolist():
+        if member.is_dir() or member.filename.endswith(".png"):
+            continue
+        basename = member.filename.rsplit("/", 1)[-1]
+        require(basename in allowed_metadata,
+                "unexpected visual artifact file: " + member.filename)
+
+
 def audit_theme_paths(theme):
     """Fail closed on non-distributable files, including nested hidden files."""
     allowed_directories = {
@@ -155,6 +166,15 @@ def audit(browser, photo, distribution, head):
     with open_archive(browser) as b, open_archive(photo) as p, open_archive(distribution, 10 * 1024 * 1024) as d:
         require(b.read(unique_suffix(b, "HEAD_SHA.txt")).decode("ascii").strip() == head,
                 "browser HEAD mismatch")
+        audit_evidence_payload(b, {
+            "HEAD_SHA.txt", "BROWSER_SCREENSHOT_INVENTORY.json",
+            "VISUAL_EVIDENCE.json", "browser-review.html", "index.html",
+            "slateframe-server.log",
+        })
+        audit_evidence_payload(p, {
+            "gallery-evidence-manifest.json", "playwright-results.json",
+            "photography-review.html", "index.html", "slateframe-photo-server.log",
+        })
         browser_count = evidence(b, "BROWSER_SCREENSHOT_INVENTORY.json", head, "head_sha")
         photo_count = evidence(p, "gallery-evidence-manifest.json", head, "commit")
         require(set(d.namelist()) == {"slateframe.zip", "HEAD_SHA.txt", "SHA256SUMS"},
