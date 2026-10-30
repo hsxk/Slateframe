@@ -16,7 +16,8 @@ class PortfolioEditorParityContract(unittest.TestCase):
         css = CSS.read_text(encoding="utf-8")
         self.assertIn(":not(:has(.wp-block-post-featured-image img))", css)
         self.assertIn("border-inline-start:2px solid var(--slateframe-accent)", css)
-        self.assertIn("padding-inline-start:var(--slateframe-stack-gap)", css)
+        self.assertIn("padding-inline-start:min(var(--slateframe-stack-gap),20px)", css)
+        self.assertNotIn("padding-inline-start:var(--slateframe-stack-gap)", css)
 
     def test_editor_uses_the_same_stylesheet(self):
         functions = FUNCTIONS.read_text(encoding="utf-8")
