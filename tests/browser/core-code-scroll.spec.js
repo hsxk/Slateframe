@@ -91,7 +91,58 @@ test('native preformatted content stays readable and keyboard reachable across d
     expect(await pre.evaluate(node => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.locator('html').evaluate(root => { root.style.fontSize = '400%'; });
     expect(await pre.evaluate(node => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
-    await page.locator('html').evaluate(root => { root.style.fontSize = '200%'; });
+    // Native Core Code and Preformatted must keep usable text space at 400%
+    // without changing the 16px rhythm or allowing document overflow.
+    for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const dir of ['ltr', 'rtl']) {
+        for (const font of [16, 32, 64]) {
+          await page.locator('html').evaluate((root, state) => {
+            root.dir = state.dir;
+            root.style.fontSize = state.font + 'px';
+          }, { dir, font });
+          for (const block of [pre, code]) {
+            const metrics = await block.evaluate(node => {
+              const style = getComputedStyle(node);
+              const rect = node.getBoundingClientRect();
+              return {
+                block: parseFloat(style.paddingBlockStart),
+                inline: parseFloat(style.paddingInlineStart),
+                overflowX: style.overflowX,
+                left: rect.left, right: rect.right,
+                pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              };
+            });
+            const label = width + 'px ' + dir + ' ' + font + 'px';
+            expect(metrics.block, label + ' block inset').toBeCloseTo(Math.min(font, 32), 1);
+            expect(metrics.inline, label + ' inline inset').toBeCloseTo(Math.min(font * 1.25, 24), 1);
+            expect(metrics.overflowX, label + ' native scrolling').toBe('auto');
+            expect(metrics.pageOverflow, label + ' document overflow').toBeLessThanOrEqual(1);
+            expect(metrics.left, label + ' left edge').toBeGreaterThanOrEqual(-1);
+            expect(metrics.right, label + ' right edge').toBeLessThanOrEqual(width + 1);
+          }
+          if (width === 390 && dir === 'rtl' && font === 64) {
+            await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+            await code.scrollIntoViewIfNeeded();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-code-bounded-390-rtl-400.png' });
+            await page.emulateMedia({ forcedColors: 'active' });
+            await pre.focus();
+            await expect(pre).toBeFocused();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-preformatted-bounded-390-rtl-400-forced-colors.png' });
+            await page.emulateMedia({ forcedColors: 'none' });
+          }
+          if (width === 1440 && dir === 'ltr' && font === 16) {
+            await code.scrollIntoViewIfNeeded();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-code-bounded-1440-ltr.png' });
+          }
+        }
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.locator('html').evaluate(root => { root.dir = 'ltr'; root.style.fontSize = '200%'; });
     await pre.focus();
     await expect(pre).toBeFocused();
     await page.keyboard.press('ArrowRight');
