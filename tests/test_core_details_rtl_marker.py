@@ -10,12 +10,12 @@ class CoreDetailsRTLMarker(unittest.TestCase):
     def test_editor_only_logical_inset_without_core_interactivity_override(self):
         css = (ROOT / "assets/css/core-details.css").read_text(encoding="utf-8")
         self.assertIn(
-            ".editor-styles-wrapper .wp-block-details>summary"
-            "{padding-inline-start:min(.75em,24px)}", css
+            ".editor-styles-wrapper &{padding-inline-start:min(.75em,24px)}", css
         )
         self.assertIn("min-block-size:var(--slateframe-control)", css)
         self.assertIn("cursor:pointer", css)
-        self.assertLessEqual(len(css.encode("utf-8")), 550)
+        self.assertIn("&:focus-visible{outline:2px solid currentColor;outline-offset:2px}", css)
+        self.assertLessEqual(len(css.encode("utf-8")), 400)
         for forbidden in ("!important", "display:none", "list-style:none", "direction:rtl"):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, css)
