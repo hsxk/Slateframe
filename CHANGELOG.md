@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Bind exact-SHA Browser/Photography screenshots, reports, manifests and logs to their reviewed fixture-relative locations; reject disguised metadata and non-canonical ZIP path aliases. Add ten positive/adversarial regressions while preserving runtime theme files, CI budgets and manual visual inspection.
+
 - Harden exact-SHA release artifact auditing with a strict WordPress theme payload allowlist: reject hidden/private files, source maps, unexpected directories, unreviewed root PHP templates and executable files in image folders; retain native Core templates, conditional CSS, vanilla JS and translations. Also reject stray private files in Browser/Photography evidence ZIPs; add eleven adversarial/positive regression tests without changing runtime assets or CI thresholds.
 
 - Add a dependency-free offline Actions artifact auditor with exact-HEAD Browser/Photography screenshot provenance, ZIP/PNG integrity, nested WordPress.org distribution checks, and eleven adversarial regression cases; manual screenshot inspection remains required.

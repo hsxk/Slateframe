@@ -23,8 +23,12 @@ inside the distributable. It also rejects hidden files, unexpected directories,
 source maps, executables in image folders, and files outside the explicit
 WordPress theme distribution layout. Normal Core PHP templates, conditional
 CSS, vanilla JS, placeholder images, and translation catalogs remain allowed.
-The Browser and Photography evidence archives likewise reject unexpected
-non-PNG files outside their reviewed manifest, report, and server-log files;
+The Browser and Photography evidence archives bind every screenshot to the
+exact manifest directory, and require review HTML, reports, logs, and manifests
+at their expected fixture-relative locations. A renamed secret cannot bypass
+the check merely by using a whitelisted basename. Non-canonical ZIP paths
+(including redundant separators and dot segments) are also rejected. They
+likewise reject unexpected non-PNG files outside the reviewed locations;
 this prevents stray private files from being silently included in artifacts.
 New distributable file types, directories, or evidence metadata require an
 intentional auditor contract update with positive and negative tests. It fails closed on missing,
