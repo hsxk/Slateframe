@@ -93,7 +93,7 @@ class MenuFallback(unittest.TestCase):
         self.assertEqual(data['html'].count('href="https://example.org/"'), 1)
 
     def test_whitespace_static_front_page_list_keeps_home(self):
-        data = render({'show_on_front': 'page', 'page_on_front': 17}, False, '  \\n\\t ')
+        data = render({'show_on_front': 'page', 'page_on_front': 17}, False, '  \n\t ')
         self.assertIn('slateframe-home-link', data['html'])
         self.assertNotIn('current_page_item', data['html'])
         self.assertNotIn('aria-current="page"', data['html'])
