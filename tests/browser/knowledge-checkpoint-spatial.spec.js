@@ -90,5 +90,18 @@ test('Knowledge checkpoint roundtrips as valid native Gutenberg blocks',async ({
     const framed=await page.locator('iframe[name="editor-canvas"]').count()>0;
     const canvas=framed?page.frameLocator('iframe[name="editor-canvas"]'):page;
     await expect(canvas.locator('.editor-styles-wrapper .slateframe-knowledge-checklist')).toBeVisible();
+    const marker = canvas.locator('.editor-styles-wrapper .is-style-slateframe-checklist > li').first();
+    await expect(marker).toBeVisible();
+    const geometry = await marker.evaluate(node => ({
+      padding: parseFloat(getComputedStyle(node).paddingInlineStart),
+      font: parseFloat(getComputedStyle(node, '::before').fontSize),
+      content: getComputedStyle(node, '::before').content,
+    }));
+    expect(geometry.padding).toBeGreaterThan(0);
+    expect(geometry.padding).toBeLessThanOrEqual(36);
+    expect(geometry.font).toBeGreaterThan(0);
+    expect(geometry.font).toBeLessThanOrEqual(24);
+    expect(geometry.content).not.toBe('none');
+
   } finally { wp('post','delete',id,'--force'); }
 });

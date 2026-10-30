@@ -210,3 +210,82 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
     });
   });
 });
+
+
+test('native Core checklist keeps a bounded marker and readable text column at 400% zoom', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One WordPress fixture covers seven widths');
+  test.setTimeout(180000);
+  const { setRootTextScale } = require('./support/root-text-scale');
+  const AxeBuilder = require('@axe-core/playwright').default;
+  await withFixture(page, async () => {
+    const checklist = page.locator('.slateframe-prose .is-style-slateframe-checklist').first();
+    const item = checklist.locator(':scope > li').first();
+    await expect(item).toBeVisible();
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const dir of ['ltr', 'rtl']) {
+        for (const font of [16, 32, 64]) {
+          await setRootTextScale(page, font, dir);
+          const state = await item.evaluate(node => {
+            const style = getComputedStyle(node);
+            const marker = getComputedStyle(node, '::before');
+            const box = node.getBoundingClientRect();
+            return {
+              root: parseFloat(getComputedStyle(document.documentElement).fontSize),
+              itemFont: parseFloat(style.fontSize),
+              padding: parseFloat(style.paddingInlineStart),
+              markerFont: parseFloat(marker.fontSize),
+              markerInset: style.direction === 'rtl' ? marker.right : marker.left,
+              markerContent: marker.content,
+              listPadding: parseFloat(getComputedStyle(node.parentElement).paddingInlineStart),
+              nestedMarker: getComputedStyle(node.querySelector('ul')).listStyleType,
+              left: box.left, right: box.right,
+              overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            };
+          });
+          const label = width + 'px ' + dir + ' ' + font + 'px';
+          expect(state.root, label + ' root font').toBeCloseTo(font, 1);
+          expect(state.padding, label + ' bounded checklist gutter')
+            .toBeCloseTo(Math.min(font * 1.65, 36), 1);
+          expect(state.markerFont, label + ' bounded decorative checkmark')
+            .toBeCloseTo(Math.min(state.itemFont, 24), 1);
+          expect(state.markerInset, label + ' logical start').toBe('0px');
+          expect(state.markerContent, label + ' checkmark retained').not.toBe('none');
+          expect(state.listPadding, label + ' Core list reset').toBeLessThanOrEqual(1);
+          expect(state.nestedMarker, label + ' native nested bullet').not.toBe('none');
+          expect(state.left, label + ' left containment').toBeGreaterThanOrEqual(-1);
+          expect(state.right, label + ' right containment').toBeLessThanOrEqual(width + 1);
+          expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          if (width === 390 && font === 64) {
+            await item.evaluate(node => node.scrollIntoView({ block: 'start' }));
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/knowledge-checklist-marker-390-' + dir + '-400.png' });
+          }
+        }
+      }
+    }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await setRootTextScale(page, 16, 'ltr');
+    await item.evaluate(node => node.scrollIntoView({ block: 'start' }));
+    await page.screenshot({ fullPage: false,
+      path: 'test-artifacts/screenshots/knowledge-checklist-marker-1440-ltr.png' });
+    await page.setViewportSize({ width: 390, height: 900 });
+    await setRootTextScale(page, 64, 'rtl');
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    const axe = await new AxeBuilder({ page }).include('.is-style-slateframe-checklist')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(axe.violations).toEqual([]);
+    const forced = await item.evaluate(node => ({
+      color: getComputedStyle(node, '::before').color,
+      nested: getComputedStyle(node.querySelector('ul')).listStyleType,
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    }));
+    expect(forced.color).not.toBe('transparent');
+    expect(forced.nested).not.toBe('none');
+    expect(forced.overflow).toBeLessThanOrEqual(1);
+    await item.evaluate(node => node.scrollIntoView({ block: 'start' }));
+    await page.screenshot({ fullPage: false,
+      path: 'test-artifacts/screenshots/knowledge-checklist-marker-390-rtl-400-forced-colors.png' });
+  });
+});
