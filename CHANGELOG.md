@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Add authenticated Gutenberg Core Tabs serialization regression for native block hierarchy, multilingual labels, stable parse/serialize, and non-destructive 390/1440px editor checks; no runtime assets or proprietary blocks.
+
 - Bound native Core Code and Preformatted block/inline padding to 32px/24px at 400% text enlargement while preserving 16px spacing, horizontal keyboard scrolling, RTL/CJK, forced-colors and Gutenberg Core markup. Add real WordPress 42-state browser checks and exact-viewport screenshot evidence without new runtime assets or relaxed CSS budgets.
 
 - Bound native Core Quote and disclosure-style Details inline spacing at 400% text enlargement to 24px, preserving normal 16px layout, RTL/CJK, Core plain quote, summary keyboard semantics, Gutenberg, and the unchanged CSS budget; extend real WordPress 42-state regressions.
