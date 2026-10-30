@@ -33,6 +33,8 @@ def open_archive(path, limit=512 * 1024 * 1024):
     for member in archive.infolist():
         name = member.filename
         parts = PurePosixPath(name).parts
+        require(name == "/".join(parts) + ("/" if member.is_dir() else ""),
+                "non-canonical ZIP path: " + name)
         require(name not in names, "duplicate ZIP entry: " + name)
         names.add(name)
         require(bool(parts) and not name.startswith("/") and ".." not in parts
@@ -105,14 +107,46 @@ def evidence(archive, manifest, expected, identity_key):
 
 
 
-def audit_evidence_payload(archive, allowed_metadata):
-    """Prevent unrelated files from leaking through visual evidence ZIPs."""
+def audit_evidence_payload(archive, manifest, kind):
+    """Bind every evidence file to the real fixture layout, not its basename."""
+    require(kind in ("browser", "photography"), "unknown visual evidence kind")
+    folder = "screenshots" if kind == "browser" else "photography-lightbox"
+    marker = "/test-artifacts/" + folder + "/"
+    manifest_path = unique_suffix(archive, manifest)
+    require(marker in manifest_path, "unexpected visual manifest location")
+    root, _, tail = manifest_path.partition(marker)
+    require(bool(root) and tail == manifest, "unexpected visual manifest location")
+    image_root = root + marker
+    metadata = {
+        image_root + manifest,
+        root + "/playwright-report/index.html",
+    }
+    if kind == "browser":
+        metadata.update({
+            image_root + "HEAD_SHA.txt",
+            image_root + "VISUAL_EVIDENCE.json",
+            root + "/test-artifacts/browser-review.html",
+            "tmp/slateframe-server.log",
+        })
+    else:
+        metadata.update({
+            image_root + "playwright-results.json",
+            root + "/test-artifacts/photography-review.html",
+            "tmp/slateframe-photo-server.log",
+        })
     for member in archive.infolist():
-        if member.is_dir() or member.filename.endswith(".png"):
+        if member.is_dir():
+            require(member.filename.startswith(root + "/"),
+                    "unexpected visual artifact directory: " + member.filename)
             continue
-        basename = member.filename.rsplit("/", 1)[-1]
-        require(basename in allowed_metadata,
-                "unexpected visual artifact file: " + member.filename)
+        name = member.filename
+        if name.endswith(".png"):
+            require(name.startswith(image_root)
+                    and "/" not in name[len(image_root):]
+                    and len(name) > len(image_root),
+                    "unexpected visual screenshot path: " + name)
+        else:
+            require(name in metadata, "unexpected visual artifact file: " + name)
 
 
 def audit_theme_paths(theme):
@@ -166,15 +200,8 @@ def audit(browser, photo, distribution, head):
     with open_archive(browser) as b, open_archive(photo) as p, open_archive(distribution, 10 * 1024 * 1024) as d:
         require(b.read(unique_suffix(b, "HEAD_SHA.txt")).decode("ascii").strip() == head,
                 "browser HEAD mismatch")
-        audit_evidence_payload(b, {
-            "HEAD_SHA.txt", "BROWSER_SCREENSHOT_INVENTORY.json",
-            "VISUAL_EVIDENCE.json", "browser-review.html", "index.html",
-            "slateframe-server.log",
-        })
-        audit_evidence_payload(p, {
-            "gallery-evidence-manifest.json", "playwright-results.json",
-            "photography-review.html", "index.html", "slateframe-photo-server.log",
-        })
+        audit_evidence_payload(b, "BROWSER_SCREENSHOT_INVENTORY.json", "browser")
+        audit_evidence_payload(p, "gallery-evidence-manifest.json", "photography")
         browser_count = evidence(b, "BROWSER_SCREENSHOT_INVENTORY.json", head, "head_sha")
         photo_count = evidence(p, "gallery-evidence-manifest.json", head, "commit")
         require(set(d.namelist()) == {"slateframe.zip", "HEAD_SHA.txt", "SHA256SUMS"},
