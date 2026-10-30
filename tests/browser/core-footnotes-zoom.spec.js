@@ -47,6 +47,9 @@ test('Core Footnotes keep native backlinks and bounded RTL/CJK 400% reading widt
   await block.evaluate(n=>n.scrollIntoView({block:'start'}));
   await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/core-footnotes-390-rtl-400-forced-colors.png'});
   await page.emulateMedia({forcedColors:'none'});
+  await page.emulateMedia({media:'print'});
+  expect(await back.evaluate(n=>getComputedStyle(n).display)).toBe('inline');
+  await page.emulateMedia({media:'screen'});
   await page.setViewportSize({width:1440,height:900});await setRootTextScale(page,16,'ltr');
   await block.evaluate(n=>n.scrollIntoView({block:'start'}));
   await page.screenshot({fullPage:false,path:'test-artifacts/screenshots/core-footnotes-1440-ltr.png'});

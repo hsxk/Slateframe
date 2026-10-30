@@ -18,6 +18,7 @@ class CoreFootnotesZoomContract(unittest.TestCase):
         self.assertNotIn('& .wp-block-footnotes{padding-inline-start:1.35rem',reading)
         self.assertLessEqual(len(reading.encode()),7000)
         self.assertLessEqual(len(css.encode()),900)
+        self.assertIn('@media screen{',css)
 
     def test_real_wordpress_matrix_and_gutenberg(self):
         spec=(ROOT/'tests/browser/core-footnotes-zoom.spec.js').read_text()
