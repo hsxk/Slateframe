@@ -361,16 +361,24 @@ function slateframe_pagination() {
  * shape to wp_nav_menu() output, which simplifies responsive navigation.
  */
 function slateframe_menu_fallback() {
-	$pages = wp_list_pages(
-		array(
-			'echo'     => false,
-			'title_li' => '',
-		)
+	// The static front page already has a dedicated Home link; do not repeat it.
+	$front_page_id = 0;
+	if ( 'page' === get_option( 'show_on_front' ) ) {
+		$front_page_id = slateframe_positive_int( get_option( 'page_on_front' ) );
+	}
+	$page_args = array(
+		'echo'     => false,
+		'title_li' => '',
 	);
+	if ( $front_page_id ) {
+		$page_args['exclude'] = (string) $front_page_id;
+	}
+	$pages = wp_list_pages( $page_args );
 
 	printf(
-		'<ul class="slateframe-menu-fallback"><li class="page_item slateframe-home-link"><a href="%1$s">%2$s</a></li>%3$s</ul>',
+		'<ul class="slateframe-menu-fallback"><li class="page_item slateframe-home-link"><a href="%1$s"%2$s>%3$s</a></li>%4$s</ul>',
 		esc_url( home_url( '/' ) ),
+		is_front_page() ? ' aria-current="page"' : '',
 		esc_html__( 'Home', 'slateframe' ),
 		wp_kses_post( is_string( $pages ) ? $pages : '' )
 	);
