@@ -110,8 +110,13 @@ def audit_theme_paths(theme):
         "assets", "assets/css", "assets/js", "assets/images",
         "assets/fonts", "inc", "patterns", "template-parts", "languages",
     }
-    root_files = {"LICENSE", "readme.txt", "theme.json", "screenshot.png",
-                  "style.css", "rtl.css"}
+    root_files = {
+        "LICENSE", "readme.txt", "theme.json", "screenshot.png",
+        "style.css", "rtl.css", "404.php", "archive.php", "attachment.php",
+        "author.php", "comments.php", "footer.php", "functions.php",
+        "header.php", "index.php", "page.php", "search.php",
+        "searchform.php", "single.php",
+    }
     extensions = {
         "assets/css": {".css"},
         "assets/js": {".js"},
@@ -139,7 +144,7 @@ def audit_theme_paths(theme):
             continue
         suffix = PurePosixPath(relative[-1]).suffix.lower()
         if not parent:
-            permitted = relative[-1] in root_files or suffix == ".php"
+            permitted = relative[-1] in root_files
         else:
             permitted = parent in extensions and suffix in extensions[parent]
         require(permitted, "non-distributable theme file: " + member.filename)
