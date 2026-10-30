@@ -381,7 +381,7 @@ class ArtifactAudit(unittest.TestCase):
     def check_png_chunk_contract(self, chunks, *, depth=8, color=2, error=None):
         """Check PNG chunk ordering through the full exact-SHA evidence auditor."""
         header = struct.pack(">IIBBBBB", 1, 1, depth, color, 0, 0, 0)
-        picture = (b"\x89PNG\\r\\n\x1a\\n" + chunk(b"IHDR", header)
+        picture = (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header)
                    + b"".join(chunks) + chunk(b"IEND"))
         self.replace_browser_png(picture)
         if error:
