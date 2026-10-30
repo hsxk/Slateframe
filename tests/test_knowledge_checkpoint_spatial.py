@@ -12,7 +12,7 @@ class KnowledgeCheckpointSpatialContract(unittest.TestCase):
         for block in ('wp:group','wp:columns','wp:column','wp:list','wp:quote'):
             self.assertIn(block,pattern)
         self.assertNotIn('wp:html',pattern)
-        self.assertIn('.slateframe-knowledge-checklist .slateframe-learning-checkpoint>.wp-block-column{min-inline-size:0;padding:min(1rem,20px);border-inline-start:var(--slateframe-rule);overflow-wrap:anywhere}',css)
+        self.assertIn('.slateframe-knowledge-checklist .slateframe-learning-checkpoint{gap:0;margin-block:var(--slateframe-heading-gap);border-block:var(--slateframe-rule);&>.wp-block-column{min-inline-size:0;padding:min(1rem,20px);border-inline-start:var(--slateframe-rule);overflow-wrap:anywhere;&:first-child{border-inline-start:0}}',css)
         self.assertIn('.slateframe-learning-checkpoint:not(.is-not-stacked-on-mobile)>.wp-block-column{padding-inline:0;',css)
         self.assertNotIn('padding:clamp(1rem,2.5vw,1.5rem)',css)
         self.assertLessEqual(len(css.encode('utf-8')),7000)
