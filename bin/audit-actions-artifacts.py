@@ -55,31 +55,66 @@ def unique_suffix(archive, suffix):
     return matches[0]
 
 
+ADAM7 = ((0, 0, 8, 8), (4, 0, 8, 8), (0, 4, 4, 8), (2, 0, 4, 4),
+         (0, 2, 2, 4), (1, 0, 2, 2), (0, 1, 1, 2))
+PNG_INFLATE_LIMIT = 128 * 1024 * 1024
+
+
 def png_dimensions(data):
+    """Validate PNG structure, CRC and bounded, fully decoded scanline stream."""
     require(data.startswith(PNG), "invalid PNG signature")
-    offset, dimensions, saw_data, ended = 8, None, False, False
+    offset, header, compressed, ended = 8, None, [], False
     while offset < len(data):
         require(offset + 12 <= len(data), "truncated PNG chunk")
         size = struct.unpack_from(">I", data, offset)[0]
         end = offset + size + 12
         require(end <= len(data), "truncated PNG payload")
         kind = data[offset + 4:offset + 8]
-        require((zlib.crc32(data[offset + 4:end - 4]) & 0xffffffff)
+        payload = data[offset + 8:end - 4]
+        require((zlib.crc32(kind + payload) & 0xffffffff)
                 == struct.unpack_from(">I", data, end - 4)[0], "PNG CRC mismatch")
-        if dimensions is None:
+        if header is None:
             require(kind == b"IHDR" and size == 13, "missing PNG IHDR")
-            width, height = struct.unpack_from(">II", data, offset + 8)
-            require(0 < width <= 8192 and 0 < height <= 50000, "invalid PNG dimensions")
-            dimensions = (width, height)
+            header = struct.unpack(">IIBBBBB", payload)
         elif kind == b"IDAT":
-            saw_data = True
+            compressed.append(payload)
         elif kind == b"IEND":
             require(size == 0 and end == len(data), "invalid PNG end")
             ended = True
             break
         offset = end
-    require(saw_data and ended, "incomplete PNG")
-    return dimensions
+    require(ended and compressed, "incomplete PNG")
+    width, height, depth, color, compression, filtering, interlace = header
+    require(0 < width <= 8192 and 0 < height <= 50000, "invalid PNG dimensions")
+    formats = {0: (1, (1, 2, 4, 8, 16)), 2: (3, (8, 16)),
+               3: (1, (1, 2, 4, 8)), 4: (2, (8, 16)),
+               6: (4, (8, 16))}
+    require(color in formats and depth in formats[color][1]
+            and compression == 0 and filtering == 0 and interlace in (0, 1),
+            "invalid PNG IHDR")
+    bits_per_pixel = formats[color][0] * depth
+    passes = ((0, 0, 1, 1),) if interlace == 0 else ADAM7
+    scanlines = []
+    for x, y, step_x, step_y in passes:
+        pass_width = (width - x + step_x - 1) // step_x if width > x else 0
+        pass_height = (height - y + step_y - 1) // step_y if height > y else 0
+        if pass_width and pass_height:
+            scanlines.extend([1 + (pass_width * bits_per_pixel + 7) // 8] * pass_height)
+    expected = sum(scanlines)
+    require(expected <= PNG_INFLATE_LIMIT, "oversized PNG decoded payload")
+    try:
+        decoder = zlib.decompressobj()
+        pixels = decoder.decompress(b"".join(compressed), expected + 1)
+    except zlib.error as exc:
+        raise ValueError("invalid PNG zlib stream") from exc
+    require(len(pixels) == expected and decoder.eof
+            and not decoder.unused_data and not decoder.unconsumed_tail,
+            "incomplete or oversized PNG scanlines")
+    position = 0
+    for length in scanlines:
+        require(pixels[position] <= 4, "invalid PNG scanline filter")
+        position += length
+    return width, height
 
 
 def evidence(archive, manifest, expected, identity_key):
