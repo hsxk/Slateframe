@@ -45,3 +45,20 @@ main merge-SHA success. The tool only checks artifact integrity, not
 pixel semantics, accessibility tree, Safari/VoiceOver, or user-device behavior.
 
 The PNG inflate limit is 128 MiB per image; oversized or incomplete compressed streams, trailing compressed garbage, and invalid filter bytes are rejected even if an attacker recalculates both PNG CRCs and manifest SHA-256. This validates image decodability, not visual quality or assistive technology behavior.
+
+## Mandatory visual-state coverage
+
+The Browser smoke job now checks its exact-HEAD screenshot inventory with
+`bin/check-visual-coverage.py` **after** generating and verifying the inventory
+and **before** uploading the artifact. The 98 required screenshot states cover
+compact/default/spacious Appearance, all seven 320–1920px breakpoints,
+LTR and RTL forced colors, Portfolio, Knowledge, Photography and Core Lightbox,
+Search/empty results, Gutenberg, Article, Header, Core Forms, Footer and CJK.
+Full-viewport screenshots must have their named viewport width; Core element
+screenshots may be narrower. Missing states, stale HEADs, invalid heights and
+wrong viewport widths fail the job. The script uses only the standard library.
+
+For a downloaded Browser artifact, extract its `BROWSER_SCREENSHOT_INVENTORY.json`
+and run `python3 bin/check-visual-coverage.py --manifest INVENTORY.json --head FULL_SHA`.
+This check supplements, never replaces, the complete ZIP/PNG provenance audit,
+Axe/keyboard/zoom/forced-colors assertions or manual review of real screenshots.
