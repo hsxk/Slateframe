@@ -27,6 +27,17 @@ class CorePullquoteParity(unittest.TestCase):
             self.assertNotIn(forbidden, css)
         self.assertNotIn('render_block_core/pullquote', php)
 
+    def test_bounded_400_percent_spacing(self):
+        reading = (ROOT / 'assets/css/reading.css').read_text()
+        browser = (ROOT / 'tests/browser/core-pullquote-parity.spec.js').read_text()
+        self.assertIn('padding-block:min(clamp(1.4rem,3vw,2.4rem),40px)', reading)
+        self.assertNotIn('padding-block:clamp(1.4rem,3vw,2.4rem)', reading)
+        self.assertLessEqual(len(reading.encode('utf-8')), 7000)
+        self.assertIn('blockPadding: parseFloat(css.paddingBlockStart)', browser)
+        self.assertIn('Math.min(corePadding, 40)', browser)
+        self.assertIn('font * 1.4', browser)
+        self.assertIn('width * .03', browser)
+
     def test_wordpress_evidence_and_gutenberg(self):
         js = (ROOT / 'tests/browser/core-pullquote-parity.spec.js').read_text()
         for expected in ("wp('post', 'create'", 'wp:pullquote', 'is-style-solid-color',

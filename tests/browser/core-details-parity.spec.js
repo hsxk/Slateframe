@@ -11,8 +11,8 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable WordPress post checks seven widths');
   test.setTimeout(150000);
   const slug = 'slateframe-details-' + randomUUID().slice(0, 12);
-  const content = '<!-- wp:details {"className":"slateframe-details-fixture"} -->' +
-    '<details class="wp-block-details slateframe-details-fixture"><summary>日本語 中文 العربية VeryLongUnbrokenEditorialDisclosureTokenRepeatedManyTimesVeryLongUnbrokenEditorialDisclosureTokenRepeatedManyTimes</summary>' +
+  const content = '<!-- wp:details {"className":"is-style-slateframe-disclosure slateframe-details-fixture"} -->' +
+    '<details class="wp-block-details is-style-slateframe-disclosure slateframe-details-fixture"><summary>日本語 中文 العربية VeryLongUnbrokenEditorialDisclosureTokenRepeatedManyTimesVeryLongUnbrokenEditorialDisclosureTokenRepeatedManyTimes</summary>' +
     '<!-- wp:paragraph --><p>Core disclosure content stays readable in every writing direction.</p><!-- /wp:paragraph -->' +
     '<!-- wp:buttons --><div class="wp-block-buttons"><!-- wp:button --><div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#slateframe-details-target">Read the following section</a></div><!-- /wp:button --></div><!-- /wp:buttons -->' +
     '</details><!-- /wp:details -->' +
@@ -46,7 +46,7 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
+        for (const font of [16, 32, 64]) {
           await setRootTextScale(page, font, dir);
           await root.evaluate(node => { node.open = true; });
           const state = await root.evaluate(node => ({
@@ -55,7 +55,8 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
             summary: node.querySelector('summary').getBoundingClientRect().toJSON(),
             summaryDisplay: getComputedStyle(node.querySelector('summary')).display,
             min: getComputedStyle(node.querySelector('summary')).minBlockSize,
-            wrap: getComputedStyle(node).overflowWrap
+            wrap: getComputedStyle(node).overflowWrap,
+            inlinePadding: parseFloat(getComputedStyle(node).paddingInlineStart)
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
           expect(state.overflow, label + ' horizontal document overflow').toBeLessThanOrEqual(1);
@@ -66,6 +67,9 @@ test('native Details disclosure keeps keyboard behavior and multilingual reflow'
           expect(state.summary.height, label + ' summary target').toBeGreaterThanOrEqual(43);
           expect(state.summaryDisplay, label + ' native disclosure marker').toBe('list-item');
           expect(state.wrap).toBe('anywhere');
+          const nativePadding = Math.max(font * .9, Math.min(width * .02, font * 1.25));
+          expect(state.inlinePadding, label + ' bounded disclosure inset')
+            .toBeCloseTo(Math.min(nativePadding, 24), 1);
           const target = await link.boundingBox();
           expect(target.width, label + ' nested link width').toBeGreaterThanOrEqual(43);
           expect(target.height, label + ' nested link height').toBeGreaterThanOrEqual(43);

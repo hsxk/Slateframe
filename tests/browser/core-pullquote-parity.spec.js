@@ -52,7 +52,7 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
-        for (const font of width === 390 ? [16, 32, 64] : [16, 32]) {
+        for (const font of [16, 32, 64]) {
           await setRootTextScale(page, font, dir);
           const state = await page.evaluate(() => {
             const box = selector => {
@@ -60,7 +60,7 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
               const css = getComputedStyle(node);
               return { rect: node.getBoundingClientRect().toJSON(),
                 border: parseFloat(css.borderInlineStartWidth),
-                padding: parseFloat(css.paddingInlineStart), wrap: css.overflowWrap };
+                padding: parseFloat(css.paddingInlineStart), blockPadding: parseFloat(css.paddingBlockStart), wrap: css.overflowWrap };
             };
             return { overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               standard: box('.slateframe-pullquote-default'), solid: box('.slateframe-pullquote-solid') };
@@ -71,6 +71,11 @@ test('native Pullquote solid variant preserves citations, keyboard order and mul
             expect(quote.rect.left, label + ' left bound').toBeGreaterThanOrEqual(-1);
             expect(quote.rect.right, label + ' right bound').toBeLessThanOrEqual(width + 1);
             expect(quote.wrap).toBe('anywhere');
+            // WordPress Core retains its 16px rhythm; 200–400% text must not
+            // inflate vertical whitespace beyond the 40px Spatial cap.
+            const corePadding = Math.max(font * 1.4, Math.min(width * .03, font * 2.4));
+            expect(quote.blockPadding, label + ' bounded block padding')
+              .toBeCloseTo(Math.min(corePadding, 40), 1);
           }
           if (font === 16) await page.screenshot({ fullPage: true,
             path: 'test-artifacts/screenshots/core-pullquote-' + width + '-' + dir + '.png' });
