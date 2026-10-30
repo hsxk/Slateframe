@@ -113,6 +113,8 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
       const canvas = node.closest('.editor-styles-wrapper');
       return {
         overflow: canvas.scrollWidth - canvas.clientWidth,
+        summaryPadding: [...node.querySelectorAll('details > summary')].map(summary =>
+          parseFloat(getComputedStyle(summary).paddingInlineStart)),
         clipped: [...node.querySelectorAll('h2, p, summary')].flatMap(child => {
           if (!child.getClientRects().length) return [];
           const box = child.getBoundingClientRect();
@@ -127,6 +129,10 @@ test('registered Core FAQ stays valid and bounded in Gutenberg', async ({ page }
     });
     expect(zoomBounds.overflow).toBeLessThanOrEqual(1);
     expect(zoomBounds.clipped).toEqual([]);
+    expect(zoomBounds.summaryPadding).toHaveLength(3);
+    for (const padding of zoomBounds.summaryPadding) {
+      expect(padding, 'RTL native disclosure marker inset at 200%').toBeGreaterThanOrEqual(16);
+    }
     await faq.screenshot({ path: 'test-artifacts/screenshots/gutenberg-knowledge-faq-390-rtl-200-forced-colors.png' });
     // At 200% zoom, the last paragraph may sit below Gutenberg's inner viewport.
     // Preserve separate evidence of its actual text rather than accepting a partial block image.
