@@ -19,8 +19,13 @@ The utility validates all ZIP CRCs, unsafe entries and duplicate paths,
 manifest/HEAD identity, the exact screenshot inventory, per-PNG SHA-256,
 PNG CRC and dimensions, the nested theme checksum, Theme Name/Text Domain,
 the 1200×900 WordPress.org screenshot, and absence of symlink/path traversal
-inside the distributable. It fails closed on missing, stale, or tampered
-evidence. Unit tests cover malicious and corrupted fixtures.
+inside the distributable. It also rejects hidden files, unexpected directories,
+source maps, executables in image folders, and files outside the explicit
+WordPress theme distribution layout. Normal Core PHP templates, conditional
+CSS, vanilla JS, placeholder images, and translation catalogs remain allowed.
+New distributable file types or directories require an intentional auditor
+contract update with positive and negative tests. It fails closed on missing,
+stale, or tampered evidence. Unit tests cover malicious and corrupted fixtures.
 
 **Passing this tool does not mean visual approval.** Reviewers must still
 actually open genuine WordPress/Chromium screenshots for Appearance
