@@ -159,11 +159,12 @@ test('Core knowledge steps keep a bounded 44px badge gutter at computed 400% zoo
           expect(result.control, label + ' Appearance control floor').toBeGreaterThanOrEqual(44);
           expect(result.control, label + ' Appearance control ceiling').toBeLessThanOrEqual(56);
           expect(result.badgeWidth, label + ' badge minimum').toBeGreaterThanOrEqual(result.control - 1);
-          expect(result.badgeWidth, label + ' badge bounded').toBeLessThanOrEqual(Math.max(44, font * 1.3) + 1);
+          expect(result.badgeWidth, label + ' 64px badge ceiling').toBeLessThanOrEqual(65);
+          expect(result.badgeWidth, label + ' badge bounded').toBeLessThanOrEqual(Math.min(64, Math.max(result.control, font * 1.3)) + 1);
           expect(result.badgeHeight, label + ' badge square').toBeCloseTo(result.badgeWidth, 0);
           expect(result.minHeight, label + ' reserve badge height').toBeGreaterThanOrEqual(result.badgeHeight - 1);
           expect(result.padding, label + ' badge and text do not overlap')
-            .toBeGreaterThanOrEqual(result.badgeWidth + font * .75 - 1);
+            .toBeCloseTo(result.badgeWidth + Math.min(font * .75, 20), 0);
           expect(result.markerInset, label + ' logical badge start').toBe('0px');
           expect(result.nested, label + ' native nested bullets').not.toBe('none');
           expect(result.badgeFont, label + ' computed counter font').toBeCloseTo(font * .72, 0);

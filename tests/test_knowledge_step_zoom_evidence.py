@@ -34,13 +34,15 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
         self.assertIn("& :is(ul,ol):not(:where(.is-style-slateframe-steps,.is-style-slateframe-checklist)){padding-inline-start:1.35em}", reading)
         self.assertNotIn("& :is(ul,ol){padding-inline-start:1.35em}", reading)
         self.assertLessEqual(len(reading.encode("utf-8")), 7000)
-        self.assertIn("--slateframe-step:max(var(--slateframe-control),1.3rem)", css)
+        self.assertIn("--slateframe-step:clamp(var(--slateframe-control),1.3rem,64px)", css)
+        self.assertNotIn("--slateframe-step:max(var(--slateframe-control),1.3rem)", css)
         self.assertIn("min-block-size:var(--slateframe-step)", css)
-        self.assertIn("padding-inline-start:calc(var(--slateframe-step) + var(--slateframe-component-gap))", css)
+        self.assertIn("padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))", css)
+        self.assertNotIn("padding-inline-start:calc(var(--slateframe-step) + var(--slateframe-component-gap))", css)
         self.assertIn("inline-size:var(--slateframe-step);block-size:var(--slateframe-step)", css)
         self.assertIn("inset-inline-start:0", css)
         self.assertIn("'assets/css/content-modes.css'", bootstrap)
-        self.assertIn(".editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + var(--slateframe-component-gap))}", editor)
+        self.assertIn(".editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))}", editor)
         self.assertNotIn("2.15rem", editor)
         self.assertLessEqual(len(editor.encode("utf-8")), 5000)
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
@@ -57,6 +59,8 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
             "forcedColors: 'active'",
             "fullPage: false",
             "badge and text do not overlap",
+            "64px badge ceiling",
+            "Math.min(font * .75, 20)",
             "native nested bullets",
             "for (const font of [16, 32, 64])",
             "nested list right",

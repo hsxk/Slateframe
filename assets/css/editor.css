@@ -103,4 +103,4 @@
 /* Natural tracking for CJK Gutenberg post titles. */
 .editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
 
-.editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + var(--slateframe-component-gap))}
+.editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))}
