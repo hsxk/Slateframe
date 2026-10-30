@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Keep native Core Knowledge Steps counters and their logical text gutter compact at 400% zoom: cap the badge at 64px and its following gap at 20px while preserving the 44–56px Appearance floor, RTL/CJK, nested Core lists and Gutenberg parity. Extend exact-computed browser and static contracts without adding assets or increasing CSS budgets.
+
 - Cap image-free Portfolio card top spacing at 40px under 200–400% text enlargement instead of 112px at 400%, while preserving 28px at the default size, Core Query Loop, Gutenberg parity, RTL/CJK, accessibility tests and the existing 7,000-byte CSS budget.
 
 - Keep image-free Portfolio cards readable at 200–400% text enlargement by bounding accent fallback logical inline padding at 20px while preserving the 16px baseline, native Query Loop, RTL/CJK, Gutenberg parity and unchanged 7,000-byte CSS budget; add real WordPress/Chromium visual and accessibility coverage.
