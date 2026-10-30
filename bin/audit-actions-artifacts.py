@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+"""Audit downloaded exact-HEAD Actions ZIPs without extracting untrusted paths.
+
+This validates provenance and file integrity, not visual quality. A human must
+still open the genuine WordPress/Chromium screenshots before approving a PR.
+"""
+import argparse
+import hashlib
+import io
+import json
+from pathlib import PurePosixPath
+import re
+import stat
+import struct
+import sys
+import zipfile
+import zlib
+
+SHA40 = re.compile(r"[0-9a-f]{40}\Z")
+SHA64 = re.compile(r"[0-9a-f]{64}\Z")
+PNG = b"\x89PNG\r\n\x1a\n"
+
+
+def require(condition, message):
+    if not condition:
+        raise ValueError(message)
+
+
+def open_archive(path, limit=512 * 1024 * 1024):
+    archive = zipfile.ZipFile(path)
+    names = set()
+    total = 0
+    for member in archive.infolist():
+        name = member.filename
+        parts = PurePosixPath(name).parts
+        require(name not in names, "duplicate ZIP entry: " + name)
+        names.add(name)
+        require(bool(parts) and not name.startswith("/") and ".." not in parts
+                and "\\" not in name and not any(ord(ch) < 32 for ch in name),
+                "unsafe ZIP path: " + name)
+        mode = (member.external_attr >> 16) & 0o170000
+        require(mode not in (stat.S_IFLNK, stat.S_IFCHR, stat.S_IFBLK,
+                             stat.S_IFIFO, stat.S_IFSOCK), "unsafe ZIP entry: " + name)
+        total += member.file_size
+        require(total <= limit, "oversized ZIP payload")
+    require(archive.testzip() is None, "ZIP CRC failure")
+    return archive
+
+
+def unique_suffix(archive, suffix):
+    matches = [name for name in archive.namelist() if name.endswith("/" + suffix) or name == suffix]
+    require(len(matches) == 1, "missing or ambiguous " + suffix)
+    return matches[0]
+
+
+def png_dimensions(data):
+    require(data.startswith(PNG), "invalid PNG signature")
+    offset, dimensions, saw_data, ended = 8, None, False, False
+    while offset < len(data):
+        require(offset + 12 <= len(data), "truncated PNG chunk")
+        size = struct.unpack_from(">I", data, offset)[0]
+        end = offset + size + 12
+        require(end <= len(data), "truncated PNG payload")
+        kind = data[offset + 4:offset + 8]
+        require((zlib.crc32(data[offset + 4:end - 4]) & 0xffffffff)
+                == struct.unpack_from(">I", data, end - 4)[0], "PNG CRC mismatch")
+        if dimensions is None:
+            require(kind == b"IHDR" and size == 13, "missing PNG IHDR")
+            width, height = struct.unpack_from(">II", data, offset + 8)
+            require(0 < width <= 8192 and 0 < height <= 50000, "invalid PNG dimensions")
+            dimensions = (width, height)
+        elif kind == b"IDAT":
+            saw_data = True
+        elif kind == b"IEND":
+            require(size == 0 and end == len(data), "invalid PNG end")
+            ended = True
+            break
+        offset = end
+    require(saw_data and ended, "incomplete PNG")
+    return dimensions
+
+
+def evidence(archive, manifest, expected, identity_key):
+    document = json.loads(archive.read(unique_suffix(archive, manifest)))
+    require(document.get(identity_key) == expected, "stale " + manifest)
+    records = document.get("screenshots")
+    require(isinstance(records, dict) and bool(records), "empty " + manifest)
+    paths = {name.rsplit("/", 1)[-1]: name for name in archive.namelist() if name.endswith(".png")}
+    require(len(paths) == len([name for name in archive.namelist() if name.endswith(".png")]),
+            "duplicate screenshot basenames")
+    require(set(paths) == set(records), "screenshot inventory differs from archive")
+    for name, meta in records.items():
+        require(re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*\.png", name) is not None,
+                "unsafe screenshot name")
+        raw = archive.read(paths[name])
+        digest = meta.get("sha256")
+        require(isinstance(digest, str) and SHA64.fullmatch(digest) is not None
+                and hashlib.sha256(raw).hexdigest() == digest, "screenshot digest mismatch: " + name)
+        require(png_dimensions(raw) == (meta.get("width"), meta.get("height")),
+                "screenshot viewport mismatch: " + name)
+        if "bytes" in meta:
+            require(len(raw) == meta["bytes"], "screenshot byte count mismatch: " + name)
+    return len(records)
+
+
+def audit(browser, photo, distribution, head):
+    require(SHA40.fullmatch(head) is not None, "expected a full lowercase HEAD SHA")
+    with open_archive(browser) as b, open_archive(photo) as p, open_archive(distribution, 10 * 1024 * 1024) as d:
+        require(b.read(unique_suffix(b, "HEAD_SHA.txt")).decode("ascii").strip() == head,
+                "browser HEAD mismatch")
+        browser_count = evidence(b, "BROWSER_SCREENSHOT_INVENTORY.json", head, "head_sha")
+        photo_count = evidence(p, "gallery-evidence-manifest.json", head, "commit")
+        require(set(d.namelist()) == {"slateframe.zip", "HEAD_SHA.txt", "SHA256SUMS"},
+                "unexpected distribution artifact contents")
+        require(d.read("HEAD_SHA.txt").decode("ascii").strip() == head,
+                "distribution HEAD mismatch")
+        theme_bytes = d.read("slateframe.zip")
+        theme_hash = hashlib.sha256(theme_bytes).hexdigest()
+        require(d.read("SHA256SUMS").decode("ascii").strip() == theme_hash + "  slateframe.zip",
+                "distribution checksum mismatch")
+        with open_archive(io.BytesIO(theme_bytes), 40 * 1024 * 1024) as theme:
+            require(all(name.startswith("slateframe/") for name in theme.namelist()),
+                    "unexpected theme ZIP root")
+            style = theme.read("slateframe/style.css").decode("utf-8")
+            require(re.search(r"(?m)^Theme Name: Slateframe$", style) is not None and
+                    re.search(r"(?m)^Text Domain: slateframe$", style) is not None,
+                    "invalid theme metadata")
+            require(png_dimensions(theme.read("slateframe/screenshot.png")) == (1200, 900),
+                    "invalid WordPress.org screenshot")
+            file_count = sum(not x.is_dir() for x in theme.infolist())
+    return {"head_sha": head, "browser_png": browser_count,
+            "photography_png": photo_count, "theme_files": file_count,
+            "theme_sha256": theme_hash}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--head", required=True)
+    parser.add_argument("--browser", required=True)
+    parser.add_argument("--photography", required=True)
+    parser.add_argument("--distribution", required=True)
+    args = parser.parse_args()
+    try:
+        result = audit(args.browser, args.photography, args.distribution, args.head)
+    except (ValueError, KeyError, OSError, zipfile.BadZipFile, UnicodeError, json.JSONDecodeError) as exc:
+        print("Artifact audit failed: " + str(exc), file=sys.stderr)
+        return 1
+    print(json.dumps(result, sort_keys=True))
+    print("Manual screenshot inspection remains mandatory.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
