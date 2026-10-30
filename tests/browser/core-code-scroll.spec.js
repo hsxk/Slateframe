@@ -123,7 +123,9 @@ test('native preformatted content stays readable and keyboard reachable across d
           }
           if (width === 390 && dir === 'rtl' && font === 64) {
             await fs.mkdir('test-artifacts/screenshots', { recursive: true });
-            await code.screenshot({ path: 'test-artifacts/screenshots/core-code-bounded-390-rtl-400.png' });
+            await code.scrollIntoViewIfNeeded();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-code-bounded-390-rtl-400.png' });
             await page.emulateMedia({ forcedColors: 'active' });
             await pre.focus();
             await expect(pre).toBeFocused();
@@ -132,7 +134,9 @@ test('native preformatted content stays readable and keyboard reachable across d
             await page.emulateMedia({ forcedColors: 'none' });
           }
           if (width === 1440 && dir === 'ltr' && font === 16) {
-            await code.screenshot({ path: 'test-artifacts/screenshots/core-code-bounded-1440-ltr.png' });
+            await code.scrollIntoViewIfNeeded();
+            await page.screenshot({ fullPage: false,
+              path: 'test-artifacts/screenshots/core-code-bounded-1440-ltr.png' });
           }
         }
       }
