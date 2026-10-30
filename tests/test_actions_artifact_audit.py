@@ -36,7 +36,7 @@ def crafted_png(width, height, raw, *, depth=8, color=2, interlace=0, compressed
     """Build a CRC-correct PNG with controllable IDAT for adversarial tests."""
     header = struct.pack(">IIBBBBB", width, height, depth, color, 0, 0, interlace)
     stream = zlib.compress(raw) if compressed is None else compressed
-    return (b"\x89PNG\\r\\n\x1a\\n" + chunk(b"IHDR", header)
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header)
             + chunk(b"IDAT", stream) + chunk(b"IEND"))
 
 
