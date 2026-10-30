@@ -32,6 +32,14 @@ def png(width=390, height=44):
             + chunk(b"IDAT", zlib.compress(pixels)) + chunk(b"IEND"))
 
 
+def crafted_png(width, height, raw, *, depth=8, color=2, interlace=0, compressed=None):
+    """Build a CRC-correct PNG with controllable IDAT for adversarial tests."""
+    header = struct.pack(">IIBBBBB", width, height, depth, color, 0, 0, interlace)
+    stream = zlib.compress(raw) if compressed is None else compressed
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", header)
+            + chunk(b"IDAT", stream) + chunk(b"IEND"))
+
+
 def zip_bytes(entries):
     target = io.BytesIO()
     with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
@@ -312,6 +320,62 @@ class ArtifactAudit(unittest.TestCase):
             self.check()
 
 
+
+    def replace_browser_png(self, picture):
+        self.browser[self.browser_name] = picture
+        key = "home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/BROWSER_SCREENSHOT_INVENTORY.json"
+        manifest = json.loads(self.browser[key])
+        record = manifest["screenshots"]["example.png"]
+        record["sha256"] = hashlib.sha256(picture).hexdigest()
+        record["width"], record["height"] = struct.unpack_from(">II", picture, 16)
+        record["bytes"] = len(picture)
+        self.browser[key] = json.dumps(manifest)
+        self.write()
+
+    def test_accepts_fully_inflated_rgb_png(self):
+        self.replace_browser_png(crafted_png(1, 1, b"\x00\x01\x02\x03"))
+        self.assertEqual(self.check()["browser_png"], 1)
+
+    def test_accepts_adam7_single_pixel(self):
+        self.replace_browser_png(crafted_png(1, 1, b"\x00\x01\x02\x03", interlace=1))
+        self.assertEqual(self.check()["browser_png"], 1)
+
+    def test_rejects_invalid_zlib_even_with_matching_sha_and_crc(self):
+        self.replace_browser_png(crafted_png(1, 1, b"", compressed=b"not-zlib"))
+        with self.assertRaisesRegex(ValueError, "invalid PNG zlib stream"):
+            self.check()
+
+    def test_rejects_truncated_zlib_even_with_matching_sha_and_crc(self):
+        stream = zlib.compress(b"\x00\x01\x02\x03")[:-2]
+        self.replace_browser_png(crafted_png(1, 1, b"", compressed=stream))
+        with self.assertRaisesRegex(ValueError, "incomplete or oversized PNG scanlines"):
+            self.check()
+
+    def test_rejects_extra_inflated_bytes(self):
+        self.replace_browser_png(crafted_png(1, 1, b"\x00\x01\x02\x03\x04"))
+        with self.assertRaisesRegex(ValueError, "incomplete or oversized PNG scanlines"):
+            self.check()
+
+    def test_rejects_trailing_compressed_garbage(self):
+        stream = zlib.compress(b"\x00\x01\x02\x03") + b"junk"
+        self.replace_browser_png(crafted_png(1, 1, b"", compressed=stream))
+        with self.assertRaisesRegex(ValueError, "incomplete or oversized PNG scanlines"):
+            self.check()
+
+    def test_rejects_invalid_png_filter_byte(self):
+        self.replace_browser_png(crafted_png(1, 1, b"\x05\x01\x02\x03"))
+        with self.assertRaisesRegex(ValueError, "invalid PNG scanline filter"):
+            self.check()
+
+    def test_rejects_invalid_png_color_type(self):
+        self.replace_browser_png(crafted_png(1, 1, b"\x00\x01\x02\x03", color=5))
+        with self.assertRaisesRegex(ValueError, "invalid PNG IHDR"):
+            self.check()
+
+    def test_rejects_excessive_png_inflate_size(self):
+        self.replace_browser_png(crafted_png(8192, 50000, b"\x00"))
+        with self.assertRaisesRegex(ValueError, "oversized PNG decoded payload"):
+            self.check()
 
 if __name__ == "__main__":
     unittest.main()
