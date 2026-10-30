@@ -23,8 +23,11 @@ inside the distributable. It also rejects hidden files, unexpected directories,
 source maps, executables in image folders, and files outside the explicit
 WordPress theme distribution layout. Normal Core PHP templates, conditional
 CSS, vanilla JS, placeholder images, and translation catalogs remain allowed.
-New distributable file types or directories require an intentional auditor
-contract update with positive and negative tests. It fails closed on missing,
+The Browser and Photography evidence archives likewise reject unexpected
+non-PNG files outside their reviewed manifest, report, and server-log files;
+this prevents stray private files from being silently included in artifacts.
+New distributable file types, directories, or evidence metadata require an
+intentional auditor contract update with positive and negative tests. It fails closed on missing,
 stale, or tampered evidence. Unit tests cover malicious and corrupted fixtures.
 
 **Passing this tool does not mean visual approval.** Reviewers must still
