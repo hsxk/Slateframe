@@ -6,4 +6,4 @@ The conditional `content-modes.css` presentation now caps the Project Brief's bl
 
 The real WordPress browser regression creates both registered patterns and checks 320, 375, 390, 412, 768, 1440 and 1920px, LTR/RTL and 16/32/64px roots (42 states). It asserts computed padding/margin, element containment, no document overflow, the 44–56px Appearance control bound, CJK/Arabic/long identifier wrapping, Axe, forced colors and Gutenberg block validity. Exact-HEAD 390×900 screenshots are mandatory and rejected when missing, symlinked, truncated, corrupt or incorrectly sized. 1440px LTR evidence is also captured. Isolated browser checks are not substitutes for GitHub Actions success and visual inspection.
 
-The strict `content-modes.css` 7,000-byte budget and existing aggregate performance budgets remain unchanged. Production deployment and legacy Time2Log code are out of scope.
+The strict `content-modes.css` 7,000-byte budget and existing aggregate performance budgets remain unchanged. Production deployment and personal-site code are out of scope.
