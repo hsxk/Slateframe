@@ -5,7 +5,7 @@ const fs=require('node:fs/promises');
 const {setRootTextScale}=require('./support/root-text-scale');
 const {openAuthenticatedEditor}=require('./support/editor-login');
 const wp=(...args)=>execFileSync('wp',[...args,'--path=/tmp/wp-browser'],{encoding:'utf8',timeout:30000}).trim();
-const content='<!-- wp:paragraph --><p>Native references <a id="slateframe-note-one-link" href="#slateframe-note-one">1</a> and <a id="slateframe-note-two-link" href="#slateframe-note-two">2</a>.</p><!-- /wp:paragraph --><!-- wp:footnotes /-->';
+const content='<!-- wp:paragraph --><p>Native references <sup data-fn="slateframe-note-one" class="fn"><a href="#slateframe-note-one" id="slateframe-note-one-link">1</a></sup> and <sup data-fn="slateframe-note-two" class="fn"><a href="#slateframe-note-two" id="slateframe-note-two-link">2</a></sup>.</p><!-- /wp:paragraph --><!-- wp:footnotes /-->';
 const notes=[{id:'slateframe-note-one',content:'日本語 中文 العربية '+'UnbrokenEvidenceIdentifier'.repeat(4)},{id:'slateframe-note-two',content:'Second note with <a href="https://example.org/reference">source link</a>.'}];
 const create=status=>{const id=wp('post','create','--post_type=post','--post_status='+status,'--post_title=Native Core Footnotes zoom','--post_content='+content,'--porcelain');wp('post','meta','update',id,'footnotes',JSON.stringify(notes));return id;};
 
@@ -17,6 +17,7 @@ test('Core Footnotes keep native backlinks and bounded RTL/CJK 400% reading widt
   await page.goto('/?p='+id,{waitUntil:'networkidle'});
   const block=page.locator('.slateframe-prose .wp-block-footnotes');
   await expect(block.locator('li')).toHaveCount(2);
+  await expect(page.locator('sup[data-fn]')).toHaveCount(2);
   await expect(block.locator('li>a[href$="-link"]')).toHaveCount(2);
   await expect(block.locator('li>a[href$="-link"]').first()).toHaveAttribute('aria-label',/.+/);
   await fs.mkdir('test-artifacts/screenshots',{recursive:true});

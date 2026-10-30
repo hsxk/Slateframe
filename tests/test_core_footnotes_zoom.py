@@ -23,7 +23,7 @@ class CoreFootnotesZoomContract(unittest.TestCase):
     def test_real_wordpress_matrix_and_gutenberg(self):
         spec=(ROOT/'tests/browser/core-footnotes-zoom.spec.js').read_text()
         workflow=(ROOT/'.github/workflows/quality.yml').read_text()
-        for token in ("'--post_content='+content", "'footnotes'", "'core/footnotes'",'openAuthenticatedEditor','[320,375,390,412,768,1440,1920]',"['ltr','rtl']",'[16,32,64]','setRootTextScale','new AxeBuilder',"forcedColors:'active'",'core/missing'):
+        for token in ("'--post_content='+content", "'footnotes'", "'core/footnotes'",'openAuthenticatedEditor','data-fn=', '[320,375,390,412,768,1440,1920]',"['ltr','rtl']",'[16,32,64]','setRootTextScale','new AxeBuilder',"forcedColors:'active'",'core/missing'):
             self.assertIn(token,spec)
         for name in CAPTURES:
             self.assertIn(name,spec)
