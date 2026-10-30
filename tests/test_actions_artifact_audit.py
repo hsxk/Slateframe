@@ -170,6 +170,18 @@ class ArtifactAudit(unittest.TestCase):
             self.check()
 
 
+    def test_rejects_extra_browser_private_file(self):
+        self.browser["home/runner/screenshots/.env"] = "SECRET"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
+
+    def test_rejects_extra_photography_private_file(self):
+        self.photo["home/runner/photography/credentials.txt"] = "SECRET"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
+
     def test_rejects_root_environment_file(self):
         self.theme["slateframe/.env"] = "SECRET"
         self.write()
