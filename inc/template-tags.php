@@ -371,11 +371,14 @@ function slateframe_menu_fallback() {
 	);
 
 	$home = '';
-	if ( ! $static_front ) {
-		$home = sprintf(
-			'<li class="page_item slateframe-home-link"><a href="%1$s"%2$s>%3$s</a></li>',
+	// An unpublished or filtered static front page can leave Core's list empty.
+	if ( ! $static_front || ! is_string( $pages ) || '' === trim( $pages ) ) {
+		$is_current = is_front_page();
+		$home       = sprintf(
+			'<li class="page_item slateframe-home-link%1$s"><a href="%2$s"%3$s>%4$s</a></li>',
+			$is_current ? ' current_page_item' : '',
 			esc_url( home_url( '/' ) ),
-			is_front_page() ? ' aria-current="page"' : '',
+			$is_current ? ' aria-current="page"' : '',
 			esc_html__( 'Home', 'slateframe' )
 		);
 	}
