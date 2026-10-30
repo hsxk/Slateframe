@@ -46,6 +46,20 @@ pixel semantics, accessibility tree, Safari/VoiceOver, or user-device behavior.
 
 The PNG inflate limit is 128 MiB per image; oversized or incomplete compressed streams, trailing compressed garbage, and invalid filter bytes are rejected even if an attacker recalculates both PNG CRCs and manifest SHA-256. This validates image decodability, not visual quality or assistive technology behavior.
 
+## Public theme distribution boundary
+
+The package job runs `python3 bin/check-distribution-boundary.py dist/slateframe.zip`
+against the **actual WordPress.org distributable**, before uploading it. The
+standard-library checker rejects legacy personal project identifiers,
+paid-feature/license activation prompts, recognizable private key or cloud
+credential markers, remote CSS imports/assets, browser fetch/XHR and PHP
+server-side HTTP clients. This enforces the free, self-contained,
+plugin-neutral theme boundary without scanning development tests or falsely
+rejecting the legitimate GitHub author and GPL metadata. Seventeen positive
+and adversarial tests guard this contract. It complements Theme Check,
+WPCS, ZIP path checks, package reproducibility and the exact-SHA artifact
+provenance auditor; it is not a substitute for secret scanning or review.
+
 ## Mandatory visual-state coverage
 
 The Browser smoke job now checks its exact-HEAD screenshot inventory with
