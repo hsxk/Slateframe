@@ -100,3 +100,8 @@ The ordinary Knowledge Steps list keeps its circular 01/02 badges. Previously th
 This uses existing reading.css and conditionally enqueued core-list.css, not a new runtime asset, custom block or JavaScript. The 7,000/350-byte budgets remain unchanged. The real WordPress regression checks seven widths, LTR/RTL, 16/32/64px text, Chromium accessibility-tree ordinal values (including three digits, implicit reversal and Roman/alphabetic numbering), forced colors, keyboard focus, Axe, print, Gutenberg validity and required exact-SHA screenshots. Isolated Chromium preflight passed 42 states; only fresh GitHub Actions and downloaded WordPress screenshots establish release acceptance.
 
 Older CSS engines that do not understand revert-layer retain a preceding list-style-type:revert declaration, so the native ordered marker remains visible even when the authored alphabetic/Roman type cannot be fully restored. Modern engines use revert-layer to preserve the HTML type mapping.
+
+
+### Authored Steps stylesheet budget (2026-10-30)
+
+The native `start`, `reversed`, and `type` marker override now lives beside the existing Steps presentation in `content-modes.css`, which the theme enqueues for the `is-style-slateframe-steps` marker and mirrors in Gutenberg. The rule itself is unchanged; equivalent CSS selector groups were nested without changing their specificity or declarations. This keeps shared article/discussion and Photography runtime envelopes below the existing 38 KB / 43 KB caps without adding a request, relaxing a budget, or hiding native list semantics.
