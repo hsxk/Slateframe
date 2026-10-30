@@ -34,8 +34,8 @@ test('Core Project Brief and Case Study sections retain readable 400% rhythm',as
             bounds:[r1,r2].map(r=>({left:r.left,right:r.right,width:r.width})),
             control:parseFloat(a.getPropertyValue('--slateframe-control'))};
         });
-        const expectedBrief=width<=781?Math.min(font*1.25,40):Math.min(Math.max(font*1.25,Math.min(width*.03,font*2)),64);
-        const expectedSections=width<=781?Math.min(font*1.75,40):Math.min(Math.max(font*1.75,Math.min(width*.04,font*3)),64);
+        const expectedBrief=width<=781?Math.min(Math.max(font*1.25,Math.min(width*.03,font*2)),40):Math.min(Math.max(font*1.25,Math.min(width*.03,font*2)),64);
+        const expectedSections=width<=781?Math.min(Math.max(font*1.75,Math.min(width*.04,font*3)),40):Math.min(Math.max(font*1.75,Math.min(width*.04,font*3)),64);
         const label=width+'px '+dir+' '+font+'px';
         expect(actual.paddingTop,label+' brief top').toBeCloseTo(expectedBrief,1);
         expect(actual.paddingBottom,label+' brief bottom').toBeCloseTo(expectedBrief,1);

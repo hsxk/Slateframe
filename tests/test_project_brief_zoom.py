@@ -12,9 +12,9 @@ class ProjectBriefZoomContract(unittest.TestCase):
     def test_core_presentation_and_unchanged_css_budget(self):
         css = (ROOT / 'assets/css/content-modes.css').read_text()
         self.assertIn('padding-block:min(clamp(1.25rem,3vw,2rem),64px)', css)
-        self.assertIn('padding-block:min(1.25rem,40px)', css)
+        self.assertIn('padding-block:min(clamp(1.25rem,3vw,2rem),40px)', css)
         self.assertIn('margin-block-start:min(clamp(1.75rem,4vw,3rem),64px)', css)
-        self.assertIn('margin-block-start:min(1.75rem,40px)', css)
+        self.assertIn('margin-block-start:min(clamp(1.75rem,4vw,3rem),40px)', css)
         self.assertNotIn('padding-block:clamp(1.25rem,3vw,2rem);border-block', css)
         self.assertNotIn('.slateframe-project-sections{margin-block-start:clamp(1.75rem,4vw,3rem)}', css)
         self.assertLessEqual(len(css.encode('utf-8')), 7000)
