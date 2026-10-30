@@ -1,0 +1,4 @@
+:is(.slateframe-prose,.editor-styles-wrapper) ol.wp-block-footnotes,ol.wp-block-footnotes{min-inline-size:0;max-inline-size:100%;padding-inline-start:min(1.35rem,32px);color:var(--slateframe-muted);font-size:.9rem;overflow-wrap:anywhere}
+.wp-block-footnotes li{min-inline-size:0;padding-inline-start:min(.25rem,8px);margin-block:min(.6rem,20px);scroll-margin-block-start:calc(var(--slateframe-header-height) + var(--slateframe-stack-gap))}
+@media screen{.wp-block-footnotes li>a[href$="-link"]{display:inline-flex;align-items:center;justify-content:center;min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-footnotes li>a[href$="-link"]:focus-visible{outline:2px solid currentColor;outline-offset:2px}}

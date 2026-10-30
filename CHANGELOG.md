@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Bound native Core Footnotes indentation and item spacing at 400% enlargement while preserving the 16px baseline; add 44–56px keyboard-accessible backlinks, conditional Gutenberg styles, 42-state RTL/CJK, Axe, forced-colors and exact WordPress screenshot verification without JavaScript or universal CSS growth.
+
 - Bound native Core Project Brief vertical padding and Case Study section spacing at 400% enlargement: cap mobile block padding/margin at 40px and desktop at 64px, retain default 16px rhythm, RTL/CJK wrapping, Gutenberg parity, existing CSS budgets and exact-HEAD WordPress visual evidence; no new runtime assets.
 
 - Bound native Core Project case study and Learning path feature-group vertical spacing at 200–400% text enlargement: preserve the 16px baseline, cap mobile padding at 40px and desktop at 64px, retain RTL/CJK, 44px Appearance controls, Gutenberg parity and original CSS budgets; add real WordPress 42-state, Axe, forced-colors, exact-viewport screenshot and editor regressions without new runtime assets.
