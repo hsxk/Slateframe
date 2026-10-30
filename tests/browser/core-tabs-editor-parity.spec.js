@@ -52,6 +52,11 @@ test('Core Tabs remain native, portable Gutenberg blocks across editor widths', 
     'core/tab-panel', 'core/tab-panel']);
   expect(result.panelLabels).toEqual(['日本語 中文 العربية', 'Second / 次へ / التالي']);
   expect(result.roundtrip).toBe(result.serialized);
-  expect(result.serialized).toContain('core/tabs');
-  expect(result.serialized).not.toContain('slateframe/');
+  // Gutenberg omits the `core/` namespace in serialized HTML block comments.
+  // Assert the actual portable Core grammar, not the registry's qualified name.
+  expect(result.serialized).toContain('<!-- wp:tabs -->');
+  expect(result.serialized).toContain('<!-- wp:tab-list -->');
+  expect(result.serialized).toContain('<!-- wp:tab-panels -->');
+  expect(result.serialized.match(/<!-- wp:tab-panel(?:\s|-->)/g)).toHaveLength(2);
+  expect(result.serialized).not.toContain('<!-- wp:slateframe/');
 });
