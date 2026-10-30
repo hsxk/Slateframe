@@ -1369,6 +1369,7 @@ jobs:
           python3 tests/verify_footnotes_screenshots.py test-artifacts/screenshots "$SLATEFRAME_EVIDENCE_SHA"
           python3 tests/verify_browser_inventory.py generate
           python3 tests/verify_browser_inventory.py verify
+          python3 bin/check-visual-coverage.py --manifest test-artifacts/screenshots/BROWSER_SCREENSHOT_INVENTORY.json --head "$SLATEFRAME_EVIDENCE_SHA"
       - name: Generate exact-HEAD browser visual review
         env:
           SLATEFRAME_EVIDENCE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
