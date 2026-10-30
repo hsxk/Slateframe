@@ -39,13 +39,20 @@ class WorkflowTriggerBoundariesTest(unittest.TestCase):
         for required in (
             "Static quality", "Browser smoke", "WordPress.org Theme Check",
             "WordPress coding standards", "Build distributable",
-            "Compatibility · WP latest · PHP 7.4",
-            "Compatibility · WP latest · PHP 8.3",
-            "Compatibility · WP 6.7 · PHP 7.4",
-            "Compatibility · WP 6.7 · PHP 8.3",
+            "Compatibility · WP ${{ matrix.wordpress }} · PHP ${{ matrix.php }}",
         ):
             with self.subTest(job=required):
                 self.assertIn(required, source)
+        # GitHub expands one matrix job into four checks; the YAML contains
+        # the expression and include pairs, not four literal job names.
+        matrix = re.findall(
+            r"(?m)^          - wordpress: '([^']+)'\n            php: '([^']+)'$",
+            source,
+        )
+        self.assertCountEqual(matrix, [
+            ("6.7", "7.4"), ("6.7", "8.3"),
+            ("latest", "7.4"), ("latest", "8.3"),
+        ])
 
     def test_photography_keeps_native_lightbox_gate(self):
         source = WORKFLOWS[1].read_text(encoding="utf-8")
