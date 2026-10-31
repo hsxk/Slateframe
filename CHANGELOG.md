@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Add real WordPress/Chromium coverage for three native Core Button actions across seven widths, LTR/RTL, 100–400% text, 44px targets, forced-colors, Axe and exact-HEAD screenshots; retain Core markup, authored widths and existing runtime budgets. Pending new-SHA Actions acceptance.
+
 + Restore the real Gutenberg Core Tabs 400% RTL editor's post dirty state with Core undo, not nonpersistent insert/remove (which failed in actual WordPress/Chromium); assert original serialized content and client IDs after cleanup.
 
 + Verify real Gutenberg Core Tabs 400% RTL reflow at 390px/1440px using a disposable native block, preserving editor content and requiring exact-HEAD editor screenshots without adding runtime assets.
