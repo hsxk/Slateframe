@@ -84,9 +84,10 @@ def verify(root: Path) -> None:
     if css_dir.is_symlink() or not css_dir.is_dir():
         raise ValueError('missing or linked CSS directory')
     reading = css_dir / 'reading.css'
+    toc = css_dir / 'core-table-of-contents.css'
     files = [root / 'style.css', root / 'rtl.css', *sorted(css_dir.glob('*.css'))]
-    if reading not in files:
-        raise ValueError('missing reading.css')
+    if reading not in files or toc not in files:
+        raise ValueError('missing reading.css or conditional Core TOC stylesheet')
     for path in files:
         if path.is_symlink() or not path.is_file():
             raise ValueError(f'missing or linked CSS file: {path}')
@@ -95,7 +96,9 @@ def verify(root: Path) -> None:
     css = reading.read_text(encoding='utf-8')
     if '.slateframe-prose .wp-block-table-of-contents{' not in css:
         raise ValueError('missing native Core TOC block presentation')
-    values = declarations(css, SELECTOR)
+    if SELECTOR in css:
+        raise ValueError('Core TOC link rule must remain conditional, not in shared reading.css')
+    values = declarations(toc.read_text(encoding='utf-8'), SELECTOR)
     for key, expected in REQUIRED.items():
         if values.get(key) != expected:
             raise ValueError(f'native TOC links require {key}:{expected}')
