@@ -7,8 +7,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PHP = r"""
 define('ABSPATH', getcwd());
-$GLOBALS['registered'] = array();
-function add_filter($name, $callback) { $GLOBALS['registered'][$name] = $callback; }
 require getcwd() . '/inc/template-tags.php';
 $original = '<input name="%1$s" type="submit" id="%2$s" class="%3$s" value="%4$s" />';
 $custom = '<button class="plugin-button">Custom</button>';
@@ -17,7 +15,6 @@ $cases = array(
     'custom' => slateframe_comment_form_reflow_defaults(array('submit_button' => $custom)),
     'empty' => slateframe_comment_form_reflow_defaults(array()),
     'invalid' => slateframe_comment_form_reflow_defaults('invalid'),
-    'registered' => $GLOBALS['registered']['comment_form_defaults'] ?? null,
 );
 echo json_encode($cases);
 """
@@ -29,7 +26,6 @@ class CoreCommentSubmitReflow(unittest.TestCase):
                                 capture_output=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stderr)
         values = json.loads(result.stdout)
-        self.assertEqual(values['registered'], 'slateframe_comment_form_reflow_defaults')
         core = values['core']['submit_button']
         self.assertTrue(core.startswith('<button name="%1$s" type="submit"'))
         self.assertIn('id="%2$s" class="%3$s" value="%4$s"', core)
@@ -38,6 +34,18 @@ class CoreCommentSubmitReflow(unittest.TestCase):
                          '<button class="plugin-button">Custom</button>')
         self.assertEqual(values['empty'], [])  # PHP encodes an empty array as JSON [].
         self.assertEqual(values['invalid'], 'invalid')
+
+    def test_theme_bootstrap_registers_the_real_core_filter(self):
+        # The isolated PHP harness loads only template-tags.php; WordPress loads
+        # functions.php, where registration actually occurs. Guard that boundary.
+        bootstrap = (ROOT / 'functions.php').read_text()
+        import re
+        self.assertRegex(
+            bootstrap,
+            re.compile(r"add_filter\s*\(\s*['\"]comment_form_defaults['\"]\s*,\s*"
+                       r"['\"]slateframe_comment_form_reflow_defaults['\"]\s*\)\s*;"),
+        )
+        self.assertIn("require_once get_template_directory() . '/inc/template-tags.php';", bootstrap)
 
     def test_browser_requires_native_button_and_complete_zoomed_label(self):
         spec = (ROOT / 'tests/browser/page-comments-core-ownership.spec.js').read_text()
