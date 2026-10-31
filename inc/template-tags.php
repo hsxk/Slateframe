@@ -410,4 +410,3 @@ function slateframe_comment_form_reflow_defaults( $defaults ) {
 
 	return $defaults;
 }
-add_filter( 'comment_form_defaults', 'slateframe_comment_form_reflow_defaults' );
