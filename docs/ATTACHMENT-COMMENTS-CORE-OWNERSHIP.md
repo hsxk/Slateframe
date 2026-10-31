@@ -7,3 +7,5 @@ The attachment template now follows the same Core-first boundary as the post and
 `tests/test_attachment_comments_core_ownership.py` executes the actual attachment template with isolated PHP WordPress stubs across nine open/closed/block combinations. The normal real WordPress browser suite and exact-HEAD CI still gate integration; this isolated test alone does not prove visual acceptance.
 
 The fix is presentation-only. Keep WordPress Core markup, user-authored content, RTL/CJK, Appearance, 44px controls, and all existing asset budgets unchanged.
+
+The real WordPress browser test also creates an approved historical comment on a classic attachment, closes comments, and verifies that the comment remains visible without a submit form. It checks 390px RTL at 400% text zoom, forced colors, 1440px LTR, Axe, and exact-HEAD screenshots. The fixture is deleted after testing.

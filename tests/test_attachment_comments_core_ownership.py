@@ -81,10 +81,16 @@ class AttachmentCommentsCoreOwnership(unittest.TestCase):
             'attachment-comments-core-390-rtl-400-forced-colors.png',
             'attachment-comments-core-1440-ltr.png',
             'attachment-comments-classic-390-rtl.png',
+            'attachment-comments-closed-390-rtl-400.png',
+            'attachment-comments-closed-390-rtl-400-forced-colors.png',
+            'attachment-comments-closed-1440-ltr.png',
         ):
             with self.subTest(screenshot=screenshot):
                 self.assertIn(screenshot, workflow)
                 self.assertIn(screenshot, browser)
+        self.assertIn('wp_insert_comment', browser)
+        self.assertIn('wp_update_comment_count_now', browser)
+        self.assertIn('Historical attachment comment', browser)
         self.assertIn('wp_delete_attachment', browser)
         self.assertIn('AxeBuilder', browser)
 
