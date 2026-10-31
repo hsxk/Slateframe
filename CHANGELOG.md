@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Restore the real Gutenberg Core Tabs 400% RTL editor's post dirty state with Core undo, not nonpersistent insert/remove (which failed in actual WordPress/Chromium); assert original serialized content and client IDs after cleanup.
+
 + Verify real Gutenberg Core Tabs 400% RTL reflow at 390px/1440px using a disposable native block, preserving editor content and requiring exact-HEAD editor screenshots without adding runtime assets.
 
 - Keep native Core File PDF preview objects within the content column at 320–1920px and 100–400% text scale, preserving authored preview URLs, download links, RTL/CJK, Gutenberg serialization and the strict 400-byte conditional CSS budget; add real WordPress/Chromium geometry and 400% screenshot regression coverage without JavaScript.

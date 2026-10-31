@@ -15,6 +15,7 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     return {
       content: window.wp.blocks.serialize(editor.getBlocks()),
       ids: editor.getBlocks().map(block => block.clientId),
+      dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty()),
     };
   });
   let canvas;
@@ -44,6 +45,8 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
         ]),
       ]),
     ]);
+    // Keep this insertion undoable: nonpersistent block changes can still leave
+    // core/editor's post content dirty even after removing the temporary block.
     window.wp.data.dispatch('core/block-editor').insertBlocks(tabs);
     return tabs.clientId;
   });
@@ -104,13 +107,18 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     }
   } finally {
     await page.evaluate(id => {
-      window.wp.data.dispatch('core/block-editor').removeBlocks(id);
+      // Undo the actual post edit, not merely its block-tree effect. WordPress
+      // core-data tracks dirty content separately from serialized block equality.
+      if (window.wp.data.select('core/block-editor').getBlock(id)) {
+        window.wp.data.dispatch('core/editor').undo();
+      }
     }, clientId);
     await expect.poll(() => page.evaluate(() => {
       const editor = window.wp.data.select('core/block-editor');
       return {
         content: window.wp.blocks.serialize(editor.getBlocks()),
         ids: editor.getBlocks().map(block => block.clientId),
+      dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty()),
       };
     })).toEqual(baseline);
   }

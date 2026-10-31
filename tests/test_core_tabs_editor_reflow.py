@@ -50,11 +50,17 @@ class CoreTabsEditorReflow(unittest.TestCase):
             "window.wp.blocks.serialize(editor.getBlocks())",
             "editor.getBlocks().map(block => block.clientId)",
             "finally {",
-            "removeBlocks(id)",
+            "dispatch('core/editor').undo()",
             "toEqual(baseline)",
+            "isEditedPostDirty()",
+            "getBlock(id)",
         ):
             with self.subTest(token=token):
                 self.assertIn(token, self.browser)
+        self.assertEqual(self.browser.count("dispatch('core/editor').undo()"), 1)
+        self.assertNotIn("__unstableMarkNextChangeAsNotPersistent()", self.browser)
+        self.assertNotIn("removeBlocks(id)", self.browser)
+        self.assertEqual(self.browser.count("isEditedPostDirty()"), 2)
         for forbidden in ("savePost(", "wp('post', 'update'", "test.only", "test.fixme"):
             self.assertNotIn(forbidden, self.browser)
 
