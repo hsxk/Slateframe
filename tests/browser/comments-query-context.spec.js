@@ -191,7 +191,7 @@ test('Query Loop discussion never suppresses the current post comments', async (
         // addition to Core's delegated class listener. Neither may steal
         // the queried post's responder from its own comment form.
         await expect(reply).not.toHaveAttribute('onclick', /./);
-        await expect(reply).toHaveAttribute('href', new RegExp('#slateframe-outer-' + fixture.id + '-respond
+        await expect(reply).toHaveAttribute('href', new RegExp('#slateframe-outer-' + fixture.id + '-respond$'));
         await reply.click();
         await expect(page).toHaveURL(new RegExp('replytocom=' + replyCommentId));
         await expect(page.locator('.slateframe-comments input[name="comment_parent"]')).toHaveValue(String(replyCommentId));
