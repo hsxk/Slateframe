@@ -389,3 +389,25 @@ function slateframe_menu_fallback() {
 		wp_kses_post( is_string( $pages ) ? $pages : '' )
 	);
 }
+
+
+/**
+ * Let the native Core comment submit label wrap at extreme text enlargement.
+ *
+ * Core's default input cannot wrap its value and visually clips translated
+ * labels on narrow screens. Only replace the unchanged Core default template;
+ * custom plugin and caller submit markup remain authoritative.
+ *
+ * @param array $defaults WordPress Core comment form defaults.
+ * @return array Unchanged defaults except for the native submit presentation.
+ */
+function slateframe_comment_form_reflow_defaults( $defaults ) {
+	$core_submit = '<input name="%1$s" type="submit" id="%2$s" class="%3$s" value="%4$s" />';
+
+	if ( is_array( $defaults ) && isset( $defaults['submit_button'] ) && $core_submit === $defaults['submit_button'] ) {
+		$defaults['submit_button'] = '<button name="%1$s" type="submit" id="%2$s" class="%3$s" value="%4$s">%4$s</button>';
+	}
+
+	return $defaults;
+}
+add_filter( 'comment_form_defaults', 'slateframe_comment_form_reflow_defaults' );
