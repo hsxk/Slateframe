@@ -1,0 +1,107 @@
+"""Core Query Loop descendants must not own the outer singular discussion."""
+import json
+import os
+import subprocess
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+
+PHP = r'''
+define('ABSPATH','/');
+class WP_Post {
+ public $ID; public $post_type; public $post_status; public $post_content;
+ function __construct($id,$content,$type='post',$status='publish') {
+  $this->ID=$id; $this->post_content=json_encode($content);
+  $this->post_type=$type; $this->post_status=$status;
+ }
+}
+function absint($x){return abs((int)$x);}
+function get_the_ID(){return 42;}
+function is_singular(){return true;}
+function post_password_required(){return false;}
+function parse_blocks($content){return json_decode($content,true);}
+function find_name($blocks,$name) {
+ foreach($blocks as $b) {
+  if(($b['blockName']??'')===$name)return true;
+  if(find_name($b['innerBlocks']??array(),$name))return true;
+ }
+ return false;
+}
+function has_block($name,$value) {
+ $p=is_int($value)?get_post($value):null;
+ $raw=$p?$p->post_content:$value;
+ return is_string($raw)&&find_name(parse_blocks($raw),$name);
+}
+function get_post($id){return $GLOBALS['posts'][$id]??null;}
+function slateframe_singular_synced_pattern_contents() {
+ return array_map(fn($p)=>$p->post_content,
+  array_filter($GLOBALS['posts'],fn($p)=>$p->post_type==='wp_block'&&$p->post_status==='publish'));
+}
+$a=json_decode(getenv('SLATEFRAME_CASE'),true);
+$GLOBALS['posts']=array(42=>new WP_Post(42,$a['root']));
+foreach($a['patterns'] as $id=>$v) {
+ $GLOBALS['posts'][$id]=new WP_Post((int)$id,$v['blocks'],'wp_block',$v['status']??'publish');
+}
+require getcwd().'/inc/comments-ownership.php';
+echo slateframe_has_core_discussion_block(42)?'1':'0';
+'''
+
+def b(name, children=None, ref=None):
+    return {'blockName': name, 'innerBlocks': children or [],
+            'attrs': {'ref': ref} if ref is not None else {}}
+
+FORM = b('core/post-comments-form')
+query = lambda children: b('core/query', [b('core/post-template', children)])
+ref = lambda value: b('core/block', ref=value)
+CASES = {
+    'query-only': ([query([FORM])], {}, False),
+    'query-and-own': ([query([FORM]), FORM], {}, True),
+    'query-sibling-own': ([b('core/query', [b('core/post-template', [FORM]), FORM])], {}, True),
+    'nested-group-own': ([b('core/group', [FORM])], {}, True),
+    'synced-own': ([ref(10)], {10: {'blocks': [FORM]}}, True),
+    'synced-under-query': ([query([ref(10)])], {10: {'blocks': [FORM]}}, False),
+    'query-in-synced': ([ref(10)], {10: {'blocks': [query([FORM])]}}, False),
+    'synced-mixed': ([ref(10)], {10: {'blocks': [query([FORM]), FORM]}}, True),
+    'unpublished': ([ref(10)], {10: {'blocks': [FORM], 'status': 'draft'}}, False),
+    'cycle': ([ref(10)], {10: {'blocks': [ref(10)]}}, False),
+    'nested-synced': ([ref(10)], {10: {'blocks': [ref(11)]}, 11: {'blocks': [FORM]}}, True),
+    'overflow-ref': ([ref('99999999999999999999999999999')], {}, False),
+}
+
+class QueryLoopDiscussionContext(unittest.TestCase):
+    def test_12_helper_context_scenarios(self):
+        for name, (root, patterns, expected) in CASES.items():
+            with self.subTest(name=name):
+                result = subprocess.run(
+                    ['php', '-r', PHP], cwd=ROOT, text=True, capture_output=True, timeout=15,
+                    env={**os.environ, 'SLATEFRAME_CASE': json.dumps({'root': root, 'patterns': patterns})})
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(result.stdout, '1' if expected else '0')
+
+    def test_browser_and_workflow_require_real_evidence(self):
+        browser = (ROOT / 'tests/browser/comments-query-context.spec.js').read_text(encoding='utf-8')
+        workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
+        for variant in ('query-only', 'synced-query-only', 'query-with-own'):
+            for viewport in ('390-rtl-400', '1440-ltr'):
+                name = f'comments-query-{variant}-{viewport}.png'
+                self.assertIn(name, browser)
+                self.assertIn(name, workflow)
+        forced = 'comments-query-query-only-390-rtl-400-forced-colors.png'
+        self.assertIn(forced, browser)
+        self.assertIn(forced, workflow)
+        self.assertIn('new AxeBuilder', browser)
+        self.assertIn("wp('post', 'delete'", browser)
+        self.assertIn('320, 375, 390, 412, 768, 1440, 1920', browser)
+
+    def test_no_rendering_or_shortcode_side_effects(self):
+        source = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
+        for token in ('slateframe_discussion_in_current_post_blocks',
+                      "'core/query', $post_id", "'core/post-template' === $name",
+                      "'publish' !== $post->post_status", '$depth >= 8'):
+            self.assertIn(token, source)
+        self.assertNotIn('do_blocks(', source)
+        self.assertNotIn('do_shortcode(', source)
+
+if __name__ == '__main__':
+    unittest.main()
