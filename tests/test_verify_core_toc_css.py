@@ -18,11 +18,13 @@ class NativeTocGateTest(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = Path(self.tmp.name)
-        self.css = self.root / 'assets/css/reading.css'
+        self.reading = self.root / 'assets/css/reading.css'
+        self.css = self.root / 'assets/css/core-table-of-contents.css'
         self.css.parent.mkdir(parents=True)
         (self.root / 'style.css').write_text('body{color:#222}', encoding='utf-8')
         (self.root / 'rtl.css').write_text('body{direction:rtl}', encoding='utf-8')
-        self.css.write_text(BASE + LINK, encoding='utf-8')
+        self.reading.write_text(BASE, encoding='utf-8')
+        self.css.write_text(LINK, encoding='utf-8')
 
     def reject(self, value):
         self.css.write_text(value, encoding='utf-8')
@@ -33,7 +35,7 @@ class NativeTocGateTest(unittest.TestCase):
         verify(self.root)
 
     def test_multiline_css_accepted(self):
-        self.css.write_text(BASE + SELECTOR + '{\n' + LINK.split('{', 1)[1].replace(';', ';\n'), encoding='utf-8')
+        self.css.write_text(SELECTOR + '{\n' + LINK.split('{', 1)[1].replace(';', ';\n'), encoding='utf-8')
         verify(self.root)
 
     def test_rejects_nonexistent_ancestor(self):
@@ -105,6 +107,16 @@ class NativeTocGateTest(unittest.TestCase):
         self.css.unlink()
         self.css.parent.rmdir()
         self.css.parent.symlink_to(self.root, target_is_directory=True)
+        with self.assertRaises(ValueError):
+            verify(self.root)
+
+    def test_shared_reading_must_not_duplicate_conditional_links(self):
+        self.reading.write_text(BASE + LINK, encoding='utf-8')
+        with self.assertRaises(ValueError):
+            verify(self.root)
+
+    def test_missing_conditional_stylesheet_rejected(self):
+        self.css.unlink()
         with self.assertRaises(ValueError):
             verify(self.root)
 
