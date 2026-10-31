@@ -1016,6 +1016,10 @@ jobs:
             done
           done
           test -s test-artifacts/screenshots/navigation-deep-390-rtl-forced-colors.png || { echo "Missing deep-navigation forced-colors evidence" >&2; exit 1; }
+          # Core-authored pages must show one native form, not a duplicate classic form.
+          for screenshot in page-comments-core-390-rtl-400.png page-comments-core-390-rtl-400-forced-colors.png page-comments-core-1440-ltr.png page-comments-classic-390-rtl.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing page discussion evidence: $screenshot" >&2; exit 1; }
+          done
           # Require real Gutenberg Core Tabs 400% RTL editor screenshots at both widths.
           for width in 390 1440; do
             test -s "test-artifacts/screenshots/core-tabs-editor-${width}-rtl-400.png" || { echo "Missing native Gutenberg Core Tabs 400% editor evidence: ${width}" >&2; exit 1; }
