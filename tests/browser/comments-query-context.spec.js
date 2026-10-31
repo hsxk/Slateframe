@@ -92,6 +92,11 @@ test('Query Loop discussion never suppresses the current post comments', async (
       // The outer form must submit to the singular post, not the queried page.
       await expect(owner.locator('input[name="comment_post_ID"]')).toHaveValue(String(fixture.id));
       if (fixture.queriedForm) {
+        // Retain exact-SHA WordPress evidence even when a11y checks fail.
+        await page.screenshot({
+          path: 'test-artifacts/screenshots/comments-query-collision-390-rtl-400.png',
+          fullPage: true, animations: 'disabled',
+        });
         // Both forms are present in the same document. The browser resolves
         // label[for] against document IDs, not the nearest form. A local Axe
         // include can miss a label that points to the *other* form.
@@ -108,12 +113,6 @@ test('Query Loop discussion never suppresses the current post comments', async (
               return !target || !form.contains(target);
             })));
         expect(badDescriptions, 'Outer descriptions must stay in the classic form').toEqual([]);
-        // Capture the actual failing WordPress document *before* enforcing
-        // the reply-ID gate so failed runs still retain visual evidence.
-        await page.screenshot({
-          path: 'test-artifacts/screenshots/comments-query-collision-390-rtl-400.png',
-          fullPage: true, animations: 'disabled',
-        });
         // Core's reply script uses document-global IDs. Detect the remaining
         // collision explicitly; correct labels alone are not sufficient to
         // claim that nested and outer threaded replies can coexist safely.
