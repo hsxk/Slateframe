@@ -105,6 +105,7 @@ class NativeTocGateTest(unittest.TestCase):
 
     def test_linked_css_directory_rejected(self):
         self.css.unlink()
+        self.reading.unlink()
         self.css.parent.rmdir()
         self.css.parent.symlink_to(self.root, target_is_directory=True)
         with self.assertRaises(ValueError):
