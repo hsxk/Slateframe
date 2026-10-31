@@ -26,6 +26,7 @@ class CoreFileParity(unittest.TestCase):
             "min-block-size:var(--slateframe-control)", "overflow-wrap:anywhere",
         ):
             self.assertIn(token, css)
+        self.assertIn(".wp-block-file__embed{max-inline-size:100%}", css)
         self.assertLessEqual(len(css.encode("utf-8")), 400)
         self.assertIn("test $(wc -c < assets/css/core-file.css) -le 400", ci)
         self.assertIn("grep -qx 'slateframe/assets/css/core-file.css' /tmp/package.txt", ci)
@@ -45,6 +46,8 @@ class CoreFileParity(unittest.TestCase):
             "AxeBuilder", "openAuthenticatedEditor", "blocks.serialize",
             "blocks.parse", "page.keyboard.press('Tab')",
             "core-file-390-rtl-200-forced-colors.png",
+            "core-file-preview-390-", "native PDF preview width",
+            "native PDF preview right", "object.wp-block-file__embed",
             "page.goto('/?p=999999999'",
         ):
             self.assertIn(token, js)
