@@ -63,10 +63,12 @@ test('Query Loop discussion never suppresses the current post comments', async (
       const classic = page.locator('.slateframe-comments');
       // Empty loops must not hide the outer form; the populated loop must
       // retain both forms with distinct WordPress comment target IDs.
-      await expect(page.locator('.wp-block-query .wp-block-post-comments-form'))
+      // Core renders the Query's Post Template as a UL; it does not emit a
+      // .wp-block-query wrapper. Target the actual repeated-post context.
+      await expect(page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form'))
         .toHaveCount(fixture.queriedForm ? 1 : 0);
       if (fixture.queriedForm) {
-        const queried = page.locator('.wp-block-query .wp-block-post-comments-form');
+        const queried = page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form');
         await expect(queried.locator('button#submit')).toHaveCount(1);
         await expect(queried.locator('input[name="comment_post_ID"]')).toHaveValue(String(hitPageId));
       }
@@ -99,10 +101,10 @@ test('Query Loop discussion never suppresses the current post comments', async (
         // The nested Core form is an independent interactive region; the
         // outer classic form's Axe pass cannot substitute for its own.
         const queriedAxe = await new AxeBuilder({ page })
-          .include('.wp-block-query .wp-block-post-comments-form')
+          .include('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form')
           .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
         expect(queriedAxe.violations).toEqual([]);
-        const queriedSubmit = page.locator('.wp-block-query .wp-block-post-comments-form button#submit');
+        const queriedSubmit = page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form button#submit');
         await queriedSubmit.focus();
         await expect(queriedSubmit).toBeFocused();
       }
