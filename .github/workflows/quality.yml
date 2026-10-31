@@ -1032,6 +1032,10 @@ jobs:
           for screenshot in attachment-comments-closed-390-rtl-400.png attachment-comments-closed-390-rtl-400-forced-colors.png attachment-comments-closed-1440-ltr.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing closed attachment history evidence: $screenshot" >&2; exit 1; }
           done
+          # Published synced Core discussion must not duplicate classic forms on any singular template.
+          for screenshot in synced-comments-post-390-rtl-400.png synced-comments-post-1440-ltr.png synced-comments-page-390-rtl-400.png synced-comments-page-1440-ltr.png synced-comments-attachment-390-rtl-400.png synced-comments-attachment-1440-ltr.png synced-comments-attachment-390-rtl-400-forced-colors.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing synced Core discussion evidence: $screenshot" >&2; exit 1; }
+          done
           # Require real Gutenberg Core Tabs 400% RTL editor screenshots at both widths.
           for width in 390 1440; do
             test -s "test-artifacts/screenshots/core-tabs-editor-${width}-rtl-400.png" || { echo "Missing native Gutenberg Core Tabs 400% editor evidence: ${width}" >&2; exit 1; }

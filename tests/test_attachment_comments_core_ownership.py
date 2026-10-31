@@ -29,9 +29,12 @@ function wp_attachment_is_image($id) { return false; }
 function get_the_content() { return ''; }
 function comments_open() { return $GLOBALS['case']['open']; }
 function get_comments_number() { return $GLOBALS['case']['count']; }
-function has_block($name, $post) {
+function slateframe_has_core_discussion_block($post) {
     if ($post !== 42) throw new Exception('Unexpected attachment ID');
-    return in_array($name, $GLOBALS['case']['blocks'], true);
+    foreach (['core/comments', 'core/post-comments', 'core/post-comments-form'] as $name) {
+        if (in_array($name, $GLOBALS['case']['blocks'], true)) return true;
+    }
+    return false;
 }
 function comments_template() { $GLOBALS['calls']++; }
 ob_start();
@@ -67,9 +70,7 @@ class AttachmentCommentsCoreOwnership(unittest.TestCase):
 
     def test_templates_share_core_discussion_ownership(self):
         source = (ROOT / 'attachment.php').read_text(encoding='utf-8')
-        for block in ('core/comments', 'core/post-comments', 'core/post-comments-form'):
-            with self.subTest(block=block):
-                self.assertIn("! has_block( '" + block + "', get_the_ID() )", source)
+        self.assertIn('! slateframe_has_core_discussion_block( get_the_ID() )', source)
         self.assertIn('comments_template();', source)
 
 

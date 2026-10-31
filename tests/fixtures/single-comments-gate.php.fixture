@@ -5,6 +5,8 @@
  * @package Slateframe
  */
 
+define( 'ABSPATH', '/' );
+
 $slateframe_state = array(
 	'loop'  => 0,
 	'calls' => 0,
@@ -13,6 +15,10 @@ $slateframe_state = array(
 	'block' => getenv( 'SLATEFRAME_COMMENTS_BLOCK' ) ?: '',
 );
 
+function absint( $value ) { return abs( (int) $value ); }
+function is_singular() { return true; }
+function post_password_required() { return false; }
+function slateframe_singular_synced_pattern_contents() { return array(); }
 function get_header() {}
 function get_footer() {}
 function have_posts() {
@@ -62,6 +68,7 @@ function comments_template() {
 	echo '<section id="comments"></section>';
 }
 
+require dirname( __DIR__, 2 ) . '/inc/comments-ownership.php';
 ob_start();
 require dirname( __DIR__, 2 ) . '/single.php';
 $html = ob_get_clean();

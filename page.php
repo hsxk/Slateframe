@@ -31,7 +31,7 @@ get_header();
 
 		<?php
 		// Core-owned discussion blocks must not be followed by a duplicate classic form.
-		if ( ( comments_open() || get_comments_number() ) && ! has_block( 'core/comments', get_the_ID() ) && ! has_block( 'core/post-comments', get_the_ID() ) && ! has_block( 'core/post-comments-form', get_the_ID() ) ) {
+		if ( ( comments_open() || get_comments_number() ) && ! slateframe_has_core_discussion_block( get_the_ID() ) ) {
 			comments_template();
 		}
 		?>
