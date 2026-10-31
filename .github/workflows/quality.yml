@@ -1012,6 +1012,7 @@ jobs:
           for width in 390 1440; do
             test -s "test-artifacts/screenshots/core-tabs-editor-${width}-rtl-400.png" || { echo "Missing native Gutenberg Core Tabs 400% editor evidence: ${width}" >&2; exit 1; }
           done
+          test -s test-artifacts/screenshots/core-tabs-editor-390-rtl-400-forced-colors.png || { echo "Missing native Gutenberg Core Tabs forced-colors editor evidence" >&2; exit 1; }
           for screenshot in knowledge-native-start-390-rtl-400.png knowledge-native-start-1440-ltr.png knowledge-native-start-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing native authored Steps evidence: $screenshot" >&2; exit 1; }
           done
