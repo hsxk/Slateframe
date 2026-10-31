@@ -2,3 +2,5 @@
 @media(max-width:480px){.has-js .slateframe-primary-nav.is-compact{max-block-size:min(55dvh,calc(100dvh - var(--slateframe-header-height) - 2*var(--slateframe-stack-gap) - env(safe-area-inset-bottom,0px)))}}
 .slateframe-brand-title:is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
 @media(min-width:481px){#main-content{scroll-margin-block-start:calc(var(--slateframe-header-height) + var(--slateframe-stack-gap))}}
+
+@media(min-width:1281px){.slateframe-primary-nav:not(.is-compact) :is(.sub-menu,.children) :is(.sub-menu,.children){padding-inline-start:var(--slateframe-component-gap);border-inline-start:var(--slateframe-rule)}}
