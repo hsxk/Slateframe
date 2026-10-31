@@ -441,6 +441,10 @@ function slateframe_scope_outer_comment_reply_link( $link, $args, $comment, $pos
 			continue;
 		}
 		$tags->remove_class( 'comment-reply-link' );
+		// Core's reply script may also be bound through an inline handler.
+		// Removing only the class leaves addComment.moveForm() active and
+		// can move the queried post's responder into the outer thread.
+		$tags->remove_attribute( 'onclick' );
 		$href = $tags->get_attribute( 'href' );
 		if ( is_string( $href ) && '#respond' === substr( $href, -8 ) ) {
 			$tags->set_attribute( 'href', substr( $href, 0, -8 ) . '#slateframe-outer-' . $outer_id . '-respond' );
