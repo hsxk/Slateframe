@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Keep ordinary WordPress in-page fragment targets visible below the sticky desktop header, preserving the mobile non-sticky position and existing Heading/Footnotes rules; add real Core Button keyboard, RTL/CJK, 400% and forced-colors regression. Pending exact-SHA Actions and screenshot review.
+
 + Add real WordPress/Chromium coverage for three native Core Button actions across seven widths, LTR/RTL, 100–400% text, 44px targets, forced-colors, Axe and exact-HEAD screenshots; retain Core markup, authored widths and existing runtime budgets. Pending new-SHA Actions acceptance.
 
 + Restore the real Gutenberg Core Tabs 400% RTL editor's post dirty state with Core undo, not nonpersistent insert/remove (which failed in actual WordPress/Chromium); assert original serialized content and client IDs after cleanup.
