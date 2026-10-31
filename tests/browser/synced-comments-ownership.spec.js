@@ -8,6 +8,12 @@ const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], 
   encoding: 'utf8', timeout: 30000,
 }).trim();
 
+const evidence = {
+  post: { mobile: 'synced-comments-post-390-rtl-400.png', desktop: 'synced-comments-post-1440-ltr.png' },
+  page: { mobile: 'synced-comments-page-390-rtl-400.png', desktop: 'synced-comments-page-1440-ltr.png' },
+  attachment: { mobile: 'synced-comments-attachment-390-rtl-400.png', desktop: 'synced-comments-attachment-1440-ltr.png' },
+};
+
 test('published synced Core discussion owns post, page and attachment forms', async ({ page }, info) => {
   test.skip(info.project.use.viewport?.width !== 390,
     'One disposable real WordPress fixture covers all seven responsive widths.');
@@ -73,7 +79,7 @@ test('published synced Core discussion owns post, page and attachment forms', as
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
       expect(a11y.violations).toEqual([]);
       await page.screenshot({
-        path: 'test-artifacts/screenshots/synced-comments-' + fixture.type + '-390-rtl-400.png',
+        path: 'test-artifacts/screenshots/' + evidence[fixture.type].mobile,
         animations: 'disabled', fullPage: true,
       });
       if (fixture.type === 'attachment') {
@@ -87,7 +93,7 @@ test('published synced Core discussion owns post, page and attachment forms', as
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.locator('html').evaluate(root => { root.dir = 'ltr'; root.style.fontSize = '16px'; });
       await native.screenshot({
-        path: 'test-artifacts/screenshots/synced-comments-' + fixture.type + '-1440-ltr.png',
+        path: 'test-artifacts/screenshots/' + evidence[fixture.type].desktop,
         animations: 'disabled',
       });
     }
