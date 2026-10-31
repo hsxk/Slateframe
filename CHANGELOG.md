@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Align native Core Footnotes reference and note fragment offsets with the sticky header plus spatial gap, including 400% RTL keyboard navigation and forced-colors screenshots; factor equivalent empty-state CSS without changing presentation or raising runtime budgets. Pending exact-SHA Actions and visual acceptance.
+
 + Preserve native and class-only Core Table of Contents 44px link presentation while factoring equivalent nested Core Table/TOC CSS and removing redundant browser defaults; retain existing aggregate runtime budgets and exact link-contract negative tests.
 
 + Keep ordinary WordPress in-page fragment targets **and the global Skip to content landmark** visible below the sticky desktop header, preserving mobile non-sticky positions and existing Heading/Footnotes rules; add real Core Button keyboard, RTL/CJK, 400%, forced-colors, and skip-link geometry regressions. Pending exact-SHA Actions and screenshot review.
