@@ -4,6 +4,9 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Restore WordPress Core's full hierarchical footer navigation instead of silently dropping child links. Keep native Walker output, browser-native RTL list indentation, 44px link targets, CJK wrapping, and unchanged strict CSS/JS budgets; add executable and real WordPress/Chromium coverage. Pending exact-HEAD Actions and visual review.
+
+
 + Preserve the complete native WordPress Core comment-submit label at 400% text zoom by using the documented Core defaults filter to replace only its non-wrapping default input with a wrapping button. Preserve plugin/caller overrides, classic form behavior, RTL/CJK, 44px targets, and add executable PHP plus exact-HEAD browser visual regression. Pending new-SHA Actions and screenshot review.
 
 + Prevent duplicate comment forms on WordPress pages that author Core Comments, Post Comments, or Post Comments Form blocks. Preserve the classic fallback on ordinary pages and closed-page comment history; add executable PHP ownership cases and real WordPress/Chromium seven-width RTL/400%/Axe/forced-colors evidence. Pending exact-HEAD Actions and visual review.
