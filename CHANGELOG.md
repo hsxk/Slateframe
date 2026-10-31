@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Correct the real Gutenberg 390px RTL/400% Core Tabs visual evidence: a passing element screenshot still lost the label's beginning under editor chrome. Temporarily fit the entire native control inside a taller editor viewport, assert both edges, capture forced-colors evidence and restore the original viewport for context. Pending exact-new-SHA Actions and visual review.
+
 + Preserve complete Core Tabs label visual evidence in the real Gutenberg 400% RTL editor: assert native multilingual tab text, capture whole-control screenshots at 390/1440px and forced colors alongside contextual viewport captures, and require all images in exact-HEAD CI without changing runtime assets or author content. Pending new-SHA Actions and visual review.
 
 + Align native Core Footnotes reference and note fragment offsets with the sticky header plus spatial gap, including 400% RTL keyboard navigation and forced-colors screenshots; factor equivalent empty-state CSS without changing presentation or raising runtime budgets. Pending exact-SHA Actions and visual acceptance.
