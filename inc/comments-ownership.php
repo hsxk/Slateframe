@@ -34,7 +34,7 @@ function slateframe_has_core_discussion_block( $post_id = 0 ) {
 		}
 	}
 
-	if ( ! is_singular() || post_password_required() || $post_id !== (int) get_the_ID() ) {
+	if ( ! is_singular() || post_password_required() || (int) get_the_ID() !== $post_id ) {
 		return false;
 	}
 
