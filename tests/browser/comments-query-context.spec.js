@@ -207,19 +207,3 @@ test('Query Loop discussion never suppresses the current post comments', async (
     if (patternId) wp('post', 'delete', String(patternId), '--force');
   }
 });
-));
-        await reply.click();
-        await expect(page).toHaveURL(new RegExp('replytocom=' + replyCommentId));
-        await expect(page.locator('.slateframe-comments input[name="comment_parent"]')).toHaveValue(String(replyCommentId));
-        const cancel = page.locator('#slateframe-outer-' + fixture.id + '-cancel-comment-reply-link');
-        await expect(cancel).toBeVisible();
-        await cancel.click();
-        await expect(page.locator('.slateframe-comments input[name="comment_parent"]')).toHaveValue('0');
-      }
-    }
-  } finally {
-    if (replyCommentId) wp('comment', 'delete', String(replyCommentId), '--force');
-    for (const id of postIds) wp('post', 'delete', String(id), '--force');
-    if (patternId) wp('post', 'delete', String(patternId), '--force');
-  }
-});
