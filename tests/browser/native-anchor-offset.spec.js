@@ -16,6 +16,7 @@ const content = '<!-- wp:group {"className":"slateframe-anchor-offset-fixture"} 
   '</div><!-- /wp:buttons -->' +
   '<!-- wp:html --><div style="height:1400px" aria-hidden="true"></div><!-- /wp:html -->' +
   '<!-- wp:paragraph {"anchor":"' + destination + '"} --><p id="' + destination + '">Destination 日本語 中文 العربية</p><!-- /wp:paragraph -->' +
+  '<!-- wp:html --><div style="height:1400px" aria-hidden="true"></div><!-- /wp:html -->' +
   '</div><!-- /wp:group -->';
 
 test('native paragraph fragments clear the sticky header without changing mobile scrolling', async ({ page }, info) => {
@@ -59,10 +60,13 @@ test('native paragraph fragments clear the sticky header without changing mobile
             expect(result.margin, label + ' scroll offset').toBeGreaterThanOrEqual(result.headerHeight);
             expect(result.top, label + ' target clears sticky header')
               .toBeGreaterThanOrEqual(result.headerHeight - 2);
+            expect(result.top, label + ' target honors offset without bottom clamping')
+              .toBeLessThanOrEqual(result.margin + 2);
           } else {
             expect(result.headerPosition, label + ' mobile header').toBe('relative');
             expect(result.margin, label + ' mobile no unnecessary offset').toBe(0);
             expect(result.top, label + ' mobile target in viewport').toBeGreaterThanOrEqual(-2);
+            expect(result.top, label + ' mobile target reaches top').toBeLessThanOrEqual(2);
           }
           if (([390, 768, 1440].includes(width) && font === 16) ||
               ([390, 1440].includes(width) && font === 64 && dir === 'rtl')) {
