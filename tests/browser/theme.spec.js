@@ -168,6 +168,23 @@ test('skip link moves keyboard users to the main landmark', async ({ page }) => 
 	await page.keyboard.press('Enter');
 	await expect(page).toHaveURL(/#main-content$/);
 	await expect(page.locator('#main-content')).toBeFocused();
+	const skipGeometry = await page.locator('#main-content').evaluate((main) => {
+		const header = document.querySelector('.slateframe-site-header');
+		return {
+			top: main.getBoundingClientRect().top,
+			header: header.getBoundingClientRect().height,
+			position: getComputedStyle(header).position,
+			offset: parseFloat(getComputedStyle(main).scrollMarginBlockStart),
+		};
+	});
+	if (page.viewportSize().width > 480) {
+		expect(skipGeometry.position).toBe('sticky');
+		expect(skipGeometry.offset).toBeGreaterThanOrEqual(skipGeometry.header);
+		expect(skipGeometry.top).toBeGreaterThanOrEqual(skipGeometry.header - 2);
+	} else {
+		expect(skipGeometry.position).toBe('relative');
+		expect(skipGeometry.offset).toBe(0);
+	}
 	await page.keyboard.press('Tab');
 	expect(await page.evaluate(() => document.activeElement.closest('#main-content') !== null)).toBe(true);
 });
