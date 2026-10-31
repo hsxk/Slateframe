@@ -90,6 +90,9 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         forced = 'comments-query-query-only-390-rtl-400-forced-colors.png'
         self.assertIn(forced, browser)
         self.assertIn(forced, workflow)
+        collision = 'comments-query-collision-390-rtl-400.png'
+        self.assertIn(collision, browser)
+        self.assertIn(collision, workflow)
         self.assertIn('new AxeBuilder', browser)
         self.assertIn("wp('post', 'delete'", browser)
         self.assertIn('320, 375, 390, 412, 768, 1440, 1920', browser)
