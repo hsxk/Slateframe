@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Underline WordPress Core's current menu/page ancestors as well as the current leaf in deep navigation; remove redundant fallback-list selectors without increasing CSS size. Verify both native class families at seven widths and LTR/RTL in real WordPress/Chromium. Pending exact-HEAD Actions and visual review.
+
 + Replace the deep-menu browser's hand-authored DOM with a disposable WP-CLI menu rendered by the actual Core Walker, verify its keyboard order and Axe accessibility, and preserve all strict CSS aggregate budgets through cascade-equivalent selector factoring. The initial SHA's 13 static budget failures were fixed without changing thresholds. Latest HEAD still requires Actions and visual acceptance.
 
 + Preserve every authored level of a configured WordPress Core menu instead of silently dropping third-level links. Keep nested desktop links inside the existing scrollable dropdown with logical RTL/LTR hierarchy; add 320–1920px keyboard, 44px, forced-colors and exact-HEAD visual regressions without new JavaScript. Pending new-SHA Actions and screenshot review.

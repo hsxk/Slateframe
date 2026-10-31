@@ -39,6 +39,11 @@ test('Core Walker preserves third-level links, keyboard order and responsive bou
     const second = nav.locator('a[href="#archive"]');
     const third = nav.locator('a[href="#method"]');
     await expect(third).toHaveCount(1);
+    // Core marks ancestor items on active paths; exercise both native
+    // menu and page-list class families without changing authored URLs.
+    await top.locator('xpath=..').evaluate(node => node.classList.add('current-menu-ancestor'));
+    await second.locator('xpath=..').evaluate(node => node.classList.add('current_page_ancestor'));
+    await third.locator('xpath=..').evaluate(node => node.classList.add('current-menu-item'));
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
@@ -55,6 +60,9 @@ test('Core Walker preserves third-level links, keyboard order and responsive bou
         }
         await expect(second).toBeVisible();
         await expect(third).toBeVisible();
+        for (const link of [top, second, third]) {
+          await expect(link).toHaveCSS('text-decoration-line', /underline/);
+        }
         await second.focus();
         await page.keyboard.press('Tab');
         await expect(third).toBeFocused();
