@@ -173,15 +173,7 @@ test('Query Loop discussion never suppresses the current post comments', async (
         const reply = page.locator('.slateframe-comment-list .reply a[href*="replytocom"]').first();
         await expect(reply).toHaveCount(1);
         await expect(reply).not.toHaveClass(/comment-reply-link/);
-        await expect(reply).toHaveAttribute('href', new RegExp('#slateframe-outer-' + fixture.id + '-respond
-    }
-  } finally {
-    if (replyCommentId) wp('comment', 'delete', String(replyCommentId), '--force');
-    for (const id of postIds) wp('post', 'delete', String(id), '--force');
-    if (patternId) wp('post', 'delete', String(patternId), '--force');
-  }
-});
-));
+        await expect(reply).toHaveAttribute('href', new RegExp('#slateframe-outer-' + fixture.id + '-respond$'));
         await reply.click();
         await expect(page).toHaveURL(new RegExp('replytocom=' + replyCommentId));
         await expect(page.locator('.slateframe-comments input[name="comment_parent"]')).toHaveValue(String(replyCommentId));
@@ -192,6 +184,7 @@ test('Query Loop discussion never suppresses the current post comments', async (
       }
     }
   } finally {
+    if (replyCommentId) wp('comment', 'delete', String(replyCommentId), '--force');
     for (const id of postIds) wp('post', 'delete', String(id), '--force');
     if (patternId) wp('post', 'delete', String(patternId), '--force');
   }
