@@ -1008,6 +1008,14 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA" || { echo "Browser evidence does not match PR HEAD" >&2; exit 1; }
           printf "%s\n" "$SLATEFRAME_EVIDENCE_SHA" > test-artifacts/screenshots/HEAD_SHA.txt
+          # Require three-level Core Walker navigation evidence across responsive RTL/LTR states.
+          for width in 320 375 390 412 768 1440 1920; do
+            for direction in ltr rtl; do
+              screenshot="test-artifacts/screenshots/navigation-deep-${width}-${direction}.png"
+              test -s "$screenshot" || { echo "Missing native deep-navigation evidence: $screenshot" >&2; exit 1; }
+            done
+          done
+          test -s test-artifacts/screenshots/navigation-deep-390-rtl-forced-colors.png || { echo "Missing deep-navigation forced-colors evidence" >&2; exit 1; }
           # Require real Gutenberg Core Tabs 400% RTL editor screenshots at both widths.
           for width in 390 1440; do
             test -s "test-artifacts/screenshots/core-tabs-editor-${width}-rtl-400.png" || { echo "Missing native Gutenberg Core Tabs 400% editor evidence: ${width}" >&2; exit 1; }

@@ -20,7 +20,8 @@ class CoreFreeformScrollContractTest(unittest.TestCase):
     def test_existing_native_styles_cover_both_scrollers(self):
         css = (ROOT / 'assets/css/reading.css').read_text(encoding='utf-8')
         self.assertIn('.slateframe-prose pre:not(.wp-block-verse),.wp-block-code{overflow:auto;', css)
-        self.assertIn('.slateframe-prose>table{display:block;', css)
+        self.assertIn('.slateframe-prose{& blockquote{', css)
+        self.assertIn('&>table{display:block;', css)
         self.assertIn('.slateframe-prose>table):focus-visible', css)
 
 

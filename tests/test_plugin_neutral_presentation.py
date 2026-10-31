@@ -28,15 +28,16 @@ class PluginNeutralPresentationTest(unittest.TestCase):
 
     def test_plain_table_and_core_table_have_bounded_overflow(self):
         css = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
-        self.assertIn(".slateframe-prose>table{display:block", css)
+        self.assertIn(".slateframe-prose{& blockquote{", css)
+        self.assertIn("&>table{display:block", css)
         # Core Table uses a figure wrapper. The shared figure bound plus
         # contained inline scrolling replace the redundant wrapper max width.
         self.assertIn(
-            ".slateframe-prose :is(figure,audio,iframe,embed,object,.wp-video,.mejs-container){max-width:100%}",
+            ".slateframe-prose{& :is(figure,audio,iframe,embed,object,.wp-video,.mejs-container){max-width:100%}",
             css,
         )
         self.assertIn(
-            ".slateframe-prose .wp-block-table{min-inline-size:0;overflow-x:auto;"
+            "& .wp-block-table{min-inline-size:0;overflow-x:auto;"
             "scrollbar-gutter:stable;contain:inline-size;overscroll-behavior-inline:contain;"
             "& table{inline-size:max-content;min-inline-size:100%;border-collapse:collapse}}",
             css,
