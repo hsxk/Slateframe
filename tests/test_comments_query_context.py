@@ -93,6 +93,11 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn('new AxeBuilder', browser)
         self.assertIn("wp('post', 'delete'", browser)
         self.assertIn('320, 375, 390, 412, 768, 1440, 1920', browser)
+        # The Query Loop must not search the fixture's own post_content:
+        # WordPress search includes serialized block attribute text.
+        self.assertIn('"postType":"page"', browser)
+        self.assertIn("'--post_type=post'", browser)
+        self.assertIn('slateframe-no-match-query-context-2026', browser)
 
     def test_no_rendering_or_shortcode_side_effects(self):
         source = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
