@@ -73,6 +73,19 @@ class CoreTabsEditorReflow(unittest.TestCase):
         self.assertIn("core-tabs-editor-390-rtl-400-forced-colors.png", self.workflow)
         self.assertIn("test -s", self.workflow)
 
+    def test_complete_label_evidence_is_not_lost_to_editor_scroll_position(self):
+        # A 400% control may be taller than the visible Gutenberg canvas. The
+        # whole-control screenshot must complement, not replace, viewport proof.
+        self.assertIn("toContainText('UnbrokenNativeTabLabel'.repeat(4))", self.browser)
+        self.assertIn("toContainText('Second / 次へ / التالي')", self.browser)
+        self.assertIn("controls.first().screenshot({", self.browser)
+        self.assertEqual(self.browser.count("controls.first().screenshot({"), 2)
+        self.assertIn("core-tabs-editor-' + width + '-rtl-400-complete-label.png", self.browser)
+        self.assertIn("core-tabs-editor-390-rtl-400-complete-label-forced-colors.png", self.browser)
+        self.assertIn('core-tabs-editor-${width}-rtl-400-complete-label.png', self.workflow)
+        self.assertIn("core-tabs-editor-390-rtl-400-complete-label-forced-colors.png", self.workflow)
+        self.assertIn("page.screenshot({", self.browser)
+
 
 if __name__ == "__main__":
     unittest.main()
