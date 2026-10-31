@@ -72,4 +72,15 @@ test('Core File PDF preview before filename keeps 44px links in frontend and RTL
     expect(await link.evaluate(node => getComputedStyle(node).outlineStyle)).not.toBe('none');
   }
   await file.screenshot({ path: 'test-artifacts/screenshots/core-file-preview-390-rtl-200-forced-colors.png' });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '400%'; });
+  const zoomed = await file.locator('object.wp-block-file__embed').evaluate(node => {
+    const rect = node.getBoundingClientRect();
+    return { width: rect.width, right: rect.right,
+      maxInlineSize: getComputedStyle(node).maxInlineSize };
+  });
+  expect(zoomed.width).toBeGreaterThan(0);
+  expect(zoomed.right).toBeLessThanOrEqual(391);
+  expect(zoomed.maxInlineSize).not.toBe('none');
+  await file.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'test-artifacts/screenshots/core-file-preview-390-rtl-400-forced-colors.png' });
 });
