@@ -118,6 +118,15 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn('await queriedSubmit.focus()', browser)
         self.assertIn('toBeFocused()', browser)
 
+    def test_queried_form_locator_remains_visible_to_later_assertions(self):
+        """A real-browser failure exposed a block-scoped JS const used later."""
+        browser = (ROOT / 'tests/browser/comments-query-context.spec.js').read_text(encoding='utf-8')
+        declaration = "const queried = page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form');"
+        self.assertEqual(browser.count(declaration), 1)
+        self.assertLess(browser.index(declaration), browser.index('if (fixture.queriedForm) {'))
+        self.assertIn("await expect(queried.locator('#respond')).toHaveCount(1)", browser)
+        self.assertIn('await queriedSubmit.focus()', browser)
+
     def test_classic_form_label_scoping_is_local_and_core_safe(self):
         template = (ROOT / 'comments.php').read_text(encoding='utf-8')
         helpers = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
