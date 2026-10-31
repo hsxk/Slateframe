@@ -57,6 +57,11 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     await expect(tabs).toHaveCount(1);
     const controls = tabs.locator('.wp-block-tab-list [role="tab"]');
     await expect(controls).toHaveCount(2);
+    // A viewport screenshot can show only the middle of a tab taller than the
+    // Gutenberg canvas at 400% zoom. Preserve the complete rendered control
+    // as independent evidence, and assert Core did not truncate its text.
+    await expect(controls.first()).toContainText('UnbrokenNativeTabLabel'.repeat(4));
+    await expect(controls.last()).toContainText('Second / 次へ / التالي');
     const measurements = await tabs.evaluate(node => {
       const root = document.documentElement;
       const box = node.getBoundingClientRect();
@@ -83,8 +88,37 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
       expect(control.width).toBeLessThanOrEqual(measurements.viewport + 1);
       expect(control.wrap).toBe('anywhere');
     }
-    // WordPress editor chrome can already overflow at 400% independently of Tabs.
+    // At 390px/400%, the tab is taller than Gutenberg's scrollable canvas.
+    // Playwright's element screenshot alone captured only the middle, with
+    // editor chrome over the first lines. Give the native canvas enough height,
+    // prove both edges fit, then restore the original viewport for context.
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    const originalViewport = page.viewportSize();
+    const captureCompleteLabel = async path => {
+      const tabHeight = await controls.first().evaluate(node =>
+        Math.ceil(node.getBoundingClientRect().height));
+      await page.setViewportSize({
+        width: originalViewport.width,
+        height: Math.max(originalViewport.height, tabHeight + 480),
+      });
+      try {
+        await controls.first().scrollIntoViewIfNeeded();
+        const visible = await controls.first().evaluate(node => {
+          const rect = node.getBoundingClientRect();
+          return { top: rect.top, bottom: rect.bottom,
+            viewport: node.ownerDocument.defaultView.innerHeight };
+        });
+        expect(visible.top, 'full native label begins inside the editor viewport')
+          .toBeGreaterThanOrEqual(-1);
+        expect(visible.bottom, 'full native label ends inside the editor viewport')
+          .toBeLessThanOrEqual(visible.viewport + 1);
+        await controls.first().screenshot({ path, animations: 'disabled' });
+      } finally {
+        await page.setViewportSize(originalViewport);
+      }
+    };
+    await captureCompleteLabel(
+      'test-artifacts/screenshots/core-tabs-editor-' + width + '-rtl-400-complete-label.png');
     await controls.first().scrollIntoViewIfNeeded();
     await page.screenshot({
       path: 'test-artifacts/screenshots/core-tabs-editor-' + width + '-rtl-400.png',
@@ -99,6 +133,8 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
       });
       expect(forced.width).toBeGreaterThanOrEqual(44);
       expect(forced.height).toBeGreaterThanOrEqual(44);
+      await captureCompleteLabel(
+        'test-artifacts/screenshots/core-tabs-editor-390-rtl-400-complete-label-forced-colors.png');
       await controls.first().scrollIntoViewIfNeeded();
       await page.screenshot({
         path: 'test-artifacts/screenshots/core-tabs-editor-390-rtl-400-forced-colors.png',
