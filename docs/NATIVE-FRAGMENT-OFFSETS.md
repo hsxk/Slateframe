@@ -10,7 +10,7 @@ The desktop Slateframe header is sticky above 480px. Core Button links and ordin
 
 ## Evidence and acceptance
 
-An isolated local Chromium reproduction using the actual distributed Slateframe CSS showed that at 768/1440px, LTR and RTL, a native fragment destination landed at **0px** (behind the ~73px header) before the fix and at **88px** after it. At 390px the non-sticky mobile target remained at 0px in both directions. The local check also reported zero document overflow.
+An isolated local Chromium reproduction using the actual distributed Slateframe CSS showed that at 768/1440px, LTR and RTL, a native fragment destination landed at **0px** (behind the ~73px header) before the fix and at **88px** after it. At 390px the non-sticky mobile target remained at 0px in both directions. The local check also reported zero document overflow. The real WordPress fixture includes space **both before and after** its destination, so a target clamped near the document bottom cannot falsely satisfy the offset assertion; it checks both lower and upper geometry bounds.
 
 `tests/browser/native-anchor-offset.spec.js` creates and deletes a disposable WordPress page. It activates a native Core Button fragment using **keyboard Enter**, checks all seven required widths, both writing directions, 100/200/400% text where relevant, actual computed header and target geometry, zero page overflow, and forced-colors screenshots. It must be accepted only after exact-new-SHA Theme quality and Photography Actions succeed and the real WordPress/Chromium screenshots are visually inspected. The isolated reproduction is not a substitute for that gate.
 
