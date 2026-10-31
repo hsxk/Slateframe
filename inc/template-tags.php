@@ -423,6 +423,11 @@ function slateframe_scope_classic_comment_field_html( $html ) {
 			$map[ $id ] = 'slateframe-outer-' . $post_id . '-' . $id;
 		}
 	}
+	// The email note is rendered separately from its field. Preserve
+	// cross-field aria-describedby references only when that note was scoped.
+	if ( ! empty( $GLOBALS['slateframe_classic_comment_note_scoped'] ) ) {
+		$map['email-notes'] = 'slateframe-outer-' . $post_id . '-email-notes';
+	}
 	if ( ! $map ) {
 		return $html;
 	}
