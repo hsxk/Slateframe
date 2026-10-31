@@ -118,6 +118,47 @@ test('authored attachment Core comments own the form without classic duplication
     await page.goto('/?attachment_id=' + coreId, { waitUntil: 'networkidle' });
     await expect(page.locator('form#commentform')).toHaveCount(0);
     await expect(page.locator('.slateframe-comments')).toHaveCount(0);
+
+    // Historical classic attachment discussion remains readable after comments close.
+    const commentId = Number(wp('eval',
+      '$id=wp_insert_comment(array("comment_post_ID"=>' + classicId +
+      ',"comment_author"=>"Slateframe fixture","comment_author_email"=>"fixture@example.invalid",' +
+      '"comment_content"=>"Historical attachment comment","comment_approved"=>1));' +
+      'if(!$id){throw new RuntimeException("Could not create comment");}' +
+      'wp_update_comment_count_now(' + classicId + ');echo $id;'));
+    expect(commentId).toBeGreaterThan(0);
+    wp('post', 'update', String(classicId), '--comment_status=closed');
+    await page.goto('/?attachment_id=' + classicId, { waitUntil: 'networkidle' });
+    const history = page.locator('.slateframe-comments');
+    await expect(history).toHaveCount(1);
+    await expect(history.locator('.slateframe-comment-list li.comment')).toHaveCount(1);
+    await expect(history).toContainText('Historical attachment comment');
+    await expect(history).toContainText('Comments are closed.');
+    await expect(page.locator('form#commentform')).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.locator('html').evaluate(root => { root.dir = 'rtl'; root.style.fontSize = '64px'; });
+    const historyOverflow = await page.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(historyOverflow).toBeLessThanOrEqual(1);
+    const historyA11y = await new AxeBuilder({ page }).include('.slateframe-comments')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(historyA11y.violations).toEqual([]);
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/attachment-comments-closed-390-rtl-400.png',
+      animations: 'disabled', fullPage: true,
+    });
+    await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+    await page.screenshot({
+      path: 'test-artifacts/screenshots/attachment-comments-closed-390-rtl-400-forced-colors.png',
+      animations: 'disabled', fullPage: true,
+    });
+    await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.locator('html').evaluate(root => { root.dir = 'ltr'; root.style.fontSize = '16px'; });
+    await history.screenshot({
+      path: 'test-artifacts/screenshots/attachment-comments-closed-1440-ltr.png',
+      animations: 'disabled',
+    });
   } finally {
     if (coreId) wp('eval', 'wp_delete_attachment(' + coreId + ',true);');
     if (classicId) wp('eval', 'wp_delete_attachment(' + classicId + ',true);');
