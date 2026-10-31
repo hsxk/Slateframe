@@ -18,6 +18,11 @@ class DeepNavigationContract(unittest.TestCase):
         self.assertIn('padding-inline-start:var(--slateframe-component-gap)', css)
         self.assertIn('border-inline-start:var(--slateframe-rule)', css)
         self.assertLessEqual(len(css.encode('utf-8')), 4000)
+        self.assertIn('.current-menu-ancestor,.current_page_ancestor', css)
+        self.assertIn('.slateframe-primary-nav ul{margin:0;padding:0;list-style:none}', css)
+        self.assertNotIn('.slateframe-primary-nav ul,.slateframe-menu-fallback{', css)
+        self.assertIn('&>ul{display:grid}', css)
+        self.assertNotIn('&>ul,& .slateframe-menu-fallback{display:grid}', css)
 
     def test_real_browser_checks_keyboard_rtl_mobile_and_forced_colors(self):
         browser = (ROOT / 'tests/browser/navigation-deep-hierarchy.spec.js').read_text(encoding='utf-8')
@@ -36,7 +41,10 @@ class DeepNavigationContract(unittest.TestCase):
                       "'--parent-id=' + research", "'--parent-id=' + archive",
                       "wp('eval', 'echo wp_nav_menu(", '"depth" => 0',
                       "wp('menu', 'delete', menuId)", 'new AxeBuilder({ page })',
-                      "expect(a11y.violations).toEqual([])"):
+                      "expect(a11y.violations).toEqual([])",
+                      "classList.add('current-menu-ancestor')",
+                      "classList.add('current_page_ancestor')",
+                      "toHaveCSS('text-decoration-line', /underline/)"):
             with self.subTest(token=token):
                 self.assertIn(token, browser)
         self.assertNotIn('node.innerHTML = '+ '\x60<ul', browser)
