@@ -414,8 +414,17 @@ function slateframe_scope_classic_comment_field_html( $html ) {
 
 	$ids = array( 'comment', 'author', 'email', 'url', 'wp-comment-cookies-consent', 'email-notes' );
 	$map = array();
-	foreach ( $ids as $id ) {
-		$map[ $id ] = 'slateframe-outer-' . $post_id . '-' . $id;
+	$scan = new WP_HTML_Tag_Processor( $html );
+	while ( $scan->next_tag() ) {
+		$id = $scan->get_attribute( 'id' );
+		// A plugin may replace a Core field with its own ID. Do not rewrite
+		// a label unless its corresponding canonical control is present.
+		if ( is_string( $id ) && in_array( $id, $ids, true ) ) {
+			$map[ $id ] = 'slateframe-outer-' . $post_id . '-' . $id;
+		}
+	}
+	if ( ! $map ) {
+		return $html;
 	}
 
 	$tags = new WP_HTML_Tag_Processor( $html );
