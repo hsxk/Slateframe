@@ -73,5 +73,21 @@ class AttachmentCommentsCoreOwnership(unittest.TestCase):
         self.assertIn('comments_template();', source)
 
 
+    def test_exact_head_browser_evidence_gate(self):
+        workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
+        browser = (ROOT / 'tests/browser/attachment-comments-core-ownership.spec.js').read_text(encoding='utf-8')
+        for screenshot in (
+            'attachment-comments-core-390-rtl-400.png',
+            'attachment-comments-core-390-rtl-400-forced-colors.png',
+            'attachment-comments-core-1440-ltr.png',
+            'attachment-comments-classic-390-rtl.png',
+        ):
+            with self.subTest(screenshot=screenshot):
+                self.assertIn(screenshot, workflow)
+                self.assertIn(screenshot, browser)
+        self.assertIn('wp_delete_attachment', browser)
+        self.assertIn('AxeBuilder', browser)
+
+
 if __name__ == '__main__':
     unittest.main()
