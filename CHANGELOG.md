@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Underline native WordPress `current-menu-parent` and `current_page_parent` links even without ancestor classes, including the posts-page parent; preserve unrelated links, 44px targets, RTL/CJK, Core Walker behavior, strict CSS budgets and real seven-width browser evidence. Pending exact-HEAD Actions and screenshot review.
+
 + Underline WordPress Core's current menu/page ancestors as well as the current leaf in deep navigation; remove redundant fallback-list selectors without increasing CSS size. Verify both native class families at seven widths and LTR/RTL in real WordPress/Chromium. Pending exact-HEAD Actions and visual review.
 
 + Replace the deep-menu browser's hand-authored DOM with a disposable WP-CLI menu rendered by the actual Core Walker, verify its keyboard order and Axe accessibility, and preserve all strict CSS aggregate budgets through cascade-equivalent selector factoring. The initial SHA's 13 static budget failures were fixed without changing thresholds. Latest HEAD still requires Actions and visual acceptance.
