@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Preserve every authored level of a configured WordPress Core menu instead of silently dropping third-level links. Keep nested desktop links inside the existing scrollable dropdown with logical RTL/LTR hierarchy; add 320–1920px keyboard, 44px, forced-colors and exact-HEAD visual regressions without new JavaScript. Pending new-SHA Actions and screenshot review.
+
 + Correct the real Gutenberg 390px RTL/400% Core Tabs visual evidence: a passing element screenshot still lost the label's beginning under editor chrome. Temporarily fit the entire native control inside a taller editor viewport, assert both edges, capture forced-colors evidence and restore the original viewport for context. Pending exact-new-SHA Actions and visual review.
 
 + Preserve complete Core Tabs label visual evidence in the real Gutenberg 400% RTL editor: assert native multilingual tab text, capture whole-control screenshots at 390/1440px and forced colors alongside contextual viewport captures, and require all images in exact-HEAD CI without changing runtime assets or author content. Pending new-SHA Actions and visual review.
