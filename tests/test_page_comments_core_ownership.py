@@ -8,9 +8,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 PHP = r"""
+define('ABSPATH', '/');
 $GLOBALS['case'] = json_decode(getenv('SLATEFRAME_PAGE_COMMENTS_CASE'), true);
 $GLOBALS['calls'] = 0;
 $GLOBALS['loop'] = 0;
+function absint($value) { return abs((int) $value); }
+function is_singular() { return true; }
+function post_password_required() { return false; }
+function slateframe_singular_synced_pattern_contents() { return []; }
 function get_header() {}
 function get_footer() {}
 function have_posts() { return $GLOBALS['loop']++ === 0; }
@@ -29,6 +34,7 @@ function has_block($name, $post) {
     return in_array($name, $GLOBALS['case']['blocks'], true);
 }
 function comments_template() { $GLOBALS['calls']++; }
+require getcwd() . '/inc/comments-ownership.php';
 ob_start();
 require getcwd() . '/page.php';
 ob_end_clean();
@@ -64,10 +70,14 @@ class PageCommentsCoreOwnership(unittest.TestCase):
     def test_page_and_single_share_core_ownership_guard(self):
         for template in ('page.php', 'single.php'):
             source = (ROOT / template).read_text(encoding='utf-8')
-            for block in ('core/comments', 'core/post-comments', 'core/post-comments-form'):
-                with self.subTest(template=template, block=block):
-                    self.assertIn("! has_block( '" + block + "', get_the_ID() )", source)
+            self.assertIn('! slateframe_has_core_discussion_block( get_the_ID() )', source)
+            self.assertNotIn("! has_block( 'core/comments', get_the_ID() )", source)
             self.assertIn('comments_template();', source)
+        helper = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
+        for block in ('core/comments', 'core/post-comments', 'core/post-comments-form'):
+            with self.subTest(block=block):
+                self.assertIn("'" + block + "'", helper)
+        self.assertIn('slateframe_singular_synced_pattern_contents()', helper)
 
     def test_real_wordpress_page_regression_is_in_browser_suite(self):
         source = (ROOT / 'tests/browser/page-comments-core-ownership.spec.js').read_text(
