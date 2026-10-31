@@ -129,7 +129,8 @@ class QueryLoopDiscussionContext(unittest.TestCase):
                       "'slateframe-outer-'"):
             self.assertIn(token, helpers)
         for token in ('badLabels', 'badDescriptions', 'document.getElementById',
-                      'form.contains(target)', "'slateframe-outer-'"):
+                      'form.contains(target)', "'slateframe-outer-'",
+                      'replyIdCollisions', "'cancel-comment-reply-link'", "'respond'"):
             self.assertIn(token, browser)
         # Core must retain the canonical queried-post form and submission
         # targets. The theme only scopes its own classic field references.
