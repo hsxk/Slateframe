@@ -153,7 +153,8 @@ while ( have_posts() ) :
 		</article>
 
 		<?php
-		if ( comments_open() || get_comments_number() ) {
+		// Core-authored discussion blocks own the form when present.
+		if ( ( comments_open() || get_comments_number() ) && ! has_block( 'core/comments', get_the_ID() ) && ! has_block( 'core/post-comments', get_the_ID() ) && ! has_block( 'core/post-comments-form', get_the_ID() ) ) {
 			comments_template();
 		}
 		?>

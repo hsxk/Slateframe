@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Prevent duplicate classic comment forms on attachment pages that already contain WordPress Core Comments, Post Comments, or Post Comments Form blocks; retain closed-attachment comment history and nine executable PHP ownership scenarios. Pending exact-HEAD Actions and visual acceptance.
+
 + Restore WordPress Core's full hierarchical footer navigation instead of silently dropping child links. Keep native Walker output, browser-native RTL list indentation, 44px link targets, CJK wrapping, and unchanged strict CSS/JS budgets; add executable and real WordPress/Chromium coverage. Pending exact-HEAD Actions and visual review.
 
 
