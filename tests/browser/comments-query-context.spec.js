@@ -115,7 +115,7 @@ test('Query Loop discussion never suppresses the current post comments', async (
         expect(badLabels, 'Outer classic labels must target their own controls').toEqual([]);
         const badDescriptions = await classic.locator('form').evaluate(form =>
           [...form.querySelectorAll('[aria-describedby]')].flatMap(control =>
-            control.getAttribute('aria-describedby').split(/\\s+/).filter(id => {
+            control.getAttribute('aria-describedby').split(/\s+/).filter(id => {
               const target = document.getElementById(id);
               return !target || !form.contains(target);
             })));
@@ -127,6 +127,20 @@ test('Query Loop discussion never suppresses the current post comments', async (
           ['respond', 'reply-title', 'cancel-comment-reply-link', 'commentform', 'comment_parent']
             .filter(id => document.querySelectorAll('[id="' + id + '"]').length > 1));
         expect(replyIdCollisions, 'Core reply containers must not collide across posts').toEqual([]);
+        // Any duplicated ID inside either form can misdirect labels, Core
+        // reply handlers or third-party accessibility tooling. Check against
+        // the whole document, not just a hardcoded list of Core IDs.
+        const duplicateFormIds = await page.evaluate(() => {
+          const counts = new Map();
+          for (const element of document.querySelectorAll('[id]')) {
+            counts.set(element.id, (counts.get(element.id) || 0) + 1);
+          }
+          const formIds = [...document.querySelectorAll(
+            '.slateframe-comments [id], .slateframe-prose .wp-block-post-template .wp-block-post-comments-form [id]'
+          )].map(element => element.id);
+          return [...new Set(formIds)].filter(id => counts.get(id) > 1);
+        });
+        expect(duplicateFormIds, 'All comment form IDs must be unique document-wide').toEqual([]);
         await expect(classic.locator('#slateframe-outer-' + fixture.id + '-respond')).toHaveCount(1);
         await expect(classic.locator('#slateframe-outer-' + fixture.id + '-comment_parent')).toHaveCount(1);
         await expect(classic.locator('#slateframe-outer-' + fixture.id + '-comment_post_ID')).toHaveCount(1);
