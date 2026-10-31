@@ -22,7 +22,8 @@ class CoreFootnotesContract(unittest.TestCase):
         self.assertIn('[id^=fnref]', CSS)
         self.assertIn(':is([id^=fnref],.wp-block-footnotes li[id^=fn]){', CSS)
         self.assertIn('.wp-block-footnotes li[id^=fn]', CSS)
-        self.assertIn('scroll-margin-block-start:var(--slateframe-header-height)', CSS)
+        self.assertIn('scroll-margin-block-start:calc(var(--slateframe-header-height) + var(--slateframe-stack-gap))', CSS)
+        self.assertNotIn('scroll-margin-block-start:var(--slateframe-header-height);&:target', CSS)
         self.assertIn('&:target{outline:2px solid var(--slateframe-accent)', CSS)
         self.assertIn('outline-color:Highlight', CSS)
         self.assertIn('@media(forced-colors:active)', CSS)
@@ -34,6 +35,7 @@ class CoreFootnotesContract(unittest.TestCase):
                       'toHaveURL', 'screenshot', 'scrollWidth', 'AxeBuilder',
                       'getBoundingClientRect', "page.keyboard.press('Enter')",
                       'anchor.id = node.id', 'SLATEFRAME_POST_PATH',
+                      'sticky header', 'target clears header',
                       'slateframe-footer-core-footnotes sup a'):
             self.assertIn(token, SPEC)
 
