@@ -63,6 +63,8 @@ class CoreTabsEditorReflow(unittest.TestCase):
         self.assertIn("core-tabs-editor-' + width + '-rtl-400.png", self.browser)
         self.assertIn("for width in 390 1440; do", self.workflow)
         self.assertIn('core-tabs-editor-${width}-rtl-400.png', self.workflow)
+        self.assertIn("core-tabs-editor-390-rtl-400-forced-colors.png", self.browser)
+        self.assertIn("core-tabs-editor-390-rtl-400-forced-colors.png", self.workflow)
         self.assertIn("test -s", self.workflow)
 
 
