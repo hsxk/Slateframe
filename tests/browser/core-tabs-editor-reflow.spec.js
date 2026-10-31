@@ -57,6 +57,11 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     await expect(tabs).toHaveCount(1);
     const controls = tabs.locator('.wp-block-tab-list [role="tab"]');
     await expect(controls).toHaveCount(2);
+    // A viewport screenshot can show only the middle of a tab taller than the
+    // Gutenberg canvas at 400% zoom. Preserve the complete rendered control
+    // as independent evidence, and assert Core did not truncate its text.
+    await expect(controls.first()).toContainText('UnbrokenNativeTabLabel'.repeat(4));
+    await expect(controls.last()).toContainText('Second / 次へ / التالي');
     const measurements = await tabs.evaluate(node => {
       const root = document.documentElement;
       const box = node.getBoundingClientRect();
@@ -85,6 +90,10 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     }
     // WordPress editor chrome can already overflow at 400% independently of Tabs.
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+    await controls.first().screenshot({
+      path: 'test-artifacts/screenshots/core-tabs-editor-' + width + '-rtl-400-complete-label.png',
+      animations: 'disabled',
+    });
     await controls.first().scrollIntoViewIfNeeded();
     await page.screenshot({
       path: 'test-artifacts/screenshots/core-tabs-editor-' + width + '-rtl-400.png',
@@ -99,6 +108,10 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
       });
       expect(forced.width).toBeGreaterThanOrEqual(44);
       expect(forced.height).toBeGreaterThanOrEqual(44);
+      await controls.first().screenshot({
+        path: 'test-artifacts/screenshots/core-tabs-editor-390-rtl-400-complete-label-forced-colors.png',
+        animations: 'disabled',
+      });
       await controls.first().scrollIntoViewIfNeeded();
       await page.screenshot({
         path: 'test-artifacts/screenshots/core-tabs-editor-390-rtl-400-forced-colors.png',
