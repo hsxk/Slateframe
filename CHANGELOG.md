@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Scope the classic comment form's canonical field IDs, labels, email-note references, form and submit IDs when a Core Query Loop shares the page, preventing outer labels from targeting a queried post's form. Preserve Core and plugin markup. Threaded reply/cancel ID collisions remain an explicit PR acceptance blocker; exact-HEAD browser Actions and visual evidence pending.
+
 + Keep the singular post's classic comments when a Core Query Loop Post Template contains its own queried-post discussion, including published synced patterns; preserve Core-first ownership outside the repeated-post context, bounded pattern resolution, and strict visual/accessibility gates.
 
 + Prevent duplicate classic comment forms when a published WordPress synced pattern owns Core Comments or Post Comments Form in a post, page or attachment. Reuse the existing bounded Core pattern resolver, preserve classic/locked fallbacks and unchanged asset budgets; add executable PHP cases and real WordPress RTL/400%/Axe/forced-colors screenshots.
