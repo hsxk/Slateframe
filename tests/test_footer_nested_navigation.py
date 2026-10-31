@@ -15,10 +15,12 @@ class FooterNestedNavigation(unittest.TestCase):
 
     def test_nested_lists_remain_visible_and_use_logical_spacing(self):
         css = (ROOT / "assets/css/footer.css").read_text()
-        self.assertIn(".slateframe-footer-menu .sub-menu{list-style:none;margin:0;padding-inline-start:1em}", css)
-        self.assertIn(".slateframe-footer-menu li{min-inline-size:0}", css)
+        self.assertIn(".slateframe-footer-menu{display:flex", css)
+        self.assertIn("overflow-wrap:anywhere", css)
+        self.assertIn("min-block-size:var(--slateframe-control)", css)
         self.assertNotIn(".slateframe-footer-menu .sub-menu{display:none", css)
-        self.assertLessEqual(len(css.encode()), 2000)
+        # No added runtime CSS: preserve the pre-existing 1,865-byte footer budget.
+        self.assertLessEqual(len(css.encode()), 1865)
 
     def test_browser_and_workflow_require_exact_visual_evidence(self):
         browser = (ROOT / "tests/browser/footer-nested-core-menu.spec.js").read_text()
