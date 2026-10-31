@@ -26,6 +26,7 @@ class CoreFileParity(unittest.TestCase):
             "min-block-size:var(--slateframe-control)", "overflow-wrap:anywhere",
         ):
             self.assertIn(token, css)
+        self.assertIn(".wp-block-file__embed{max-inline-size:100%}", css)
         self.assertLessEqual(len(css.encode("utf-8")), 400)
         self.assertIn("test $(wc -c < assets/css/core-file.css) -le 400", ci)
         self.assertIn("grep -qx 'slateframe/assets/css/core-file.css' /tmp/package.txt", ci)
@@ -33,6 +34,20 @@ class CoreFileParity(unittest.TestCase):
                           "javascript", "direction:ltr"):
             self.assertNotIn(forbidden, css)
         self.assertNotIn("render_block_core/file", php)
+
+    def test_preview_fixture_does_not_mask_theme_containment(self):
+        preview = (ROOT / "tests/browser/core-file-preview.spec.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("inline-size:600px", preview)
+        self.assertNotIn("max-inline-size:100%;block-size", preview)
+        for token in (
+            "sizes.preview.width", "sizes.preview.right",
+            "sizes.preview.maxInlineSize", "sizes.container + 1",
+            "core-file-preview-390-rtl-400-forced-colors.png",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, preview)
 
     def test_disposable_wordpress_and_editor_coverage(self):
         js = (ROOT / "tests/browser/core-file-parity.spec.js").read_text(encoding="utf-8")
@@ -45,6 +60,9 @@ class CoreFileParity(unittest.TestCase):
             "AxeBuilder", "openAuthenticatedEditor", "blocks.serialize",
             "blocks.parse", "page.keyboard.press('Tab')",
             "core-file-390-rtl-200-forced-colors.png",
+            "core-file-preview-390-", "native PDF preview width",
+            "native PDF preview right", "object.wp-block-file__embed",
+            "Core-hidden PDF preview", "hidden: node.hidden",
             "page.goto('/?p=999999999'",
         ):
             self.assertIn(token, js)

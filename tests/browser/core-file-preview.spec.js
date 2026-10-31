@@ -13,7 +13,7 @@ test('Core File PDF preview before filename keeps 44px links in frontend and RTL
     const preview = document.createElement('object');
     preview.className = 'wp-block-file__embed';
     preview.type = 'application/pdf';
-    preview.style.cssText = 'display:block;inline-size:100%;max-inline-size:100%;block-size:4rem';
+    preview.style.cssText = 'display:block;inline-size:600px;block-size:4rem';
     const filename = document.createElement('a');
     filename.href = '#preview-file';
     filename.textContent = '日本語-中文-العربية-' + 'long-filename-'.repeat(15) + '.pdf';
@@ -38,9 +38,13 @@ test('Core File PDF preview before filename keeps 44px links in frontend and RTL
       const sizes = await file.evaluate(node => {
         const a = node.querySelector('a:first-of-type').getBoundingClientRect();
         const b = node.querySelector('.wp-block-file__button').getBoundingClientRect();
+        const preview = node.querySelector('.wp-block-file__embed');
+        const c = preview.getBoundingClientRect();
         return {
           filename: { width: a.width, height: a.height },
           download: { width: b.width, height: b.height },
+          preview: { width: c.width, left: c.left, right: c.right,
+            maxInlineSize: getComputedStyle(preview).maxInlineSize },
           container: node.getBoundingClientRect().width,
           pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
         };
@@ -49,6 +53,12 @@ test('Core File PDF preview before filename keeps 44px links in frontend and RTL
       expect(sizes.filename.width).toBeGreaterThanOrEqual(43);
       expect(sizes.filename.width).toBeLessThanOrEqual(sizes.container + 1);
       expect(sizes.download.height).toBeGreaterThanOrEqual(43);
+      expect(sizes.preview.width, `${width}px ${dir} PDF preview width`).toBeGreaterThan(0);
+      expect(sizes.preview.width, `${width}px ${dir} PDF preview containment`)
+        .toBeLessThanOrEqual(sizes.container + 1);
+      expect(sizes.preview.left).toBeGreaterThanOrEqual(-1);
+      expect(sizes.preview.right).toBeLessThanOrEqual(width + 1);
+      expect(sizes.preview.maxInlineSize).not.toBe('none');
       expect(sizes.pageOverflow).toBeLessThanOrEqual(1);
     }
   }
@@ -62,4 +72,15 @@ test('Core File PDF preview before filename keeps 44px links in frontend and RTL
     expect(await link.evaluate(node => getComputedStyle(node).outlineStyle)).not.toBe('none');
   }
   await file.screenshot({ path: 'test-artifacts/screenshots/core-file-preview-390-rtl-200-forced-colors.png' });
+  await page.evaluate(() => { document.documentElement.style.fontSize = '400%'; });
+  const zoomed = await file.locator('object.wp-block-file__embed').evaluate(node => {
+    const rect = node.getBoundingClientRect();
+    return { width: rect.width, right: rect.right,
+      maxInlineSize: getComputedStyle(node).maxInlineSize };
+  });
+  expect(zoomed.width).toBeGreaterThan(0);
+  expect(zoomed.right).toBeLessThanOrEqual(391);
+  expect(zoomed.maxInlineSize).not.toBe('none');
+  await file.scrollIntoViewIfNeeded();
+  await page.screenshot({ path: 'test-artifacts/screenshots/core-file-preview-390-rtl-400-forced-colors.png' });
 });
