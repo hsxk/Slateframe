@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Load native Core Table of Contents link presentation only when its block is rendered, preserving the exact 44px/Gutenberg contract and negative tests while reducing shared article CSS by 200 bytes; all aggregate runtime budgets remain unchanged.
+
 + Keep ordinary WordPress in-page fragment targets **and the global Skip to content landmark** visible below the sticky desktop header, preserving mobile non-sticky positions and existing Heading/Footnotes rules; add real Core Button keyboard, RTL/CJK, 400%, forced-colors, and skip-link geometry regressions. Pending exact-SHA Actions and screenshot review.
 
 + Add real WordPress/Chromium coverage for three native Core Button actions across seven widths, LTR/RTL, 100–400% text, 44px targets, forced-colors, Axe and exact-HEAD screenshots; retain Core markup, authored widths and existing runtime budgets. Pending new-SHA Actions acceptance.
