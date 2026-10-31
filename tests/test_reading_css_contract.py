@@ -42,6 +42,34 @@ class SharedReadingCssTest(unittest.TestCase):
         self.assertNotIn(".wp-block-table{tabindex:", css)
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
 
+    def test_native_content_anchor_clears_sticky_header(self):
+        css = READING.read_text(encoding="utf-8")
+        selector = "@media(min-width:481px){.slateframe-prose [id]{"
+        self.assertIn(selector, css)
+        self.assertIn(
+            selector + "scroll-margin-block-start:calc(var(--slateframe-header-height) + "
+            "var(--slateframe-stack-gap))}}",
+            css,
+        )
+        self.assertNotIn(".editor-styles-wrapper [id]:not(", css)
+        browser = (ROOT / "tests/browser/native-anchor-offset.spec.js").read_text(encoding="utf-8")
+        for value in ("320, 375, 390, 412, 768, 1440, 1920", "['ltr', 'rtl']",
+                      "page.keyboard.press('Enter')", "scrollMarginBlockStart",
+                      "forcedColors: 'active'", "slateframe-native-anchor-destination"):
+            with self.subTest(value=value):
+                self.assertIn(value, browser)
+        self.assertLessEqual(len(css.encode("utf-8")), 7000)
+        navigation = (ROOT / "assets/css/navigation.css").read_text(encoding="utf-8")
+        self.assertIn(
+            "@media(min-width:481px){#main-content{scroll-margin-block-start:"
+            "calc(var(--slateframe-header-height) + var(--slateframe-stack-gap))}}",
+            navigation,
+        )
+        self.assertLessEqual(len(navigation.encode("utf-8")), 4000)
+        theme = (ROOT / "tests/browser/theme.spec.js").read_text(encoding="utf-8")
+        self.assertIn("skipGeometry.top", theme)
+        self.assertIn("skipGeometry.offset", theme)
+
     def test_editor_has_no_competing_duplicate_typography(self):
         editor = EDITOR.read_text(encoding="utf-8")
         for selector in (
