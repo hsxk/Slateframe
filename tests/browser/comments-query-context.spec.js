@@ -61,8 +61,8 @@ test('Query Loop discussion never suppresses the current post comments', async (
     for (const fixture of fixtures) {
       await page.goto('/?p=' + fixture.id, { waitUntil: 'networkidle' });
       const classic = page.locator('.slateframe-comments');
-      // The queried post set is intentionally empty: its stored nested form
-      // must not hide the outer singular's real classic form.
+      // Empty loops must not hide the outer form; the populated loop must
+      // retain both forms with distinct WordPress comment target IDs.
       await expect(page.locator('.wp-block-query .wp-block-post-comments-form'))
         .toHaveCount(fixture.queriedForm ? 1 : 0);
       if (fixture.queriedForm) {
