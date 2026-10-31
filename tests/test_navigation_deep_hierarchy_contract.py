@@ -29,5 +29,19 @@ class DeepNavigationContract(unittest.TestCase):
                 self.assertIn(token, browser)
 
 
+    def test_real_core_walker_fixture_is_disposable_and_accessible(self):
+        browser = (ROOT / 'tests/browser/navigation-deep-hierarchy.spec.js').read_text(encoding='utf-8')
+        for token in ("execFileSync('wp'", "'--path=/tmp/wp-browser'",
+                      "wp('menu', 'create'", "wp('menu', 'item', 'add-custom'",
+                      "'--parent-id=' + research", "'--parent-id=' + archive",
+                      "wp('eval', 'echo wp_nav_menu(", '"depth" => 0',
+                      "wp('menu', 'delete', menuId)", 'new AxeBuilder({ page })',
+                      "expect(a11y.violations).toEqual([])"):
+            with self.subTest(token=token):
+                self.assertIn(token, browser)
+        self.assertNotIn('node.innerHTML = '+ '\x60<ul', browser)
+        self.assertIn("One isolated Core menu fixture covers all widths.", browser)
+
+
 if __name__ == '__main__':
     unittest.main()
