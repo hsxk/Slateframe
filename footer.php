@@ -29,7 +29,7 @@
 						'container'      => false,
 						'menu_class'     => 'slateframe-footer-menu',
 						'fallback_cb'    => false,
-						'depth'          => 1,
+						'depth'          => 0,
 					)
 				);
 				?>
