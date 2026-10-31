@@ -216,3 +216,65 @@ test('native Core Footnotes long return labels reflow at computed 400% in both d
   await expect(page).toHaveURL(/#fnref-slateframe-core$/);
   await expect(page.locator('#fnref-slateframe-core')).toHaveCSS('outline-style', 'solid');
 });
+
+
+test('native footnote and backreference fragments clear the sticky header at 400% RTL', async ({ page }, info) => {
+  test.skip(info.project.use.viewport?.width !== 390, 'One real browser fixture covers desktop widths and zoom');
+  test.setTimeout(120000);
+  await openArticle(page);
+  await page.locator('.slateframe-core-footnotes-fixture').evaluate(root => {
+    for (const side of ['before', 'after']) {
+      const spacer = document.createElement('div');
+      spacer.style.height = '1400px';
+      spacer.setAttribute('aria-hidden', 'true');
+      root[side](spacer);
+    }
+  });
+  await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+  const ref = page.locator('.slateframe-core-footnotes-fixture sup a[href="#fn-slateframe-core"]');
+  const back = page.locator('.slateframe-core-footnotes-fixture a[href="#fnref-slateframe-core"]');
+  for (const width of [768, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const dir of ['ltr', 'rtl']) {
+      for (const font of width === 1440 ? [16, 64] : [16]) {
+        await page.evaluate(({ direction, size }) => {
+          document.documentElement.dir = direction;
+          document.documentElement.style.fontSize = size + 'px';
+          history.replaceState(null, '', location.pathname);
+          scrollTo(0, 0);
+        }, { direction: dir, size: font });
+        for (const [link, id] of [[ref, 'fn-slateframe-core'], [back, 'fnref-slateframe-core']]) {
+          await link.focus();
+          await expect(link).toBeFocused();
+          await page.keyboard.press('Enter');
+          await expect.poll(() => page.evaluate(() => location.hash)).toBe('#' + id);
+          const target = page.locator('#' + id);
+          const m = await target.evaluate(node => {
+            const header = document.querySelector('.slateframe-site-header');
+            const h = header.getBoundingClientRect();
+            return {
+              top: node.getBoundingClientRect().top,
+              headerBottom: h.bottom,
+              headerHeight: h.height,
+              headerPosition: getComputedStyle(header).position,
+              offset: parseFloat(getComputedStyle(node).scrollMarginBlockStart),
+              overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            };
+          });
+          const label = width + 'px ' + dir + ' ' + font + 'px #' + id;
+          expect(m.headerPosition, label + ' sticky header').toBe('sticky');
+          expect(m.offset, label + ' token offset').toBeGreaterThanOrEqual(m.headerHeight - 1);
+          expect(m.top, label + ' target clears header').toBeGreaterThanOrEqual(m.headerBottom - 2);
+          expect(m.top, label + ' no bottom clamping').toBeLessThanOrEqual(m.offset + 3);
+          expect(m.overflow, label + ' no document overflow').toBeLessThanOrEqual(1);
+          if (width === 1440 && dir === 'rtl' && font === 64) {
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/core-footnotes-sticky-' + id + '-1440-rtl-400.png',
+              animations: 'disabled',
+            });
+          }
+        }
+      }
+    }
+  }
+});
