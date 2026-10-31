@@ -82,7 +82,7 @@ class QueryLoopDiscussionContext(unittest.TestCase):
     def test_browser_and_workflow_require_real_evidence(self):
         browser = (ROOT / 'tests/browser/comments-query-context.spec.js').read_text(encoding='utf-8')
         workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
-        for variant in ('query-only', 'synced-query-only', 'query-with-own'):
+        for variant in ('query-only', 'synced-query-only', 'query-with-own', 'query-with-result'):
             for viewport in ('390-rtl-400', '1440-ltr'):
                 name = f'comments-query-{variant}-{viewport}.png'
                 self.assertIn(name, browser)
@@ -98,6 +98,12 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn('"postType":"page"', browser)
         self.assertIn("'--post_type=post'", browser)
         self.assertIn('slateframe-no-match-query-context-2026', browser)
+        # A real published page must match the populated Query Loop, while
+        # the outer post remains a different context with its own discussion.
+        self.assertIn("const hitTitle = 'slateframe-query-hit-' + suffix", browser)
+        self.assertIn("'--post_type=page'", browser)
+        self.assertIn("queriedForm: true", browser)
+        self.assertIn('toHaveCount(fixture.queriedForm ? 1 : 0)', browser)
 
     def test_no_rendering_or_shortcode_side_effects(self):
         source = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
