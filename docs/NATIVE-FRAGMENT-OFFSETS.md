@@ -17,3 +17,7 @@ An isolated local Chromium reproduction using the actual distributed Slateframe 
 ## Release boundary
 
 The rule is limited to article content, preserves author-owned fragment IDs and WordPress Core link behavior, and stays within the existing 7,000-byte reading stylesheet budget. Manual Safari/VoiceOver and Firefox fragment-announcement checks remain open.
+
+## Skip-link main landmark
+
+The same issue affects the global keyboard **Skip to content** link: `#main-content` is focusable, but its first heading could be hidden behind the sticky header after Enter. A global, bounded rule in `assets/css/navigation.css` gives that landmark the same logical offset only above 480px. It applies on archive/search/404 as well as singular pages, so it cannot live solely in the singular-only reading stylesheet. Existing skip-link Playwright coverage now checks actual header geometry and focus on every configured viewport. A local Chromium reproduction found a desktop main landmark at ~0px before and ~88px after the fix, while 390px remained unchanged. No focus trap, JavaScript scroll handler, or change to WordPress landmarks is introduced.
