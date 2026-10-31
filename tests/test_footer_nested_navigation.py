@@ -33,6 +33,12 @@ class FooterNestedNavigation(unittest.TestCase):
         self.assertIn("new AxeBuilder", browser)
         self.assertIn("wp('menu', 'create'", browser)
         self.assertIn("wp('menu', 'delete'", browser)
+        # Browser evidence must come from the actual footer template, not a
+        # separately hand-configured wp_nav_menu() call that can mask a bug.
+        self.assertIn('theme_mod_nav_menu_locations', browser)
+        self.assertIn('include get_stylesheet_directory() . "/footer.php"', browser)
+        self.assertIn('new DOMParser()', browser)
+        self.assertNotIn('echo wp_nav_menu(array(', browser)
 
 if __name__ == "__main__":
     unittest.main()

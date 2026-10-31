@@ -19,22 +19,31 @@ test('footer preserves WordPress Core three-level menu in RTL and zoom', async (
     wp('menu', 'item', 'add-custom', menuId, 'Methodology / 方法 / المنهجية', '#method',
       '--parent-id=' + child);
     wp('menu', 'item', 'add-custom', menuId, 'About', '#about');
-    const html = wp('eval', 'echo wp_nav_menu(array("menu" => ' + menuId +
-      ', "container" => false, "echo" => false, "depth" => 0, ' +
-      '"menu_class" => "slateframe-footer-menu", "fallback_cb" => false));');
+    // Exercise footer.php itself. A process-local theme-mod filter avoids
+    // mutating the shared WordPress test database or other parallel tests.
+    const html = wp('eval', [
+      '$menuId = ' + Number(menuId) + ';',
+      'add_filter("theme_mod_nav_menu_locations", function ($locations) use ($menuId) {',
+      '  $locations = (array) $locations;',
+      '  $locations["footer"] = $menuId;',
+      '  return $locations;',
+      '});',
+      'ob_start();',
+      'include get_stylesheet_directory() . "/footer.php";',
+      'echo ob_get_clean();',
+    ].join(' '));
+    expect(html).toContain('slateframe-footer-nav');
     expect(html).toContain('sub-menu');
     expect(html).toContain('Methodology / 方法 / المنهجية');
     await page.goto('/', { waitUntil: 'networkidle' });
     const footer = page.locator('.slateframe-footer-inner');
     await footer.evaluate((node, markup) => {
-      let nav = node.querySelector('.slateframe-footer-nav');
-      if (!nav) {
-        nav = document.createElement('nav');
-        nav.className = 'slateframe-footer-nav';
-        nav.setAttribute('aria-label', 'Footer navigation');
-        node.append(nav);
-      }
-      nav.innerHTML = markup;
+      const parsed = new DOMParser().parseFromString(markup, 'text/html');
+      const renderedNav = parsed.querySelector('.slateframe-footer-nav');
+      if (!renderedNav) throw new Error('footer.php did not render native navigation');
+      const existingNav = node.querySelector('.slateframe-footer-nav');
+      if (existingNav) existingNav.replaceWith(renderedNav);
+      else node.append(renderedNav);
     }, html);
     const nav = footer.locator('.slateframe-footer-nav');
     const links = nav.locator('a');
