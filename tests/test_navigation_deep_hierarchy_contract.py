@@ -19,6 +19,7 @@ class DeepNavigationContract(unittest.TestCase):
         self.assertIn('border-inline-start:var(--slateframe-rule)', css)
         self.assertLessEqual(len(css.encode('utf-8')), 4000)
         self.assertIn('.current-menu-ancestor,.current_page_ancestor', css)
+        self.assertIn('.current-menu-parent,.current_page_parent', css)
         self.assertIn('.slateframe-primary-nav ul{margin:0;padding:0;list-style:none}', css)
         self.assertNotIn('.slateframe-primary-nav ul,.slateframe-menu-fallback{', css)
         self.assertIn('&>ul{display:grid}', css)
@@ -44,7 +45,13 @@ class DeepNavigationContract(unittest.TestCase):
                       "expect(a11y.violations).toEqual([])",
                       "classList.add('current-menu-ancestor')",
                       "classList.add('current_page_ancestor')",
-                      "toHaveCSS('text-decoration-line', /underline/)"):
+                      "toHaveCSS('text-decoration-line', /underline/)",
+                      "classList.add('current-menu-parent')",
+                      "classList.add('current_page_parent')",
+                      "classList.remove('current-menu-ancestor')",
+                      "classList.remove('current_page_ancestor')",
+                      "toHaveCSS('text-decoration-line', 'none')",
+                      "navigation-parent-390-rtl.png"):
             with self.subTest(token=token):
                 self.assertIn(token, browser)
         self.assertNotIn('node.innerHTML = '+ '\x60<ul', browser)
