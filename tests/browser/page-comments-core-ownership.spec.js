@@ -29,6 +29,10 @@ test('Core-authored pages never duplicate the classic comment form', async ({ pa
     await expect(page.locator('form#commentform')).toHaveCount(1);
     await expect(page.locator('.slateframe-comments')).toHaveCount(0);
     await expect(page.locator('textarea#comment')).toHaveCount(1);
+    const submit = core.locator('button#submit');
+    await expect(submit).toHaveCount(1);
+    await expect(core.locator('input#submit')).toHaveCount(0);
+    await expect(submit).toHaveText(/Post Comment/);
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
 
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
@@ -63,6 +67,28 @@ test('Core-authored pages never duplicate the classic comment form', async ({ pa
     });
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    // Inputs cannot wrap translated values; the Core-owned form now uses a
+    // native submit button so every text fragment remains visible at 400%.
+    const labelGeometry = await submit.evaluate(node => {
+      const box = node.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const lines = [...range.getClientRects()];
+      return {
+        left: box.left, right: box.right, height: box.height,
+        scrollWidth: node.scrollWidth, clientWidth: node.clientWidth,
+        lineCount: lines.length,
+        textContent: node.textContent,
+        textInside: lines.every(line => line.left >= box.left - 1 && line.right <= box.right + 1),
+      };
+    });
+    expect(labelGeometry.textContent).toContain('Post Comment');
+    expect(labelGeometry.lineCount).toBeGreaterThanOrEqual(2);
+    expect(labelGeometry.textInside, 'complete native submit label').toBe(true);
+    expect(labelGeometry.scrollWidth, 'submit label must not clip').toBeLessThanOrEqual(labelGeometry.clientWidth + 1);
+    expect(labelGeometry.left).toBeGreaterThanOrEqual(-1);
+    expect(labelGeometry.right).toBeLessThanOrEqual(391);
+    expect(labelGeometry.height).toBeGreaterThanOrEqual(44);
     const textarea = core.locator('textarea#comment');
     await textarea.focus();
     await expect(textarea).toBeFocused();
