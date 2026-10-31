@@ -44,6 +44,7 @@ class CoreFileParity(unittest.TestCase):
         for token in (
             "sizes.preview.width", "sizes.preview.right",
             "sizes.preview.maxInlineSize", "sizes.container + 1",
+            "core-file-preview-390-rtl-400-forced-colors.png",
         ):
             with self.subTest(token=token):
                 self.assertIn(token, preview)
@@ -61,6 +62,7 @@ class CoreFileParity(unittest.TestCase):
             "core-file-390-rtl-200-forced-colors.png",
             "core-file-preview-390-", "native PDF preview width",
             "native PDF preview right", "object.wp-block-file__embed",
+            "Core-hidden PDF preview", "hidden: node.hidden",
             "page.goto('/?p=999999999'",
         ):
             self.assertIn(token, js)
