@@ -79,6 +79,17 @@ class PageCommentsCoreOwnership(unittest.TestCase):
                       "forcedColors: 'active'", 'AxeBuilder',
                       "wp('post', 'delete'", 'finally'):
             self.assertIn(token, source)
+        workflow = (ROOT / '.github/workflows/quality.yml').read_text(encoding='utf-8')
+        for screenshot in (
+            'page-comments-core-390-rtl-400.png',
+            'page-comments-core-390-rtl-400-forced-colors.png',
+            'page-comments-core-1440-ltr.png',
+            'page-comments-classic-390-rtl.png',
+        ):
+            with self.subTest(screenshot=screenshot):
+                self.assertIn('test-artifacts/screenshots/$screenshot', workflow)
+                self.assertIn(screenshot, workflow)
+        self.assertIn('Missing page discussion evidence:', workflow)
 
 
 if __name__ == '__main__':
