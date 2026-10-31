@@ -35,6 +35,19 @@ class CoreFileParity(unittest.TestCase):
             self.assertNotIn(forbidden, css)
         self.assertNotIn("render_block_core/file", php)
 
+    def test_preview_fixture_does_not_mask_theme_containment(self):
+        preview = (ROOT / "tests/browser/core-file-preview.spec.js").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("inline-size:600px", preview)
+        self.assertNotIn("max-inline-size:100%;block-size", preview)
+        for token in (
+            "sizes.preview.width", "sizes.preview.right",
+            "sizes.preview.maxInlineSize", "sizes.container + 1",
+        ):
+            with self.subTest(token=token):
+                self.assertIn(token, preview)
+
     def test_disposable_wordpress_and_editor_coverage(self):
         js = (ROOT / "tests/browser/core-file-parity.spec.js").read_text(encoding="utf-8")
         for token in (
