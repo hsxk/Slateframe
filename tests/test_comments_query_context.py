@@ -103,6 +103,10 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn("const hitTitle = 'slateframe-query-hit-' + suffix", browser)
         self.assertIn("'--post_type=page'", browser)
         self.assertIn("queriedForm: true", browser)
+        # WordPress Core renders a Post Template list without a query wrapper.
+        # Check the repeated-post DOM, never a non-existent .wp-block-query.
+        self.assertIn(".slateframe-prose .wp-block-post-template .wp-block-post-comments-form", browser)
+        self.assertNotIn("page.locator(\'.wp-block-query .wp-block-post-comments-form\')", browser)
         self.assertIn('toHaveCount(fixture.queriedForm ? 1 : 0)', browser)
         self.assertIn('toHaveValue(String(hitPageId))', browser)
         self.assertIn('toHaveValue(String(fixture.id))', browser)
