@@ -66,12 +66,17 @@ test('native Core File preserves download semantics and responsive links', async
           const embed = await preview.evaluate(node => {
             const rect = node.getBoundingClientRect();
             return { left: rect.left, right: rect.right, width: rect.width,
-              maxInlineSize: getComputedStyle(node).maxInlineSize };
+              hidden: node.hidden, maxInlineSize: getComputedStyle(node).maxInlineSize };
           });
-          expect(embed.width, labelForFailure + ' native PDF preview width').toBeGreaterThan(0);
-          expect(embed.left, labelForFailure + ' native PDF preview left').toBeGreaterThanOrEqual(-1);
-          expect(embed.right, labelForFailure + ' native PDF preview right').toBeLessThanOrEqual(width + 1);
           expect(embed.maxInlineSize, labelForFailure + ' bounded PDF preview').not.toBe('none');
+          if (embed.hidden) {
+            // WordPress Core may hide the preview until its PDF support check completes.
+            expect(embed.width, labelForFailure + ' Core-hidden PDF preview').toBe(0);
+          } else {
+            expect(embed.width, labelForFailure + ' native PDF preview width').toBeGreaterThan(0);
+            expect(embed.left, labelForFailure + ' native PDF preview left').toBeGreaterThanOrEqual(-1);
+            expect(embed.right, labelForFailure + ' native PDF preview right').toBeLessThanOrEqual(width + 1);
+          }
           if (width === 390 && font === 64) await root.screenshot({
             path: 'test-artifacts/screenshots/core-file-preview-390-' + dir + '-400.png',
           });
