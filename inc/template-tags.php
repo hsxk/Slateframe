@@ -463,8 +463,10 @@ function slateframe_scope_classic_comment_defaults( $defaults ) {
 	if ( isset( $defaults['id_submit'] ) && 'submit' === $defaults['id_submit'] ) {
 		$defaults['id_submit'] = $prefix . 'submit';
 	}
-	if ( isset( $defaults['comment_notes_before'] ) ) {
-		$defaults['comment_notes_before'] = slateframe_scope_classic_comment_field_html( $defaults['comment_notes_before'] );
+	$GLOBALS['slateframe_classic_comment_note_scoped'] = false;
+	if ( isset( $defaults['comment_notes_before'] ) && is_string( $defaults['comment_notes_before'] ) && false !== strpos( $defaults['comment_notes_before'], 'id="email-notes"' ) ) {
+		$defaults['comment_notes_before']                  = slateframe_scope_classic_comment_field_html( $defaults['comment_notes_before'] );
+		$GLOBALS['slateframe_classic_comment_note_scoped'] = true;
 	}
 
 	return $defaults;
@@ -482,7 +484,17 @@ function slateframe_scope_classic_comment_fields( $fields ) {
 	}
 
 	foreach ( $fields as $key => $html ) {
-		$fields[ $key ] = slateframe_scope_classic_comment_field_html( $html );
+		$scoped = slateframe_scope_classic_comment_field_html( $html );
+		if ( 'email' === $key && ! empty( $GLOBALS['slateframe_classic_comment_note_scoped'] ) && is_string( $scoped ) ) {
+			$processor = new WP_HTML_Tag_Processor( $scoped );
+			while ( $processor->next_tag( 'input' ) ) {
+				if ( 'slateframe-outer-' . absint( get_the_ID() ) . '-email' === $processor->get_attribute( 'id' ) && ! $processor->get_attribute( 'aria-describedby' ) ) {
+					$processor->set_attribute( 'aria-describedby', 'slateframe-outer-' . absint( get_the_ID() ) . '-email-notes' );
+				}
+			}
+			$scoped = $processor->get_updated_html();
+		}
+		$fields[ $key ] = $scoped;
 	}
 
 	return $fields;
