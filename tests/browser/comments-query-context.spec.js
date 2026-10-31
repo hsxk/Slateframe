@@ -91,6 +91,30 @@ test('Query Loop discussion never suppresses the current post comments', async (
       // Assert real WordPress comment-form ownership, not just DOM counts.
       // The outer form must submit to the singular post, not the queried page.
       await expect(owner.locator('input[name="comment_post_ID"]')).toHaveValue(String(fixture.id));
+      if (fixture.queriedForm) {
+        // Both forms are present in the same document. The browser resolves
+        // label[for] against document IDs, not the nearest form. A local Axe
+        // include can miss a label that points to the *other* form.
+        const badLabels = await classic.locator('form').evaluate(form =>
+          [...form.querySelectorAll('label[for]')].filter(label => {
+            const target = document.getElementById(label.htmlFor);
+            return !target || !form.contains(target);
+          }).map(label => label.htmlFor));
+        expect(badLabels, 'Outer classic labels must target their own controls').toEqual([]);
+        const badDescriptions = await classic.locator('form').evaluate(form =>
+          [...form.querySelectorAll('[aria-describedby]')].flatMap(control =>
+            control.getAttribute('aria-describedby').split(/\\s+/).filter(id => {
+              const target = document.getElementById(id);
+              return !target || !form.contains(target);
+            })));
+        expect(badDescriptions, 'Outer descriptions must stay in the classic form').toEqual([]);
+        for (const name of ['comment', 'author', 'email', 'url', 'wp-comment-cookies-consent']) {
+          const control = classic.locator('[name="' + name + '"]');
+          if (await control.count()) {
+            await expect(control).toHaveAttribute('id', 'slateframe-outer-' + fixture.id + '-' + name);
+          }
+        }
+      }
       const submit = owner.locator('button#submit');
       await expect(submit).toHaveCount(1);
       expect(await submit.evaluate(node => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
