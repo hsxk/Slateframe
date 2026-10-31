@@ -1,7 +1,7 @@
 .wp-block-accordion,.wp-block-accordion-item,.wp-block-accordion-heading,.wp-block-accordion-panel{min-inline-size:0;max-inline-size:100%}
 .wp-block-accordion-heading__toggle{box-sizing:border-box;min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);max-inline-size:100%;white-space:normal;overflow-wrap:anywhere}
-.wp-block-accordion-heading__toggle-title{min-inline-size:0;overflow-wrap:anywhere}
-.wp-block-accordion-heading__toggle-icon{flex:none}
+.wp-block-accordion-heading__toggle-title{min-inline-size:0}
+.wp-block-accordion-heading__toggle-icon{flex:none;font-size:min(1em,24px)}
 .wp-block-accordion-panel{overflow-wrap:anywhere}
 @media(forced-colors:active){.wp-block-accordion-heading__toggle:focus-visible{outline:2px solid Highlight;outline-offset:2px}}
 @media print{.wp-block-accordion-panel:is([inert],[hidden]){display:block!important;content-visibility:visible!important}}

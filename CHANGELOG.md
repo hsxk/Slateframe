@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
+- Bound native Core Accordion decorative toggle icons to 24px at 200–400% text enlargement while preserving 16px appearance, native Core interaction, title wrapping, 44px controls, RTL/CJK, Gutenberg parity, forced-colors, print behavior and the existing 800-byte conditional CSS budget; extend real WordPress browser and static regression coverage.
+
 - Keep native Core Details disclosure markers clear of the RTL Gutenberg canvas edge at 200–400% text scale with a bounded logical editor-only inset; add authenticated WordPress/Chromium zoom checks and static regressions without replacing Core interaction.
 
 - Recover an accessible, visibly current Home link when WordPress Core returns an empty or malformed static-front-page list, while retaining the native hierarchy when pages exist. Reuse the existing `current_page_item` styling and add executable PHP regressions without runtime CSS/JS changes.
