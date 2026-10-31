@@ -59,10 +59,8 @@ class CoreTabsEditorReflow(unittest.TestCase):
     def test_two_actual_viewport_screenshots_are_required_by_ci(self):
         self.assertIn("[390, 1440]", self.browser)
         self.assertIn("core-tabs-editor-' + width + '-rtl-400.png", self.browser)
-        for width in (390, 1440):
-            self.assertIn(
-                f"core-tabs-editor-{width}-rtl-400.png", self.workflow
-            )
+        self.assertIn("for width in 390 1440; do", self.workflow)
+        self.assertIn('core-tabs-editor-${width}-rtl-400.png', self.workflow)
         self.assertIn("test -s", self.workflow)
 
 
