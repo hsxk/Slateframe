@@ -66,7 +66,9 @@ test('Query Loop discussion never suppresses the current post comments', async (
       await expect(page.locator('.wp-block-query .wp-block-post-comments-form'))
         .toHaveCount(fixture.queriedForm ? 1 : 0);
       if (fixture.queriedForm) {
-        await expect(page.locator('.wp-block-query .wp-block-post-comments-form button#submit')).toHaveCount(1);
+        const queried = page.locator('.wp-block-query .wp-block-post-comments-form');
+        await expect(queried.locator('button#submit')).toHaveCount(1);
+        await expect(queried.locator('input[name="comment_post_ID"]')).toHaveValue(String(hitPageId));
       }
       await expect(classic).toHaveCount(fixture.classic ? 1 : 0);
       for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
@@ -84,6 +86,9 @@ test('Query Loop discussion never suppresses the current post comments', async (
       expect(await page.evaluate(() => document.documentElement.scrollWidth -
         document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
       const owner = fixture.classic ? classic : page.locator('.slateframe-prose > .wp-block-post-comments-form');
+      // Assert real WordPress comment-form ownership, not just DOM counts.
+      // The outer form must submit to the singular post, not the queried page.
+      await expect(owner.locator('input[name="comment_post_ID"]')).toHaveValue(String(fixture.id));
       const submit = owner.locator('button#submit');
       await expect(submit).toHaveCount(1);
       expect(await submit.evaluate(node => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
