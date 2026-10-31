@@ -52,9 +52,13 @@ class CoreTabsEditorReflow(unittest.TestCase):
             "finally {",
             "removeBlocks(id)",
             "toEqual(baseline)",
+            "isEditedPostDirty()",
+            "__unstableMarkNextChangeAsNotPersistent()",
         ):
             with self.subTest(token=token):
                 self.assertIn(token, self.browser)
+        self.assertEqual(self.browser.count("__unstableMarkNextChangeAsNotPersistent()"), 2)
+        self.assertEqual(self.browser.count("isEditedPostDirty()"), 2)
         for forbidden in ("savePost(", "wp('post', 'update'", "test.only", "test.fixme"):
             self.assertNotIn(forbidden, self.browser)
 
