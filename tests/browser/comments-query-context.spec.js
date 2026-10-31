@@ -29,6 +29,7 @@ test('Query Loop discussion never suppresses the current post comments', async (
   const suffix = randomUUID().replaceAll('-', '').slice(0, 12);
   const postIds = [];
   let patternId = 0;
+  let replyCommentId = 0;
   try {
     patternId = Number(wp('post', 'create', '--post_type=wp_block', '--post_status=publish',
       '--post_title=Slateframe query context ' + suffix,
@@ -56,6 +57,12 @@ test('Query Loop discussion never suppresses the current post comments', async (
       expect(id).toBeGreaterThan(0);
       postIds.push(id);
       fixture.id = id;
+      if (fixture.name === 'query-with-result') {
+        replyCommentId = Number(wp('comment', 'create', '--comment_post_ID=' + id,
+          '--comment_author=Query Reader', '--comment_author_email=query-reader@example.com',
+          '--comment_content=Reply fallback fixture', '--comment_approved=1', '--porcelain'));
+        expect(replyCommentId).toBeGreaterThan(0);
+      }
     }
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     for (const fixture of fixtures) {
@@ -120,6 +127,10 @@ test('Query Loop discussion never suppresses the current post comments', async (
           ['respond', 'reply-title', 'cancel-comment-reply-link', 'commentform', 'comment_parent']
             .filter(id => document.querySelectorAll('[id="' + id + '"]').length > 1));
         expect(replyIdCollisions, 'Core reply containers must not collide across posts').toEqual([]);
+        await expect(classic.locator('#slateframe-outer-' + fixture.id + '-respond')).toHaveCount(1);
+        await expect(classic.locator('#slateframe-outer-' + fixture.id + '-comment_parent')).toHaveCount(1);
+        await expect(classic.locator('#slateframe-outer-' + fixture.id + '-comment_post_ID')).toHaveCount(1);
+        await expect(queried.locator('#respond')).toHaveCount(1);
         for (const name of ['comment', 'author', 'email', 'url', 'wp-comment-cookies-consent']) {
           const control = classic.locator('[name="' + name + '"]');
           if (await control.count()) {
@@ -129,7 +140,7 @@ test('Query Loop discussion never suppresses the current post comments', async (
       }
       const submit = owner.locator('button[type="submit"]');
       await expect(submit).toHaveCount(1);
-      await expect(submit).toHaveAttribute('id', fixture.classic
+      await expect(submit).toHaveAttribute('id', fixture.queriedForm
         ? 'slateframe-outer-' + fixture.id + '-submit' : 'submit');
       expect(await submit.evaluate(node => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
       const axe = await new AxeBuilder({ page }).include(fixture.classic ? '.slateframe-comments' : '.slateframe-prose > .wp-block-post-comments-form')
@@ -156,6 +167,29 @@ test('Query Loop discussion never suppresses the current post comments', async (
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.locator('html').evaluate(root => { root.dir = 'ltr'; root.style.fontSize = '16px'; });
       await page.screenshot({ path: 'test-artifacts/screenshots/' + evidence[fixture.name].desktop, fullPage: true, animations: 'disabled' });
+      if (fixture.queriedForm) {
+        // The queried Core form retains native JS; the outer thread uses
+        // WordPress's no-JS replytocom fallback, not a competing responder.
+        const reply = page.locator('.slateframe-comment-list .reply a[href*="replytocom"]').first();
+        await expect(reply).toHaveCount(1);
+        await expect(reply).not.toHaveClass(/comment-reply-link/);
+        await expect(reply).toHaveAttribute('href', new RegExp('#slateframe-outer-' + fixture.id + '-respond
+    }
+  } finally {
+    if (replyCommentId) wp('comment', 'delete', String(replyCommentId), '--force');
+    for (const id of postIds) wp('post', 'delete', String(id), '--force');
+    if (patternId) wp('post', 'delete', String(patternId), '--force');
+  }
+});
+));
+        await reply.click();
+        await expect(page).toHaveURL(new RegExp('replytocom=' + replyCommentId));
+        await expect(page.locator('.slateframe-comments input[name="comment_parent"]')).toHaveValue(String(replyCommentId));
+        const cancel = page.locator('#slateframe-outer-' + fixture.id + '-cancel-comment-reply-link');
+        await expect(cancel).toBeVisible();
+        await cancel.click();
+        await expect(page.locator('.slateframe-comments input[name="comment_parent"]')).toHaveValue('0');
+      }
     }
   } finally {
     for (const id of postIds) wp('post', 'delete', String(id), '--force');

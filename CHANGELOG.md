@@ -4,7 +4,7 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-+ Scope the classic comment form's canonical field IDs, labels, email-note references, form and submit IDs when a Core Query Loop shares the page, preventing outer labels from targeting a queried post's form. Preserve Core and plugin markup. Threaded reply/cancel ID collisions remain an explicit PR acceptance blocker; exact-HEAD browser Actions and visual evidence pending.
++ Isolate the theme-owned classic comment form only when a different Query Loop post actually renders a Core form. Scope canonical field, reply/cancel and hidden input IDs; preserve Core's nested form and use WordPress's no-JS replytocom fallback for the outer thread, avoiding duplicate responders without custom JavaScript. Pending exact-HEAD browser reply/cancel and visual acceptance.
 
 + Keep the singular post's classic comments when a Core Query Loop Post Template contains its own queried-post discussion, including published synced patterns; preserve Core-first ownership outside the repeated-post context, bounded pattern resolution, and strict visual/accessibility gates.
 

@@ -142,6 +142,31 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn('toHaveValue(String(hitPageId))', browser)
         self.assertIn('toHaveValue(String(fixture.id))', browser)
 
+    def test_parallel_forms_preserve_core_reply_and_outer_fallback(self):
+        bootstrap = (ROOT / 'functions.php').read_text(encoding='utf-8')
+        template = (ROOT / 'comments.php').read_text(encoding='utf-8')
+        helpers = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
+        browser = (ROOT / 'tests/browser/comments-query-context.spec.js').read_text(encoding='utf-8')
+        css = (ROOT / 'assets/css/comments.css').read_text(encoding='utf-8')
+        self.assertIn("render_block_core/post-comments-form", bootstrap)
+        self.assertIn("slateframe_track_nested_core_comment_form", helpers)
+        self.assertIn("get_queried_object_id()", helpers)
+        self.assertIn("slateframe_nested_core_comment_form_rendered", template)
+        self.assertIn("slateframe_scope_outer_comment_reply_link", template)
+        self.assertIn("remove_filter( 'comment_reply_link'", template)
+        self.assertIn("slateframe_scope_outer_comment_form_html", template)
+        self.assertIn("ob_get_clean()", template)
+        for token in ("'respond'", "'reply-title'", "'cancel-comment-reply-link'",
+                      "'comment_parent'", "'comment_post_ID'",
+                      "remove_class( 'comment-reply-link' )", "'#respond'"):
+            self.assertIn(token, helpers)
+        self.assertIn('slateframe-comments .comment-respond', css)
+        self.assertIn('replyCommentId', browser)
+        self.assertIn("await reply.click()", browser)
+        self.assertIn("await cancel.click()", browser)
+        self.assertIn("toHaveValue(String(replyCommentId))", browser)
+        self.assertIn("toHaveValue('0')", browser)
+
     def test_no_rendering_or_shortcode_side_effects(self):
         source = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
         for token in ('slateframe_discussion_in_current_post_blocks',
