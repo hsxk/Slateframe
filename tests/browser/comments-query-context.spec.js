@@ -95,6 +95,17 @@ test('Query Loop discussion never suppresses the current post comments', async (
       const axe = await new AxeBuilder({ page }).include(fixture.classic ? '.slateframe-comments' : '.slateframe-prose > .wp-block-post-comments-form')
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
       expect(axe.violations).toEqual([]);
+      if (fixture.queriedForm) {
+        // The nested Core form is an independent interactive region; the
+        // outer classic form's Axe pass cannot substitute for its own.
+        const queriedAxe = await new AxeBuilder({ page })
+          .include('.wp-block-query .wp-block-post-comments-form')
+          .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+        expect(queriedAxe.violations).toEqual([]);
+        const queriedSubmit = page.locator('.wp-block-query .wp-block-post-comments-form button#submit');
+        await queriedSubmit.focus();
+        await expect(queriedSubmit).toBeFocused();
+      }
       await page.screenshot({ path: 'test-artifacts/screenshots/' + evidence[fixture.name].mobile, fullPage: true, animations: 'disabled' });
       if (fixture.name === 'query-only') {
         await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
