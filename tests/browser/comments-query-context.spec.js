@@ -115,8 +115,10 @@ test('Query Loop discussion never suppresses the current post comments', async (
           }
         }
       }
-      const submit = owner.locator('button#submit');
+      const submit = owner.locator('button[type="submit"]');
       await expect(submit).toHaveCount(1);
+      await expect(submit).toHaveAttribute('id', fixture.classic && fixture.queriedForm
+        ? 'slateframe-outer-' + fixture.id + '-submit' : 'submit');
       expect(await submit.evaluate(node => node.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
       const axe = await new AxeBuilder({ page }).include(fixture.classic ? '.slateframe-comments' : '.slateframe-prose > .wp-block-post-comments-form')
         .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
