@@ -33,6 +33,8 @@ class CoreTabsEditorReflow(unittest.TestCase):
         for token in (
             "getBoundingClientRect()",
             "getComputedStyle(button)",
+            "baselineOverflow",
+            "measurements.overflow",
             "measurements.blockWidth",
             "measurements.viewport + 1",
             "control.height",
