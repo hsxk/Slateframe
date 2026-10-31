@@ -115,6 +115,28 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn('await queriedSubmit.focus()', browser)
         self.assertIn('toBeFocused()', browser)
 
+    def test_classic_form_label_scoping_is_local_and_core_safe(self):
+        template = (ROOT / 'comments.php').read_text(encoding='utf-8')
+        helpers = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
+        browser = (ROOT / 'tests/browser/comments-query-context.spec.js').read_text(encoding='utf-8')
+        for token in ('slateframe_scope_classic_comment_defaults',
+                      'slateframe_scope_classic_comment_fields',
+                      "remove_filter( 'comment_form_defaults'",
+                      "remove_filter( 'comment_form_fields'"):
+            self.assertIn(token, template)
+        for token in ('WP_HTML_Tag_Processor', "'aria-describedby'",
+                      "'email-notes'", "'id_form'", "'id_submit'",
+                      "'slateframe-outer-'"):
+            self.assertIn(token, helpers)
+        for token in ('badLabels', 'badDescriptions', 'document.getElementById',
+                      'form.contains(target)', "'slateframe-outer-'"):
+            self.assertIn(token, browser)
+        # Core must retain the canonical queried-post form and submission
+        # targets. The theme only scopes its own classic field references.
+        self.assertIn("queried.locator('button#submit')", browser)
+        self.assertIn('toHaveValue(String(hitPageId))', browser)
+        self.assertIn('toHaveValue(String(fixture.id))', browser)
+
     def test_no_rendering_or_shortcode_side_effects(self):
         source = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
         for token in ('slateframe_discussion_in_current_post_blocks',
