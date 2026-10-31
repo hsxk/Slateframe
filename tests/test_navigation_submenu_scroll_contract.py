@@ -16,7 +16,8 @@ class NavigationSubmenuScrollContract(unittest.TestCase):
 
     def test_compact_menu_retains_independent_scroll(self):
         css = NAV.read_text()
-        self.assertIn('max-block-size:min(70dvh,calc(100dvh', css)
+        self.assertIn('max-block-size:min(70dvh,100dvh', css)
+        self.assertIn('max-block-size:min(55dvh,100dvh', css)
         self.assertIn('overscroll-behavior:contain', css)
 
     def test_no_new_runtime_script_or_asset_budget_increase(self):
