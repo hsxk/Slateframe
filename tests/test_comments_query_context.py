@@ -161,6 +161,8 @@ class QueryLoopDiscussionContext(unittest.TestCase):
                       "remove_class( 'comment-reply-link' )", "'#respond'"):
             self.assertIn(token, helpers)
         self.assertIn('slateframe-comments .comment-respond', css)
+        self.assertIn("remove_attribute( 'onclick' )", helpers)
+        self.assertIn("not.toHaveAttribute('onclick', /./)", browser)
         self.assertIn('replyCommentId', browser)
         self.assertIn("await reply.click()", browser)
         self.assertIn("await cancel.click()", browser)
