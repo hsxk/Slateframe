@@ -20,7 +20,11 @@ readme, checks the file response and original download attribute, seven widths
 (320, 375, 390, 412, 768, 1440, 1920), LTR/RTL, 200%/400% text, keyboard
 focus, Axe, forced colors, explicit 390px/400% LTR/RTL PDF preview screenshots,
 object geometry and source-URL preservation, 404 isolation, and authenticated
-Gutenberg serialization. The fixture is removed in `finally`.
+Gutenberg serialization. The fixture is removed in `finally`. The independent Core File preview browser
+fixture intentionally specifies a 600px inline object width **without** an
+inline maximum; only the theme's conditional stylesheet may constrain it.
+This prevents a self-bounded test object from masking the actual overflow
+regression.
 
 Release review: inspect exact-HEAD WordPress/Chromium screenshots and manually
 check Core File download and preview behavior with Safari/VoiceOver and Firefox,
