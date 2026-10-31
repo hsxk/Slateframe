@@ -15,7 +15,7 @@ const content = '<!-- wp:group {"className":"slateframe-anchor-offset-fixture"} 
   destination + '">Jump / 移動 / الانتقال</a></div><!-- /wp:button -->' +
   '</div><!-- /wp:buttons -->' +
   '<!-- wp:html --><div style="height:1400px" aria-hidden="true"></div><!-- /wp:html -->' +
-  '<!-- wp:paragraph --><p id="' + destination + '">Destination 日本語 中文 العربية</p><!-- /wp:paragraph -->' +
+  '<!-- wp:paragraph {"anchor":"' + destination + '"} --><p id="' + destination + '">Destination 日本語 中文 العربية</p><!-- /wp:paragraph -->' +
   '</div><!-- /wp:group -->';
 
 test('native paragraph fragments clear the sticky header without changing mobile scrolling', async ({ page }, info) => {
