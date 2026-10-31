@@ -18,7 +18,7 @@ class CoreMediaTextParity(unittest.TestCase):
         self.assertNotIn("scroll-behavior:auto!important", photo)
         self.assertIn("img,svg,video{display:block;max-width:100%;height:auto}", css)
         self.assertIn("overflow-wrap: anywhere;", (ROOT / "assets/css/editor.css").read_text())
-        self.assertIn(".slateframe-prose :is(figure,audio,iframe,embed,object,.wp-video,.mejs-container){max-width:100%}", (ROOT / "assets/css/reading.css").read_text())
+        self.assertIn(".slateframe-prose{& :is(figure,audio,iframe,embed,object,.wp-video,.mejs-container){max-width:100%}", (ROOT / "assets/css/reading.css").read_text())
         self.assertLessEqual((ROOT / "style.css").stat().st_size, 16000)
 
     def test_wordpress_browser_and_editor_evidence(self):
