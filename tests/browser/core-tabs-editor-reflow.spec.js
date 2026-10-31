@@ -15,6 +15,7 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     return {
       content: window.wp.blocks.serialize(editor.getBlocks()),
       ids: editor.getBlocks().map(block => block.clientId),
+      dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty()),
     };
   });
   let canvas;
@@ -44,6 +45,7 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
         ]),
       ]),
     ]);
+    window.wp.data.dispatch('core/block-editor').__unstableMarkNextChangeAsNotPersistent();
     window.wp.data.dispatch('core/block-editor').insertBlocks(tabs);
     return tabs.clientId;
   });
@@ -104,6 +106,7 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     }
   } finally {
     await page.evaluate(id => {
+      window.wp.data.dispatch('core/block-editor').__unstableMarkNextChangeAsNotPersistent();
       window.wp.data.dispatch('core/block-editor').removeBlocks(id);
     }, clientId);
     await expect.poll(() => page.evaluate(() => {
@@ -111,6 +114,7 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
       return {
         content: window.wp.blocks.serialize(editor.getBlocks()),
         ids: editor.getBlocks().map(block => block.clientId),
+      dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty()),
       };
     })).toEqual(baseline);
   }
