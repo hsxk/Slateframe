@@ -108,6 +108,12 @@ test('Query Loop discussion never suppresses the current post comments', async (
               return !target || !form.contains(target);
             })));
         expect(badDescriptions, 'Outer descriptions must stay in the classic form').toEqual([]);
+        // Capture the actual failing WordPress document *before* enforcing
+        // the reply-ID gate so failed runs still retain visual evidence.
+        await page.screenshot({
+          path: 'test-artifacts/screenshots/comments-query-collision-390-rtl-400.png',
+          fullPage: true, animations: 'disabled',
+        });
         // Core's reply script uses document-global IDs. Detect the remaining
         // collision explicitly; correct labels alone are not sufficient to
         // claim that nested and outer threaded replies can coexist safely.
