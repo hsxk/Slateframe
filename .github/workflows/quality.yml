@@ -1037,7 +1037,7 @@ jobs:
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing synced Core discussion evidence: $screenshot" >&2; exit 1; }
           done
           # Core Query Loop Post Template comments belong to repeated posts, not the outer singular.
-          for screenshot in comments-query-query-only-390-rtl-400.png comments-query-query-only-1440-ltr.png comments-query-synced-query-only-390-rtl-400.png comments-query-synced-query-only-1440-ltr.png comments-query-query-with-own-390-rtl-400.png comments-query-query-with-own-1440-ltr.png comments-query-query-only-390-rtl-400-forced-colors.png; do
+          for screenshot in comments-query-query-only-390-rtl-400.png comments-query-query-only-1440-ltr.png comments-query-synced-query-only-390-rtl-400.png comments-query-synced-query-only-1440-ltr.png comments-query-query-with-own-390-rtl-400.png comments-query-query-with-own-1440-ltr.png comments-query-query-with-result-390-rtl-400.png comments-query-query-with-result-1440-ltr.png comments-query-query-only-390-rtl-400-forced-colors.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing Query Loop discussion ownership evidence: $screenshot" >&2; exit 1; }
           done
           # Require real Gutenberg Core Tabs 400% RTL editor screenshots at both widths.
