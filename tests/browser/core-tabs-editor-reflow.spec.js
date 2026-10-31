@@ -87,6 +87,21 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
       path: 'test-artifacts/screenshots/core-tabs-editor-' + width + '-rtl-400.png',
       animations: 'disabled',
     });
+    if (width === 390) {
+      await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+      const forced = await controls.first().evaluate(node => {
+        const rect = node.getBoundingClientRect();
+        return { width: rect.width, height: rect.height,
+          color: getComputedStyle(node).color };
+      });
+      expect(forced.width).toBeGreaterThanOrEqual(44);
+      expect(forced.height).toBeGreaterThanOrEqual(44);
+      await controls.first().scrollIntoViewIfNeeded();
+      await page.screenshot({
+        path: 'test-artifacts/screenshots/core-tabs-editor-390-rtl-400-forced-colors.png',
+        animations: 'disabled',
+      });
+    }
   } finally {
     await page.evaluate(id => {
       window.wp.data.dispatch('core/block-editor').removeBlocks(id);
