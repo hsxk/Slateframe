@@ -68,6 +68,9 @@ test('Query Loop discussion never suppresses the current post comments', async (
     for (const fixture of fixtures) {
       await page.goto('/?p=' + fixture.id, { waitUntil: 'networkidle' });
       const classic = page.locator('.slateframe-comments');
+      // Keep the queried form locator in the enclosing fixture scope: later
+      // global-ID and keyboard assertions also use it after the first check.
+      const queried = page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form');
       // Empty loops must not hide the outer form; the populated loop must
       // retain both forms with distinct WordPress comment target IDs.
       // Core renders the Query's Post Template as a UL; it does not emit a
@@ -75,7 +78,6 @@ test('Query Loop discussion never suppresses the current post comments', async (
       await expect(page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form'))
         .toHaveCount(fixture.queriedForm ? 1 : 0);
       if (fixture.queriedForm) {
-        const queried = page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form');
         await expect(queried.locator('button#submit')).toHaveCount(1);
         await expect(queried.locator('input[name="comment_post_ID"]')).toHaveValue(String(hitPageId));
       }
