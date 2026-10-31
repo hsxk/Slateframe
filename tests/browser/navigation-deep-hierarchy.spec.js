@@ -38,12 +38,15 @@ test('Core Walker preserves third-level links, keyboard order and responsive bou
     const top = nav.locator('a[href="#research"]');
     const second = nav.locator('a[href="#archive"]');
     const third = nav.locator('a[href="#method"]');
+    const unrelated = nav.locator('a[href="#about"]');
     await expect(third).toHaveCount(1);
     // Core marks ancestor items on active paths; exercise both native
     // menu and page-list class families without changing authored URLs.
     await top.locator('xpath=..').evaluate(node => node.classList.add('current-menu-ancestor'));
     await second.locator('xpath=..').evaluate(node => node.classList.add('current_page_ancestor'));
     await third.locator('xpath=..').evaluate(node => node.classList.add('current-menu-item'));
+    const topItem = top.locator('xpath=..');
+    const secondItem = second.locator('xpath=..');
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
@@ -63,6 +66,36 @@ test('Core Walker preserves third-level links, keyboard order and responsive bou
         for (const link of [top, second, third]) {
           await expect(link).toHaveCSS('text-decoration-line', /underline/);
         }
+        await expect(unrelated).toHaveCSS('text-decoration-line', 'none');
+        // WordPress also emits direct-parent classes (including the posts
+        // page's current_page_parent) without requiring an ancestor class.
+        // Verify those states in isolation, then restore the Core ancestor
+        // classes before the original keyboard and visual evidence.
+        await topItem.evaluate(node => {
+          node.classList.remove('current-menu-ancestor');
+          node.classList.add('current-menu-parent');
+        });
+        await secondItem.evaluate(node => {
+          node.classList.remove('current_page_ancestor');
+          node.classList.add('current_page_parent');
+        });
+        await expect(top).toHaveCSS('text-decoration-line', /underline/);
+        await expect(second).toHaveCSS('text-decoration-line', /underline/);
+        await expect(unrelated).toHaveCSS('text-decoration-line', 'none');
+        if (width === 390 && direction === 'rtl') {
+          await page.screenshot({
+            path: path.join('test-artifacts/screenshots', 'navigation-parent-390-rtl.png'),
+            animations: 'disabled',
+          });
+        }
+        await topItem.evaluate(node => {
+          node.classList.remove('current-menu-parent');
+          node.classList.add('current-menu-ancestor');
+        });
+        await secondItem.evaluate(node => {
+          node.classList.remove('current_page_parent');
+          node.classList.add('current_page_ancestor');
+        });
         await second.focus();
         await page.keyboard.press('Tab');
         await expect(third).toBeFocused();
