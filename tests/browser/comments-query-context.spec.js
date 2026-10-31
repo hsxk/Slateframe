@@ -14,7 +14,7 @@ const evidence = {
   'query-with-own': { mobile: 'comments-query-query-with-own-390-rtl-400.png', desktop: 'comments-query-query-with-own-1440-ltr.png' },
 };
 
-const query = '<!-- wp:query {"query":{"perPage":1,"postType":"post","inherit":false}} -->' +
+const query = '<!-- wp:query {"query":{"perPage":1,"postType":"post","inherit":false,"search":"slateframe-no-match-query-context-2026"}} -->' +
   '<!-- wp:post-template --><!-- wp:post-comments-form /--><!-- /wp:post-template -->' +
   '<!-- /wp:query -->';
 const ownForm = '<!-- wp:post-comments-form /-->';
@@ -47,6 +47,9 @@ test('Query Loop discussion never suppresses the current post comments', async (
     for (const fixture of fixtures) {
       await page.goto('/?p=' + fixture.id, { waitUntil: 'networkidle' });
       const classic = page.locator('.slateframe-comments');
+      // The queried post set is intentionally empty: its stored nested form
+      // must not hide the outer singular's real classic form.
+      await expect(page.locator('.wp-block-query .wp-block-post-comments-form')).toHaveCount(0);
       await expect(classic).toHaveCount(fixture.classic ? 1 : 0);
       for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
         await page.setViewportSize({ width, height: 900 });
