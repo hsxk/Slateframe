@@ -7,7 +7,7 @@ Slateframe's classic page template previously called `comments_template()` whene
 - An ordinary page with open comments continues to render Slateframe's classic `comments.php` form. A page with existing comments and closed discussion retains its classic comment history.
 - Pages containing `core/comments`, `core/post-comments`, or `core/post-comments-form` leave the discussion presentation to WordPress Core and do not append `comments_template()`.
 - A page with no comments and no Core discussion block does not render an empty classic discussion section.
-- The theme does not replace Core block markup, moderation, comment submission, nonces, privacy or REST behavior. No custom JS, endpoints, plugin, or runtime CSS is introduced.
+- WordPress Core still owns block structure, moderation, comment submission, nonces, privacy and REST behavior. The documented comment_form_defaults filter changes only the unchanged default submit control to permit text wrapping; no custom JS, endpoints, plugin or runtime CSS is introduced.
 
 ## Regression evidence
 
