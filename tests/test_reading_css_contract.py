@@ -42,9 +42,9 @@ class SharedReadingCssTest(unittest.TestCase):
         self.assertNotIn(".wp-block-table{tabindex:", css)
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
 
-    def test_native_non_heading_anchor_clears_sticky_header(self):
+    def test_native_content_anchor_clears_sticky_header(self):
         css = READING.read_text(encoding="utf-8")
-        selector = "@media(min-width:481px){.slateframe-prose [id]:not(:is(h1,h2,h3,h4,h5,h6)){"
+        selector = "@media(min-width:481px){.slateframe-prose [id]{"
         self.assertIn(selector, css)
         self.assertIn(
             selector + "scroll-margin-block-start:calc(var(--slateframe-header-height) + "
