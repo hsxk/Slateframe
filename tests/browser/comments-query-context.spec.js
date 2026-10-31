@@ -108,6 +108,13 @@ test('Query Loop discussion never suppresses the current post comments', async (
               return !target || !form.contains(target);
             })));
         expect(badDescriptions, 'Outer descriptions must stay in the classic form').toEqual([]);
+        // Core's reply script uses document-global IDs. Detect the remaining
+        // collision explicitly; correct labels alone are not sufficient to
+        // claim that nested and outer threaded replies can coexist safely.
+        const replyIdCollisions = await page.evaluate(() =>
+          ['respond', 'reply-title', 'cancel-comment-reply-link', 'commentform', 'comment_parent']
+            .filter(id => document.querySelectorAll('[id="' + id + '"]').length > 1));
+        expect(replyIdCollisions, 'Core reply containers must not collide across posts').toEqual([]);
         for (const name of ['comment', 'author', 'email', 'url', 'wp-comment-cookies-consent']) {
           const control = classic.locator('[name="' + name + '"]');
           if (await control.count()) {
