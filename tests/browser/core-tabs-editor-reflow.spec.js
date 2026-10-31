@@ -17,6 +17,19 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
       ids: editor.getBlocks().map(block => block.clientId),
     };
   });
+  let canvas;
+  await expect.poll(async () => {
+    for (const frame of page.frames()) {
+      if (await frame.locator('.editor-styles-wrapper').count().catch(() => 0)) {
+        canvas = frame;
+        return true;
+      }
+    }
+    return false;
+  }, { timeout: 15000 }).toBe(true);
+  await setRootTextScale(canvas, 64, 'rtl');
+  const baselineOverflow = await canvas.evaluate(() =>
+    document.documentElement.scrollWidth - document.documentElement.clientWidth);
   const clientId = await page.evaluate(() => {
     const { createBlock } = window.wp.blocks;
     const label = '日本語 中文 العربية ' + 'UnbrokenNativeTabLabel'.repeat(4);
@@ -35,19 +48,8 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     return tabs.clientId;
   });
   try {
-    let canvas;
-    await expect.poll(async () => {
-      for (const frame of page.frames()) {
-        if (await frame.locator('.editor-styles-wrapper').count().catch(() => 0)) {
-          canvas = frame;
-          return true;
-        }
-      }
-      return false;
-    }, { timeout: 15000 }).toBe(true);
     const block = canvas.locator('[data-block="' + clientId + '"]');
     await expect(block).toHaveCount(1);
-    await setRootTextScale(canvas, 64, 'rtl');
     const tabs = block.locator(':scope.wp-block-tabs, .wp-block-tabs').first();
     await expect(tabs).toHaveCount(1);
     const controls = tabs.locator('.wp-block-tab-list [role="tab"]');
@@ -70,6 +72,8 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
     expect(measurements.font).toBe(64);
     expect(measurements.direction).toBe('rtl');
     expect(measurements.blockWidth).toBeLessThanOrEqual(measurements.viewport + 1);
+    expect(measurements.overflow, 'Core Tabs must not add to existing Gutenberg chrome overflow')
+      .toBeLessThanOrEqual(baselineOverflow + 1);
     for (const control of measurements.controls) {
       expect(control.width).toBeGreaterThanOrEqual(44);
       expect(control.height).toBeGreaterThanOrEqual(44);
