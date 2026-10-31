@@ -69,15 +69,16 @@ test('Core-authored pages never duplicate the classic comment form', async ({ pa
     const a11y = await new AxeBuilder({ page }).include('.wp-block-post-comments-form')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(a11y.violations).toEqual([]);
-    await core.screenshot({
+    // Full-page capture retains the complete form even when 400% text exceeds the viewport.
+    await page.screenshot({
       path: 'test-artifacts/screenshots/page-comments-core-390-rtl-400.png',
-      animations: 'disabled',
+      animations: 'disabled', fullPage: true,
     });
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     await expect(textarea).toBeFocused();
-    await core.screenshot({
+    await page.screenshot({
       path: 'test-artifacts/screenshots/page-comments-core-390-rtl-400-forced-colors.png',
-      animations: 'disabled',
+      animations: 'disabled', fullPage: true,
     });
     await page.emulateMedia({ forcedColors: 'none', reducedMotion: 'no-preference' });
 
