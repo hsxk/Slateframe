@@ -84,6 +84,15 @@ class SharedReadingCssTest(unittest.TestCase):
     def test_core_table_of_contents_is_plugin_agnostic(self):
         reading = READING.read_text(encoding="utf-8")
         self.assertIn(".slateframe-prose .wp-block-table-of-contents", reading)
+        toc = (ROOT / "assets/css/core-table-of-contents.css").read_text(encoding="utf-8")
+        self.assertIn(".wp-block-table-of-contents a{display:inline-flex", toc)
+        self.assertIn("min-block-size:var(--slateframe-control)", toc)
+        self.assertNotIn(".wp-block-table-of-contents a{display:inline-flex", reading)
+        self.assertLessEqual(len(toc.encode("utf-8")), 300)
+        functions = (ROOT / "functions.php").read_text(encoding="utf-8")
+        self.assertIn("slateframe_register_core_toc_styles", functions)
+        self.assertIn("'core/table-of-contents'", functions)
+        self.assertIn("'assets/css/core-table-of-contents.css'", functions)
         self.assertIn("min-block-size:var(--slateframe-control)", reading)
         for path in (ROOT / "style.css", ROOT / "rtl.css", *(ROOT / "assets/css").glob("*.css")):
             css = path.read_text(encoding="utf-8").lower()
