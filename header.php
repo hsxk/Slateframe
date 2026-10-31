@@ -38,7 +38,7 @@
 					'theme_location' => 'primary',
 					'container'      => false,
 					'fallback_cb'    => 'slateframe_menu_fallback',
-					'depth'          => 2,
+					'depth'          => 0,
 				)
 			);
 			slateframe_language_switcher();
