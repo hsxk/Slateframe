@@ -107,6 +107,9 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn('toHaveValue(String(hitPageId))', browser)
         self.assertIn('toHaveValue(String(fixture.id))', browser)
         self.assertIn('input[name="comment_post_ID"]', browser)
+        self.assertIn('queriedAxe.violations', browser)
+        self.assertIn('await queriedSubmit.focus()', browser)
+        self.assertIn('toBeFocused()', browser)
 
     def test_no_rendering_or_shortcode_side_effects(self):
         source = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
