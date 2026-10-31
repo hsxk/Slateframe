@@ -10,6 +10,8 @@ if ( post_password_required() ) {
 }
 
 $slateframe_comment_count = get_comments_number();
+// Only a rendered second Core form requires scoped classic reply markup.
+$slateframe_parallel_form = isset( $GLOBALS['slateframe_nested_core_comment_form_rendered'] ) && absint( $GLOBALS['slateframe_nested_core_comment_form_rendered'] ) === absint( get_the_ID() );
 ?>
 <section id="comments" class="slateframe-prose slateframe-comments">
 	<?php if ( have_comments() ) : ?>
@@ -32,6 +34,9 @@ $slateframe_comment_count = get_comments_number();
 
 		<ol class="slateframe-comment-list">
 			<?php
+			if ( $slateframe_parallel_form ) {
+				add_filter( 'comment_reply_link', 'slateframe_scope_outer_comment_reply_link', 1000, 4 );
+			}
 			wp_list_comments(
 				array(
 					'style'       => 'ol',
@@ -39,6 +44,9 @@ $slateframe_comment_count = get_comments_number();
 					'avatar_size' => 48,
 				)
 			);
+			if ( $slateframe_parallel_form ) {
+				remove_filter( 'comment_reply_link', 'slateframe_scope_outer_comment_reply_link', 1000 );
+			}
 			?>
 		</ol>
 
@@ -50,22 +58,10 @@ $slateframe_comment_count = get_comments_number();
 	<?php endif; ?>
 
 	<?php
-	// A repeated Core Post Template may render a second post's comment form
-	// before this classic one. Scope only the classic field references so
-	// labels cannot resolve to the earlier queried-post controls. Keep Core
-	// form ownership, input names, submission targets and plugin IDs intact.
-	$slateframe_query_context = has_block( 'core/query', get_the_ID() ) || has_block( 'core/post-template', get_the_ID() );
-	if ( ! $slateframe_query_context ) {
-		foreach ( slateframe_singular_synced_pattern_contents() as $slateframe_pattern_content ) {
-			if ( is_string( $slateframe_pattern_content ) && ( has_block( 'core/query', $slateframe_pattern_content ) || has_block( 'core/post-template', $slateframe_pattern_content ) ) ) {
-				$slateframe_query_context = true;
-				break;
-			}
-		}
-	}
-	if ( $slateframe_query_context ) {
+	if ( $slateframe_parallel_form ) {
 		add_filter( 'comment_form_defaults', 'slateframe_scope_classic_comment_defaults', 1000 );
 		add_filter( 'comment_form_fields', 'slateframe_scope_classic_comment_fields', 1000 );
+		ob_start();
 	}
 
 	// A real button wraps its translated label at extreme text zoom; an input
@@ -75,10 +71,12 @@ $slateframe_comment_count = get_comments_number();
 			'submit_button' => '<button name="%1$s" type="submit" id="%2$s" class="%3$s" value="%4$s">%4$s</button>',
 		)
 	);
-	if ( $slateframe_query_context ) {
+	if ( $slateframe_parallel_form ) {
+		$slateframe_classic_html = ob_get_clean();
 		remove_filter( 'comment_form_defaults', 'slateframe_scope_classic_comment_defaults', 1000 );
 		remove_filter( 'comment_form_fields', 'slateframe_scope_classic_comment_fields', 1000 );
 		unset( $GLOBALS['slateframe_classic_comment_note_scoped'] );
+		echo slateframe_scope_outer_comment_form_html( $slateframe_classic_html, get_the_ID() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Core comment_form() HTML with only canonical IDs scoped.
 	}
 	?>
 </section>
