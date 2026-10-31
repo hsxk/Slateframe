@@ -52,7 +52,7 @@ get_header();
 		<?php endif; ?>
 
 		<?php // Avoid duplicate comment lists, forms and #comments anchors when Core owns the discussion. ?>
-		<?php if ( ( comments_open() || get_comments_number() ) && ! has_block( 'core/comments', get_the_ID() ) && ! has_block( 'core/post-comments', get_the_ID() ) && ! has_block( 'core/post-comments-form', get_the_ID() ) ) : ?>
+		<?php if ( ( comments_open() || get_comments_number() ) && ! slateframe_has_core_discussion_block( get_the_ID() ) ) : ?>
 			<?php comments_template(); ?>
 		<?php endif; ?>
 	<?php endwhile; ?>
