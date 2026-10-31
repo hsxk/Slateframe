@@ -89,6 +89,26 @@ test('Core-authored pages never duplicate the classic comment form', async ({ pa
     expect(labelGeometry.left).toBeGreaterThanOrEqual(-1);
     expect(labelGeometry.right).toBeLessThanOrEqual(391);
     expect(labelGeometry.height).toBeGreaterThanOrEqual(44);
+    // A long translated label must wrap too, not just the English default.
+    const originalSubmitHtml = await submit.innerHTML();
+    await submit.evaluate(node => {
+      node.textContent = '日本語中文العربية' + 'UnbrokenTranslatedCommentAction'.repeat(4);
+    });
+    const translated = await submit.evaluate(node => {
+      const box = node.getBoundingClientRect();
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const lines = [...range.getClientRects()];
+      return {
+        lineCount: lines.length,
+        inside: lines.every(line => line.left >= box.left - 1 && line.right <= box.right + 1),
+        scrollWidth: node.scrollWidth, clientWidth: node.clientWidth,
+      };
+    });
+    expect(translated.lineCount).toBeGreaterThan(2);
+    expect(translated.inside, 'translated submit label stays visible').toBe(true);
+    expect(translated.scrollWidth).toBeLessThanOrEqual(translated.clientWidth + 1);
+    await submit.evaluate((node, html) => { node.innerHTML = html; }, originalSubmitHtml);
     const textarea = core.locator('textarea#comment');
     await textarea.focus();
     await expect(textarea).toBeFocused();
