@@ -14,8 +14,8 @@ test('native Core File preserves download semantics and responsive links', async
   const slug = 'slateframe-core-file-' + randomUUID().slice(0, 12);
   const href = wp('eval', 'echo get_template_directory_uri() . "/readme.txt";');
   const label = '日本語 中文 العربية ' + 'LongUnbrokenDocumentName'.repeat(8);
-  const content = '<!-- wp:file {"href":' + JSON.stringify(href) + ',"showDownloadButton":true,"downloadButtonText":"Download / 下载"} -->' +
-    '<div class="wp-block-file slateframe-file-fixture"><a href="' + href + '">' + label +
+  const content = '<!-- wp:file {"href":' + JSON.stringify(href) + ',"displayPreview":true,"showDownloadButton":true,"downloadButtonText":"Download / 下载"} -->' +
+    '<div class="wp-block-file slateframe-file-fixture"><object class="wp-block-file__embed" data="' + href + '" type="application/pdf" style="width:600px;height:240px" aria-label="Document preview">PDF preview</object><a href="' + href + '">' + label +
     '</a><a href="' + href + '" class="wp-block-file__button wp-element-button" download>Download / 下载</a></div><!-- /wp:file -->';
   let postId;
   try {
@@ -24,6 +24,9 @@ test('native Core File preserves download semantics and responsive links', async
     await page.goto('/?page_id=' + postId, { waitUntil: 'networkidle' });
     const root = page.locator('.slateframe-file-fixture');
     await expect(root).toHaveCount(1);
+    const preview = root.locator('object.wp-block-file__embed');
+    await expect(preview).toHaveCount(1);
+    await expect(preview).toHaveAttribute('data', href);
     const links = root.locator('a');
     await expect(links).toHaveCount(2);
     for (const link of await links.all()) await expect(link).toHaveAttribute('href', href);
@@ -60,6 +63,18 @@ test('native Core File preserves download semantics and responsive links', async
             expect(metric.wrap, labelForFailure + ' wrapping').toBe('anywhere');
           }
           expect(metrics[1].width, labelForFailure + ' download width').toBeGreaterThanOrEqual(43);
+          const embed = await preview.evaluate(node => {
+            const rect = node.getBoundingClientRect();
+            return { left: rect.left, right: rect.right, width: rect.width,
+              maxInlineSize: getComputedStyle(node).maxInlineSize };
+          });
+          expect(embed.width, labelForFailure + ' native PDF preview width').toBeGreaterThan(0);
+          expect(embed.left, labelForFailure + ' native PDF preview left').toBeGreaterThanOrEqual(-1);
+          expect(embed.right, labelForFailure + ' native PDF preview right').toBeLessThanOrEqual(width + 1);
+          expect(embed.maxInlineSize, labelForFailure + ' bounded PDF preview').not.toBe('none');
+          if (width === 390 && font === 64) await root.screenshot({
+            path: 'test-artifacts/screenshots/core-file-preview-390-' + dir + '-400.png',
+          });
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-file-' + width + '-' + dir + '.png',
           });
