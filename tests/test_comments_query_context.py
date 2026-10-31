@@ -129,7 +129,8 @@ class QueryLoopDiscussionContext(unittest.TestCase):
             self.assertIn(token, template)
         for token in ('WP_HTML_Tag_Processor', "'aria-describedby'",
                       "'email-notes'", "'id_form'", "'id_submit'",
-                      "'slateframe-outer-'"):
+                      "'slateframe-outer-'", "in_array( $id, $ids, true )",
+                      "if ( ! $map )"):
             self.assertIn(token, helpers)
         for token in ('badLabels', 'badDescriptions', 'document.getElementById',
                       'form.contains(target)', "'slateframe-outer-'",
