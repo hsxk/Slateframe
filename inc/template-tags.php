@@ -392,6 +392,103 @@ function slateframe_menu_fallback() {
 
 
 /**
+ * Scope the theme's classic form field references when a Query Loop also
+ * renders a Core comment form for a different post on the same document.
+ *
+ * WordPress Core's repeated-post form uses canonical field IDs. Leave its
+ * markup, submission names and post target untouched; scope only canonical
+ * field IDs in the theme-owned outer form. Plugins' non-Core IDs survive.
+ *
+ * @param string $html Field markup from Core or a plugin.
+ * @return string Field markup with local ID references.
+ */
+function slateframe_scope_classic_comment_field_html( $html ) {
+	if ( ! is_string( $html ) || '' === $html ) {
+		return $html;
+	}
+
+	$post_id = absint( get_the_ID() );
+	if ( ! $post_id ) {
+		return $html;
+	}
+
+	$ids = array( 'comment', 'author', 'email', 'url', 'wp-comment-cookies-consent', 'email-notes' );
+	$map = array();
+	foreach ( $ids as $id ) {
+		$map[ $id ] = 'slateframe-outer-' . $post_id . '-' . $id;
+	}
+
+	$tags = new WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag() ) {
+		foreach ( array( 'id', 'for' ) as $attribute ) {
+			$value = $tags->get_attribute( $attribute );
+			if ( is_string( $value ) && isset( $map[ $value ] ) ) {
+				$tags->set_attribute( $attribute, $map[ $value ] );
+			}
+		}
+
+		$describedby = $tags->get_attribute( 'aria-describedby' );
+		if ( is_string( $describedby ) && '' !== $describedby ) {
+			$tokens = preg_split( '/\\s+/', trim( $describedby ) );
+			if ( is_array( $tokens ) ) {
+				$updated = array_map(
+					static function ( $token ) use ( $map ) {
+						return isset( $map[ $token ] ) ? $map[ $token ] : $token;
+					},
+					$tokens
+				);
+				$tags->set_attribute( 'aria-describedby', implode( ' ', $updated ) );
+			}
+		}
+	}
+
+	return $tags->get_updated_html();
+}
+
+/**
+ * Scope only Core's default classic form container IDs and email note.
+ *
+ * @param array $defaults Core comment form defaults.
+ * @return array Scoped defaults.
+ */
+function slateframe_scope_classic_comment_defaults( $defaults ) {
+	if ( ! is_array( $defaults ) || ! get_the_ID() ) {
+		return $defaults;
+	}
+
+	$prefix = 'slateframe-outer-' . absint( get_the_ID() ) . '-';
+	if ( isset( $defaults['id_form'] ) && 'commentform' === $defaults['id_form'] ) {
+		$defaults['id_form'] = $prefix . 'commentform';
+	}
+	if ( isset( $defaults['id_submit'] ) && 'submit' === $defaults['id_submit'] ) {
+		$defaults['id_submit'] = $prefix . 'submit';
+	}
+	if ( isset( $defaults['comment_notes_before'] ) ) {
+		$defaults['comment_notes_before'] = slateframe_scope_classic_comment_field_html( $defaults['comment_notes_before'] );
+	}
+
+	return $defaults;
+}
+
+/**
+ * Keep each classic label and description associated with its own field.
+ *
+ * @param array $fields Filtered Core comment form fields.
+ * @return array Scoped fields.
+ */
+function slateframe_scope_classic_comment_fields( $fields ) {
+	if ( ! is_array( $fields ) ) {
+		return $fields;
+	}
+
+	foreach ( $fields as $key => $html ) {
+		$fields[ $key ] = slateframe_scope_classic_comment_field_html( $html );
+	}
+
+	return $fields;
+}
+
+/**
  * Let the native Core comment submit label wrap at extreme text enlargement.
  *
  * Core's default input cannot wrap its value and visually clips translated
