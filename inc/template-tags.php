@@ -412,8 +412,8 @@ function slateframe_scope_classic_comment_field_html( $html ) {
 		return $html;
 	}
 
-	$ids = array( 'comment', 'author', 'email', 'url', 'wp-comment-cookies-consent', 'email-notes' );
-	$map = array();
+	$ids  = array( 'comment', 'author', 'email', 'url', 'wp-comment-cookies-consent', 'email-notes' );
+	$map  = array();
 	$scan = new WP_HTML_Tag_Processor( $html );
 	while ( $scan->next_tag() ) {
 		$id = $scan->get_attribute( 'id' );
