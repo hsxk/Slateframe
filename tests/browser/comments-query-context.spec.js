@@ -14,7 +14,10 @@ const evidence = {
   'query-with-own': { mobile: 'comments-query-query-with-own-390-rtl-400.png', desktop: 'comments-query-query-with-own-1440-ltr.png' },
 };
 
-const query = '<!-- wp:query {"query":{"perPage":1,"postType":"post","inherit":false,"search":"slateframe-no-match-query-context-2026"}} -->' +
+// WP_Query searches serialized post_content too: using postType=post would
+// match the fixture post that stores this search term inside its own block
+// attributes. Query pages instead so this is a genuinely empty inner context.
+const query = '<!-- wp:query {"query":{"perPage":1,"postType":"page","inherit":false,"search":"slateframe-no-match-query-context-2026"}} -->' +
   '<!-- wp:post-template --><!-- wp:post-comments-form /--><!-- /wp:post-template -->' +
   '<!-- /wp:query -->';
 const ownForm = '<!-- wp:post-comments-form /-->';
