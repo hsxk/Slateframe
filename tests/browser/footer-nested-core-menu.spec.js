@@ -64,8 +64,32 @@ test('footer preserves WordPress Core three-level menu in RTL and zoom', async (
     for (const link of await links.all()) {
       await link.focus();
       await expect(link).toBeFocused();
-      expect((await link.boundingBox()).height).toBeGreaterThanOrEqual(44);
+      const geometry = await link.evaluate(node => {
+        const box = node.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const fragments = [...range.getClientRects()].map(rect => ({
+          left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom,
+        }));
+        return { x: box.x, right: box.right, height: box.height,
+          scrollWidth: node.scrollWidth, clientWidth: node.clientWidth,
+          fragments };
+      });
+      expect(geometry.height).toBeGreaterThanOrEqual(44);
+      expect(geometry.x).toBeGreaterThanOrEqual(-1);
+      expect(geometry.right).toBeLessThanOrEqual(391);
+      expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+      expect(geometry.fragments.length).toBeGreaterThan(0);
+      for (const fragment of geometry.fragments) {
+        expect(fragment.left).toBeGreaterThanOrEqual(-1);
+        expect(fragment.right).toBeLessThanOrEqual(391);
+      }
     }
+    await links.first().focus();
+    await page.keyboard.press('Tab');
+    await expect(links.nth(1)).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(links.nth(2)).toBeFocused();
     expect(await page.evaluate(() => document.documentElement.scrollWidth -
       document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     const axe = await new AxeBuilder({ page }).include('.slateframe-footer-nav')
