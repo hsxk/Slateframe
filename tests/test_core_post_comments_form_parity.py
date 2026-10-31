@@ -37,7 +37,24 @@ class CorePostCommentsFormParity(unittest.TestCase):
         for forbidden in ("!important", "display:none", "time2log_", "wpcode_",
                           "direction:ltr", "javascript"):
             self.assertNotIn(forbidden, css)
-        self.assertNotIn("render_block_core/post-comments-form", php)
+        # The theme may observe a *rendered* Core form's post context, but
+        # must never replace Core's markup, queries or form implementation.
+        # A previous blanket hook ban incorrectly rejected this read-only
+        # observer despite preserving all native block/editor semantics.
+        self.assertIn(
+            "add_filter( 'render_block_core/post-comments-form', "
+            "'slateframe_track_nested_core_comment_form', 10, 3 );", php)
+        helpers = (ROOT / "inc/template-tags.php").read_text(encoding="utf-8")
+        observer = helpers.split(
+            "function slateframe_track_nested_core_comment_form(", 1
+        )[1].split("function slateframe_scope_outer_comment_reply_link(", 1)[0]
+        for token in ("$instance->context['postId']", "get_queried_object_id()",
+                      "slateframe_nested_core_comment_form_rendered",
+                      "return $content;"):
+            self.assertIn(token, observer)
+        for forbidden in ("do_blocks(", "render_block(", "comment_form(",
+                          "wp_query(", "get_posts(", "echo ", "print "):
+            self.assertNotIn(forbidden, observer)
         self.assertNotIn("comment_form(", php)
 
     def test_wordpress_browser_and_editor_coverage(self):
