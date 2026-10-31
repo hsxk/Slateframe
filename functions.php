@@ -16,6 +16,9 @@ require_once get_template_directory() . '/inc/core-verse.php';
 require_once get_template_directory() . '/inc/footer-presentation.php';
 require_once get_template_directory() . '/inc/customizer.php';
 
+// Native Core comment forms retain Core behavior while wrapping long submit labels.
+add_filter( 'comment_form_defaults', 'slateframe_comment_form_reflow_defaults' );
+
 /**
  * Register theme supports and navigation locations.
  */
