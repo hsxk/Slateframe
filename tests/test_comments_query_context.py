@@ -104,6 +104,9 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         self.assertIn("'--post_type=page'", browser)
         self.assertIn("queriedForm: true", browser)
         self.assertIn('toHaveCount(fixture.queriedForm ? 1 : 0)', browser)
+        self.assertIn('toHaveValue(String(hitPageId))', browser)
+        self.assertIn('toHaveValue(String(fixture.id))', browser)
+        self.assertIn('input[name="comment_post_ID"]', browser)
 
     def test_no_rendering_or_shortcode_side_effects(self):
         source = (ROOT / 'inc/comments-ownership.php').read_text(encoding='utf-8')
