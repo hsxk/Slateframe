@@ -86,7 +86,7 @@ function slateframe_has_core_discussion_block( $post_id = 0 ) {
 		return false;
 	}
 
-	$blocks    = array( 'core/comments', 'core/post-comments', 'core/post-comments-form' );
+	$blocks               = array( 'core/comments', 'core/post-comments', 'core/post-comments-form' );
 	$has_context_boundary = has_block( 'core/query', $post_id ) || has_block( 'core/post-template', $post_id );
 	if ( ! $has_context_boundary ) {
 		foreach ( $blocks as $block ) {
