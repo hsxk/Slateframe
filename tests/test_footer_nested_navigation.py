@@ -20,5 +20,17 @@ class FooterNestedNavigation(unittest.TestCase):
         self.assertNotIn(".slateframe-footer-menu .sub-menu{display:none", css)
         self.assertLessEqual(len(css.encode()), 2000)
 
+    def test_browser_and_workflow_require_exact_visual_evidence(self):
+        browser = (ROOT / "tests/browser/footer-nested-core-menu.spec.js").read_text()
+        workflow = (ROOT / ".github/workflows/quality.yml").read_text()
+        for name in ("footer-nested-390-rtl-400.png",
+                     "footer-nested-390-rtl-400-forced-colors.png",
+                     "footer-nested-1440-ltr.png"):
+            self.assertIn(name, browser)
+            self.assertIn(name, workflow)
+        self.assertIn("new AxeBuilder", browser)
+        self.assertIn("wp('menu', 'create'", browser)
+        self.assertIn("wp('menu', 'delete'", browser)
+
 if __name__ == "__main__":
     unittest.main()
