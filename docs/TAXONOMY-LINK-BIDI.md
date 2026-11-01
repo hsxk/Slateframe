@@ -4,8 +4,9 @@ Slateframe leaves taxonomy links, term IDs, URLs, Core block markup and translat
 ownership with WordPress. The theme supplies only presentation.
 
 - Classic single-post category and tag links inside `.slateframe-entry-footer`
-  remain Core-generated anchors. The theme applies only `unicode-bidi: isolate`
-  to keep mixed-script labels separate from adjacent punctuation. It preserves
+  remain Core-generated anchors. The theme isolates mixed-script labels
+  with `unicode-bidi: isolate` and gives each link a bounded touch target.
+  It preserves
   the original Core link markup and URL. The bounded 44px minimum width and
   height now apply to the classic anchors as well as the Core blocks. This
   matches `--slateframe-control: 44px` while keeping the strict aggregate CSS
