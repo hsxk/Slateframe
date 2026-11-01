@@ -23,4 +23,4 @@ assert.equal(canonicalizeCoreQueryDefaults(twoQueries), before + '\n' + before,
 assert.throws(() => canonicalizeCoreQueryDefaults(123), TypeError);
 assert.throws(() => canonicalizeCoreQueryDefaults('<!-- wp:query {invalid} -->'), SyntaxError,
   'Malformed Query Loop metadata must never be silently ignored');
-console.log('Core Query null-default normalization: 8 assertions passed');
+console.log('Core Query null-default normalization: 9 assertions passed');
