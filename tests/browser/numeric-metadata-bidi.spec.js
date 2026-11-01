@@ -25,6 +25,21 @@ test('published metadata preserves Core dates and isolates mixed-script text', a
     expect(await date.getAttribute('datetime')).toBeTruthy();
     expect(await iso.evaluate(node => getComputedStyle(node).unicodeBidi)).toBe('isolate');
     await iso.evaluate(node => { node.textContent = '2026年11月1日 العربية'; });
+    // This is a real Core category link emitted by the classic post footer.
+    const taxonomyLink = surface.label === 'article' ? page.locator('.slateframe-entry-footer a').first() : null;
+    if (taxonomyLink) {
+      await expect(taxonomyLink).toBeVisible();
+      const originalHref = await taxonomyLink.getAttribute('href');
+      expect(originalHref).toBeTruthy();
+      const computed = await taxonomyLink.evaluate(node => ({
+        bidi: getComputedStyle(node).unicodeBidi,
+        target: parseFloat(getComputedStyle(node).minBlockSize),
+      }));
+      expect(computed.bidi).toBe('isolate');
+      expect(computed.target).toBeGreaterThanOrEqual(44);
+      await taxonomyLink.evaluate(node => { node.textContent = '日本語 العربية 2026'; });
+      expect(await taxonomyLink.getAttribute('href')).toBe(originalHref);
+    }
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const direction of ['ltr', 'rtl']) {
@@ -54,5 +69,21 @@ test('published metadata preserves Core dates and isolates mixed-script text', a
     await page.setViewportSize({ width: 1440, height: 900 });
     await setRootTextScale(page, 16, 'ltr');
     await page.screenshot({ path: 'test-artifacts/screenshots/numeric-metadata-' + surface.label + '-1440-ltr.png' });
+    if (taxonomyLink) {
+      const footer = page.locator('.slateframe-entry-footer');
+      await footer.screenshot({ path: 'test-artifacts/screenshots/taxonomy-footer-1440-ltr.png' });
+      await page.setViewportSize({ width: 390, height: 900 });
+      await setRootTextScale(page, 64, 'rtl');
+      const axeFooter = await new AxeBuilder({ page }).include('.slateframe-entry-footer')
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+      expect(axeFooter.violations).toEqual([]);
+      await taxonomyLink.focus();
+      expect(await taxonomyLink.evaluate(node => document.activeElement === node)).toBe(true);
+      await taxonomyLink.evaluate(node => node.blur());
+      await footer.screenshot({ path: 'test-artifacts/screenshots/taxonomy-footer-390-rtl-400.png' });
+      await page.emulateMedia({ forcedColors: 'active' });
+      await footer.screenshot({ path: 'test-artifacts/screenshots/taxonomy-footer-390-rtl-400-forced-colors.png' });
+      await page.emulateMedia({ forcedColors: 'none' });
+    }
   }
 });
