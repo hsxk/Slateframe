@@ -22,3 +22,5 @@ name, 44px target, keyboard focus, horizontal containment, Axe and two required
 exact-HEAD screenshots. Real-device VoiceOver/TalkBack and Safari/Firefox
 remain manual release-readiness checks. Inspect the exact-HEAD screenshots
 before merging.
+
+A stale or non-image custom-logo attachment ID must not hide the visible Home fallback. The header now checks Core image attachment validity only when the title is unreadable and a logo setting exists. It also uses the same display-filtered Core name as `bloginfo()` and suppresses entity-only or Unicode-invisible taglines. The PHP fixture includes 19 cases, including stale logos; the exact new HEAD still requires full Actions and visual acceptance.

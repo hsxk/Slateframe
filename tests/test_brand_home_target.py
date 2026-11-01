@@ -13,11 +13,15 @@ class BrandHomeTarget(unittest.TestCase):
             cwd=ROOT, capture_output=True, text=True, timeout=20, check=False,
         )
         self.assertEqual(run.returncode, 0, run.stderr)
-        self.assertIn('Brand accessible home: 16 cases passed', run.stdout)
+        self.assertIn('Brand accessible home: 19 cases passed', run.stdout)
 
     def test_bounded_brand_target_uses_spatial_token(self):
         css = (ROOT / 'style.css').read_text(encoding='utf-8')
         self.assertIn('min-block-size:var(--slateframe-control);color:inherit;text-decoration:none', css)
+        header = (ROOT / 'header.php').read_text(encoding='utf-8')
+        self.assertIn("wp_attachment_is_image( slateframe_positive_int( get_theme_mod( 'custom_logo' ) ) )", header)
+        self.assertIn("get_bloginfo( 'name', 'display' )", header)
+        self.assertIn("slateframe_has_readable_label( get_bloginfo( 'description', 'display' ) )", header)
         self.assertIn(':root[data-slateframe-color-mode=dark]{color-scheme:dark;& .slateframe-color-icon-sun{display:none}& .slateframe-color-icon-moon{display:block}}', css)
         self.assertNotIn('min-block-size:44px', css)
 

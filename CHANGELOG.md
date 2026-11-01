@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Harden blank header identity against stale/non-image Core logo IDs and invisible taglines; match the Core display-filtered title, preserve 44px touch targets, and extend executable PHP regression from 16 to 19 cases. Exact new-HEAD Actions and screenshot review pending.
+
 + Restore a visible, localized Home identity when a WordPress Core site title is empty or Unicode-invisible and no custom logo is present; use a screen-reader-only Home label for logo-only identity. Share the existing Unicode readable-label check with discovery titles, give the brand a bounded 44–56px touch target, and preserve exact light/dark icon behavior with smaller CSS. Add 16 executable PHP cases, real seven-width RTL/400%/Axe/forced-colors coverage and two mandatory screenshots. Pending exact-HEAD Actions and visual acceptance.
 
 + Preserve accessible theme-owned discovery links when a WordPress title contains only HTML entities, Unicode separators, or invisible formatting characters. Check a decoded plain-text copy while retaining the original visible Core title; add 32 executable PHP cases and a static contract. PR #256 exact HEAD passed Theme quality, Photography, real Chromium screenshot review and byte-identical distribution builds.
