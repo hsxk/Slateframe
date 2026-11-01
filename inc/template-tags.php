@@ -146,7 +146,7 @@ function slateframe_featured_media( $post_id = 0 ) {
 	// were added afterward. Preserve responsive and priority attributes.
 	echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
-	if ( is_string( $caption ) && '' !== trim( $caption ) ) {
+	if ( slateframe_has_readable_label( $caption ) ) {
 		printf( '<figcaption class="wp-caption-text">%s</figcaption>', wp_kses_post( $caption ) );
 	}
 
@@ -222,12 +222,9 @@ function slateframe_attachment_details( $attachment_id ) {
 
 	$safe_details = array();
 	foreach ( $filtered as $label => $value ) {
-		if (
-			! is_string( $label ) ||
-			'' === trim( $label ) ||
-			! is_string( $value ) ||
-			'' === trim( $value )
-		) {
+		// Public metadata filters may return HTML-only or Unicode-invisible
+		// labels/values. Never render an unnamed definition row.
+		if ( ! slateframe_has_readable_label( $label ) || ! slateframe_has_readable_label( $value ) ) {
 			continue;
 		}
 		$safe_details[ $label ] = $value;

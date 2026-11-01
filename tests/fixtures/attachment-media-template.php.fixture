@@ -78,6 +78,11 @@ class WP_HTML_Tag_Processor {
     }
     public function get_updated_html() { return $this->html; }
 }
+function slateframe_has_readable_label( $text ) {
+    if ( ! is_string( $text ) ) { return false; }
+    return 1 === preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u',
+        html_entity_decode( strip_tags( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+}
 function slateframe_attachment_check( $ok, $message ) {
     if ( ! $ok ) { throw new RuntimeException( $message ); }
     ++$GLOBALS['slateframe_attachment_checks'];
@@ -212,4 +217,12 @@ $nonmedia_audio = slateframe_attachment_render( array(
 ) );
 slateframe_attachment_check( false === strpos( $nonmedia_audio, '<figure class="alignwide">' ), 'Wrong media element created audio figure' );
 slateframe_attachment_check( false === strpos( $nonmedia_audio, 'Orphan filtered audio caption' ), 'Wrong media element leaked caption' );
+foreach ( array( '&#x200B;', '<em></em>', '&#x3164;' ) as $hidden_caption ) {
+    $hidden = slateframe_attachment_render( array( 'image' => true, 'image_html' => '<img src="/photo.jpg">', 'caption' => $hidden_caption ) );
+    slateframe_attachment_check( false === strpos( $hidden, '<figcaption' ), 'Invisible image caption created figcaption' );
+}
+$hidden_video = slateframe_attachment_render( array( 'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4', 'caption' => '&#x200B;' ) );
+slateframe_attachment_check( false === strpos( $hidden_video, '<figcaption' ), 'Invisible video caption created figcaption' );
+$hidden_audio = slateframe_attachment_render( array( 'url' => 'https://example.org/audio.mp3', 'mime' => 'audio/mpeg', 'caption' => '&#x3164;' ) );
+slateframe_attachment_check( false === strpos( $hidden_audio, '<figcaption' ), 'Invisible audio caption created figcaption' );
 echo 'Attachment media template: ' . $GLOBALS['slateframe_attachment_checks'] . " assertions passed\n";
