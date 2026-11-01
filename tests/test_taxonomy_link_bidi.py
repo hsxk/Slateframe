@@ -37,6 +37,17 @@ class TaxonomyLinkBidi(unittest.TestCase):
                 self.assertIn("overflow-wrap:anywhere", rule)
                 self.assertNotIn("direction:ltr", rule)
 
+    def test_real_core_browser_parity_contract(self):
+        for name in (
+            "core-post-terms-parity.spec.js",
+            "core-categories-parity.spec.js",
+        ):
+            with self.subTest(name=name):
+                source = (ROOT / "tests/browser" / name).read_text()
+                self.assertIn("getComputedStyle(el).unicodeBidi", source)
+                self.assertIn("toBe('isolate')", source)
+                self.assertIn("for (const width of [320, 375, 390, 412, 768, 1440, 1920])", source)
+
     def test_no_budget_relaxation(self):
         for name, limit in (
             ("publishing.css", 4500),
