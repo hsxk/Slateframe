@@ -50,6 +50,14 @@ class BrowserFixtureIsolationContractTest(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
 
+    def test_taxonomy_footer_fixture_cleans_up_temporary_post_and_plugin(self):
+        source = (BROWSER / "taxonomy-readable-footer.spec.js").read_text(encoding="utf-8")
+        for marker in ("sf_taxonomy_footer_test", "execFileSync(", "finally {",
+                       "fs.rm(plugin", "flag: 'wx'", "wp('post', 'delete'",
+                       "taxonomy-readable-category-390-rtl-400-forced-colors.png"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_readonly_phase_preserves_every_other_browser_suite(self):
         specs = list(BROWSER.glob("*.spec.js"))
         self.assertGreater(len(specs), 10)
