@@ -11,6 +11,7 @@ test('site identity preserves CJK tracking and focus at responsive widths', asyn
   const brand = page.locator('.slateframe-brand-title');
   const link = page.locator('.slateframe-brand');
   await expect(brand).toHaveCount(1);
+  await expect(brand.locator('bdi')).toHaveCount(1);
   const previous = await page.evaluate(() => {
     const node = document.querySelector('.slateframe-brand-title');
     return {
@@ -32,7 +33,7 @@ test('site identity preserves CJK tracking and focus at responsive widths', asyn
               document.documentElement.style.fontSize = zoom;
               const node = document.querySelector('.slateframe-brand-title');
               node.lang = lang;
-              node.textContent = lang === 'en' ? 'Slateframe' : '風景と物語';
+              node.querySelector('bdi').textContent = lang === 'en' ? 'Slateframe' : '風景と物語';
             }, { direction, zoom, lang });
             const result = await brand.evaluate(node => ({
               tracking: getComputedStyle(node).letterSpacing,
@@ -52,7 +53,7 @@ test('site identity preserves CJK tracking and focus at responsive widths', asyn
       document.documentElement.lang = 'ja';
       const node = document.querySelector('.slateframe-brand-title');
       node.removeAttribute('lang');
-      node.textContent = '風景と物語';
+      node.querySelector('bdi').textContent = '風景と物語';
     });
     await expect.poll(() => brand.evaluate(node => getComputedStyle(node).letterSpacing)).toBe('normal');
     for (const width of [390, 1440]) {
@@ -79,7 +80,7 @@ test('site identity preserves CJK tracking and focus at responsive widths', asyn
       root.style.fontSize = previous.font;
       previous.dir === null ? root.removeAttribute('dir') : root.setAttribute('dir', previous.dir);
       previous.rootLang === null ? root.removeAttribute('lang') : root.setAttribute('lang', previous.rootLang);
-      node.textContent = previous.text;
+      node.querySelector('bdi').textContent = previous.text;
       previous.lang === null ? node.removeAttribute('lang') : node.setAttribute('lang', previous.lang);
     }, previous);
   }
