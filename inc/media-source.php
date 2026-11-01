@@ -24,8 +24,8 @@ function slateframe_sanitize_media_shortcode( $html ) {
 		return '';
 	}
 
-	$allowed             = wp_kses_allowed_html( 'post' );
-	$allowed['source']   = array(
+	$allowed           = wp_kses_allowed_html( 'post' );
+	$allowed['source'] = array(
 		'src'   => true,
 		'type'  => true,
 		'media' => true,
