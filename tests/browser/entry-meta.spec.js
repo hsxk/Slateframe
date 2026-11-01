@@ -39,7 +39,11 @@ test('post date separator and author form one responsive wrapping unit', async (
 
 	const author = page.locator('.slateframe-meta-byline .slateframe-byline a');
 	await expect(author).toHaveCount(1);
-	await author.evaluate((node) => { node.textContent = '非常长的作者名称 مع اسم عربي طويل طويل للغاية — LongUnbrokenAuthorNameWithoutWhitespace'; });
+	const isolatedName = author.locator('bdi');
+	await expect(isolatedName).toHaveCount(1);
+	await expect(isolatedName).toHaveJSProperty('dir', '');
+	expect(await isolatedName.evaluate((node) => getComputedStyle(node).unicodeBidi)).toBe('isolate');
+	await isolatedName.evaluate((node) => { node.textContent = '非常长的作者名称 مع اسم عربي طويل طويل للغاية — LongUnbrokenAuthorNameWithoutWhitespace'; });
 	await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
 	await expectMetaGroupContained(page);
 
