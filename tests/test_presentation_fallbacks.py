@@ -20,7 +20,8 @@ class PresentationFallbacks(unittest.TestCase):
         source = (ROOT / "inc/template-tags.php").read_text(encoding="utf-8")
         self.assertIn("! is_string( $text )", source)
         self.assertIn("slateframe_has_readable_label( $title )", source)
-        self.assertIn("is_string( $caption )", source)
+        self.assertIn("slateframe_has_readable_label( $caption )", source)
+        self.assertNotIn("if ( is_string( $caption ) && '' !== trim( $caption ) )", source)
         self.assertIn("is_string( $pages ) ? $pages : ''", source)
         self.assertNotIn("time2log", source.lower())
 
