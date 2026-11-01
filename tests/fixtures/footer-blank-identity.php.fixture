@@ -61,4 +61,4 @@ foreach ( $cases as $i => $case ) {
 		throw new RuntimeException( 'Unescaped title case ' . $i );
 	}
 }
-echo 'Footer readable identity: ' . count( $cases ) . "\n";
+echo 'Footer readable identity: ' . count( $cases ) . " cases passed\n";
