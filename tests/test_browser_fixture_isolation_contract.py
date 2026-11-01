@@ -41,6 +41,15 @@ class BrowserFixtureIsolationContractTest(unittest.TestCase):
         self.assertIn("const viewports = [320, 375, 390, 412, 768, 1440, 1920]", helper)
         self.assertIn("wp_cache_delete( 'sidebars_widgets', 'options' )", helper)
 
+    def test_filtered_front_page_fixture_restores_global_options(self):
+        source = (BROWSER / "menu-front-page-recovery.spec.js").read_text(encoding="utf-8")
+        for marker in ("sf_menu_front_test", "pre_wp_nav_menu", "wp_list_pages",
+                       "finally {", "fs.rm(plugin", "flag: 'wx'",
+                       "wp('option', 'update', 'show_on_front', originalShow)",
+                       "wp('option', 'update', 'page_on_front', originalFront)"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_readonly_phase_preserves_every_other_browser_suite(self):
         specs = list(BROWSER.glob("*.spec.js"))
         self.assertGreater(len(specs), 10)

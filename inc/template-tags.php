@@ -396,17 +396,32 @@ function slateframe_pagination() {
  */
 function slateframe_menu_fallback() {
 	// Core must retain the static front page as a parent of its child pages.
-	$static_front = 'page' === get_option( 'show_on_front' ) && slateframe_positive_int( get_option( 'page_on_front' ) );
-	$pages        = wp_list_pages(
+	$front_page_id = 0;
+	if ( 'page' === get_option( 'show_on_front' ) ) {
+		$front_page_id = slateframe_positive_int( get_option( 'page_on_front' ) );
+	}
+
+	$pages = wp_list_pages(
 		array(
 			'echo'     => false,
 			'title_li' => '',
 		)
 	);
 
-	$home = '';
-	// An unpublished or filtered static front page can leave Core's list empty.
-	if ( ! $static_front || ! is_string( $pages ) || '' === trim( $pages ) ) {
+	$home              = '';
+	$front_page_listed = false;
+	// A filtered Core page list may still contain other pages while omitting
+	// the configured front page. Check the actual list before hiding Home.
+	if ( $front_page_id && is_string( $pages ) && '' !== trim( $pages ) ) {
+		$slateframe_page_tags = new WP_HTML_Tag_Processor( $pages );
+		while ( $slateframe_page_tags->next_tag( 'li' ) ) {
+			if ( $slateframe_page_tags->has_class( 'page-item-' . $front_page_id ) ) {
+				$front_page_listed = true;
+				break;
+			}
+		}
+	}
+	if ( ! $front_page_listed ) {
 		$is_current = is_front_page();
 		$home       = sprintf(
 			'<li class="page_item slateframe-home-link%1$s"><a href="%2$s"%3$s>%4$s</a></li>',

@@ -8,8 +8,8 @@ When **Settings → Reading → Your homepage displays** uses **latest posts**,
 the fallback adds a translated Home link to the site root. That link receives
 `aria-current="page"` only when `is_front_page()` is true.
 
-When Reading uses a valid **static front page**, the fallback **does not add a
-second Home link**. Instead it retains the complete native Core page list,
+When Reading uses a valid **static front page** that appears in Core's page
+list, the fallback **does not add a second Home link**. Instead it retains the complete native Core page list,
 including the static front page and its descendants. WordPress
 `Walker_Page` supplies `aria-current="page"` for the active static page.
 This is important: excluding the parent page from `wp_list_pages()` can
@@ -33,3 +33,11 @@ includes executable PHP-backed cases for posts/static front pages, Core current
 state, retained child hierarchy, separate posts index, malformed IDs and
 the original list shape. These isolated Core API stubs are not a substitute
 for the exact-HEAD real WordPress browser and compatibility gates.
+
+When a filter omits the configured static front page but leaves other pages in
+Core's list, Slateframe checks the actual `page-item-{ID}` class with Core's
+HTML Tag Processor. It restores the localized Home link only when that page is
+absent, without changing Core's page hierarchy, permalink selection or menu
+assignment. The same 44px navigation target, keyboard focus and RTL/CJK
+styles apply. A real WordPress/Chromium fixture covers seven widths, 400% text,
+Axe, forced colors and two exact-HEAD screenshots.
