@@ -13,11 +13,16 @@ global $wp_query;
 		<div class="slateframe-shell">
 			<h1 class="slateframe-page-title">
 				<?php
-				printf(
-					/* translators: %s: search query. */
-					esc_html__( 'Search results for: %s', 'slateframe' ),
-					'<bdi>' . esc_html( get_search_query( false ) ) . '</bdi>'
-				);
+				$slateframe_search_query = get_search_query( false );
+				if ( slateframe_has_readable_label( $slateframe_search_query ) ) {
+					printf(
+						/* translators: %s: search query. */
+						esc_html__( 'Search results for: %s', 'slateframe' ),
+						'<bdi>' . esc_html( $slateframe_search_query ) . '</bdi>'
+					);
+				} else {
+					esc_html_e( 'Search results', 'slateframe' );
+				}
 				?>
 			</h1>
 			<p class="slateframe-archive-description">

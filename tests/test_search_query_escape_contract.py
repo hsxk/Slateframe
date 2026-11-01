@@ -15,9 +15,11 @@ class SearchQueryEscapeContract(unittest.TestCase):
 
     def test_search_heading_escapes_raw_query_once_for_html(self):
         template = (ROOT / 'search.php').read_text()
-        self.assertIn('esc_html( get_search_query( false ) )', template)
+        self.assertIn('$slateframe_search_query = get_search_query( false );', template)
         self.assertNotIn('esc_html( get_search_query() )', template)
-        self.assertIn("'<bdi>' . esc_html( get_search_query( false ) ) . '</bdi>'", template)
+        self.assertIn('slateframe_has_readable_label( $slateframe_search_query )', template)
+        self.assertIn("esc_html_e( 'Search results', 'slateframe' )", template)
+        self.assertIn("'<bdi>' . esc_html( $slateframe_search_query ) . '</bdi>'", template)
         self.assertIn("esc_html__( 'Search results for: %s', 'slateframe' )", template)
 
     def test_browser_regression_checks_query_values_and_bidi(self):

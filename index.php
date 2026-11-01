@@ -11,15 +11,15 @@ global $wp_query;
 <main id="main-content" class="slateframe-main" tabindex="-1">
 	<header class="slateframe-page-header">
 		<div class="slateframe-shell">
-			<h1 class="slateframe-page-title"><bdi>
-				<?php
-				if ( is_home() && ! is_front_page() ) {
-					single_post_title();
-				} else {
-					bloginfo( 'name' );
-				}
-				?>
-			</bdi></h1>
+			<?php
+			$slateframe_index_title = is_home() && ! is_front_page()
+				? single_post_title( '', false )
+				: get_bloginfo( 'name', 'display' );
+			if ( ! slateframe_has_readable_label( $slateframe_index_title ) ) {
+				$slateframe_index_title = __( 'Latest posts', 'slateframe' );
+			}
+			?>
+			<h1 class="slateframe-page-title"><bdi><?php echo esc_html( $slateframe_index_title ); ?></bdi></h1>
 		</div>
 	</header>
 
