@@ -33,6 +33,25 @@ function slateframe_positive_int( $value ) {
 }
 
 /**
+ * Check whether theme-owned presentation text has a readable character.
+ *
+ * Use a decoded, tag-free copy for the decision; callers retain the original
+ * Core string and its escaping. Empty entities, combining-only text and
+ * invisible Unicode fillers must not create nameless links.
+ *
+ * @param mixed $text Candidate text from WordPress Core or a display filter.
+ * @return bool Whether the label has a readable character.
+ */
+function slateframe_has_readable_label( $text ) {
+	if ( ! is_string( $text ) ) {
+		return false;
+	}
+
+	$plain = html_entity_decode( wp_strip_all_tags( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	return 1 === preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u', $plain );
+}
+
+/**
  * Return a resilient display title for frontend discovery surfaces.
  *
  * WordPress permits untitled content. Theme navigation must still expose a
@@ -44,14 +63,7 @@ function slateframe_positive_int( $value ) {
 function slateframe_get_display_title( $post_id = 0 ) {
 	$title = get_the_title( $post_id );
 
-	if ( ! is_string( $title ) ) {
-		return __( 'Untitled', 'slateframe' );
-	}
-
-	// Entity-only, combining-only and Unicode spacing/format/filler characters
-	// are not readable link names. Inspect a decoded plain-text copy, never rewrite the Core title.
-	$plain_title = html_entity_decode( wp_strip_all_tags( $title ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-	if ( ! preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u', $plain_title ) ) {
+	if ( ! slateframe_has_readable_label( $title ) ) {
 		return __( 'Untitled', 'slateframe' );
 	}
 
