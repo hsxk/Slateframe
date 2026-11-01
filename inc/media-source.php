@@ -45,4 +45,3 @@ function slateframe_media_has_source( $html, $tag ) {
 
 	return false;
 }
-
