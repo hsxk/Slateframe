@@ -43,7 +43,7 @@ class ListingBidi(unittest.TestCase):
     def test_author_name_and_bio(self):
         html = self.render('author.php')
         self.assertIn('<h1 class="slateframe-page-title"><bdi>日本語 العربية</bdi></h1>', html)
-        self.assertIn('<p class="slateframe-archive-description">Author biography</p>', html)
+        self.assertIn('<p class="slateframe-archive-description"><bdi>Author biography</bdi></p>', html)
 
     def test_archive_preserves_core_prefix_and_description(self):
         html = self.render('archive.php')
