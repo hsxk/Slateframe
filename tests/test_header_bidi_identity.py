@@ -10,6 +10,9 @@ TITLE = "العربية / 日本語 — Slateframe"
 DESCRIPTION = "日本語と中文 / العربية"
 PHP = r"""
 define('COOKIEPATH', '/');
+define('ABSPATH', __DIR__);
+function wp_strip_all_tags($value) { return strip_tags($value); }
+require getcwd() . '/inc/template-tags.php';
 function language_attributes() { echo 'lang="en-US" dir="rtl"'; }
 function bloginfo($key) {
     echo htmlspecialchars($key === 'name' ? 'العربية / 日本語 — Slateframe'
@@ -54,7 +57,7 @@ class Isolates(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag == "bdi":
-            self.values.append("".join(self.parts))
+            self.values.append("".join(self.parts).strip())
             self.inside = False
 
 
