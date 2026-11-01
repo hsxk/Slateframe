@@ -12,7 +12,7 @@ global $wp_query;
 	<header class="slateframe-page-header">
 		<div class="slateframe-shell">
 			<?php
-			the_archive_title( '<h1 class="slateframe-page-title">', '</h1>' );
+			the_archive_title( '<h1 class="slateframe-page-title"><bdi>', '</bdi></h1>' );
 			the_archive_description( '<div class="slateframe-archive-description">', '</div>' );
 			?>
 		</div>
