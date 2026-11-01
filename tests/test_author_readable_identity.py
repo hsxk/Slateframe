@@ -30,7 +30,7 @@ class AuthorReadableIdentity(unittest.TestCase):
         return run.stdout
 
     def test_empty_and_unicode_invisible_names_use_localized_heading(self):
-        for value in ('', ' ', '&nbsp;', '\\u200b', '\\ufe0f', '\\u3164', '\\u2800', '\\u0301', '<i></i>'):
+        for value in ('', ' ', '&nbsp;', '\u200b', '\ufe0f', '\u3164', '\u2800', '\u0301', '<i></i>'):
             with self.subTest(value=repr(value)):
                 html = self.render(value, '&nbsp;')
                 self.assertIn('<h1 class="slateframe-page-title"><bdi>Author</bdi></h1>', html)
