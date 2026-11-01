@@ -391,6 +391,248 @@ function slateframe_menu_fallback() {
 }
 
 
+
+/**
+ * Track an actually rendered Core form owned by a different queried post.
+ *
+ * Empty Query Loops keep canonical classic form IDs and native JS replies.
+ * This does not alter Core markup, query content or post ownership.
+ *
+ * @param string   $content  Rendered Core block HTML.
+ * @param array    $block    Parsed Core block.
+ * @param WP_Block $instance Core block instance with post context.
+ * @return string Unmodified HTML.
+ */
+function slateframe_track_nested_core_comment_form( $content, $block, $instance ) {
+	if ( ! is_singular() || ! is_string( $content ) || false === strpos( $content, 'id="respond"' ) || ! $instance instanceof WP_Block || ! isset( $instance->context['postId'] ) ) {
+		return $content;
+	}
+
+	$outer_id  = slateframe_positive_int( get_queried_object_id() );
+	$nested_id = slateframe_positive_int( $instance->context['postId'] );
+	if ( $outer_id && $nested_id && $outer_id !== $nested_id ) {
+		$GLOBALS['slateframe_nested_core_comment_form_rendered'] = $outer_id;
+	}
+
+	return $content;
+}
+
+/**
+ * Use Core's no-JavaScript reply URL fallback for the second comment form.
+ *
+ * Core's comment-reply script can manage only one canonical responder. Do
+ * not let it move the queried post's form into the outer post's thread.
+ *
+ * @param string     $link    Reply link HTML.
+ * @param array      $args    Core reply arguments.
+ * @param WP_Comment $comment Replied-to comment.
+ * @param WP_Post    $post    Comment's owning post.
+ * @return string Fallback link to the outer form.
+ */
+function slateframe_scope_outer_comment_reply_link( $link, $args, $comment, $post ) {
+	$outer_id = isset( $GLOBALS['slateframe_nested_core_comment_form_rendered'] ) ? slateframe_positive_int( $GLOBALS['slateframe_nested_core_comment_form_rendered'] ) : 0;
+	if ( ! $outer_id || ! $post instanceof WP_Post || (int) $post->ID !== $outer_id || ! is_string( $link ) ) {
+		return $link;
+	}
+
+	$tags = new WP_HTML_Tag_Processor( $link );
+	while ( $tags->next_tag( 'a' ) ) {
+		if ( ! $tags->has_class( 'comment-reply-link' ) ) {
+			continue;
+		}
+		$tags->remove_class( 'comment-reply-link' );
+		// Core's reply script may also be bound through an inline handler.
+		// Removing only the class leaves addComment.moveForm() active and
+		// can move the queried post's responder into the outer thread.
+		$tags->remove_attribute( 'onclick' );
+		$href = $tags->get_attribute( 'href' );
+		if ( is_string( $href ) && '#respond' === substr( $href, -8 ) ) {
+			$tags->set_attribute( 'href', substr( $href, 0, -8 ) . '#slateframe-outer-' . $outer_id . '-respond' );
+		}
+	}
+
+	return $tags->get_updated_html();
+}
+
+/**
+ * Scope Core's hardcoded reply container IDs in the theme's second form.
+ *
+ * Only the outer form is buffered and rewritten. Preserve submission names,
+ * values, Core's queried-post form and arbitrary plugin field markup.
+ *
+ * @param string $html    Classic form markup.
+ * @param int    $post_id Outer singular post ID.
+ * @return string Scoped form markup.
+ */
+function slateframe_scope_outer_comment_form_html( $html, $post_id ) {
+	$post_id = slateframe_positive_int( $post_id );
+	if ( ! is_string( $html ) || ! $post_id ) {
+		return $html;
+	}
+
+	$prefix = 'slateframe-outer-' . $post_id . '-';
+	$ids    = array( 'respond', 'reply-title', 'cancel-comment-reply-link', 'comment_parent', 'comment_post_ID' );
+	$map    = array();
+	foreach ( $ids as $id ) {
+		$map[ $id ] = $prefix . $id;
+	}
+
+	$tags = new WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag() ) {
+		foreach ( array( 'id', 'for' ) as $attribute ) {
+			$value = $tags->get_attribute( $attribute );
+			if ( is_string( $value ) && isset( $map[ $value ] ) ) {
+				$tags->set_attribute( $attribute, $map[ $value ] );
+			}
+		}
+		foreach ( array( 'aria-labelledby', 'aria-describedby' ) as $attribute ) {
+			$value = $tags->get_attribute( $attribute );
+			if ( ! is_string( $value ) || '' === trim( $value ) ) {
+				continue;
+			}
+			$tokens = preg_split( '/\s+/', trim( $value ) );
+			if ( is_array( $tokens ) ) {
+				$tokens = array_map(
+					static function ( $token ) use ( $map ) {
+						return isset( $map[ $token ] ) ? $map[ $token ] : $token;
+					},
+					$tokens
+				);
+				$tags->set_attribute( $attribute, implode( ' ', $tokens ) );
+			}
+		}
+		$href = $tags->get_attribute( 'href' );
+		if ( is_string( $href ) && '#respond' === substr( $href, -8 ) ) {
+			$tags->set_attribute( 'href', substr( $href, 0, -8 ) . '#' . $prefix . 'respond' );
+		}
+	}
+
+	return $tags->get_updated_html();
+}
+
+/**
+ * Scope the theme's classic form field references when a Query Loop also
+ * renders a Core comment form for a different post on the same document.
+ *
+ * WordPress Core's repeated-post form uses canonical field IDs. Leave its
+ * markup, submission names and post target untouched; scope only canonical
+ * field IDs in the theme-owned outer form. Plugins' non-Core IDs survive.
+ *
+ * @param string $html Field markup from Core or a plugin.
+ * @return string Field markup with local ID references.
+ */
+function slateframe_scope_classic_comment_field_html( $html ) {
+	if ( ! is_string( $html ) || '' === $html ) {
+		return $html;
+	}
+
+	$post_id = absint( get_the_ID() );
+	if ( ! $post_id ) {
+		return $html;
+	}
+
+	$ids  = array( 'comment', 'author', 'email', 'url', 'wp-comment-cookies-consent', 'email-notes' );
+	$map  = array();
+	$scan = new WP_HTML_Tag_Processor( $html );
+	while ( $scan->next_tag() ) {
+		$id = $scan->get_attribute( 'id' );
+		// A plugin may replace a Core field with its own ID. Do not rewrite
+		// a label unless its corresponding canonical control is present.
+		if ( is_string( $id ) && in_array( $id, $ids, true ) ) {
+			$map[ $id ] = 'slateframe-outer-' . $post_id . '-' . $id;
+		}
+	}
+	// The email note is rendered separately from its field. Preserve
+	// cross-field aria-describedby references only when that note was scoped.
+	if ( ! empty( $GLOBALS['slateframe_classic_comment_note_scoped'] ) ) {
+		$map['email-notes'] = 'slateframe-outer-' . $post_id . '-email-notes';
+	}
+	if ( ! $map ) {
+		return $html;
+	}
+
+	$tags = new WP_HTML_Tag_Processor( $html );
+	while ( $tags->next_tag() ) {
+		foreach ( array( 'id', 'for' ) as $attribute ) {
+			$value = $tags->get_attribute( $attribute );
+			if ( is_string( $value ) && isset( $map[ $value ] ) ) {
+				$tags->set_attribute( $attribute, $map[ $value ] );
+			}
+		}
+
+		$describedby = $tags->get_attribute( 'aria-describedby' );
+		if ( is_string( $describedby ) && '' !== $describedby ) {
+			$tokens = preg_split( '/\\s+/', trim( $describedby ) );
+			if ( is_array( $tokens ) ) {
+				$updated = array_map(
+					static function ( $token ) use ( $map ) {
+						return isset( $map[ $token ] ) ? $map[ $token ] : $token;
+					},
+					$tokens
+				);
+				$tags->set_attribute( 'aria-describedby', implode( ' ', $updated ) );
+			}
+		}
+	}
+
+	return $tags->get_updated_html();
+}
+
+/**
+ * Scope only Core's default classic form container IDs and email note.
+ *
+ * @param array $defaults Core comment form defaults.
+ * @return array Scoped defaults.
+ */
+function slateframe_scope_classic_comment_defaults( $defaults ) {
+	if ( ! is_array( $defaults ) || ! get_the_ID() ) {
+		return $defaults;
+	}
+
+	$prefix = 'slateframe-outer-' . absint( get_the_ID() ) . '-';
+	if ( isset( $defaults['id_form'] ) && 'commentform' === $defaults['id_form'] ) {
+		$defaults['id_form'] = $prefix . 'commentform';
+	}
+	if ( isset( $defaults['id_submit'] ) && 'submit' === $defaults['id_submit'] ) {
+		$defaults['id_submit'] = $prefix . 'submit';
+	}
+	$GLOBALS['slateframe_classic_comment_note_scoped'] = false;
+	if ( isset( $defaults['comment_notes_before'] ) && is_string( $defaults['comment_notes_before'] ) && false !== strpos( $defaults['comment_notes_before'], 'id="email-notes"' ) ) {
+		$defaults['comment_notes_before']                  = slateframe_scope_classic_comment_field_html( $defaults['comment_notes_before'] );
+		$GLOBALS['slateframe_classic_comment_note_scoped'] = true;
+	}
+
+	return $defaults;
+}
+
+/**
+ * Keep each classic label and description associated with its own field.
+ *
+ * @param array $fields Filtered Core comment form fields.
+ * @return array Scoped fields.
+ */
+function slateframe_scope_classic_comment_fields( $fields ) {
+	if ( ! is_array( $fields ) ) {
+		return $fields;
+	}
+
+	foreach ( $fields as $key => $html ) {
+		$scoped = slateframe_scope_classic_comment_field_html( $html );
+		if ( 'email' === $key && ! empty( $GLOBALS['slateframe_classic_comment_note_scoped'] ) && is_string( $scoped ) ) {
+			$processor = new WP_HTML_Tag_Processor( $scoped );
+			while ( $processor->next_tag( 'input' ) ) {
+				if ( 'slateframe-outer-' . absint( get_the_ID() ) . '-email' === $processor->get_attribute( 'id' ) && ! $processor->get_attribute( 'aria-describedby' ) ) {
+					$processor->set_attribute( 'aria-describedby', 'slateframe-outer-' . absint( get_the_ID() ) . '-email-notes' );
+				}
+			}
+			$scoped = $processor->get_updated_html();
+		}
+		$fields[ $key ] = $scoped;
+	}
+
+	return $fields;
+}
+
 /**
  * Let the native Core comment submit label wrap at extreme text enlargement.
  *

@@ -4,11 +4,15 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-+ Prevent duplicate classic comment forms when a published WordPress synced pattern owns Core Comments or Post Comments Form in a post, page or attachment. Reuse the existing bounded Core pattern resolver, preserve classic/locked fallbacks and unchanged asset budgets; add executable PHP cases and real WordPress RTL/400%/Axe/forced-colors screenshots. Pending exact-HEAD Actions and visual acceptance.
++ Isolate the theme-owned classic comment form only when a different Query Loop post actually renders a Core form. Scope canonical field, reply/cancel and hidden input IDs; preserve Core's nested form and use WordPress's no-JS replytocom fallback for the outer thread, avoiding duplicate responders without custom JavaScript. Pending exact-HEAD browser reply/cancel and visual acceptance.
 
-+ Prevent duplicate classic comment forms on attachment pages that already contain WordPress Core Comments, Post Comments, or Post Comments Form blocks; retain closed-attachment comment history and nine executable PHP ownership scenarios. Original fix verified with real WordPress/Chromium screenshots; extended closed-history regression awaits its own exact-HEAD Actions.
++ Keep the singular post's classic comments when a Core Query Loop Post Template contains its own queried-post discussion, including published synced patterns; preserve Core-first ownership outside the repeated-post context, bounded pattern resolution, and strict visual/accessibility gates.
 
-+ Restore WordPress Core's full hierarchical footer navigation instead of silently dropping child links. Keep native Walker output, browser-native RTL list indentation, 44px link targets, CJK wrapping, and unchanged strict CSS/JS budgets; add executable and real WordPress/Chromium coverage. Pending exact-HEAD Actions and visual review.
++ Prevent duplicate classic comment forms when a published WordPress synced pattern owns Core Comments or Post Comments Form in a post, page or attachment. Reuse the existing bounded Core pattern resolver, preserve classic/locked fallbacks and unchanged asset budgets; add executable PHP cases and real WordPress RTL/400%/Axe/forced-colors screenshots.
+
++ Prevent duplicate classic comment forms on attachment pages that already contain WordPress Core Comments, Post Comments, or Post Comments Form blocks; retain closed-attachment comment history and nine executable PHP ownership scenarios.
+
++ Restore WordPress Core's full hierarchical footer navigation instead of silently dropping child links. Keep native Walker output, browser-native RTL list indentation, 44px link targets, CJK wrapping, and unchanged strict CSS/JS budgets; add executable and real WordPress/Chromium coverage.
 
 
 + Preserve the complete native WordPress Core comment-submit label at 400% text zoom by using the documented Core defaults filter to replace only its non-wrapping default input with a wrapping button. Preserve plugin/caller overrides, classic form behavior, RTL/CJK, 44px targets, and add executable PHP plus exact-HEAD browser visual regression. Pending new-SHA Actions and screenshot review.

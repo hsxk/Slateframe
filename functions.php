@@ -19,6 +19,8 @@ require_once get_template_directory() . '/inc/customizer.php';
 
 // Native Core comment forms retain Core behavior while wrapping long submit labels.
 add_filter( 'comment_form_defaults', 'slateframe_comment_form_reflow_defaults' );
+// Detect a rendered native form owned by a repeated Query Loop post.
+add_filter( 'render_block_core/post-comments-form', 'slateframe_track_nested_core_comment_form', 10, 3 );
 
 /**
  * Register theme supports and navigation locations.
