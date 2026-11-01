@@ -32,7 +32,7 @@ $slateframe_author_avatar = is_string( $slateframe_author_avatar ) ? $slateframe
 			<div class="slateframe-author-copy">
 				<h1 class="slateframe-page-title"><bdi><?php echo esc_html( get_the_author_meta( 'display_name', $slateframe_author_id ) ); ?></bdi></h1>
 				<?php if ( $slateframe_author_bio ) : ?>
-					<p class="slateframe-archive-description"><?php echo esc_html( $slateframe_author_bio ); ?></p>
+					<p class="slateframe-archive-description"><bdi><?php echo esc_html( $slateframe_author_bio ); ?></bdi></p>
 				<?php endif; ?>
 			</div>
 		</div>
