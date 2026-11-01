@@ -77,7 +77,7 @@ while ( have_posts() ) :
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'video/' ) && $slateframe_file_url ) : ?>
 					<?php
 					$slateframe_video_html  = wp_video_shortcode( array( 'src' => $slateframe_file_url ) );
-					$slateframe_video_html  = is_string( $slateframe_video_html ) ? wp_kses_post( $slateframe_video_html ) : '';
+					$slateframe_video_html  = slateframe_sanitize_media_shortcode( $slateframe_video_html );
 					$slateframe_video_valid = slateframe_media_has_source( $slateframe_video_html, 'video' );
 					if ( $slateframe_video_valid ) :
 						?>
@@ -93,7 +93,7 @@ while ( have_posts() ) :
 				<?php elseif ( 0 === strpos( $slateframe_mime_type, 'audio/' ) && $slateframe_file_url ) : ?>
 					<?php
 					$slateframe_audio_html  = wp_audio_shortcode( array( 'src' => $slateframe_file_url ) );
-					$slateframe_audio_html  = is_string( $slateframe_audio_html ) ? wp_kses_post( $slateframe_audio_html ) : '';
+					$slateframe_audio_html  = slateframe_sanitize_media_shortcode( $slateframe_audio_html );
 					$slateframe_audio_valid = slateframe_media_has_source( $slateframe_audio_html, 'audio' );
 					if ( $slateframe_audio_valid ) :
 						?>

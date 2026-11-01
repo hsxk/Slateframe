@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Preserve WordPress Core's native audio/video `<source>` children through a narrowly extended `wp_kses()` media-shortcode allowlist; default post KSES removes those children. Keep URL protocol filtering, reject script/event handlers, and test actual playable nested sources plus unsafe-source suppression.
+
 + Prevent source-less Core audio/video shortcode filter output from creating nonfunctional attachment figures or orphaned captions. Retain valid direct and nested media sources, original-file recovery, native player behavior and zero additional runtime assets; extend executable PHP media regressions.
 
 + Normalize fallback WordPress Core attachment metadata through the same readable-label/value filter when a plugin returns an invalid metadata array; suppress invisible native MIME values without losing valid dimensions, filesize, or CJK/RTL terms. Add executable regression cases.

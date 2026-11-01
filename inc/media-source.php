@@ -10,6 +10,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Sanitize native Core media shortcode markup without stripping <source>.
+ *
+ * Post KSES allows video/audio but omits the source element that Core emits
+ * for playable formats. Extend only this shortcode's allowlist, retaining
+ * WordPress's attribute and URL protocol validation.
+ *
+ * @param mixed $html Core media shortcode output.
+ * @return string Sanitized player HTML.
+ */
+function slateframe_sanitize_media_shortcode( $html ) {
+	if ( ! is_string( $html ) ) {
+		return '';
+	}
+
+	$allowed             = wp_kses_allowed_html( 'post' );
+	$allowed['source']   = array(
+		'src'   => true,
+		'type'  => true,
+		'media' => true,
+	);
+
+	return wp_kses( $html, $allowed );
+}
+
+/**
  * Check that a sanitized Core video/audio player has a usable media source.
  *
  * Shortcode filters may return an empty player shell. Preserve Core's direct

@@ -14,13 +14,14 @@ class AttachmentMediaTemplate(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn('Attachment media template: 101 assertions passed', result.stdout)
+        self.assertIn('Attachment media template: 105 assertions passed', result.stdout)
 
     def test_uses_core_media_without_business_or_remote_dependencies(self):
         source = (ROOT / 'attachment.php').read_text(encoding='utf-8')
         self.assertIn('wp_get_attachment_image(', source)
         self.assertIn('wp_video_shortcode(', source)
         self.assertIn('wp_audio_shortcode(', source)
+        self.assertIn('slateframe_sanitize_media_shortcode(', source)
         self.assertIn("slateframe_media_has_source( $slateframe_video_html, 'video' )", source)
         self.assertIn("slateframe_media_has_source( $slateframe_audio_html, 'audio' )", source)
         self.assertIn('new WP_HTML_Tag_Processor(', source)

@@ -52,6 +52,14 @@ function wp_kses_post( $value ) {
     // Mirror Core post KSES: priority and decoding must be restored after sanitization.
     return preg_replace( '~\\s+(?:fetchpriority|decoding)\\s*=\\s*"[^"]*"~i', '', $value );
 }
+function wp_kses_allowed_html( $context ) { return array( 'video' => array(), 'audio' => array() ); }
+function wp_kses( $html, $allowed ) {
+    if ( ! isset( $allowed['source']['src'] ) ) { throw new RuntimeException( 'Core source allowlist missing' ); }
+    $html = preg_replace( '~<script\\b[^>]*>.*?</script>~is', '', $html );
+    $html = preg_replace( '~\\s+onerror\\s*=\\s*"[^"]*"~i', '', $html );
+    $html = preg_replace( '~\\s+src\\s*=\\s*"javascript:[^"]*"~i', '', $html );
+    return $html;
+}
 function get_permalink( $id ) { return '/parent/' . $id; }
 function comments_open() { return false; }
 function get_comments_number() { return 0; }
@@ -221,6 +229,20 @@ $multiple_audio = slateframe_attachment_render( array(
     'audio_shortcode' => '<audio controls><source src=" "><source src="/fallback.ogg"></audio>',
 ) );
 slateframe_attachment_check( false !== strpos( $multiple_audio, '<figure class="alignwide">' ), 'Later valid audio source candidate ignored' );
+
+
+$sanitized_video = slateframe_attachment_render( array(
+    'url' => 'https://example.org/movie.mp4', 'mime' => 'video/mp4',
+    'video_shortcode' => '<video controls><source type="video/webm" src="/movie.webm" onerror="alert(1)"></video><script>alert(2)</script>',
+) );
+slateframe_attachment_check( false !== strpos( $sanitized_video, 'src="/movie.webm"' ), 'Core nested source stripped by post KSES' );
+slateframe_attachment_check( false === strpos( $sanitized_video, 'onerror' ), 'Filtered source event handler leaked' );
+slateframe_attachment_check( false === strpos( $sanitized_video, '<script' ), 'Filtered source script leaked' );
+$unsafe_audio_source = slateframe_attachment_render( array(
+    'url' => 'https://example.org/song.mp3', 'mime' => 'audio/mpeg',
+    'audio_shortcode' => '<audio controls><source src="javascript:alert(1)"></audio>',
+) );
+slateframe_attachment_check( false === strpos( $unsafe_audio_source, '<figure class="alignwide">' ), 'Unsafe source created playable figure' );
 
 $bad_content = slateframe_attachment_render( array( 'content' => array( 'invalid' ) ) );
 slateframe_attachment_check( false === strpos( $bad_content, 'invalid' ), 'Malformed content was coerced into output' );

@@ -44,3 +44,10 @@ attachment content and metadata. The guard uses WordPress's HTML Tag Processor;
 it adds no player library, JavaScript, remote request or custom media handling.
 Executable PHP regressions cover both media types, blank sources and later
 valid candidates.
+
+Core's default post KSES omits `<source>` even though its audio/video shortcodes
+emit nested source candidates. Slateframe extends the sanitized media-shortcode
+allowlist only for the `source` element (`src`, `type`, `media`), using Core
+`wp_kses()` protocol validation. It does not allow arbitrary scripts, event
+handlers or unsafe source protocols. Regression verifies source preservation,
+unsafe source removal and absence of nonfunctional figures.
