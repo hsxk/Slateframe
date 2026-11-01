@@ -42,6 +42,8 @@ def required_browser_screenshots():
         "footer-footnotes-viewport-390-rtl-200-forced-colors.png": 390,
         "footer-bidi-390-rtl-400-forced-colors.png": 390,
         "footer-bidi-1440-ltr.png": 1440,
+        "footer-blank-identity-390-rtl-400-forced-colors.png": 390,
+        "footer-blank-identity-1440-ltr.png": 1440,
         "header-bidi-390-rtl-400-forced-colors.png": 390,
         "header-bidi-1440-ltr.png": 1440,
         "header-blank-brand-390-rtl-400-forced-colors.png": 390,
