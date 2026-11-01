@@ -40,6 +40,8 @@ def required_browser_screenshots():
         "mobile-header-inline-viewport-390.png": 390,
         "gutenberg-knowledge-faq-390-rtl-200-forced-colors.png": 390,
         "footer-footnotes-viewport-390-rtl-200-forced-colors.png": 390,
+        "footer-bidi-390-rtl-400-forced-colors.png": 390,
+        "footer-bidi-1440-ltr.png": 1440,
     })
     return required
 
