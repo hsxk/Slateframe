@@ -24,6 +24,7 @@ function body_class() { echo 'class="home"'; }
 function wp_body_open() {}
 function home_url($path) { return '/'; }
 function esc_url($value) { return $value; }
+function esc_attr($value) { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 function slateframe_brand_mark() {}
 function wp_nav_menu($args) {}
 function slateframe_language_switcher() {}
