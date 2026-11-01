@@ -73,7 +73,7 @@ test('real WordPress taxonomy archive keeps its Core title and RTL isolation', a
   test.skip(info.project.use.viewport?.width !== 390, 'One disposable Core taxonomy fixture');
   test.setTimeout(120000);
   const slug = 'slateframe-bidi-' + randomUUID();
-  const category = wp('term', 'create', 'category', '日本語 العربية', '--slug=' + slug, '--porcelain');
+  const category = wp('term', 'create', 'category', '日本語 العربية ' + slug, '--slug=' + slug, '--porcelain');
   let post = null;
   try {
     post = wp('post', 'create', '--post_type=post', '--post_status=publish',
