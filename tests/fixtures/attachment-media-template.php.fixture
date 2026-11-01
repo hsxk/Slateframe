@@ -67,18 +67,28 @@ class WP_HTML_Tag_Processor {
     private $html;
     private $matched = false;
     private $tag = '';
+    private $tag_name = '';
+    private $closing = false;
     private $offset = 0;
     public function __construct( $html ) { $this->html = $html; }
-    public function next_tag( $name ) {
-        if ( ! preg_match( '/<' . preg_quote( $name, '/' ) . '(?=[\\s\\/>])[^>]*>/i', $this->html, $match, PREG_OFFSET_CAPTURE, $this->offset ) ) {
-            $this->matched = false;
-            return false;
+    public function next_tag( $query = null ) {
+        $name = is_string( $query ) ? strtoupper( $query ) : ( isset( $query['tag_name'] ) ? strtoupper( $query['tag_name'] ) : null );
+        $visit_closers = is_array( $query ) && isset( $query['tag_closers'] ) && 'visit' === $query['tag_closers'];
+        while ( preg_match( '~<(\\/?)([a-z][a-z0-9-]*)(?=[\\s\\/>])[^>]*>~i', $this->html, $match, PREG_OFFSET_CAPTURE, $this->offset ) ) {
+            $this->tag = $match[0][0];
+            $this->offset = $match[0][1] + strlen( $this->tag );
+            $this->tag_name = strtoupper( $match[2][0] );
+            $this->closing = '/' === $match[1][0];
+            if ( ( null === $name || $name === $this->tag_name ) && ( ! $this->closing || $visit_closers ) ) {
+                $this->matched = true;
+                return true;
+            }
         }
-        $this->matched = true;
-        $this->tag = $match[0][0];
-        $this->offset = $match[0][1] + strlen( $match[0][0] );
-        return true;
+        $this->matched = false;
+        return false;
     }
+    public function get_tag() { return $this->tag_name; }
+    public function is_tag_closer() { return $this->closing; }
     public function get_attribute( $name ) {
         if ( ! $this->matched ) { return null; }
         if ( ! preg_match( '/\\s' . preg_quote( $name, '/' ) . '="([^"]*)"/i', $this->tag, $value ) ) { return null; }
@@ -229,6 +239,22 @@ $multiple_audio = slateframe_attachment_render( array(
     'audio_shortcode' => '<audio controls><source src=" "><source src="/fallback.ogg"></audio>',
 ) );
 slateframe_attachment_check( false !== strpos( $multiple_audio, '<figure class="alignwide">' ), 'Later valid audio source candidate ignored' );
+
+// A valid source outside the closed player must not make an empty player playable.
+foreach ( array( 'video', 'audio' ) as $kind ) {
+    $extension = 'video' === $kind ? 'mp4' : 'mp3';
+    $mime = 'video' === $kind ? 'video/mp4' : 'audio/mpeg';
+    foreach ( array( '', '<source src=" ">' ) as $inside ) {
+        $sibling = slateframe_attachment_render( array(
+            'url' => 'https://example.org/clip.' . $extension, 'mime' => $mime,
+            $kind . '_shortcode' => '<' . $kind . ' controls>' . $inside . '</' . $kind . '><source src="/outside.' . $extension . '">',
+            'caption' => 'Orphan sibling-source caption',
+        ) );
+        slateframe_attachment_check( false === strpos( $sibling, '<figure class="alignwide">' ), 'Sibling source created nonfunctional ' . $kind . ' figure' );
+        slateframe_attachment_check( false === strpos( $sibling, 'Orphan sibling-source caption' ), 'Sibling source leaked ' . $kind . ' caption' );
+        slateframe_attachment_check( false !== strpos( $sibling, 'Open original file' ), 'Sibling source lost safe original ' . $kind . ' link' );
+    }
+}
 
 
 $sanitized_video = slateframe_attachment_render( array(
