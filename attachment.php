@@ -128,7 +128,7 @@ while ( have_posts() ) :
 				<?php if ( $slateframe_details ) : ?>
 					<section class="slateframe-entry-footer" aria-label="<?php esc_attr_e( 'Media details', 'slateframe' ); ?>">
 						<?php foreach ( $slateframe_details as $slateframe_label => $slateframe_value ) : ?>
-							<div><span class="slateframe-entry-footer-label"><?php echo esc_html( $slateframe_label ); ?></span> <?php echo esc_html( $slateframe_value ); ?></div>
+							<div><span class="slateframe-entry-footer-label"><?php echo esc_html( $slateframe_label ); ?></span> <bdi><?php echo esc_html( $slateframe_value ); ?></bdi></div>
 						<?php endforeach; ?>
 					</section>
 				<?php endif; ?>
@@ -143,7 +143,7 @@ while ( have_posts() ) :
 							printf(
 								/* translators: %s: parent post or Page title. */
 								esc_html__( 'Back to %s', 'slateframe' ),
-								esc_html( slateframe_get_display_title( $slateframe_parent_id ) )
+								'<bdi>' . esc_html( slateframe_get_display_title( $slateframe_parent_id ) ) . '</bdi>'
 							);
 							?>
 						</a>
