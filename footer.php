@@ -16,13 +16,7 @@ $slateframe_footer_has_description = slateframe_has_readable_label( get_bloginfo
 
 	<div class="slateframe-shell slateframe-footer-inner">
 		<div class="slateframe-footer-brand">
-			<strong><bdi><?php
-				if ( $slateframe_footer_has_title ) {
-					bloginfo( 'name' );
-				} else {
-					esc_html_e( 'Home', 'slateframe' );
-				}
-				?></bdi></strong>
+			<strong><bdi><?php slateframe_footer_display_name( $slateframe_footer_has_title ); ?></bdi></strong>
 			<?php if ( $slateframe_footer_has_description ) : ?>
 				<p><bdi><?php bloginfo( 'description' ); ?></bdi></p>
 			<?php endif; ?>
