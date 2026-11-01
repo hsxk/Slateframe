@@ -4,7 +4,9 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-+ Give classic Core-generated category/tag footer anchors bounded 44px touch targets without adding JavaScript or raising any CSS budget. Reuse the existing root light color-scheme declaration and compact equivalent dark-system icon rules, retain the `--slateframe-control` token, and extend real WordPress seven-width RTL/CJK/400% link geometry checks. Pending exact-HEAD Actions and visual acceptance.
++ Preserve accessible theme-owned discovery links when a WordPress title contains only HTML entities, Unicode separators, or invisible formatting characters. Check a decoded plain-text copy while retaining the original visible Core title; add 20 executable PHP cases and a static contract. Pending exact-HEAD Actions verification.
+
++ Give classic Core-generated category/tag footer anchors bounded 44px touch targets without adding JavaScript or raising any CSS budget. Reuse the existing root light color-scheme declaration and compact equivalent dark-system icon rules, retain the `--slateframe-control` token, and extend real WordPress seven-width RTL/CJK/400% link geometry checks. PR #255 exact HEAD passed Theme quality, Photography, visual review, and ZIP reproducibility.
 
 + Isolate mixed RTL/CJK labels on classic WordPress taxonomy footer links without rewriting Core category/tag HTML or exceeding the strict 38KB shared CSS budget. Preserve existing 44px Core Post Terms and Categories targets, assert their bidi isolation in real WordPress, and add keyboard/Axe/400%/forced-colors coverage plus three required footer screenshots; PR #254 exact HEAD passed Theme quality and Photography.
 
