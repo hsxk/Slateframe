@@ -4,16 +4,25 @@ Slateframe leaves taxonomy links, term IDs, URLs, Core block markup and translat
 ownership with WordPress. The theme supplies only presentation.
 
 - Classic single-post category and tag links inside `.slateframe-entry-footer`
-  remain Core-generated anchors. The theme applies only `unicode-bidi: isolate`
-  to keep mixed-script labels separate from adjacent punctuation. It preserves
-  the existing Core link presentation and the strict shared runtime CSS budget;
-  classic footer touch-target enlargement is a separate future slice.
+  remain Core-generated anchors. The theme isolates mixed-script labels
+  with `unicode-bidi: isolate` and gives each link a bounded touch target.
+  It preserves
+  the original Core link markup and URL. The bounded 44px minimum width and
+  height now apply to the classic anchors as well as the Core blocks. This
+  uses the shared `--slateframe-control: 44px` token without raising the
+  strict aggregate CSS budget; the native anchors remain inline-block and can wrap.
 - Native Core Post Terms and Categories links retain their existing 44px targets,
   link markup, and responsive wrapping. Their scoped rules explicitly isolate
   mixed RTL/CJK labels. No forced `dir=ltr`, extra JavaScript, global selector,
   SEO/taxonomy behavior or plugin-specific integration is introduced.
 - Core Tag Cloud anchors already use inline-block, which establishes an
   independent formatting context; the tightly capped Tag Cloud asset is unchanged.
+- The explicit light color-mode selector was redundant: the root already
+  declares `color-scheme: light`, and the dark-system rule excludes roots with
+  a selected mode. Removing that duplicate and nesting the equivalent
+  dark-system icon rules offsets the new token-based classic link geometry.
+  Existing real WordPress color-mode tests
+  continue to assert explicit light selection under dark system preference.
 - The real WordPress article fixture must contain its Core-generated category
   link. The browser test checks the original URL, computed isolation, seven
   viewport widths, RTL/LTR, 100%/400%, keyboard focus, Axe
