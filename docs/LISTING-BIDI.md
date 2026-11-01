@@ -3,7 +3,7 @@
 Slateframe isolates the text that its own templates place in listing headings without changing WordPress data, permalink behavior, Core blocks or plugin output.
 
 - `archive.php` passes `<bdi>` in the before/after arguments of WordPress `the_archive_title()`. Core retains responsibility for taxonomy/date labels, prefixes and filters.
-- `author.php` isolates the escaped display name, while leaving the optional biography and avatar filter untouched.
+- `author.php` isolates the escaped display name and optional plain-text biography separately, while leaving the avatar filter and the original Core author metadata untouched.
 - `index.php` isolates either the posts-page heading or the site name in the fallback listing.
 - `search.php` already isolates the escaped query. The localized result count is now independently isolated inside the translated singular/plural message; the count, translation, search form and pagination are unchanged.
 
