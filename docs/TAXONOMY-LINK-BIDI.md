@@ -9,8 +9,8 @@ ownership with WordPress. The theme supplies only presentation.
   It preserves
   the original Core link markup and URL. The bounded 44px minimum width and
   height now apply to the classic anchors as well as the Core blocks. This
-  matches `--slateframe-control: 44px` while keeping the strict aggregate CSS
-  budget unchanged; the native anchors remain inline-block and can wrap.
+  uses the shared `--slateframe-control: 44px` token without raising the
+  strict aggregate CSS budget; the native anchors remain inline-block and can wrap.
 - Native Core Post Terms and Categories links retain their existing 44px targets,
   link markup, and responsive wrapping. Their scoped rules explicitly isolate
   mixed RTL/CJK labels. No forced `dir=ltr`, extra JavaScript, global selector,
@@ -19,8 +19,9 @@ ownership with WordPress. The theme supplies only presentation.
   independent formatting context; the tightly capped Tag Cloud asset is unchanged.
 - The explicit light color-mode selector was redundant: the root already
   declares `color-scheme: light`, and the dark-system rule excludes roots with
-  a selected mode. Removing only that duplicate selector offsets the new
-  bounded classic link geometry. Existing real WordPress color-mode tests
+  a selected mode. Removing that duplicate and nesting the equivalent
+  dark-system icon rules offsets the new token-based classic link geometry.
+  Existing real WordPress color-mode tests
   continue to assert explicit light selection under dark system preference.
 - The real WordPress article fixture must contain its Core-generated category
   link. The browser test checks the original URL, computed isolation, seven

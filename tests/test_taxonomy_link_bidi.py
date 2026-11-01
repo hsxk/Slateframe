@@ -13,7 +13,7 @@ class TaxonomyLinkBidi(unittest.TestCase):
 
     def test_classic_footer_links_preserve_native_markup_and_bidi(self):
         css = self.css("publishing.css")
-        self.assertIn(".slateframe-entry-footer a{display:inline-block;min-width:44px;min-height:44px;unicode-bidi:isolate}", css)
+        self.assertIn(".slateframe-entry-footer a{display:inline-block;min-inline-size:var(--slateframe-control);min-block-size:var(--slateframe-control);unicode-bidi:isolate}", css)
         self.assertIn("--slateframe-control:44px", (ROOT / "style.css").read_text(encoding="utf-8"))
         self.assertNotIn("direction:ltr", css)
         self.assertNotIn("unicode-bidi:bidi-override", css)
@@ -23,7 +23,7 @@ class TaxonomyLinkBidi(unittest.TestCase):
         self.assertIn("color-scheme:light}", css)
         self.assertNotIn(":root[data-slateframe-color-mode=light]{color-scheme:light}", css)
         self.assertIn(":root[data-slateframe-color-mode=dark]{color-scheme:dark}", css)
-        self.assertIn(":root:not([data-slateframe-color-mode]){color-scheme:dark}", css)
+        self.assertIn(":root:not([data-slateframe-color-mode]){color-scheme:dark;& .slateframe-color-icon-sun{display:none}& .slateframe-color-icon-moon{display:block}}", css)
         browser = (ROOT / "tests/browser/color-mode.spec.js").read_text(encoding="utf-8")
         self.assertIn("toHaveCSS('color-scheme', 'light')", browser)
 
