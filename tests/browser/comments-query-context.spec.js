@@ -44,15 +44,20 @@ test('Query Loop discussion never suppresses the current post comments', async (
     expect(hitPageId).toBeGreaterThan(0);
     postIds.push(hitPageId);
     const hitQuery = query.replace('slateframe-no-match-query-context-2026', hitTitle);
+    // Keep visible titles concise at 400% text zoom. The randomized IDs and
+    // unique queried-page search term already isolate fixtures; repeating a
+    // 12-character nonce in every title adds hundreds of pixels of artificial
+    // wrapping (including Related posts) and can exceed the strict 24,000px
+    // full-page PNG safety limit without testing any additional behavior.
     const fixtures = [
-      { name: 'query-only', content: query, classic: true },
-      { name: 'synced-query-only', content: '<!-- wp:block {"ref":' + patternId + '} /-->', classic: true },
-      { name: 'query-with-own', content: query + ownForm, classic: false },
-      { name: 'query-with-result', content: hitQuery, classic: true, queriedForm: true },
+      { name: 'query-only', title: 'Query only', content: query, classic: true },
+      { name: 'synced-query-only', title: 'Synced query', content: '<!-- wp:block {"ref":' + patternId + '} /-->', classic: true },
+      { name: 'query-with-own', title: 'Own comments', content: query + ownForm, classic: false },
+      { name: 'query-with-result', title: 'Query result', content: hitQuery, classic: true, queriedForm: true },
     ];
     for (const fixture of fixtures) {
       const id = Number(wp('post', 'create', '--post_type=post', '--post_status=publish',
-        '--comment_status=open', '--post_title=Slateframe ' + fixture.name + ' ' + suffix,
+        '--comment_status=open', '--post_title=' + fixture.title,
         '--post_content=' + fixture.content, '--porcelain'));
       expect(id).toBeGreaterThan(0);
       postIds.push(id);
