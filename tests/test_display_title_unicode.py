@@ -13,12 +13,15 @@ class DisplayTitleUnicode(unittest.TestCase):
             cwd=ROOT, capture_output=True, text=True, timeout=20, check=False,
         )
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('Display title Unicode: 20 cases passed', result.stdout)
+        self.assertIn('Display title Unicode: 32 cases passed', result.stdout)
 
     def test_core_title_is_preserved_and_fallback_translated(self):
         source = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
         helper = source.split('function slateframe_get_display_title(', 1)[1].split('\n}', 1)[0]
         self.assertIn('html_entity_decode(', helper)
+        self.assertIn(r'\p{M}', helper)
+        self.assertIn(r'\x{2800}', helper)
+        self.assertIn(r'\x{3164}', helper)
         self.assertIn('wp_strip_all_tags( $title )', helper)
         self.assertIn("'UTF-8'", helper)
         self.assertIn("__( 'Untitled', 'slateframe' )", helper)

@@ -48,10 +48,10 @@ function slateframe_get_display_title( $post_id = 0 ) {
 		return __( 'Untitled', 'slateframe' );
 	}
 
-	// Entity-only and Unicode spacing/format characters are not readable link
-	// names. Inspect a decoded plain-text copy, never rewrite the Core title.
+	// Entity-only, combining-only and Unicode spacing/format/filler characters
+	// are not readable link names. Inspect a decoded plain-text copy, never rewrite the Core title.
 	$plain_title = html_entity_decode( wp_strip_all_tags( $title ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-	if ( ! preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\s]/u', $plain_title ) ) {
+	if ( ! preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u', $plain_title ) ) {
 		return __( 'Untitled', 'slateframe' );
 	}
 
