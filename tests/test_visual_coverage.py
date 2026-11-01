@@ -22,8 +22,8 @@ class VisualCoverageContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing mandatory browser coverage"):
             AUDIT.audit_browser_coverage({k: v for k, v in self.records.items() if k != name})
 
-    def test_complete_114_state_contract(self):
-        self.assertEqual(AUDIT.audit_browser_coverage(self.records), 114)
+    def test_complete_116_state_contract(self):
+        self.assertEqual(AUDIT.audit_browser_coverage(self.records), 116)
 
     def test_all_seven_responsive_widths(self):
         for width in (320, 375, 390, 412, 768, 1440, 1920):
@@ -70,6 +70,10 @@ class VisualCoverageContract(unittest.TestCase):
             with self.subTest(name=name):
                 self.reject_missing(name)
 
+    def test_archive_fallback_states_cannot_be_skipped(self):
+        self.reject_missing("archive-readable-fallback-390-rtl-400-forced-colors.png")
+        self.reject_missing("archive-readable-fallback-1440-ltr.png")
+
     def test_post_navigation_bidi_states_cannot_be_skipped(self):
         self.reject_missing("post-navigation-bidi-390-rtl-400-forced-colors.png")
         self.reject_missing("post-navigation-bidi-1440-ltr.png")
@@ -103,7 +107,7 @@ class VisualCoverageContract(unittest.TestCase):
     def test_element_screenshots_may_be_narrower(self):
         self.records["core-post-comments-form-1440-ltr.png"]["width"] = 736
         self.records["authored-form-ltr-400-forced-colors-390.png"]["width"] = 358
-        self.assertEqual(AUDIT.audit_browser_coverage(self.records), 114)
+        self.assertEqual(AUDIT.audit_browser_coverage(self.records), 116)
 
     def test_missing_inventory(self):
         with self.assertRaisesRegex(ValueError, "browser screenshot inventory"):
@@ -121,7 +125,7 @@ class VisualCoverageContract(unittest.TestCase):
 
     def test_extra_screenshots_cannot_replace_required_ones(self):
         self.records["extra-fixture.png"] = {"width": 320, "height": 900}
-        self.assertEqual(AUDIT.audit_browser_coverage(self.records), 114)
+        self.assertEqual(AUDIT.audit_browser_coverage(self.records), 116)
         self.reject_missing("appearance-default-viewport-390-portfolio.png")
 
 

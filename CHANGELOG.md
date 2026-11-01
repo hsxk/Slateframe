@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Recover readable, localized H1 labels for WordPress Core category, tag, date, post-type and generic archives when a display filter returns empty, invisible or malformed values. Preserve native archive title markup, descriptions, queries, pagination and RTL/CJK isolation without CSS/JS; add executable PHP, real WordPress seven-width/400%/Axe/keyboard/forced-colors and exact-SHA visual evidence. Pending Actions and human visual acceptance.
+
 + Keep a readable, localized H1 when WordPress Core's posts index/site title or search term is blank or Unicode-invisible. Preserve the posts-page title, Core search form/results, escaped RTL/CJK queries and native Query Loop; add executable PHP cases, real WordPress seven-width/400%/Axe/keyboard/forced-colors regressions and four mandatory screenshots. Pending exact-HEAD Actions and human visual review.
 
 + Isolate mixed RTL/CJK/Latin titles in native WordPress previous/next post navigation using `bdi`, retaining Core adjacent-post selection, localized context labels, Gutenberg parity and zero additional runtime assets. Add executable PHP template checks, disposable real WordPress/Chromium seven-width, 400%, Axe, keyboard and forced-colors regression and two mandatory screenshots. Pending exact-HEAD Actions and visual acceptance.
