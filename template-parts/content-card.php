@@ -26,7 +26,7 @@
 			<p class="slateframe-pattern-kicker"><?php esc_html_e( 'Featured', 'slateframe' ); ?></p>
 		<?php endif; ?>
 		<h2 class="slateframe-card-title">
-			<a href="<?php the_permalink(); ?>" rel="bookmark"><?php echo wp_kses_post( slateframe_get_display_title() ); ?></a>
+			<a href="<?php the_permalink(); ?>" rel="bookmark"><bdi><?php echo wp_kses_post( slateframe_get_display_title() ); ?></bdi></a>
 		</h2>
 		<div class="slateframe-card-excerpt">
 			<?php the_excerpt(); ?>
