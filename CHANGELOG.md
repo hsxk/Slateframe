@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Normalize fallback WordPress Core attachment metadata through the same readable-label/value filter when a plugin returns an invalid metadata array; suppress invisible native MIME values without losing valid dimensions, filesize, or CJK/RTL terms. Add executable regression cases.
+
 + Present classic attachment metadata as native definition-list term/value pairs with independent bidi isolation and 400% responsive reflow; preserve Core media and sanitize rules. Improve the exact-SHA 1440px media screenshot by resetting scroll after focus verification, with executable PHP and browser semantic regressions.
 
 + Hide unreadable attachment metadata rows and Unicode-invisible classic image, video, audio and featured-hero captions without affecting native Core media, Gutenberg blocks, CSS/JS budgets or readable multilingual content. Add executable PHP and real WordPress/Chromium regression evidence.

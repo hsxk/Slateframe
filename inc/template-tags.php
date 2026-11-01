@@ -217,7 +217,7 @@ function slateframe_attachment_details( $attachment_id ) {
 	 */
 	$filtered = apply_filters( 'slateframe_attachment_details', $details, $attachment_id );
 	if ( ! is_array( $filtered ) ) {
-		return $details;
+		$filtered = $details;
 	}
 
 	$safe_details = array();

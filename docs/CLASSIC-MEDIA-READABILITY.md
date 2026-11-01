@@ -12,7 +12,8 @@ values remain unchanged and are escaped at output. Attachment details use a nati
 `<dl>` with paired `<dt>`/`<dd>` terms and definitions, each with `<bdi>` to
 isolate mixed CJK/RTL text. The compact label/value rows reflow vertically at
 high zoom without horizontal overflow. Invalid non-array filter returns
-continue to fall back to Core metadata.
+continue through the same readability normalization on Core metadata, so an
+unreadable native value cannot bypass the filtered-row checks.
 
 An attachment's caption can also contain only an invisible entity or markup. Native
 image/video/audio previews and the featured hero omit these empty `<figcaption>`
