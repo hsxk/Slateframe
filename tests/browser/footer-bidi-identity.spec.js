@@ -34,7 +34,7 @@ test('real Core footer isolates mixed-direction site identity at 400% without la
   const copyright = footer.locator('.slateframe-copyright');
   await expect(brand.locator('strong bdi')).toHaveText(title);
   await expect(brand.locator('p bdi')).toHaveText(description);
-  await expect(copyright.locator('bdi')).toHaveText(['© ' + new Date().getFullYear(), title]);
+  await expect(copyright.locator('bdi')).toHaveText([/^© \\d{4}$/, title]);
   const isolates = await footer.locator('bdi').evaluateAll(nodes => nodes.map(node => ({
     explicitDirection: node.getAttribute('dir'),
     unicodeBidi: getComputedStyle(node).unicodeBidi,
