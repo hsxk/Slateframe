@@ -8,9 +8,18 @@ test('listing headings preserve mixed-script isolation across viewport and zoom'
   test.skip(info.project.use.viewport?.width !== 390, 'One real WordPress fixture exercises the matrix');
   test.setTimeout(180000);
   await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  let authorUrl = await page.locator('.slateframe-byline a').first().getAttribute('href').catch(() => null);
+  if (!authorUrl) {
+    const firstPost = page.locator('.slateframe-card-title a').first();
+    await expect(firstPost).toBeVisible();
+    await firstPost.click();
+    authorUrl = await page.locator('.slateframe-byline a').first().getAttribute('href');
+  }
+  expect(authorUrl, 'WordPress must supply a real author archive link').toBeTruthy();
   for (const surface of [
     { route: '/', label: 'index' },
-    { route: '/?author=1', label: 'author' },
+    { route: authorUrl, label: 'author' },
   ]) {
     await page.goto(surface.route, { waitUntil: 'networkidle' });
     const title = page.locator('.slateframe-page-header .slateframe-page-title').first();
