@@ -1,0 +1,58 @@
+<?php
+/** Standalone executable contract for filtered classic taxonomy footer. */
+define( 'ABSPATH', __DIR__ . '/' );
+class WP_Error {}
+$GLOBALS['sf_taxonomy'] = array( 'category' => '<a href="/category">Category</a>', 'tag' => '<a href="/tag">Tag</a>' );
+$GLOBALS['sf_post_type'] = 'post';
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
+function get_post_type() { return $GLOBALS['sf_post_type']; }
+function get_the_ID() { return 42; }
+function get_the_category_list( $separator ) { return '<a href="/category">Category</a>'; }
+function get_the_tag_list( $before, $separator ) { return '<a href="/tag">Tag</a>'; }
+function esc_html_x( $value, $context, $domain ) { return $value; }
+function esc_html__( $value, $domain ) { return $value; }
+function wp_kses_post( $value ) {
+    if ( ! is_string( $value ) ) { throw new TypeError( 'Invalid markup type' ); }
+    return $value;
+}
+function apply_filters( $hook, $value, ...$args ) {
+    if ( 'slateframe_entry_categories_html' === $hook ) { return $GLOBALS['sf_taxonomy']['category']; }
+    if ( 'slateframe_entry_tags_html' === $hook ) { return $GLOBALS['sf_taxonomy']['tag']; }
+    return $value;
+}
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+function sf_render_footer() { ob_start(); slateframe_entry_footer(); return ob_get_clean(); }
+$cases = 0;
+function sf_assert( $condition, $message ) {
+    global $cases;
+    if ( ! $condition ) { throw new RuntimeException( $message ); }
+    ++$cases;
+}
+$valid_category = '<a href="/category">Category 日本語 العربية</a>';
+$valid_tag = '<a href="/tag">Tag العربية 日本語</a>';
+$set = static function ( $category, $tag ) {
+    $GLOBALS['sf_taxonomy'] = array( 'category' => $category, 'tag' => $tag );
+    return sf_render_footer();
+};
+$html = $set( $valid_category, $valid_tag );
+sf_assert( str_contains( $html, 'Filed under' ) && str_contains( $html, 'Tagged' ), 'Visible Core groups missing' );
+sf_assert( str_contains( $html, $valid_category ) && str_contains( $html, $valid_tag ), 'Multilingual links altered' );
+$html = $set( $valid_category, '' );
+sf_assert( str_contains( $html, 'Filed under' ) && ! str_contains( $html, 'Tagged' ), 'Category-only group incorrect' );
+$html = $set( '', $valid_tag );
+sf_assert( ! str_contains( $html, 'Filed under' ) && str_contains( $html, 'Tagged' ), 'Tag-only group incorrect' );
+sf_assert( '' === $set( '', '' ), 'Both empty groups rendered an orphaned footer' );
+sf_assert( '' === $set( " \t\n", "\r\n" ), 'Whitespace-only groups rendered' );
+sf_assert( '' === $set( '&nbsp;', '&#x200B;' ), 'Entity-only invisible groups rendered' );
+sf_assert( '' === $set( '<a href="/cat"></a>', '<span><b></b></span>' ), 'HTML-only groups rendered' );
+sf_assert( '' === $set( '<a href="/cat">&#x3164;</a>', '<a href="/tag">&#x2800;</a>' ), 'Unicode filler groups rendered' );
+sf_assert( '' === $set( new WP_Error(), array( 'bad' ) ), 'Malformed filter returns rendered' );
+$html = $set( $valid_category, '<a href="/tag">&#x200B;</a>' );
+sf_assert( str_contains( $html, 'Filed under' ) && ! str_contains( $html, 'Tagged' ), 'Invisible tag did not preserve category-only footer' );
+$html = $set( '<a href="/cat">&#x200B;</a>', $valid_tag );
+sf_assert( ! str_contains( $html, 'Filed under' ) && str_contains( $html, 'Tagged' ), 'Invisible category did not preserve tag-only footer' );
+$html = $set( '<a href="/cat">&amp;</a>', '' );
+sf_assert( str_contains( $html, 'Filed under' ), 'Visible punctuation label was dropped' );
+$GLOBALS['sf_post_type'] = 'page';
+sf_assert( '' === $set( $valid_category, $valid_tag ), 'Non-post taxonomy footer rendered' );
+echo "Readable taxonomy footer: {$cases} cases passed\n";

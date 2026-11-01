@@ -334,6 +334,15 @@ function slateframe_entry_footer() {
 	$categories = is_string( $categories ) ? $categories : '';
 	$tags       = is_string( $tags ) ? $tags : '';
 
+	// Filters can return whitespace, empty anchors or invisible Unicode.
+	// Omit those groups rather than exposing an orphaned taxonomy label.
+	if ( ! slateframe_has_readable_label( $categories ) ) {
+		$categories = '';
+	}
+	if ( ! slateframe_has_readable_label( $tags ) ) {
+		$tags = '';
+	}
+
 	if ( ! $categories && ! $tags ) {
 		return;
 	}

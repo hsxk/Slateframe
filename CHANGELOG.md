@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Suppress orphaned classic taxonomy footer labels when Core category/tag HTML filters return whitespace, empty anchors, invisible Unicode entities or invalid values. Keep independently readable groups, Core links, 44px targets, CJK/RTL isolation and existing CSS/JS budgets; add executable PHP and real WordPress browser regressions with mandatory exact-SHA visual evidence. Pending Actions and manual review.
+
 + Restore the localized Home route in the native WordPress page-menu fallback when a filtered static-front-page list still contains other pages but omits the front page. Use Core HTML Tag Processor to avoid duplicate Home links, preserve page hierarchy and 44px navigation targets; add PHP and real-WordPress responsive, RTL/CJK, 400%, Axe, keyboard and screenshot regressions. Pending exact-HEAD Actions and visual acceptance.
 
 + Recover readable, localized H1 labels for WordPress Core category, tag, date, post-type and generic archives when a display filter returns empty, invisible or malformed values. Preserve native archive title markup, descriptions, queries, pagination and RTL/CJK isolation without CSS/JS; add executable PHP, real WordPress seven-width/400%/Axe/keyboard/forced-colors and exact-SHA visual evidence. Pending Actions and human visual acceptance.
