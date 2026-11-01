@@ -22,7 +22,7 @@ class TaxonomyLinkBidi(unittest.TestCase):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
         self.assertIn("color-scheme:light}", css)
         self.assertNotIn(":root[data-slateframe-color-mode=light]{color-scheme:light}", css)
-        self.assertIn(":root[data-slateframe-color-mode=dark]{color-scheme:dark}", css)
+        self.assertIn(":root[data-slateframe-color-mode=dark]{color-scheme:dark;& .slateframe-color-icon-sun{display:none}& .slateframe-color-icon-moon{display:block}}", css)
         self.assertIn(":root:not([data-slateframe-color-mode]){color-scheme:dark;& .slateframe-color-icon-sun{display:none}& .slateframe-color-icon-moon{display:block}}", css)
         browser = (ROOT / "tests/browser/color-mode.spec.js").read_text(encoding="utf-8")
         self.assertIn("toHaveCSS('color-scheme', 'light')", browser)

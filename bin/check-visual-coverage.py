@@ -44,6 +44,8 @@ def required_browser_screenshots():
         "footer-bidi-1440-ltr.png": 1440,
         "header-bidi-390-rtl-400-forced-colors.png": 390,
         "header-bidi-1440-ltr.png": 1440,
+        "header-blank-brand-390-rtl-400-forced-colors.png": 390,
+        "header-blank-brand-1440-ltr.png": 1440,
     })
     return required
 

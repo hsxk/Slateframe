@@ -4,6 +4,9 @@
  *
  * @package Slateframe
  */
+$slateframe_site_title     = get_bloginfo( 'name' );
+$slateframe_brand_has_name = slateframe_has_readable_label( $slateframe_site_title );
+$slateframe_brand_has_logo = ! $slateframe_brand_has_name && has_custom_logo();
 ?>
 <!doctype html>
 <html <?php language_attributes(); ?>>
@@ -22,7 +25,19 @@
 		<a class="slateframe-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
 			<?php slateframe_brand_mark(); ?>
 			<span class="slateframe-brand-copy">
-				<span class="slateframe-brand-title"><bdi><?php bloginfo( 'name' ); ?></bdi></span>
+				<?php if ( $slateframe_brand_has_name || ! $slateframe_brand_has_logo ) : ?>
+					<span class="slateframe-brand-title"><bdi>
+						<?php
+						if ( $slateframe_brand_has_name ) {
+							bloginfo( 'name' );
+						} else {
+							esc_html_e( 'Home', 'slateframe' );
+						}
+						?>
+					</bdi></span>
+				<?php else : ?>
+					<span class="screen-reader-text"><?php esc_html_e( 'Home', 'slateframe' ); ?></span>
+				<?php endif; ?>
 				<?php if ( get_bloginfo( 'description' ) ) : ?>
 					<span class="slateframe-brand-tagline"><bdi><?php bloginfo( 'description' ); ?></bdi></span>
 				<?php endif; ?>
