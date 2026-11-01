@@ -146,7 +146,10 @@ test('Query Loop discussion never suppresses the current post comments', async (
         await expect(classic.locator('#slateframe-outer-' + fixture.id + '-respond')).toHaveCount(1);
         await expect(classic.locator('#slateframe-outer-' + fixture.id + '-comment_parent')).toHaveCount(1);
         await expect(classic.locator('#slateframe-outer-' + fixture.id + '-comment_post_ID')).toHaveCount(1);
-        await expect(queried.locator('#respond')).toHaveCount(1);
+        // WordPress Core puts wp-block-post-comments-form on #respond itself,
+        // not on a wrapper containing a descendant #respond. Verify both
+        // semantics on the real repeated-post form.
+        await expect(queried).toHaveAttribute('id', 'respond');
         for (const name of ['comment', 'author', 'email', 'url', 'wp-comment-cookies-consent']) {
           const control = classic.locator('[name="' + name + '"]');
           if (await control.count()) {
