@@ -12,8 +12,8 @@ test('blank Core footer identity remains readable without inventing a copyright 
     'One real WordPress footer exercises the responsive matrix.');
   test.setTimeout(180000);
   const html = execFileSync('wp', ['eval', [
-    'add_filter("pre_option_blogname", static function () { return "&nbsp;"; });',
-    'add_filter("pre_option_blogdescription", static function () { return "\\u{200B}"; });',
+    'add_filter("pre_option_blogname", static function () { return "\\u{200B}"; });',
+    'add_filter("pre_option_blogdescription", static function () { return "\\u{FE0F}"; });',
     'ob_start(); include get_stylesheet_directory() . "/footer.php"; echo ob_get_clean();',
   ].join(' '), '--path=/tmp/wp-browser'], { encoding: 'utf8', timeout: 30000 });
   await page.goto('/', { waitUntil: 'networkidle' });
