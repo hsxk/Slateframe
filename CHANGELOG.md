@@ -4,11 +4,11 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-+ Isolate mixed-direction WordPress Core site title and optional tagline in the header with native HTML `bdi`; preserve menu, color control, no-JS navigation and CJK tracking. Add real PHP and WordPress/Chromium RTL/400%/forced-colors/Axe coverage and two mandatory exact-HEAD screenshots. Pending precise SHA acceptance.
++ Isolate mixed-direction WordPress Core site title and optional tagline in the header with native HTML `bdi`; preserve menu, color control, no-JS navigation and CJK tracking. Add real PHP and WordPress/Chromium RTL/400%/forced-colors/Axe coverage and two mandatory exact-HEAD screenshots.
 
-+ Isolate mixed Arabic/CJK/Latin site identity and the copyright-year group with native HTML `bdi` in the WordPress Core footer. Preserve `bloginfo()`, `wp_date()`, menu hierarchy, no-JS and existing CSS budgets; add executable PHP, real WordPress seven-width 400% RTL/forced-colors/Axe tests and two mandatory exact-HEAD screenshots. Pending new-SHA Actions and visual review.
++ Isolate mixed Arabic/CJK/Latin site identity and the copyright-year group with native HTML `bdi` in the WordPress Core footer. Preserve `bloginfo()`, `wp_date()`, menu hierarchy, no-JS and existing CSS budgets; add executable PHP, real WordPress seven-width 400% RTL/forced-colors/Axe tests and two mandatory exact-HEAD screenshots.
 
-+ Isolate the theme-owned classic comment form only when a different Query Loop post actually renders a Core form. Scope canonical field, reply/cancel and hidden input IDs; preserve Core's nested form and use WordPress's no-JS replytocom fallback for the outer thread, avoiding duplicate responders without custom JavaScript. Pending exact-HEAD browser reply/cancel and visual acceptance.
++ Isolate the theme-owned classic comment form only when a different Query Loop post actually renders a Core form. Scope canonical field, reply/cancel and hidden input IDs; preserve Core's nested form and use WordPress's no-JS replytocom fallback for the outer thread, avoiding duplicate responders without custom JavaScript.
 
 + Keep the singular post's classic comments when a Core Query Loop Post Template contains its own queried-post discussion, including published synced patterns; preserve Core-first ownership outside the repeated-post context, bounded pattern resolution, and strict visual/accessibility gates.
 
