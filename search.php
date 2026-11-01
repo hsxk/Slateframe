@@ -27,7 +27,7 @@ global $wp_query;
 						/* translators: %s: number of search results. */
 						_n( '%s result found', '%s results found', (int) $wp_query->found_posts, 'slateframe' )
 					),
-					esc_html( number_format_i18n( (int) $wp_query->found_posts ) )
+					'<bdi>' . esc_html( number_format_i18n( (int) $wp_query->found_posts ) ) . '</bdi>'
 				);
 				?>
 			</p>
