@@ -44,7 +44,14 @@ function slateframe_positive_int( $value ) {
 function slateframe_get_display_title( $post_id = 0 ) {
 	$title = get_the_title( $post_id );
 
-	if ( ! is_string( $title ) || '' === trim( wp_strip_all_tags( $title ) ) ) {
+	if ( ! is_string( $title ) ) {
+		return __( 'Untitled', 'slateframe' );
+	}
+
+	// Entity-only, combining-only and Unicode spacing/format/filler characters
+	// are not readable link names. Inspect a decoded plain-text copy, never rewrite the Core title.
+	$plain_title = html_entity_decode( wp_strip_all_tags( $title ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	if ( ! preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u', $plain_title ) ) {
 		return __( 'Untitled', 'slateframe' );
 	}
 

@@ -1,0 +1,60 @@
+<?php
+/** Execute the theme's untitled-link fallback with Core-shaped stubs. */
+define( 'ABSPATH', __DIR__ );
+$GLOBALS['slateframe_test_title'] = '';
+function get_the_title( $post_id = 0 ) {
+	return $GLOBALS['slateframe_test_title'];
+}
+function wp_strip_all_tags( $value ) {
+	return strip_tags( $value );
+}
+function __( $text, $domain ) {
+	if ( 'slateframe' !== $domain ) {
+		throw new RuntimeException( 'Wrong text domain' );
+	}
+	return $text;
+}
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+
+$cases = array(
+	array( '', 'Untitled' ),
+	array( "  \t\n", 'Untitled' ),
+	array( '&nbsp;', 'Untitled' ),
+	array( '&#160;', 'Untitled' ),
+	array( '&#x200B;', 'Untitled' ),
+	array( "\u{00A0}", 'Untitled' ),
+	array( "\u{3000}", 'Untitled' ),
+	array( "\u{200B}", 'Untitled' ),
+	array( '<em> </em>', 'Untitled' ),
+	array( "\xFF", 'Untitled' ),
+	array( null, 'Untitled' ),
+	array( false, 'Untitled' ),
+	array( 'Hello', 'Hello' ),
+	array( '日本語', '日本語' ),
+	array( 'العربية', 'العربية' ),
+	array( '📷', '📷' ),
+	array( '0', '0' ),
+	array( '&amp;', '&amp;' ),
+	array( '<em>Work</em>', '<em>Work</em>' ),
+	array( '日本語 &amp; العربية', '日本語 &amp; العربية' ),
+	array( "\u{0301}", 'Untitled' ),
+	array( "\u{FE0F}", 'Untitled' ),
+	array( "\u{034F}", 'Untitled' ),
+	array( "\u{2800}", 'Untitled' ),
+	array( "\u{115F}", 'Untitled' ),
+	array( "\u{1160}", 'Untitled' ),
+	array( "\u{3164}", 'Untitled' ),
+	array( "\u{FFA0}", 'Untitled' ),
+	array( '&#xFE0F;', 'Untitled' ),
+	array( '👩‍💻', '👩‍💻' ),
+	array( 'é', 'é' ),
+	array( 'e' . "\u{0301}", 'e' . "\u{0301}" ),
+);
+foreach ( $cases as $index => $case ) {
+	$GLOBALS['slateframe_test_title'] = $case[0];
+	$actual = slateframe_get_display_title( 123 );
+	if ( $actual !== $case[1] ) {
+		throw new RuntimeException( 'Case ' . $index . ': expected ' . var_export( $case[1], true ) . ', got ' . var_export( $actual, true ) );
+	}
+}
+echo 'Display title Unicode: ' . count( $cases ) . " cases passed\n";
