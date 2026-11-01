@@ -40,6 +40,7 @@ jobs:
           node tests/browser/test-visual-evidence-helper.cjs
           node tests/browser/test-wordpress-login.cjs
           node tests/browser/test-editor-login-helper.cjs
+          node tests/browser/test-core-query-defaults.cjs
           node tests/browser/test-color-cookie-scope.cjs
           node tests/browser/test-footer-widget-fixture.cjs
       - name: Validate build script syntax
