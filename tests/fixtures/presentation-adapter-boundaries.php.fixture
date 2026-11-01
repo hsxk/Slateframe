@@ -1,6 +1,7 @@
 <?php
 /** Runtime contract for public, plugin-neutral presentation filter boundaries. */
 define( 'ABSPATH', __DIR__ . '/' );
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 class WP_Error {}
 $GLOBALS['slateframe_filters'] = array();
 $GLOBALS['slateframe_metadata'] = array( 'width' => 800, 'height' => 600, 'filesize' => 1234 );
