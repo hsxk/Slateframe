@@ -11,7 +11,7 @@ global $wp_query;
 <main id="main-content" class="slateframe-main" tabindex="-1">
 	<header class="slateframe-page-header">
 		<div class="slateframe-shell">
-			<h1 class="slateframe-page-title">
+			<h1 class="slateframe-page-title"><bdi>
 				<?php
 				if ( is_home() && ! is_front_page() ) {
 					single_post_title();
@@ -19,7 +19,7 @@ global $wp_query;
 					bloginfo( 'name' );
 				}
 				?>
-			</h1>
+			</bdi></h1>
 		</div>
 	</header>
 
