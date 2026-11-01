@@ -22,9 +22,9 @@
 		<a class="slateframe-brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
 			<?php slateframe_brand_mark(); ?>
 			<span class="slateframe-brand-copy">
-				<span class="slateframe-brand-title"><?php bloginfo( 'name' ); ?></span>
+				<span class="slateframe-brand-title"><bdi><?php bloginfo( 'name' ); ?></bdi></span>
 				<?php if ( get_bloginfo( 'description' ) ) : ?>
-					<span class="slateframe-brand-tagline"><?php bloginfo( 'description' ); ?></span>
+					<span class="slateframe-brand-tagline"><bdi><?php bloginfo( 'description' ); ?></bdi></span>
 				<?php endif; ?>
 			</span>
 		</a>
