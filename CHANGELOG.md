@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Isolate WordPress theme-owned mixed-script titles across single posts, pages, attachments, archive cards, related reading and 404 recovery with native `bdi`; preserve Core Post Title blocks, link semantics and existing typography. Add PHP lint/static contracts and real Chromium 400% RTL/Axe screenshots.
+
 + Isolate linked and unlinked author names with native HTML `bdi` in post metadata, preserving Core author URLs, localized dates, separator, escaping and zero-JS behavior. Add executable PHP cases and keep the existing responsive Chromium byline test from replacing the isolation element.
 
 + Isolate mixed-direction WordPress Core site title and optional tagline in the header with native HTML `bdi`; preserve menu, color control, no-JS navigation and CJK tracking. Add real PHP and WordPress/Chromium RTL/400%/forced-colors/Axe coverage and two mandatory exact-HEAD screenshots.

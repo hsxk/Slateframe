@@ -10,7 +10,7 @@ const scenarios = [
     links: '.slateframe-related-item a', wrapTarget: '.slateframe-related-title',
     mutate: async root => {
       await root.locator('.slateframe-related-title').evaluateAll(nodes => nodes.forEach((node, i) => {
-        node.textContent = '関連記事 中文 العربية 日本語 ' +
+        node.querySelector('bdi').textContent = '関連記事 中文 العربية 日本語 ' +
           'VeryLongUnbrokenEditorialIdentifier'.repeat(8) + ' ' + i;
       }));
     },

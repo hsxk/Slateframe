@@ -16,7 +16,7 @@ get_header();
 			<header class="slateframe-page-header">
 				<div class="slateframe-shell">
 					<?php slateframe_entry_meta(); ?>
-					<h1 class="slateframe-entry-title"><?php echo wp_kses_post( slateframe_get_display_title() ); ?></h1>
+					<h1 class="slateframe-entry-title"><bdi><?php echo wp_kses_post( slateframe_get_display_title() ); ?></bdi></h1>
 				</div>
 			</header>
 
