@@ -15,7 +15,8 @@ class TaxonomyLinkBidi(unittest.TestCase):
         css = self.css("publishing.css")
         self.assertIn(
             ".slateframe-entry-footer a{display:inline-flex;align-items:center;"
-            "min-block-size:var(--slateframe-control);max-inline-size:100%;"
+            "min-block-size:var(--slateframe-control);"
+            "min-inline-size:min(100%,var(--slateframe-control));max-inline-size:100%;"
             "overflow-wrap:anywhere;unicode-bidi:isolate}",
             css,
         )
@@ -62,6 +63,7 @@ class TaxonomyLinkBidi(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/quality.yml").read_text()
         self.assertIn("taxonomyLink.evaluate", browser)
         self.assertIn("computed.target", browser)
+        self.assertIn("node.getBoundingClientRect().width", browser)
         self.assertIn("axeFooter.violations", browser)
         self.assertIn("document.activeElement === node", browser)
         for name in (
