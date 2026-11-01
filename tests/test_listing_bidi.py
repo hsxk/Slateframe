@@ -25,10 +25,12 @@ function wp_kses_post($value) { return $value; }
 function esc_html($value) { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 function is_home() { return true; }
 function is_front_page() { global $mode; return $mode === 'front'; }
-function single_post_title() { echo '日本語 العربية'; }
+function single_post_title($prefix = '', $display = true) { $title = '日本語 العربية'; if ($display) { echo $title; } return $title; }
 function bloginfo($field) { echo 'Slateframe 日本語 العربية'; }
-function get_search_query($escaped = true) { global $mode; return $mode === 'hostile' ? '<img onerror=alert(1)>' : '日本語 العربية'; }
+function get_bloginfo($field, $filter = '') { return 'Slateframe 日本語 العربية'; }
+function get_search_query($escaped = true) { global $mode; return $mode === 'hostile' ? '日本語 <img onerror=alert(1)>' : ($mode === 'html_only' ? '<img onerror=alert(1)>' : '日本語 العربية'); }
 function esc_html__($value, $domain) { return $value; }
+function esc_html_e($value, $domain) { echo esc_html($value); }
 function _n($singular, $plural, $count, $domain) { return $count === 1 ? $singular : $plural; }
 function number_format_i18n($number) { return (string) $number; }
 require getcwd() . '/inc/template-tags.php';
@@ -76,6 +78,12 @@ class ListingBidi(unittest.TestCase):
         self.assertIn('&lt;script&gt;alert(1)&lt;/script&gt;', self.render('author.php', 'hostile'))
         self.assertIn('&lt;img onerror=alert(1)&gt;', self.render('search.php', 'hostile'))
         self.assertNotIn('<script>alert(1)</script>', self.render('author.php', 'hostile'))
+
+    def test_html_only_search_query_uses_readable_fallback(self):
+        html = self.render('search.php', 'html_only')
+        self.assertIn('Search results', html)
+        self.assertNotIn('<img onerror=alert(1)>', html)
+        self.assertNotIn('&lt;img onerror=alert(1)&gt;', html)
 
     def test_no_forced_direction_or_runtime_assets(self):
         for path in ('author.php', 'archive.php', 'index.php', 'search.php'):
