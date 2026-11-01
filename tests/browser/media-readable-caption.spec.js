@@ -31,6 +31,12 @@ test('Core media captions and attachment metadata have readable labels at all wi
     postId = wp('post', 'create', '--post_type=post', '--post_status=publish',
       '--post_title=' + slug, '--post_content=Native image caption test.', '--porcelain');
     expect(postId).toMatch(/^\d+$/);
+    // Exercise real WordPress shortcode output, not only a mocked PHP fixture:
+    // Core emits nested source tags that default post KSES would remove.
+    const nativePlayers = JSON.parse(wp('eval',
+      'echo wp_json_encode(array("video"=>slateframe_sanitize_media_shortcode(wp_video_shortcode(array("src"=>"https://example.org/clip.mp4"))),"audio"=>slateframe_sanitize_media_shortcode(wp_audio_shortcode(array("src"=>"https://example.org/clip.mp3")))));'));
+    expect(nativePlayers.video).toMatch(/<source\\b[^>]*src=/);
+    expect(nativePlayers.audio).toMatch(/<source\\b[^>]*src=/);
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
     expect(attachmentId).toMatch(/^\d+$/);
