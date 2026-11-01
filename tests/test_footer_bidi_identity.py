@@ -9,6 +9,9 @@ TITLE = "العربية / 日本語 — Slateframe"
 DESCRIPTION = "日本語と中文 / العربية"
 
 PHP = r"""
+define('ABSPATH', __DIR__);
+function wp_strip_all_tags($value) { return strip_tags($value); }
+require getcwd() . '/inc/template-tags.php';
 function is_active_sidebar($name) { return false; }
 function has_nav_menu($name) { return false; }
 function bloginfo($name) {

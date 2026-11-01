@@ -52,6 +52,21 @@ function slateframe_has_readable_label( $text ) {
 }
 
 /**
+ * Output the Core footer name or a localized visible fallback.
+ *
+ * @param bool $has_readable_name Whether the display-filtered site title is readable.
+ * @return void
+ */
+function slateframe_footer_display_name( $has_readable_name ) {
+	if ( $has_readable_name ) {
+		bloginfo( 'name' );
+		return;
+	}
+
+	esc_html_e( 'Home', 'slateframe' );
+}
+
+/**
  * Return a resilient display title for frontend discovery surfaces.
  *
  * WordPress permits untitled content. Theme navigation must still expose a
