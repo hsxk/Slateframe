@@ -44,6 +44,10 @@ attachment content and metadata. The guard uses WordPress's HTML Tag Processor;
 it adds no player library, JavaScript, remote request or custom media handling.
 Executable PHP regressions cover both media types, blank sources and later
 valid candidates.
+The candidate scan stops at the matching player's closing tag; a `<source>`
+following a closed `<video>` or `<audio>` is not part of that player and cannot
+turn an empty preview into a misleading playable figure. Both the executable
+PHP fixture and real WordPress browser fixture guard this boundary.
 
 Core's default post KSES omits `<source>` even though its audio/video shortcodes
 emit nested source candidates. Slateframe extends the sanitized media-shortcode
