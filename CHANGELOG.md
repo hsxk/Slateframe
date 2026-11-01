@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Preserve strict Gutenberg Core Tabs undo checks against WordPress Core's semantically empty Query Loop `excludeCurrent: null` hydration. Compare every other serialized attribute, block ID and editor dirty flag unchanged; add eight executable Node regression assertions and a required CI check. Pending exact-HEAD browser verification.
+
 + Isolate localized published dates, related/404 dates, classic comment counts, attachment detail values and parent recovery titles with native `bdi` while retaining WordPress Core semantics and escaping. Add executable PHP contracts and real WordPress seven-width RTL/400%/Axe/forced-colors screenshots; pending exact-HEAD Actions acceptance.
 
 + Preserve WordPress Core archive title prefixes while isolating mixed-script listing headings (author name and biography, archive, posts index/site name) and localized search result counts with native `bdi`; add executable PHP contracts and real WordPress seven-width RTL/400%/Axe/forced-colors screenshot coverage. Pending exact-HEAD Actions and visual acceptance.
