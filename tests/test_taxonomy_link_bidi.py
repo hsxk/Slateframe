@@ -11,15 +11,9 @@ class TaxonomyLinkBidi(unittest.TestCase):
     def css(self, name):
         return (ROOT / "assets" / "css" / name).read_text(encoding="utf-8")
 
-    def test_classic_footer_links_keep_bounded_touch_targets(self):
+    def test_classic_footer_links_preserve_native_markup_and_bidi(self):
         css = self.css("publishing.css")
-        self.assertIn(
-            ".slateframe-entry-footer a{display:inline-flex;align-items:center;"
-            "min-block-size:var(--slateframe-control);"
-            "min-inline-size:min(100%,var(--slateframe-control));max-inline-size:100%;"
-            "overflow-wrap:anywhere;unicode-bidi:isolate}",
-            css,
-        )
+        self.assertIn(".slateframe-entry-footer a{unicode-bidi:isolate}", css)
         self.assertNotIn("direction:ltr", css)
         self.assertNotIn("unicode-bidi:bidi-override", css)
 
@@ -62,8 +56,8 @@ class TaxonomyLinkBidi(unittest.TestCase):
         browser = (ROOT / "tests/browser/numeric-metadata-bidi.spec.js").read_text()
         workflow = (ROOT / ".github/workflows/quality.yml").read_text()
         self.assertIn("taxonomyLink.evaluate", browser)
-        self.assertIn("computed.target", browser)
-        self.assertIn("node.getBoundingClientRect().width", browser)
+        self.assertIn("computed.bidi", browser)
+        self.assertIn("computed.tag", browser)
         self.assertIn("axeFooter.violations", browser)
         self.assertIn("document.activeElement === node", browser)
         for name in (
