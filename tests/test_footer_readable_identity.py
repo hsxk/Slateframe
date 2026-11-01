@@ -19,11 +19,14 @@ class FooterReadableIdentity(unittest.TestCase):
         source = (ROOT / 'footer.php').read_text(encoding='utf-8')
         for marker in ("slateframe_has_readable_label( get_bloginfo( 'name', 'display' ) )",
                        "slateframe_has_readable_label( get_bloginfo( 'description', 'display' ) )",
-                       "esc_html_e( 'Home', 'slateframe' )", "bloginfo( 'name' )",
+                       "slateframe_footer_display_name( $slateframe_footer_has_title )", "bloginfo( 'name' )",
                        "bloginfo( 'description' )", "wp_date( 'Y' )",
                        'dynamic_sidebar(', 'wp_nav_menu(', 'wp_footer();', '<bdi>'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
+        helper = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
+        self.assertIn("function slateframe_footer_display_name( $has_readable_name )", helper)
+        self.assertIn("esc_html_e( 'Home', 'slateframe' )", helper)
         self.assertNotIn('dir="ltr"', source)
         self.assertNotIn('dir="rtl"', source)
 
