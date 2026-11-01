@@ -14,7 +14,7 @@ class PresentationFallbacks(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("Presentation fallbacks: 51 assertions passed", result.stdout)
+        self.assertIn("Presentation fallbacks: 53 assertions passed", result.stdout)
 
     def test_public_core_boundary(self):
         source = (ROOT / "inc/template-tags.php").read_text(encoding="utf-8")

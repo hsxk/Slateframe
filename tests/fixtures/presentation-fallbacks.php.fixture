@@ -29,8 +29,21 @@ function esc_url( $url ) { return $url; }
 function esc_html__( $text, $domain ) { return $text; }
 class WP_HTML_Tag_Processor {
     private $html;
+    private $offset = 0;
+    private $current_tag = '';
     public function __construct( $html ) { $this->html = $html; }
-    public function next_tag( $tag ) { return false !== stripos( $this->html, '<img' ); }
+    public function next_tag( $tag ) {
+        if ( ! preg_match( '/<' . preg_quote( $tag, '/' ) . '\\b[^>]*>/i', $this->html, $match, PREG_OFFSET_CAPTURE, $this->offset ) ) {
+            return false;
+        }
+        $this->current_tag = $match[0][0];
+        $this->offset = $match[0][1] + strlen( $match[0][0] );
+        return true;
+    }
+    public function has_class( $name ) {
+        if ( ! preg_match( '/class="([^"]*)"/', $this->current_tag, $class ) ) { return false; }
+        return in_array( $name, preg_split( '/\\s+/', trim( $class[1] ) ), true );
+    }
     public function get_attribute( $name ) {
         if ( ! preg_match( '/<img\\b[^>]*>/i', $this->html, $tag ) ) { return null; }
         if ( ! preg_match( '/\\s' . preg_quote( $name, '/' ) . '="([^"]*)"/i', $tag[0], $value ) ) { return null; }
@@ -82,7 +95,7 @@ foreach ( array( null, false, array( 'bad' ), new WP_Error() ) as $bad ) {
     verify_case( false !== strpos( $html, 'slateframe-home-link' ), 'Fallback home link lost' );
     verify_case( false === strpos( $html, 'Array' ), 'Invalid page markup leaked' );
 }
-$GLOBALS['slateframe_case']['pages'] = '<li class="page_item"><a href="/about">About</a></li>';
+$GLOBALS['slateframe_case']['pages'] = '<li class="page_item page-item-17"><a href="/about">About</a></li>';
 $html = render_method( 'slateframe_menu_fallback' );
 verify_case( false !== strpos( $html, 'href="/about"' ), 'Valid Core page fallback lost' );
 $GLOBALS['slateframe_case']['options'] = array( 'show_on_front' => 'page', 'page_on_front' => 17 );
@@ -90,6 +103,10 @@ $GLOBALS['slateframe_case']['front'] = true;
 $html = render_method( 'slateframe_menu_fallback' );
 verify_case( false === strpos( $html, 'slateframe-home-link' ), 'Static Core front page duplicated Home' );
 verify_case( false !== strpos( $html, 'href="/about"' ), 'Static Core page tree lost' );
+$GLOBALS['slateframe_case']['pages'] = '<li class="page_item page-item-24"><a href="/about">About</a></li>';
+$html = render_method( 'slateframe_menu_fallback' );
+verify_case( false !== strpos( $html, 'slateframe-home-link current_page_item' ), 'Filtered static front page lost Home' );
+verify_case( false !== strpos( $html, 'href="/about"' ), 'Filtered Core page links lost' );
 $GLOBALS['slateframe_case']['options'] = array( 'show_on_front' => 'posts' );
 $html = render_method( 'slateframe_menu_fallback' );
 verify_case( false !== strpos( $html, 'aria-current="page"' ), 'Posts front page missing current Home' );

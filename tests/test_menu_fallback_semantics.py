@@ -7,6 +7,26 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 PHP = r'''
 define('ABSPATH', '/tmp/');
+class WP_HTML_Tag_Processor {
+    private $html;
+    private $offset = 0;
+    private $classes = '';
+    public function __construct($html) { $this->html = $html; }
+    public function next_tag($tag = 'li') {
+        if (!preg_match('/<' . preg_quote($tag, '/') . '\\b[^>]*>/i', $this->html, $match, PREG_OFFSET_CAPTURE, $this->offset)) {
+            return false;
+        }
+        $this->offset = $match[0][1] + strlen($match[0][0]);
+        $this->classes = '';
+        if (preg_match('/class="([^"]*)"/', $match[0][0], $class)) {
+            $this->classes = $class[1];
+        }
+        return true;
+    }
+    public function has_class($name) {
+        return in_array($name, preg_split('/\\s+/', trim($this->classes)), true);
+    }
+}
 $GLOBALS['options'] = json_decode($argv[1], true);
 $GLOBALS['front'] = $argv[2] === '1';
 $GLOBALS['page_markup'] = json_decode($argv[4], true);
@@ -21,7 +41,7 @@ function wp_list_pages($args) {
     if ($GLOBALS['page_markup'] !== '__default__') { return $GLOBALS['page_markup']; }
     $static = ($GLOBALS['options']['show_on_front'] ?? '') === 'page';
     $current = $static && $GLOBALS['front'] ? ' aria-current="page"' : '';
-    return '<li class="page_item page_item_has_children"><a href="/front"' . $current .
+    return '<li class="page_item page-item-17 page_item_has_children"><a href="/front"' . $current .
         '>Front</a><ul class="children"><li class="page_item"><a href="/child">Child</a></li></ul></li>' .
         '<li class="page_item"><a href="/blog">Blog</a></li>';
 }
@@ -104,6 +124,28 @@ class MenuFallback(unittest.TestCase):
                 data = render({'show_on_front': 'page', 'page_on_front': 17}, True, pages)
                 self.assertIn('slateframe-home-link current_page_item', data['html'])
                 self.assertIn('aria-current="page"', data['html'])
+
+    def test_filtered_static_front_page_restores_home_with_other_pages(self):
+        pages = '<li class="page_item page-item-24"><a href="/about">About</a></li>'
+        data = render({'show_on_front': 'page', 'page_on_front': 17}, True, pages)
+        self.assertIn('slateframe-home-link current_page_item', data['html'])
+        self.assertEqual(data['html'].count('aria-current="page"'), 1)
+        self.assertIn('href="/about"', data['html'])
+
+    def test_prefix_collision_does_not_hide_home(self):
+        pages = '<li class="page_item page-item-170"><a href="/other">Other</a></li>'
+        data = render({'show_on_front': 'page', 'page_on_front': 17}, False, pages)
+        self.assertIn('slateframe-home-link', data['html'])
+
+    def test_unrelated_attribute_does_not_hide_home(self):
+        pages = '<li data-note="page-item-17" class="page_item page-item-24"><a href="/other">Other</a></li>'
+        data = render({'show_on_front': 'page', 'page_on_front': 17}, False, pages)
+        self.assertIn('slateframe-home-link', data['html'])
+
+    def test_nested_static_front_page_does_not_duplicate_home(self):
+        pages = '<li class="page_item page-item-24"><ul><li class="page_item page-item-17"><a href="/front">Front</a></li></ul></li>'
+        data = render({'show_on_front': 'page', 'page_on_front': 17}, False, pages)
+        self.assertNotIn('slateframe-home-link', data['html'])
 
     def test_home_current_class_uses_existing_navigation_style(self):
         css = (ROOT / 'assets' / 'css' / 'navigation.css').read_text(encoding='utf-8')
