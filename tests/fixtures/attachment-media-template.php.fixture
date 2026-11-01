@@ -85,6 +85,7 @@ class WP_HTML_Tag_Processor {
     }
     public function get_updated_html() { return $this->html; }
 }
+require dirname( __DIR__, 2 ) . '/inc/media-source.php';
 function slateframe_has_readable_label( $text ) {
     if ( ! is_string( $text ) ) { return false; }
     return 1 === preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u',
