@@ -150,6 +150,17 @@ test('Query Loop discussion never suppresses the current post comments', async (
         // not on a wrapper containing a descendant #respond. Verify both
         // semantics on the real repeated-post form.
         await expect(queried).toHaveAttribute('id', 'respond');
+        await expect(queried.locator('form#commentform')).toHaveCount(1);
+        // Core reply.js resolves IDs document-wide. Ensure the canonical
+        // responder, form, parent input and cancel link all belong to the
+        // queried page rather than to the theme's scoped outer discussion.
+        const coreReplyTargets = await queried.evaluate(root =>
+          ['respond', 'commentform', 'comment_parent', 'cancel-comment-reply-link']
+            .filter(id => {
+              const target = document.getElementById(id);
+              return !target || !root.contains(target);
+            }));
+        expect(coreReplyTargets, 'Native Core reply targets must remain in the queried form').toEqual([]);
         for (const name of ['comment', 'author', 'email', 'url', 'wp-comment-cookies-consent']) {
           const control = classic.locator('[name="' + name + '"]');
           if (await control.count()) {
