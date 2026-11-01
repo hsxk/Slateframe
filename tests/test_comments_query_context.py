@@ -129,6 +129,12 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         # the actual WordPress DOM even when the form is rendered correctly.
         self.assertIn("await expect(queried).toHaveAttribute('id', 'respond')", browser)
         self.assertNotIn("queried.locator('#respond')", browser)
+        # Do not silently regress to counting forms without verifying Core's
+        # document-global reply/cancel targets are owned by the queried post.
+        self.assertIn("queried.locator('form#commentform')", browser)
+        self.assertIn("document.getElementById(id)", browser)
+        self.assertIn("root.contains(target)", browser)
+        self.assertIn("expect(coreReplyTargets", browser)
         self.assertIn('await queriedSubmit.focus()', browser)
 
     def test_classic_form_label_scoping_is_local_and_core_safe(self):
