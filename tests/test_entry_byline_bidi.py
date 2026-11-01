@@ -9,8 +9,9 @@ ROOT = Path(__file__).resolve().parents[1]
 PHP = r"""
 define('ABSPATH', '/');
 function get_post_type() { return 'post'; }
+function wp_strip_all_tags($value) { return strip_tags($value); }
 function get_the_author_meta($key) { return '7'; }
-function get_the_author() { return getenv('EMPTY_AUTHOR') === '1' ? '' : 'العربية / 日本語 — Alice & Bob'; }
+function get_the_author() { return getenv('EMPTY_AUTHOR') === '1' ? '' : (getenv('AUTHOR_NAME') !== false ? getenv('AUTHOR_NAME') : 'العربية / 日本語 — Alice & Bob'); }
 function get_author_posts_url($id) { return getenv('NO_AUTHOR_URL') === '1' ? '' : '/author/alice/'; }
 function apply_filters($name, $value, ...$args) { return $value; }
 function esc_url_raw($value) { return $value; }
@@ -73,6 +74,15 @@ class EntryBylineBidi(unittest.TestCase):
         self.assertEqual(len([path for path in isolates if 'time' in path]), 1)
         self.assertNotIn('slateframe-meta-byline', html)
         self.assertIn('slateframe-published', html)
+
+    def test_invisible_only_author_does_not_create_nameless_link(self):
+        for value in ('&nbsp;', '\u200b', '\ufe0f', '\u3164', '\u2800', '\u0301'):
+            with self.subTest(value=repr(value)):
+                html, isolates = self.render(AUTHOR_NAME=value)
+                self.assertEqual(len([path for path in isolates if 'time' not in path]), 0)
+                self.assertEqual(len([path for path in isolates if 'time' in path]), 1)
+                self.assertNotIn('slateframe-meta-byline', html)
+                self.assertNotIn('<a ', html)
 
     def test_does_not_force_ltr_direction_or_add_script(self):
         source = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')

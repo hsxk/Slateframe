@@ -1,6 +1,7 @@
 <?php
 /** Disposable WordPress function stubs for template filter boundary tests. */
 define( 'ABSPATH', __DIR__ . '/' );
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 class WP_Error {}
 $GLOBALS['slateframe_test_filters'] = array();
 $GLOBALS['slateframe_test_post_type'] = 'post';

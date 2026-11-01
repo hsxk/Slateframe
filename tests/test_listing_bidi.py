@@ -6,6 +6,9 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 
 PHP_FIXTURE = r'''
+define('ABSPATH', '/');
+function wp_strip_all_tags($value) { return strip_tags($value); }
+function __($value, $domain) { return $value; }
 $mode = $argv[2];
 $GLOBALS['wp_query'] = (object) ['max_num_pages' => 1, 'found_posts' => $mode === 'one' ? 1 : ($mode === 'zero' ? 0 : 12)];
 function get_header() {}
@@ -28,6 +31,7 @@ function get_search_query($escaped = true) { global $mode; return $mode === 'hos
 function esc_html__($value, $domain) { return $value; }
 function _n($singular, $plural, $count, $domain) { return $count === 1 ? $singular : $plural; }
 function number_format_i18n($number) { return (string) $number; }
+require getcwd() . '/inc/template-tags.php';
 include $argv[1];
 '''
 

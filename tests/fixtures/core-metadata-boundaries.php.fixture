@@ -5,6 +5,7 @@
  * @package Slateframe
  */
 define( 'ABSPATH', __DIR__ . '/' );
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 class WP_Error {}
 $GLOBALS['slateframe_id']   = 3;
 $GLOBALS['slateframe_name'] = 'Writer';
