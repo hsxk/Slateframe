@@ -124,7 +124,11 @@ class QueryLoopDiscussionContext(unittest.TestCase):
         declaration = "const queried = page.locator('.slateframe-prose .wp-block-post-template .wp-block-post-comments-form');"
         self.assertEqual(browser.count(declaration), 1)
         self.assertLess(browser.index(declaration), browser.index('if (fixture.queriedForm) {'))
-        self.assertIn("await expect(queried.locator('#respond')).toHaveCount(1)", browser)
+        # Core's post-comments-form block applies its class to the #respond
+        # root itself. A descendant #respond selector incorrectly fails on
+        # the actual WordPress DOM even when the form is rendered correctly.
+        self.assertIn("await expect(queried).toHaveAttribute('id', 'respond')", browser)
+        self.assertNotIn("queried.locator('#respond')", browser)
         self.assertIn('await queriedSubmit.focus()', browser)
 
     def test_classic_form_label_scoping_is_local_and_core_safe(self):
