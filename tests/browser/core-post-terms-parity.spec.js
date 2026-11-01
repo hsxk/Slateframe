@@ -68,7 +68,7 @@ test('Core Post Terms retains native taxonomy links and bounded multilingual con
             links: [...node.querySelectorAll('.wp-block-post-terms a')].map(el => {
               const r = el.getBoundingClientRect();
               return { left: r.left, right: r.right, width: r.width, height: r.height,
-                wrap: getComputedStyle(el).overflowWrap };
+                wrap: getComputedStyle(el).overflowWrap, bidi: getComputedStyle(el).unicodeBidi };
             }),
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
@@ -80,6 +80,7 @@ test('Core Post Terms retains native taxonomy links and bounded multilingual con
             expect(link.width, label + ' width').toBeGreaterThanOrEqual(43);
             expect(link.height, label + ' height').toBeGreaterThanOrEqual(43);
             expect(link.wrap, label + ' long term wrapping').toBe('anywhere');
+            expect(link.bidi, label + ' isolated mixed-script term').toBe('isolate');
           }
           if (font === 16 && [320, 390, 1440].includes(width)) {
             await page.screenshot({ fullPage: true,

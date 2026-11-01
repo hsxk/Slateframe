@@ -77,7 +77,7 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
             controls: [...node.querySelectorAll('a,select')].map(el => {
               const r = el.getBoundingClientRect();
               return { left: r.left, right: r.right, width: r.width, height: r.height,
-                wrap: getComputedStyle(el).overflowWrap, tag: el.tagName };
+                wrap: getComputedStyle(el).overflowWrap, bidi: getComputedStyle(el).unicodeBidi, tag: el.tagName };
             }),
           }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
@@ -91,7 +91,10 @@ test('Core Categories hierarchy and dropdown retain native queries and bounded c
             expect(item.right, label + ' right').toBeLessThanOrEqual(width + 1);
             expect(item.width, label + ' target width').toBeGreaterThanOrEqual(43);
             expect(item.height, label + ' target height').toBeGreaterThanOrEqual(43);
-            if (item.tag === 'A') expect(item.wrap).toBe('anywhere');
+            if (item.tag === 'A') {
+              expect(item.wrap).toBe('anywhere');
+              expect(item.bidi, label + ' isolated category label').toBe('isolate');
+            }
           }
           if (width === 390 && font === 64) {
             await select.focus();
