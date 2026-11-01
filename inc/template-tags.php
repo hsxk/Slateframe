@@ -277,7 +277,7 @@ function slateframe_entry_meta() {
 	echo '<div class="slateframe-entry-meta">';
 	slateframe_posted_on();
 
-	if ( '' !== $author_name ) {
+	if ( slateframe_has_readable_label( $author_name ) ) {
 		// Keep punctuation and the author together when metadata wraps.
 		echo '<span class="slateframe-meta-byline"><span class="slateframe-meta-separator" aria-hidden="true">·</span>';
 
