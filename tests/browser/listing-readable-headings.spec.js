@@ -74,6 +74,7 @@ test('Core search with invisible query keeps an H1 and native form', async ({ pa
   // WordPress must enqueue the real is_search() form stylesheet.
   await page.goto('/?s=%E2%80%8B', { waitUntil: 'networkidle' });
   const root = page.locator('main#main-content .slateframe-page-header');
+  await expect(page.locator('link#slateframe-forms-css')).toHaveCount(1);
   await expect(page.locator('link#slateframe-search-form-css')).toHaveCount(1);
   await checkReadableResponsiveHeading(page, root, 'Search results');
   await expect(root.locator('h1 bdi')).toHaveCount(0);
