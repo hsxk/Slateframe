@@ -37,6 +37,14 @@ test('Core media captions and attachment metadata have readable labels at all wi
       'echo wp_json_encode(array("video"=>slateframe_sanitize_media_shortcode(wp_video_shortcode(array("src"=>"https://example.org/clip.mp4"))),"audio"=>slateframe_sanitize_media_shortcode(wp_audio_shortcode(array("src"=>"https://example.org/clip.mp3")))));'));
     expect(nativePlayers.video).toMatch(/<source\b[^>]*src=/);
     expect(nativePlayers.audio).toMatch(/<source\b[^>]*src=/);
+    // A source after the closing player tag cannot make that player playable.
+    const siblingPlayers = JSON.parse(wp('eval', `
+      echo wp_json_encode(array(
+        'video' => slateframe_media_has_source('<video></video><source src="/outside.mp4">', 'video'),
+        'audio' => slateframe_media_has_source('<audio><source src=" "></audio><source src="/outside.mp3">', 'audio')
+      ));
+    `));
+    expect(siblingPlayers).toEqual({ video: false, audio: false });
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
     expect(attachmentId).toMatch(/^\d+$/);
