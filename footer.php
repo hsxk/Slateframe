@@ -4,6 +4,8 @@
  *
  * @package Slateframe
  */
+$slateframe_footer_has_title       = slateframe_has_readable_label( get_bloginfo( 'name', 'display' ) );
+$slateframe_footer_has_description = slateframe_has_readable_label( get_bloginfo( 'description', 'display' ) );
 ?>
 <footer class="slateframe-site-footer">
 	<?php if ( is_active_sidebar( 'footer-content' ) ) : ?>
@@ -14,8 +16,14 @@
 
 	<div class="slateframe-shell slateframe-footer-inner">
 		<div class="slateframe-footer-brand">
-			<strong><bdi><?php bloginfo( 'name' ); ?></bdi></strong>
-			<?php if ( get_bloginfo( 'description' ) ) : ?>
+			<strong><bdi><?php
+				if ( $slateframe_footer_has_title ) {
+					bloginfo( 'name' );
+				} else {
+					esc_html_e( 'Home', 'slateframe' );
+				}
+				?></bdi></strong>
+			<?php if ( $slateframe_footer_has_description ) : ?>
 				<p><bdi><?php bloginfo( 'description' ); ?></bdi></p>
 			<?php endif; ?>
 		</div>
@@ -37,7 +45,10 @@
 		<?php endif; ?>
 
 		<p class="slateframe-copyright">
-			<bdi>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?></bdi> <bdi><?php bloginfo( 'name' ); ?></bdi>
+			<bdi>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?></bdi>
+			<?php if ( $slateframe_footer_has_title ) : ?>
+				<bdi><?php bloginfo( 'name' ); ?></bdi>
+			<?php endif; ?>
 		</p>
 	</div>
 </footer>
