@@ -14,7 +14,7 @@ class AttachmentMediaTemplate(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn('Attachment media template: 105 assertions passed', result.stdout)
+        self.assertIn('Attachment media template: 117 assertions passed', result.stdout)
 
     def test_uses_core_media_without_business_or_remote_dependencies(self):
         source = (ROOT / 'attachment.php').read_text(encoding='utf-8')
@@ -33,7 +33,10 @@ class AttachmentMediaTemplate(unittest.TestCase):
         self.assertIn('! is_string( $html )', media)
         self.assertIn("in_array( $tag, array( 'video', 'audio' ), true )", media)
         self.assertIn("next_tag( $tag )", media)
-        self.assertIn("next_tag( 'source' )", media)
+        self.assertIn("next_tag( array( 'tag_closers' => 'visit' ) )", media)
+        self.assertIn("strtoupper( $tag ) === $current_tag", media)
+        self.assertIn("$processor->is_tag_closer()", media)
+        self.assertIn("'SOURCE' !== $current_tag", media)
         self.assertIn("get_attribute( 'src' )", media)
         self.assertIn("wp_kses_allowed_html( 'post' )", media)
         self.assertIn("wp_kses( $html, $allowed )", media)
