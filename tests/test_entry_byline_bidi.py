@@ -50,8 +50,11 @@ class EntryBylineBidi(unittest.TestCase):
 
     def test_linked_mixed_author_is_isolated_without_changing_core_url(self):
         html, isolates = self.render()
-        self.assertEqual(len(isolates), 1)
-        self.assertIn('a', isolates[0])
+        author_isolates = [path for path in isolates if 'time' not in path]
+        date_isolates = [path for path in isolates if 'time' in path]
+        self.assertEqual(len(author_isolates), 1)
+        self.assertIn('a', author_isolates[0])
+        self.assertEqual(len(date_isolates), 1)
         self.assertIn('href="/author/alice/"', html)
         self.assertIn('<bdi>العربية / 日本語 — Alice &amp; Bob</bdi>', html)
         self.assertIn('datetime="2026-11-01T12:00:00+09:00"', html)
@@ -59,13 +62,15 @@ class EntryBylineBidi(unittest.TestCase):
 
     def test_unlinked_author_keeps_isolation_without_empty_anchor(self):
         html, isolates = self.render(NO_AUTHOR_URL='1')
-        self.assertEqual(len(isolates), 1)
+        self.assertEqual(len([path for path in isolates if 'time' not in path]), 1)
+        self.assertEqual(len([path for path in isolates if 'time' in path]), 1)
         self.assertNotIn('<a ', html)
         self.assertIn('<bdi>العربية / 日本語 — Alice &amp; Bob</bdi>', html)
 
     def test_empty_author_does_not_emit_empty_isolation(self):
         html, isolates = self.render(EMPTY_AUTHOR='1')
-        self.assertEqual(isolates, [])
+        self.assertEqual([path for path in isolates if 'time' not in path], [])
+        self.assertEqual(len([path for path in isolates if 'time' in path]), 1)
         self.assertNotIn('slateframe-meta-byline', html)
         self.assertIn('slateframe-published', html)
 

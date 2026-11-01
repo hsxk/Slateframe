@@ -204,7 +204,7 @@ function slateframe_related_posts() {
 				<article <?php post_class( 'slateframe-related-item' ); ?>>
 					<a href="<?php the_permalink(); ?>">
 						<span class="slateframe-related-title"><bdi><?php echo wp_kses_post( slateframe_get_display_title() ); ?></bdi></span>
-						<time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time>
+						<time datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><bdi><?php echo esc_html( get_the_date() ); ?></bdi></time>
 					</a>
 				</article>
 				<?php

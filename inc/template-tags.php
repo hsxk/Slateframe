@@ -207,7 +207,7 @@ function slateframe_attachment_details( $attachment_id ) {
  */
 function slateframe_posted_on() {
 	printf(
-		'<time class="slateframe-published" datetime="%1$s">%2$s</time>',
+		'<time class="slateframe-published" datetime="%1$s"><bdi>%2$s</bdi></time>',
 		esc_attr( get_the_date( DATE_W3C ) ),
 		esc_html( get_the_date() )
 	);

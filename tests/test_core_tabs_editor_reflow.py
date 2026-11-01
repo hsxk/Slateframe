@@ -60,7 +60,16 @@ class CoreTabsEditorReflow(unittest.TestCase):
         self.assertEqual(self.browser.count("dispatch('core/editor').undo()"), 1)
         self.assertNotIn("__unstableMarkNextChangeAsNotPersistent()", self.browser)
         self.assertNotIn("removeBlocks(id)", self.browser)
-        self.assertEqual(self.browser.count("isEditedPostDirty()"), 2)
+        # One shared snapshot reader is used both before insertion and after
+        # undo; counting duplicate inlined selectors would reject a stricter
+        # single-source-of-truth contract.
+        self.assertEqual(self.browser.count("isEditedPostDirty()"), 1)
+        self.assertIn("const readSnapshot = async () =>", self.browser)
+        self.assertIn("const baseline = await readSnapshot();", self.browser)
+        self.assertIn("await expect.poll(readSnapshot).toEqual(baseline);", self.browser)
+        self.assertIn("canonicalizeCoreQueryDefaults(snapshot.content)", self.browser)
+        self.assertIn("content: window.wp.blocks.serialize(editor.getBlocks())", self.browser)
+        self.assertIn("dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty())", self.browser)
         for forbidden in ("savePost(", "wp('post', 'update'", "test.only", "test.fixme"):
             self.assertNotIn(forbidden, self.browser)
 

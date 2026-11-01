@@ -40,6 +40,7 @@ jobs:
           node tests/browser/test-visual-evidence-helper.cjs
           node tests/browser/test-wordpress-login.cjs
           node tests/browser/test-editor-login-helper.cjs
+          node tests/browser/test-core-query-defaults.cjs
           node tests/browser/test-color-cookie-scope.cjs
           node tests/browser/test-footer-widget-fixture.cjs
       - name: Validate build script syntax
@@ -1008,6 +1009,25 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$SLATEFRAME_EVIDENCE_SHA" || { echo "Browser evidence does not match PR HEAD" >&2; exit 1; }
           printf "%s\n" "$SLATEFRAME_EVIDENCE_SHA" > test-artifacts/screenshots/HEAD_SHA.txt
+          # Keep both listing and numeric metadata RTL/CJK visual contracts mandatory.
+          # These files are captured by real WordPress/Chromium Playwright, never mock DOM.
+          for screenshot in \
+            listing-bidi-index-390-rtl-400.png \
+            listing-bidi-index-390-rtl-400-forced-colors.png \
+            listing-bidi-index-1440-ltr.png \
+            listing-bidi-author-390-rtl-400.png \
+            listing-bidi-author-390-rtl-400-forced-colors.png \
+            listing-bidi-author-1440-ltr.png \
+            listing-bidi-core-archive-390-rtl-400.png \
+            listing-bidi-core-archive-1440-ltr.png \
+            numeric-metadata-listing-390-rtl-400.png \
+            numeric-metadata-listing-390-rtl-400-forced-colors.png \
+            numeric-metadata-listing-1440-ltr.png \
+            numeric-metadata-article-390-rtl-400.png \
+            numeric-metadata-article-390-rtl-400-forced-colors.png \
+            numeric-metadata-article-1440-ltr.png; do
+            test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing RTL/CJK listing/metadata evidence: $screenshot" >&2; exit 1; }
+          done
           # Require three-level Core Walker navigation evidence across responsive RTL/LTR states.
           for width in 320 375 390 412 768 1440 1920; do
             for direction in ltr rtl; do

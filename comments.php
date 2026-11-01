@@ -27,7 +27,7 @@ $slateframe_parallel_form = isset( $GLOBALS['slateframe_nested_core_comment_form
 						'slateframe'
 					)
 				),
-				esc_html( number_format_i18n( $slateframe_comment_count ) )
+				'<bdi>' . esc_html( number_format_i18n( $slateframe_comment_count ) ) . '</bdi>'
 			);
 			?>
 		</h2>

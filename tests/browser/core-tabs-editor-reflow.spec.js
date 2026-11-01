@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 const { openAuthenticatedEditor } = require('./support/editor-login');
 const { setRootTextScale } = require('./support/root-text-scale');
+const { canonicalizeCoreQueryDefaults } = require('./support/core-query-defaults');
 
 // A disposable native block in the real Gutenberg iframe, never saved to the post.
 test('Core Tabs editor controls reflow at 400% RTL without changing saved content', async ({ page }, info) => {
@@ -10,14 +11,21 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
   test.skip(!postId || ![390, 1440].includes(width), 'Real Gutenberg mobile/desktop fixture');
   test.setTimeout(120000);
   await openAuthenticatedEditor(page, postId);
-  const baseline = await page.evaluate(() => {
-    const editor = window.wp.data.select('core/block-editor');
-    return {
-      content: window.wp.blocks.serialize(editor.getBlocks()),
-      ids: editor.getBlocks().map(block => block.clientId),
-      dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty()),
-    };
-  });
+  // Compare the complete serialized post, original client IDs and dirty flag.
+  // Core may add the semantically empty Query Loop excludeCurrent:null default
+  // when Gutenberg's editor state is refreshed by a disposable block undo.
+  const readSnapshot = async () => {
+    const snapshot = await page.evaluate(() => {
+      const editor = window.wp.data.select('core/block-editor');
+      return {
+        content: window.wp.blocks.serialize(editor.getBlocks()),
+        ids: editor.getBlocks().map(block => block.clientId),
+        dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty()),
+      };
+    });
+    return { ...snapshot, content: canonicalizeCoreQueryDefaults(snapshot.content) };
+  };
+  const baseline = await readSnapshot();
   let canvas;
   await expect.poll(async () => {
     for (const frame of page.frames()) {
@@ -149,13 +157,6 @@ test('Core Tabs editor controls reflow at 400% RTL without changing saved conten
         window.wp.data.dispatch('core/editor').undo();
       }
     }, clientId);
-    await expect.poll(() => page.evaluate(() => {
-      const editor = window.wp.data.select('core/block-editor');
-      return {
-        content: window.wp.blocks.serialize(editor.getBlocks()),
-        ids: editor.getBlocks().map(block => block.clientId),
-      dirty: Boolean(window.wp.data.select('core/editor').isEditedPostDirty()),
-      };
-    })).toEqual(baseline);
+    await expect.poll(readSnapshot).toEqual(baseline);
   }
 });
