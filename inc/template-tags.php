@@ -249,14 +249,14 @@ function slateframe_entry_meta() {
 
 		if ( $author_url ) {
 			printf(
-				'<span class="slateframe-byline"><span class="screen-reader-text">%1$s </span><a href="%2$s">%3$s</a></span>',
+				'<span class="slateframe-byline"><span class="screen-reader-text">%1$s </span><a href="%2$s"><bdi>%3$s</bdi></a></span>',
 				esc_html__( 'By', 'slateframe' ),
 				esc_url( $author_url ),
 				esc_html( $author_name )
 			);
 		} else {
 			printf(
-				'<span class="slateframe-byline"><span class="screen-reader-text">%1$s </span>%2$s</span>',
+				'<span class="slateframe-byline"><span class="screen-reader-text">%1$s </span><bdi>%2$s</bdi></span>',
 				esc_html__( 'By', 'slateframe' ),
 				esc_html( $author_name )
 			);
