@@ -61,7 +61,15 @@ function slateframe_media_has_source( $html, $tag ) {
 	}
 
 	// Core can render nested <source> candidates instead of a player src.
-	while ( $processor->next_tag( 'source' ) ) {
+	// Stop at this player's closing tag: a later sibling's source is not playable.
+	while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+		$current_tag = $processor->get_tag();
+		if ( strtoupper( $tag ) === $current_tag && $processor->is_tag_closer() ) {
+			break;
+		}
+		if ( 'SOURCE' !== $current_tag || $processor->is_tag_closer() ) {
+			continue;
+		}
 		$src = $processor->get_attribute( 'src' );
 		if ( is_string( $src ) && '' !== trim( $src ) ) {
 			return true;
