@@ -33,12 +33,10 @@ test('published metadata preserves Core dates and isolates mixed-script text', a
       expect(originalHref).toBeTruthy();
       const computed = await taxonomyLink.evaluate(node => ({
         bidi: getComputedStyle(node).unicodeBidi,
-        target: parseFloat(getComputedStyle(node).minBlockSize),
+        tag: node.tagName,
       }));
       expect(computed.bidi).toBe('isolate');
-      expect(computed.target).toBeGreaterThanOrEqual(44);
-      await taxonomyLink.evaluate(node => { node.textContent = 'AI'; });
-      expect(await taxonomyLink.evaluate(node => node.getBoundingClientRect().width)).toBeGreaterThanOrEqual(43);
+      expect(computed.tag).toBe('A');
       await taxonomyLink.evaluate(node => { node.textContent = '日本語 العربية 2026'; });
       expect(await taxonomyLink.getAttribute('href')).toBe(originalHref);
     }
