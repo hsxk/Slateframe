@@ -14,7 +14,7 @@ class AttachmentMediaTemplate(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn('Attachment media template: 84 assertions passed', result.stdout)
+        self.assertIn('Attachment media template: 87 assertions passed', result.stdout)
 
     def test_uses_core_media_without_business_or_remote_dependencies(self):
         source = (ROOT / 'attachment.php').read_text(encoding='utf-8')

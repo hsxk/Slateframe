@@ -109,6 +109,9 @@ $valid = slateframe_attachment_render( array(
     'image_html' => '<img src="/photo.jpg" alt="花" srcset="/small.jpg 1x, /large.jpg 2x">',
     'parent' => true,
 ) );
+slateframe_attachment_check( false !== strpos( $valid, '<dl class="slateframe-entry-footer"' ), 'Native attachment metadata definition list missing' );
+slateframe_attachment_check( false !== strpos( $valid, '<dt class="slateframe-entry-footer-label"><bdi>Dimensions</bdi></dt>' ), 'Metadata term or bidi isolation missing' );
+slateframe_attachment_check( false !== strpos( $valid, '<dd><bdi>1920 × 1080 px</bdi></dd>' ), 'Metadata definition or bidi isolation missing' );
 slateframe_attachment_check( 1 === substr_count( $valid, '<figure class="alignwide">' ), 'Valid image figure missing' );
 slateframe_attachment_check( false !== strpos( $valid, 'alt="花"' ), 'CJK alt lost' );
 slateframe_attachment_check( false !== strpos( $valid, '<figcaption class="wp-caption-text"><em>花の写真</em></figcaption>' ), 'CJK caption lost' );

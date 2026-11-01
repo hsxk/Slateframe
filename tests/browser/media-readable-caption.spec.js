@@ -46,7 +46,11 @@ test('Core media captions and attachment metadata have readable labels at all wi
     await expect(page.locator('main#main-content')).toBeVisible();
     await expect(page.locator('.slateframe-prose > figure.alignwide img')).toBeVisible();
     await expect(page.locator('.slateframe-prose > figure.alignwide figcaption')).toHaveCount(0);
-    const labels = page.locator('.slateframe-entry-footer-label');
+    const details = page.locator('dl.slateframe-entry-footer');
+    await expect(details).toHaveCount(1);
+    await expect(details.locator(':scope > div > dt.slateframe-entry-footer-label')).toHaveCount(2);
+    await expect(details.locator(':scope > div > dd')).toHaveCount(2);
+    const labels = details.locator('dt.slateframe-entry-footer-label');
     await expect(labels).toHaveCount(2);
     await expect(page.locator('.slateframe-entry-footer')).toContainText('日本語 العربية');
     await expect(page.locator('.slateframe-entry-footer')).toContainText('写真 1200 × 900');
@@ -96,6 +100,10 @@ test('Core media captions and attachment metadata have readable labels at all wi
     await page.emulateMedia({ forcedColors: 'none' });
     await page.setViewportSize({ width: 1440, height: 900 });
     await setRootTextScale(page, 16, 'ltr');
+    await page.evaluate(async () => {
+      window.scrollTo(0, 0);
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    });
     await page.screenshot({ path: 'test-artifacts/screenshots/media-readable-attachment-1440-ltr.png', fullPage: true });
   } finally {
     await fs.rm(plugin, { force: true });

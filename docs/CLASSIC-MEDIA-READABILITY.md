@@ -8,7 +8,10 @@ The `slateframe_attachment_details` filter may return metadata whose labels or v
 are HTML-only, whitespace, Unicode combining marks or invisible filler characters.
 Such rows now disappear rather than producing unnamed definitions. Readable CJK/RTL
 labels, numerical zero, punctuation, native MIME/dimensions/filesize, and filter
-values remain unchanged and are escaped at output. Invalid non-array filter returns
+values remain unchanged and are escaped at output. Attachment details use a native
+`<dl>` with paired `<dt>`/`<dd>` terms and definitions, each with `<bdi>` to
+isolate mixed CJK/RTL text. The compact label/value rows reflow vertically at
+high zoom without horizontal overflow. Invalid non-array filter returns
 continue to fall back to Core metadata.
 
 An attachment's caption can also contain only an invisible entity or markup. Native

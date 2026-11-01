@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Present classic attachment metadata as native definition-list term/value pairs with independent bidi isolation and 400% responsive reflow; preserve Core media and sanitize rules. Improve the exact-SHA 1440px media screenshot by resetting scroll after focus verification, with executable PHP and browser semantic regressions.
+
 + Hide unreadable attachment metadata rows and Unicode-invisible classic image, video, audio and featured-hero captions without affecting native Core media, Gutenberg blocks, CSS/JS budgets or readable multilingual content. Add executable PHP and real WordPress/Chromium regression evidence.
 
 + Suppress orphaned classic taxonomy footer labels when Core category/tag HTML filters return whitespace, empty anchors, invisible Unicode entities or invalid values. Keep independently readable groups, Core links, 44px targets, CJK/RTL isolation and existing CSS/JS budgets; add executable PHP and real WordPress browser regressions with mandatory exact-SHA visual evidence. Pending Actions and manual review.
