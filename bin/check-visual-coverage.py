@@ -50,6 +50,8 @@ def required_browser_screenshots():
         "index-readable-fallback-1440-ltr.png": None,
         "search-readable-fallback-390-rtl-400-forced-colors.png": None,
         "search-readable-fallback-1440-ltr.png": None,
+        "archive-readable-fallback-390-rtl-400-forced-colors.png": None,
+        "archive-readable-fallback-1440-ltr.png": None,
         "author-blank-identity-390-rtl-400-forced-colors.png": None,
         "author-blank-identity-1440-ltr.png": None,
         "header-bidi-390-rtl-400-forced-colors.png": 390,

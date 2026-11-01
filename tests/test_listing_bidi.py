@@ -16,7 +16,11 @@ function get_footer() {}
 function have_posts() { return false; }
 function get_template_part($a, $b) {}
 function get_search_form() { echo '<form role="search"></form>'; }
-function the_archive_title($before, $after) { echo $before . '<span class="screen-reader-text">Archives:</span> 日本語 العربية' . $after; }
+function get_the_archive_title() { return '<span class="screen-reader-text">Archives:</span> 日本語 العربية'; }
+function is_category() { return false; }
+function is_tag() { return false; }
+function is_date() { return false; }
+function is_post_type_archive() { return false; }
 function the_archive_description($before, $after) { echo $before . 'Archive description' . $after; }
 function get_queried_object_id() { return 1; }
 function get_the_author_meta($field, $id) { global $mode; return $field === 'display_name' ? ($mode === 'hostile' ? '<script>alert(1)</script>' : '日本語 العربية') : 'Author biography'; }
