@@ -54,6 +54,42 @@ class NumericMetadataBidi(unittest.TestCase):
         self.assertIn('<bdi><?php echo esc_html( $slateframe_value ); ?></bdi>', source)
         self.assertIn("'<bdi>' . esc_html( slateframe_get_display_title( $slateframe_parent_id ) ) . '</bdi>'", source)
 
+    def test_attachment_runtime_escapes_details_and_isolates_parent_title(self):
+        fixture = r'''
+function get_header() {}
+function get_footer() {}
+function have_posts() { static $seen = false; if ($seen) return false; $seen = true; return true; }
+function the_post() {}
+function get_the_ID() { return 9; }
+function slateframe_public_attachment_parent_id($id) { return 42; }
+function wp_get_attachment_url($id) { return ''; }
+function esc_url_raw($url) { return $url; }
+function get_post_mime_type($id) { return 'application/pdf'; }
+function wp_get_attachment_caption($id) { return ''; }
+function slateframe_attachment_details($id) { return ['Dimensions' => '1920 × 1080 العربية <script>bad</script>']; }
+function post_class($class) { echo 'class="' . $class . '"'; }
+function slateframe_get_display_title($id = 0) { return '日本語 العربية'; }
+function wp_attachment_is_image($id) { return false; }
+function get_the_content() { return ''; }
+function esc_html($value) { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
+function wp_kses_post($value) { return $value; }
+function esc_attr_e($value, $domain) { echo $value; }
+function esc_html_e($value, $domain) { echo $value; }
+function esc_html__($value, $domain) { return $value; }
+function get_permalink($id) { return 'https://example.test/parent'; }
+function esc_url($value) { return $value; }
+function comments_open() { return false; }
+function get_comments_number() { return 0; }
+include $argv[1];
+'''
+        result = subprocess.run(['php', '-r', fixture, str(ROOT / 'attachment.php')],
+                                text=True, capture_output=True, timeout=15)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('<bdi>1920 × 1080 العربية &lt;script&gt;bad&lt;/script&gt;</bdi>', result.stdout)
+        self.assertIn('Back to <bdi>日本語 العربية</bdi>', result.stdout)
+        self.assertIn('https://example.test/parent', result.stdout)
+        self.assertNotIn('<script>bad</script>', result.stdout)
+
     def test_no_forced_ltr_or_new_runtime_scripts(self):
         for name in ('comments.php', 'attachment.php', '404.php', 'inc/content-discovery.php', 'inc/template-tags.php'):
             source = (ROOT / name).read_text()
