@@ -44,6 +44,8 @@ def required_browser_screenshots():
         "footer-bidi-1440-ltr.png": 1440,
         "footer-blank-identity-390-rtl-400-forced-colors.png": 390,
         "footer-blank-identity-1440-ltr.png": 1440,
+        "post-navigation-bidi-390-rtl-400-forced-colors.png": None,
+        "post-navigation-bidi-1440-ltr.png": None,
         "author-blank-identity-390-rtl-400-forced-colors.png": None,
         "author-blank-identity-1440-ltr.png": None,
         "header-bidi-390-rtl-400-forced-colors.png": 390,

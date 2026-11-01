@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Isolate mixed RTL/CJK/Latin titles in native WordPress previous/next post navigation using `bdi`, retaining Core adjacent-post selection, localized context labels, Gutenberg parity and zero additional runtime assets. Add executable PHP template checks, disposable real WordPress/Chromium seven-width, 400%, Axe, keyboard and forced-colors regression and two mandatory screenshots. Pending exact-HEAD Actions and visual acceptance.
+
 + Recover a readable, localized author archive heading when WordPress Core exposes an empty or Unicode-invisible display name; omit invisible biography text and suppress nameless classic byline links while retaining native author URLs, dates, CJK/RTL isolation and Core author blocks. Add executable PHP cases, a disposable real-WordPress author fixture, seven-width/400%/Axe/keyboard/forced-colors checks and two mandatory exact-SHA screenshots. Pending new-HEAD Actions and visual acceptance.
 
 + Restore a localized, visible Home identity in the Core footer when the site title is empty or Unicode-invisible, omit empty taglines and avoid inventing a copyright owner. Preserve native menus, widgets, Core identity, bidi isolation and CSS/JS budgets; add 12 executable PHP cases, seven-width real Chromium accessibility coverage and two required exact-SHA screenshots. Pending Actions acceptance.
