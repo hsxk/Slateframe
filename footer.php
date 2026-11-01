@@ -14,9 +14,9 @@
 
 	<div class="slateframe-shell slateframe-footer-inner">
 		<div class="slateframe-footer-brand">
-			<strong><?php bloginfo( 'name' ); ?></strong>
+			<strong><bdi><?php bloginfo( 'name' ); ?></bdi></strong>
 			<?php if ( get_bloginfo( 'description' ) ) : ?>
-				<p><?php bloginfo( 'description' ); ?></p>
+				<p><bdi><?php bloginfo( 'description' ); ?></bdi></p>
 			<?php endif; ?>
 		</div>
 
@@ -37,7 +37,7 @@
 		<?php endif; ?>
 
 		<p class="slateframe-copyright">
-			&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?> <?php bloginfo( 'name' ); ?>
+			<bdi>&copy; <?php echo esc_html( wp_date( 'Y' ) ); ?></bdi> <bdi><?php bloginfo( 'name' ); ?></bdi>
 		</p>
 	</div>
 </footer>
