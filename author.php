@@ -9,7 +9,9 @@ get_header();
 global $wp_query;
 
 $slateframe_author_id  = get_queried_object_id();
-$slateframe_author_bio = get_the_author_meta( 'description', $slateframe_author_id );
+$slateframe_author_bio  = get_the_author_meta( 'description', $slateframe_author_id );
+$slateframe_author_name = get_the_author_meta( 'display_name', $slateframe_author_id );
+$slateframe_author_name = slateframe_has_readable_label( $slateframe_author_name ) ? $slateframe_author_name : __( 'Author', 'slateframe' );
 
 /**
  * Filters optional avatar/profile media rendered by the author archive.
@@ -30,8 +32,8 @@ $slateframe_author_avatar = is_string( $slateframe_author_avatar ) ? $slateframe
 				<div class="slateframe-author-avatar"><?php echo wp_kses_post( $slateframe_author_avatar ); ?></div>
 			<?php endif; ?>
 			<div class="slateframe-author-copy">
-				<h1 class="slateframe-page-title"><bdi><?php echo esc_html( get_the_author_meta( 'display_name', $slateframe_author_id ) ); ?></bdi></h1>
-				<?php if ( $slateframe_author_bio ) : ?>
+				<h1 class="slateframe-page-title"><bdi><?php echo esc_html( $slateframe_author_name ); ?></bdi></h1>
+				<?php if ( slateframe_has_readable_label( $slateframe_author_bio ) ) : ?>
 					<p class="slateframe-archive-description"><bdi><?php echo esc_html( $slateframe_author_bio ); ?></bdi></p>
 				<?php endif; ?>
 			</div>
