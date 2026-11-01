@@ -26,4 +26,4 @@ ownership with WordPress. The theme supplies only presentation.
 - Keep static CSS budgets unchanged (publishing 4500 bytes, Core Post Terms
   450 bytes, Core Categories 550 bytes). No test may be skipped or relaxed.
 
-This change does not touch time2log.com or import legacy site content.
+No production site was accessed, and no legacy site content was imported.
