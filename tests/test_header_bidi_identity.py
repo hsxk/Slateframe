@@ -20,8 +20,10 @@ function bloginfo($key) {
         ENT_QUOTES, 'UTF-8');
 }
 function get_bloginfo($key) {
+    if ($key === 'name') { return 'العربية / 日本語 — Slateframe'; }
     return getenv('EMPTY_TAGLINE') === '1' ? '' : '日本語と中文 / العربية';
 }
+function has_custom_logo() { return false; }
 function wp_head() {}
 function body_class() { echo 'class="home"'; }
 function wp_body_open() {}
