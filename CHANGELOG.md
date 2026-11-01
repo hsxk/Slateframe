@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Recover a readable, localized author archive heading when WordPress Core exposes an empty or Unicode-invisible display name; omit invisible biography text and suppress nameless classic byline links while retaining native author URLs, dates, CJK/RTL isolation and Core author blocks. Add executable PHP cases, a disposable real-WordPress author fixture, seven-width/400%/Axe/keyboard/forced-colors checks and two mandatory exact-SHA screenshots. Pending new-HEAD Actions and visual acceptance.
+
 + Restore a localized, visible Home identity in the Core footer when the site title is empty or Unicode-invisible, omit empty taglines and avoid inventing a copyright owner. Preserve native menus, widgets, Core identity, bidi isolation and CSS/JS budgets; add 12 executable PHP cases, seven-width real Chromium accessibility coverage and two required exact-SHA screenshots. Pending Actions acceptance.
 
 + Harden blank header identity against stale/non-image Core logo IDs and invisible taglines; match the Core display-filtered title, preserve 44px touch targets, and extend executable PHP regression from 16 to 19 cases. Exact new-HEAD Actions and screenshot review pending.
