@@ -76,7 +76,7 @@ class EntryBylineBidi(unittest.TestCase):
         self.assertIn('slateframe-published', html)
 
     def test_invisible_only_author_does_not_create_nameless_link(self):
-        for value in ('&nbsp;', '\\u200b', '\\ufe0f', '\\u3164', '\\u2800', '\\u0301'):
+        for value in ('&nbsp;', '\u200b', '\ufe0f', '\u3164', '\u2800', '\u0301'):
             with self.subTest(value=repr(value)):
                 html, isolates = self.render(AUTHOR_NAME=value)
                 self.assertEqual(len([path for path in isolates if 'time' not in path]), 0)
