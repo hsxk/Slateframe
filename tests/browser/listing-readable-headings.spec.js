@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
-const { execFileSync } = require('node:child_process');
 const fs = require('node:fs/promises');
+const { execFileSync } = require('node:child_process');
 const AxeBuilder = require('@axe-core/playwright').default;
 const { setRootTextScale } = require('./support/root-text-scale');
 
@@ -8,18 +8,6 @@ const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], 
   encoding: 'utf8', timeout: 30000,
 });
 const widths = [320, 375, 390, 412, 768, 1440, 1920];
-
-async function installRealCoreTemplate(page, php) {
-  const markup = wp('eval', php);
-  await page.goto('/', { waitUntil: 'networkidle' });
-  await page.locator('main#main-content').evaluate((node, html) => {
-    const parsed = new DOMParser().parseFromString(html, 'text/html');
-    const replacement = parsed.querySelector('main#main-content');
-    if (!replacement) throw new Error('Real WordPress template did not render a main landmark');
-    node.replaceWith(replacement);
-  }, markup);
-  return page.locator('main#main-content .slateframe-page-header');
-}
 
 async function checkReadableResponsiveHeading(page, root, expected) {
   const heading = root.locator('h1.slateframe-page-title');
@@ -57,30 +45,36 @@ async function checkReadableResponsiveHeading(page, root, expected) {
 
 test('Core posts index with invisible site title keeps a readable H1', async ({ page }, info) => {
   test.skip(!process.env.CI || info.project.use.viewport?.width !== 390,
-    'One real WordPress template covers seven widths.');
+    'One real WordPress route covers seven widths.');
   test.setTimeout(180000);
-  const root = await installRealCoreTemplate(page, [
-    'add_filter("pre_option_blogname", static function () { return "\\u{200B}"; });',
-    'ob_start(); include get_stylesheet_directory() . "/index.php"; echo ob_get_clean();',
-  ].join(' '));
-  await checkReadableResponsiveHeading(page, root, 'Latest posts');
-  await expect(root.locator('h1 bdi')).toHaveText('Latest posts');
-  await page.emulateMedia({ forcedColors: 'active' });
-  await root.screenshot({ path: 'test-artifacts/screenshots/index-readable-fallback-390-rtl-400-forced-colors.png', animations: 'disabled' });
-  await page.emulateMedia({ forcedColors: 'none' });
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await setRootTextScale(page, 16, 'ltr');
-  await root.screenshot({ path: 'test-artifacts/screenshots/index-readable-fallback-1440-ltr.png', animations: 'disabled' });
+  // Exercise the actual HTTP route. WP-CLI-rendered fragments omit conditional
+  // styles and can cause false overflow failures at 400% text zoom.
+  const originalTitle = wp('option', 'get', 'blogname').replace(/\r?\n$/, '');
+  try {
+    wp('option', 'update', 'blogname', '\u200B');
+    await page.goto('/', { waitUntil: 'networkidle' });
+    const root = page.locator('main#main-content .slateframe-page-header');
+    await checkReadableResponsiveHeading(page, root, 'Latest posts');
+    await expect(root.locator('h1 bdi')).toHaveText('Latest posts');
+    await page.emulateMedia({ forcedColors: 'active' });
+    await root.screenshot({ path: 'test-artifacts/screenshots/index-readable-fallback-390-rtl-400-forced-colors.png', animations: 'disabled' });
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await setRootTextScale(page, 16, 'ltr');
+    await root.screenshot({ path: 'test-artifacts/screenshots/index-readable-fallback-1440-ltr.png', animations: 'disabled' });
+  } finally {
+    wp('option', 'update', 'blogname', originalTitle);
+  }
 });
 
 test('Core search with invisible query keeps an H1 and native form', async ({ page }, info) => {
   test.skip(!process.env.CI || info.project.use.viewport?.width !== 390,
-    'One real WordPress template covers seven widths.');
+    'One real WordPress route covers seven widths.');
   test.setTimeout(180000);
-  const root = await installRealCoreTemplate(page, [
-    'add_filter("get_search_query", static function () { return "\\u{200B}"; });',
-    'ob_start(); include get_stylesheet_directory() . "/search.php"; echo ob_get_clean();',
-  ].join(' '));
+  // WordPress must enqueue the real is_search() form stylesheet.
+  await page.goto('/?s=%E2%80%8B', { waitUntil: 'networkidle' });
+  const root = page.locator('main#main-content .slateframe-page-header');
+  await expect(page.locator('link#slateframe-search-form-css')).toHaveCount(1);
   await checkReadableResponsiveHeading(page, root, 'Search results');
   await expect(root.locator('h1 bdi')).toHaveCount(0);
   const form = root.locator('form.slateframe-search-form');
