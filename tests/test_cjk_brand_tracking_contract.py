@@ -25,7 +25,8 @@ class CjkBrandTrackingContract(unittest.TestCase):
                        "'ja', 'zh-Hans', 'zh-Hant', 'ko-KR', 'en'",
                        "'ltr', 'rtl'", "'100%', '400%'",
                        'forcedColors', 'toBeFocused()', 'fullPage: true',
-                       'cjk-brand-', "rootLang"):
+                       'cjk-brand-', "rootLang", "brand.locator('bdi')",
+                       "node.querySelector('bdi').textContent"):
             with self.subTest(marker=marker):
                 self.assertIn(marker, spec)
 
