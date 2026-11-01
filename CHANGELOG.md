@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Hide unreadable attachment metadata rows and Unicode-invisible classic image, video, audio and featured-hero captions without affecting native Core media, Gutenberg blocks, CSS/JS budgets or readable multilingual content. Add executable PHP and real WordPress/Chromium regression evidence.
+
 + Suppress orphaned classic taxonomy footer labels when Core category/tag HTML filters return whitespace, empty anchors, invisible Unicode entities or invalid values. Keep independently readable groups, Core links, 44px targets, CJK/RTL isolation and existing CSS/JS budgets; add executable PHP and real WordPress browser regressions with mandatory exact-SHA visual evidence. Pending Actions and manual review.
 
 + Restore the localized Home route in the native WordPress page-menu fallback when a filtered static-front-page list still contains other pages but omits the front page. Use Core HTML Tag Processor to avoid duplicate Home links, preserve page hierarchy and 44px navigation targets; add PHP and real-WordPress responsive, RTL/CJK, 400%, Axe, keyboard and screenshot regressions. Pending exact-HEAD Actions and visual acceptance.

@@ -69,7 +69,7 @@ while ( have_posts() ) :
 					<?php if ( $slateframe_image_valid ) : ?>
 						<figure class="alignwide">
 							<?php echo $slateframe_image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+							<?php if ( slateframe_has_readable_label( $slateframe_caption ) ) : ?>
 								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
 							<?php endif; ?>
 						</figure>
@@ -87,7 +87,7 @@ while ( have_posts() ) :
 						?>
 						<figure class="alignwide">
 							<?php echo $slateframe_video_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+							<?php if ( slateframe_has_readable_label( $slateframe_caption ) ) : ?>
 								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
 							<?php endif; ?>
 						</figure>
@@ -107,7 +107,7 @@ while ( have_posts() ) :
 						?>
 						<figure class="alignwide">
 							<?php echo $slateframe_audio_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php if ( '' !== trim( $slateframe_caption ) ) : ?>
+							<?php if ( slateframe_has_readable_label( $slateframe_caption ) ) : ?>
 								<figcaption class="wp-caption-text"><?php echo wp_kses_post( $slateframe_caption ); ?></figcaption>
 							<?php endif; ?>
 						</figure>

@@ -44,6 +44,7 @@ class WP_HTML_Tag_Processor {
 	}
 	public function get_updated_html() { return $this->html; }
 }
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
 $cases = 0;
 function check_case( $condition, $message ) {
@@ -107,4 +108,8 @@ $srcset_only = render_case( array(
 check_case( false !== strpos( $srcset_only, '<figure class="slateframe-shell slateframe-entry-hero">' ), 'Valid srcset-only hero lost figure' );
 check_case( false !== strpos( $srcset_only, 'srcset="/small.jpg 1x, /large.jpg 2x"' ), 'Valid srcset-only hero lost candidates' );
 check_case( false !== strpos( $srcset_only, 'fetchpriority="high"' ), 'Valid srcset-only hero lost priority' );
+foreach ( array( '&#x200B;', '<em></em>', '&#x3164;', "\u{0301}" ) as $hidden_caption ) {
+	$hidden = render_case( array( 'thumbnail' => true, 'html' => '<img src="/photo.jpg">', 'caption' => $hidden_caption ) );
+	check_case( false === strpos( $hidden, '<figcaption' ), 'Invisible featured caption created an empty figcaption' );
+}
 echo "Featured media boundaries: {$cases} cases passed\\n";

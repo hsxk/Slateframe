@@ -1,0 +1,55 @@
+<?php
+/** Exercise real Slateframe media detail normalization without WordPress boot. */
+define( 'ABSPATH', __DIR__ . '/' );
+$GLOBALS['sf_media_details_filter'] = null;
+function absint( $value ) { return abs( (int) $value ); }
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
+function wp_get_attachment_metadata( $id ) { return array( 'width' => 1200, 'height' => 900, 'filesize' => 2048 ); }
+function get_post_mime_type( $id ) { return 'image/png'; }
+function __( $text, $domain ) { return $text; }
+function number_format_i18n( $number ) { return (string) $number; }
+function size_format( $bytes ) { return '2 KB'; }
+function apply_filters( $name, $details, ...$args ) {
+	return 'slateframe_attachment_details' === $name && null !== $GLOBALS['sf_media_details_filter']
+		? $GLOBALS['sf_media_details_filter'] : $details;
+}
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+$cases = 0;
+function sf_media_assert( $ok, $message ) {
+	global $cases;
+	if ( ! $ok ) { throw new RuntimeException( $message ); }
+	++$cases;
+}
+$base = slateframe_attachment_details( 42 );
+sf_media_assert( 'image/png' === $base['File type'], 'Native MIME missing' );
+sf_media_assert( '1200 × 900 px' === $base['Dimensions'], 'Native dimensions missing' );
+sf_media_assert( '2 KB' === $base['File size'], 'Native filesize missing' );
+$GLOBALS['sf_media_details_filter'] = new stdClass();
+sf_media_assert( $base === slateframe_attachment_details( 42 ), 'Malformed filter should preserve native details' );
+$GLOBALS['sf_media_details_filter'] = array(
+	'日本語 العربية' => '写真 1200 × 900',
+	'Visible punctuation' => '&amp;',
+	'Numeric zero' => '0',
+	'&#x200B;' => 'Hidden label',
+	'<span></span>' => 'HTML-only label',
+	'Combining mark' => "\u{0301}",
+	'Braille blank' => '&#x2800;',
+	'Hangul filler' => '&#x3164;',
+	'Zero width value' => '<span>&#x200B;</span>',
+	'Whitespace value' => " \t\n",
+	'Invalid array' => array( 'unsafe' ),
+	'Invalid object' => new stdClass(),
+	'Empty value' => '',
+	'' => 'Visible but no key',
+);
+$result = slateframe_attachment_details( 42 );
+sf_media_assert( 3 === count( $result ), 'Unreadable metadata rows were not suppressed' );
+sf_media_assert( '写真 1200 × 900' === $result['日本語 العربية'], 'CJK/RTL value changed' );
+sf_media_assert( '&amp;' === $result['Visible punctuation'], 'Entity punctuation should remain unchanged for escaping' );
+sf_media_assert( '0' === $result['Numeric zero'], 'Visible numeric zero was dropped' );
+foreach ( array( '&#x200B;', '<span></span>', 'Combining mark', 'Braille blank', 'Hangul filler', 'Zero width value', 'Whitespace value', 'Invalid array', 'Invalid object', 'Empty value', '' ) as $key ) {
+	sf_media_assert( ! array_key_exists( $key, $result ), 'Unreadable metadata row leaked: ' . $key );
+}
+$GLOBALS['sf_media_details_filter'] = array( 'Name' => 'A & B', 'عنوان' => '日本語' );
+sf_media_assert( 2 === count( slateframe_attachment_details( 42 ) ), 'Visible filtered labels dropped' );
+echo "Media metadata readability: {$cases} assertions passed\n";

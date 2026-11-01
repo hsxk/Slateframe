@@ -58,6 +58,15 @@ class BrowserFixtureIsolationContractTest(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, source)
 
+    def test_media_caption_fixture_cleans_up_attachment_post_and_plugin(self):
+        source = (BROWSER / "media-readable-caption.spec.js").read_text(encoding="utf-8")
+        for marker in ("wp('media', 'import'", "wp('post', 'meta', 'update'",
+                       "finally {", "fs.rm(plugin", "flag: 'wx'",
+                       "wp_delete_attachment(", "wp('post', 'delete'",
+                       "media-readable-attachment-390-rtl-400-forced-colors.png"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, source)
+
     def test_readonly_phase_preserves_every_other_browser_suite(self):
         specs = list(BROWSER.glob("*.spec.js"))
         self.assertGreater(len(specs), 10)
