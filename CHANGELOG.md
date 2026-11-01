@@ -4,7 +4,7 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
-+ Preserve WordPress Core archive title prefixes while isolating mixed-script listing headings (author, archive, posts index/site name) and localized search result counts with native `bdi`; add executable PHP contracts and real WordPress seven-width RTL/400%/Axe/forced-colors screenshot coverage. Pending exact-HEAD Actions and visual acceptance.
++ Preserve WordPress Core archive title prefixes while isolating mixed-script listing headings (author name and biography, archive, posts index/site name) and localized search result counts with native `bdi`; add executable PHP contracts and real WordPress seven-width RTL/400%/Axe/forced-colors screenshot coverage. Pending exact-HEAD Actions and visual acceptance.
 
 + Isolate WordPress theme-owned mixed-script titles across single posts, pages, attachments, archive cards, related reading and 404 recovery with native `bdi`; preserve Core Post Title blocks, link semantics and existing typography. Add PHP lint/static contracts and real Chromium 400% RTL/Axe screenshots.
 
