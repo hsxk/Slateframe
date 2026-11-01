@@ -37,6 +37,7 @@ test('published metadata preserves Core dates and isolates mixed-script text', a
       }));
       expect(computed.bidi).toBe('isolate');
       expect(computed.tag).toBe('A');
+      expect(await taxonomyLink.evaluate(node => getComputedStyle(node).display)).toBe('inline-block');
       await taxonomyLink.evaluate(node => { node.textContent = '日本語 العربية 2026'; });
       expect(await taxonomyLink.getAttribute('href')).toBe(originalHref);
     }
@@ -52,6 +53,11 @@ test('published metadata preserves Core dates and isolates mixed-script text', a
           }));
           const label = surface.label + ' ' + width + ' ' + direction + ' ' + font;
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          if (taxonomyLink && [320, 390, 1440].includes(width)) {
+            const target = await taxonomyLink.boundingBox();
+            expect(target?.width ?? 0, label + ' category target width').toBeGreaterThanOrEqual(43);
+            expect(target?.height ?? 0, label + ' category target height').toBeGreaterThanOrEqual(43);
+          }
           expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);
           expect(state.right, label + ' right').toBeLessThanOrEqual(width + 1);
         }
