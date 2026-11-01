@@ -78,7 +78,7 @@ test('real WordPress taxonomy archive keeps its Core title and RTL isolation', a
   try {
     post = wp('post', 'create', '--post_type=post', '--post_status=publish',
       '--post_title=Archive listing ' + slug, '--porcelain');
-    wp('post', 'term', 'set', post, 'category', category);
+    wp('post', 'term', 'set', post, 'category', slug);
     await page.goto('/?cat=' + category, { waitUntil: 'networkidle' });
     const title = page.locator('.slateframe-page-header .slateframe-page-title').first();
     await expect(title).toBeVisible();
