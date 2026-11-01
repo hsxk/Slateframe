@@ -43,8 +43,8 @@ get_header();
 			<?php
 			the_post_navigation(
 				array(
-					'prev_text' => '<span class="slateframe-post-navigation-label">' . esc_html__( 'Previous post', 'slateframe' ) . '</span><span>%title</span>',
-					'next_text' => '<span class="slateframe-post-navigation-label">' . esc_html__( 'Next post', 'slateframe' ) . '</span><span>%title</span>',
+					'prev_text' => '<span class="slateframe-post-navigation-label">' . esc_html__( 'Previous post', 'slateframe' ) . '</span><span><bdi>%title</bdi></span>',
+					'next_text' => '<span class="slateframe-post-navigation-label">' . esc_html__( 'Next post', 'slateframe' ) . '</span><span><bdi>%title</bdi></span>',
 				)
 			);
 			?>
