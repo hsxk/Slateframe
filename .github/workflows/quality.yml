@@ -1025,7 +1025,10 @@ jobs:
             numeric-metadata-listing-1440-ltr.png \
             numeric-metadata-article-390-rtl-400.png \
             numeric-metadata-article-390-rtl-400-forced-colors.png \
-            numeric-metadata-article-1440-ltr.png; do
+            numeric-metadata-article-1440-ltr.png \
+            taxonomy-footer-390-rtl-400.png \
+            taxonomy-footer-390-rtl-400-forced-colors.png \
+            taxonomy-footer-1440-ltr.png; do
             test -s "test-artifacts/screenshots/$screenshot" || { echo "Missing RTL/CJK listing/metadata evidence: $screenshot" >&2; exit 1; }
           done
           # Require three-level Core Walker navigation evidence across responsive RTL/LTR states.
