@@ -32,3 +32,15 @@ Gutenberg presentation parity. No runtime CSS/JS, extra requests or dependencies
   colors and screenshots, then deletes all temporary data in `finally`.
 - Exact-HEAD Theme quality, Photography, visual artifact inspection and independent
   distribution ZIP byte identity are required before merge.
+
+## Native audio/video shortcode source integrity
+
+Core audio and video shortcodes may render a `src` on the player or one or more
+nested `<source src>` candidates. Slateframe checks the sanitized player for a
+nonblank source before displaying a classic attachment figure and its caption.
+When a shortcode filter produces an empty or source-less media shell, the theme
+omits the nonfunctional preview while retaining the safe original-file link,
+attachment content and metadata. The guard uses WordPress's HTML Tag Processor;
+it adds no player library, JavaScript, remote request or custom media handling.
+Executable PHP regressions cover both media types, blank sources and later
+valid candidates.

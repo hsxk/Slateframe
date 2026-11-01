@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Prevent source-less Core audio/video shortcode filter output from creating nonfunctional attachment figures or orphaned captions. Retain valid direct and nested media sources, original-file recovery, native player behavior and zero additional runtime assets; extend executable PHP media regressions.
+
 + Normalize fallback WordPress Core attachment metadata through the same readable-label/value filter when a plugin returns an invalid metadata array; suppress invisible native MIME values without losing valid dimensions, filesize, or CJK/RTL terms. Add executable regression cases.
 
 + Present classic attachment metadata as native definition-list term/value pairs with independent bidi isolation and 400% responsive reflow; preserve Core media and sanitize rules. Improve the exact-SHA 1440px media screenshot by resetting scroll after focus verification, with executable PHP and browser semantic regressions.
