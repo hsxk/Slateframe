@@ -274,7 +274,7 @@ slateframe_attachment_check( false === strpos( $empty_audio, '<figure class="ali
 slateframe_attachment_check( false === strpos( $empty_audio, 'Orphan audio caption' ), 'Empty audio leaked caption' );
 $filtered_video = slateframe_attachment_render( array(
     'url' => 'https://example.org/video.mp4', 'mime' => 'video/mp4',
-    'video_shortcode' => '<video controls></video><script>alert(1)</script>', 'caption' => '<em>Safe caption</em>',
+    'video_shortcode' => '<video controls><source src="/safe.mp4"></video><script>alert(1)</script>', 'caption' => '<em>Safe caption</em>',
 ) );
 slateframe_attachment_check( false === strpos( $filtered_video, '<script' ), 'Filtered video script leaked' );
 slateframe_attachment_check( false !== strpos( $filtered_video, '<figcaption class="wp-caption-text"><em>Safe caption</em></figcaption>' ), 'Filtered video lost safe caption' );
