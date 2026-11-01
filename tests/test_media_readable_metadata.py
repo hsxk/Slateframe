@@ -12,12 +12,13 @@ class MediaReadableMetadata(unittest.TestCase):
         result = subprocess.run(['php', str(fixture)], cwd=ROOT,
                                 capture_output=True, text=True, timeout=20)
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn('Media metadata readability: 20 assertions passed', result.stdout)
+        self.assertIn('Media metadata readability: 23 assertions passed', result.stdout)
 
     def test_runtime_reuses_readability_for_details_and_captions(self):
         tags = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
         attachment = (ROOT / 'attachment.php').read_text(encoding='utf-8')
         self.assertIn('! slateframe_has_readable_label( $label )', tags)
+        self.assertIn('$filtered = $details;', tags)
         self.assertIn('! slateframe_has_readable_label( $value )', tags)
         self.assertIn('if ( slateframe_has_readable_label( $caption ) )', tags)
         self.assertEqual(attachment.count('if ( slateframe_has_readable_label( $slateframe_caption ) )'), 3)

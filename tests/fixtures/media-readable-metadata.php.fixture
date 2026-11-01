@@ -5,7 +5,7 @@ $GLOBALS['sf_media_details_filter'] = null;
 function absint( $value ) { return abs( (int) $value ); }
 function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 function wp_get_attachment_metadata( $id ) { return array( 'width' => 1200, 'height' => 900, 'filesize' => 2048 ); }
-function get_post_mime_type( $id ) { return 'image/png'; }
+function get_post_mime_type( $id ) { return isset( $GLOBALS['sf_media_mime_override'] ) ? $GLOBALS['sf_media_mime_override'] : 'image/png'; }
 function __( $text, $domain ) { return $text; }
 function number_format_i18n( $number ) { return (string) $number; }
 function size_format( $bytes ) { return '2 KB'; }
@@ -26,6 +26,14 @@ sf_media_assert( '1200 × 900 px' === $base['Dimensions'], 'Native dimensions mi
 sf_media_assert( '2 KB' === $base['File size'], 'Native filesize missing' );
 $GLOBALS['sf_media_details_filter'] = new stdClass();
 sf_media_assert( $base === slateframe_attachment_details( 42 ), 'Malformed filter should preserve native details' );
+$GLOBALS['sf_media_mime_override'] = "\u{200B}";
+$invalid_fallback = slateframe_attachment_details( 42 );
+sf_media_assert( ! array_key_exists( 'File type', $invalid_fallback ), 'Malformed filter exposed an invisible native MIME' );
+sf_media_assert( '1200 × 900 px' === $invalid_fallback['Dimensions'], 'Malformed filter lost readable native dimensions' );
+$GLOBALS['sf_media_details_filter'] = null;
+$unfiltered = slateframe_attachment_details( 42 );
+sf_media_assert( ! array_key_exists( 'File type', $unfiltered ), 'Unfiltered invisible native MIME escaped normalization' );
+unset( $GLOBALS['sf_media_mime_override'] );
 $GLOBALS['sf_media_details_filter'] = array(
 	'日本語 العربية' => '写真 1200 × 900',
 	'Visible punctuation' => '&amp;',
