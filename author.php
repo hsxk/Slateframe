@@ -8,7 +8,7 @@
 get_header();
 global $wp_query;
 
-$slateframe_author_id  = get_queried_object_id();
+$slateframe_author_id   = get_queried_object_id();
 $slateframe_author_bio  = get_the_author_meta( 'description', $slateframe_author_id );
 $slateframe_author_name = get_the_author_meta( 'display_name', $slateframe_author_id );
 if ( ! slateframe_has_readable_label( $slateframe_author_name ) ) {
