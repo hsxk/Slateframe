@@ -83,3 +83,73 @@ test('Knowledge procedure text fragments stay inside the real Gutenberg canvas i
     }
   }
 });
+
+test('Knowledge Gutenberg glyphs remain visible at 400% in both writing directions', async ({ page }, testInfo) => {
+  const width = testInfo.project.use.viewport?.width;
+  test.skip(!editorPostId || ![390, 1440].includes(width), 'Requires the real WordPress editor fixture at mobile or desktop width.');
+
+  await openAuthenticatedEditor(page, editorPostId);
+  const framed = (await page.locator('iframe[name="editor-canvas"]').count()) > 0;
+  const canvas = framed ? page.frameLocator('iframe[name="editor-canvas"]') : page;
+  const knowledge = canvas.locator('.slateframe-knowledge-procedure').first();
+  await expect(knowledge).toBeVisible();
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+
+  for (const direction of ['ltr', 'rtl']) {
+    await knowledge.evaluate((node, dir) => {
+      node.dir = dir;
+      node.ownerDocument.documentElement.style.fontSize = '64px';
+      const paragraph = node.querySelector('p');
+      if (paragraph) {
+        paragraph.textContent = 'العربية 中文 日本語 — a long multilingual authoring sentence that must wrap without clipped glyphs at 400 percent';
+      }
+    }, direction);
+    await knowledge.scrollIntoViewIfNeeded();
+
+    const metrics = await knowledge.evaluate((node) => {
+      const root = node.ownerDocument.documentElement;
+      const viewport = root.clientWidth;
+      const region = node.getBoundingClientRect();
+      const walker = node.ownerDocument.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+      const escaped = [];
+      let measured = 0;
+      while (walker.nextNode()) {
+        const text = walker.currentNode;
+        if (!text.textContent.trim()) continue;
+        const range = node.ownerDocument.createRange();
+        range.selectNodeContents(text);
+        for (const rect of range.getClientRects()) {
+          if (!rect.width || !rect.height) continue;
+          measured += 1;
+          if (rect.left < Math.max(-2, region.left - 2) ||
+              rect.right > Math.min(viewport + 2, region.right + 2)) {
+            escaped.push({ text: text.textContent.trim().slice(0, 72), left: rect.left, right: rect.right });
+          }
+        }
+      }
+      return {
+        rootFont: getComputedStyle(root).fontSize,
+        direction: getComputedStyle(node).direction,
+        viewport,
+        region: { left: region.left, right: region.right },
+        overflow: root.scrollWidth - viewport,
+        measured,
+        escaped,
+      };
+    });
+
+    const label = `${width}px ${direction} at 400%`;
+    expect(metrics.rootFont, label).toBe('64px');
+    expect(metrics.direction, label).toBe(direction);
+    expect(metrics.measured, label).toBeGreaterThan(8);
+    expect(metrics.overflow, label).toBeLessThanOrEqual(1);
+    expect(metrics.region.left, label).toBeGreaterThanOrEqual(-2);
+    expect(metrics.region.right, label).toBeLessThanOrEqual(metrics.viewport + 2);
+    expect(metrics.escaped, label).toEqual([]);
+
+    await testInfo.attach(`knowledge-editor-${width}-${direction}-400-forced-colors`, {
+      body: await knowledge.screenshot(),
+      contentType: 'image/png',
+    });
+  }
+});
