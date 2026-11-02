@@ -57,7 +57,8 @@ test('Core listing cards omit filtered broken thumbnails but retain accessible t
       await expect(page.locator('.slateframe-card-title a')).toContainText(slug);
       await expect(page.locator('.slateframe-card a a')).toHaveCount(0);
     }
-    await page.goto(search + '&sf_card_nested_link=1', { waitUntil: 'networkidle' });
+    // Keep the original broken-source screenshot distinct from nested-link evidence.
+    await page.goto(search + '&sf_card_fragment=1', { waitUntil: 'networkidle' });
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const direction of ['ltr', 'rtl']) {
