@@ -161,7 +161,7 @@ function slateframe_card_thumbnail_markup( $post_id ) {
 	// This card owns a decorative permalink. Filtered thumbnails must not
 	// nest another interactive control inside it. Preserve noninteractive
 	// wrappers, responsive image candidates, and Core's original attributes.
-	$markup_tags = new WP_HTML_Tag_Processor( $html );
+	$markup_tags       = new WP_HTML_Tag_Processor( $html );
 	$interactive_roles = array(
 		'button',
 		'checkbox',
@@ -182,7 +182,7 @@ function slateframe_card_thumbnail_markup( $post_id ) {
 		'textbox',
 		'treeitem',
 	);
-	$interactive = array(
+	$interactive       = array(
 		'A',
 		'AREA',
 		'AUDIO',
