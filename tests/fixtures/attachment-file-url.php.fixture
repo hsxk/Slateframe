@@ -2,9 +2,12 @@
 /** Executable Core attachment recovery URL boundary fixture. */
 define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
 function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
-function esc_url_raw( $url ) {
-	if ( preg_match( '/^(?:javascript|data|vbscript):/i', $url ) ) {
-		return '';
+function esc_url_raw( $url, $protocols = null ) {
+	if ( preg_match( '/^([a-z][a-z0-9+.-]*):/i', $url, $matches ) ) {
+		$scheme = strtolower( $matches[1] );
+		if ( in_array( $scheme, array( 'javascript', 'data', 'vbscript' ), true ) || ( is_array( $protocols ) && ! in_array( $scheme, $protocols, true ) ) ) {
+			return '';
+		}
 	}
 	return trim( $url );
 }
@@ -33,6 +36,14 @@ $cases = array(
 	array( false, false, 'boolean' ),
 	array( 42, false, 'number' ),
 	array( array( 'url' ), false, 'array' ),
+	array( '//cdn.example.org/photo.jpg', true, 'protocol-relative CDN' ),
+	array( 'https://example.org/photo.jpg#fragment', true, 'HTTP fragment' ),
+	array( 'mailto:editor@example.org', false, 'email is not a file' ),
+	array( 'tel:+12025550123', false, 'telephone is not a file' ),
+	array( 'ftp://example.org/photo.jpg', false, 'FTP is not web media' ),
+	array( 'ftps://example.org/photo.jpg', false, 'FTPS is not web media' ),
+	array( 'news:example.org', false, 'news protocol' ),
+	array( 'irc://example.org/channel', false, 'chat protocol' ),
 );
 foreach ( $cases as $case ) {
 	$url = slateframe_attachment_file_url( $case[0] );

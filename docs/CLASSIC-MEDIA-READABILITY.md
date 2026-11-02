@@ -112,3 +112,17 @@ ordinary descriptive alt text remains unchanged. Core image markup, responsive
 sources, Gallery/Lightbox, and editor-owned blocks are not rewritten.
 Executable PHP cases and a disposable real WordPress/Chromium fixture assert
 both image surfaces and axe behavior. No new CSS, JS, or dependencies.
+
+## Web-only original-file recovery links
+
+WordPress's default URL protocol allowlist includes schemes such as mail and FTP.
+An attachment URL filter can therefore return a syntactically sanitized value
+that cannot act as a normal browser media recovery link. Slateframe now passes
+only HTTP and HTTPS to Core `esc_url_raw()` for the classic attachment's
+"Open original file" action. Site-relative, protocol-relative, encoded CJK/RTL,
+query-string, and ordinary HTTP(S) URLs remain available. This restriction
+applies only to the recovery action, not Core media rendering, attachment
+storage, native Gallery/Lightbox, or editor blocks. The isolated PHP fixture
+covers 30 URL cases, while real WordPress/Chromium tests check mailto, FTP,
+telephone, 390px RTL 400% forced-colors, overflow and a mandatory screenshot.
+No CSS, JavaScript, dependency or external request is introduced.

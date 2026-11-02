@@ -32,7 +32,8 @@ function slateframe_attachment_file_url( $url ) {
 		return '';
 	}
 
-	$safe_url = esc_url_raw( $url );
+	// A file-recovery link must not launch mail, FTP, or custom protocol handlers.
+	$safe_url = esc_url_raw( $url, array( 'http', 'https' ) );
 	return is_string( $safe_url ) && slateframe_has_readable_media_url( $safe_url ) ? $safe_url : '';
 }
 

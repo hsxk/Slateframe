@@ -23,6 +23,7 @@ const fixture = [
   "  return '<img src=\"&#x200B;\" srcset=\"&#x3164; 2x\" alt=\"Filtered image\">';",
   '} );',
   "add_filter( 'wp_get_attachment_url', static function ( $url ) {",
+  "  if ( isset( $_GET['sf_non_http_file_url'] ) ) { return 'mailto:editor@example.org'; }",
   "  return isset( $_GET['sf_invisible_file_url'] ) ? '%E2%80%8B' : $url;",
   '} );',
   "add_filter( 'wp_get_attachment_image', static function ( $html ) {",
@@ -108,6 +109,19 @@ test('Core media captions and attachment metadata have readable labels at all wi
       valid_srcset: true, valid_rtl: true,
       encoded_invisible_src: false, encoded_invisible_srcset: false,
     });
+    // Real WordPress protocol sanitization, not only the isolated PHP stub.
+    const recoverySchemes = JSON.parse(wp('eval', `
+      echo wp_json_encode(array(
+        'https' => slateframe_attachment_file_url('https://example.org/写真.jpg') !== '',
+        'relative' => slateframe_attachment_file_url('/写真.jpg') !== '',
+        'mailto' => slateframe_attachment_file_url('mailto:editor@example.org') === '',
+        'ftp' => slateframe_attachment_file_url('ftp://example.org/image.jpg') === '',
+        'tel' => slateframe_attachment_file_url('tel:+12025550123') === ''
+      ));
+    `));
+    expect(recoverySchemes).toEqual({
+      https: true, relative: true, mailto: true, ftp: true, tel: true,
+    });
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
     expect(attachmentId).toMatch(/^\d+$/);
@@ -155,6 +169,16 @@ test('Core media captions and attachment metadata have readable labels at all wi
     const recoveryOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(recoveryOverflow).toBeLessThanOrEqual(1);
     await page.screenshot({ path: 'test-artifacts/screenshots/media-invisible-file-url-390-rtl-400-forced-colors.png', fullPage: true });
+    await page.emulateMedia({ forcedColors: 'none' });
+    // Non-web URLs cannot act as an original-file recovery action.
+    await page.goto(attachmentUrl + '&sf_non_http_file_url=1', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('link', { name: 'Open original file' })).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 900 });
+    await setRootTextScale(page, 64, 'rtl');
+    await page.emulateMedia({ forcedColors: 'active' });
+    const schemeOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(schemeOverflow).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: 'test-artifacts/screenshots/media-non-http-file-url-390-rtl-400-forced-colors.png', fullPage: true });
     await page.emulateMedia({ forcedColors: 'none' });
     await page.goto(heroUrl + '&sf_invisible_alt=1', { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-entry-hero img')).toHaveAttribute('alt', '');

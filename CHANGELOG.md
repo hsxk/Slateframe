@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Restrict classic attachment original-file recovery actions to HTTP(S) through WordPress Core URL sanitization; omit filtered mail/FTP/telephone handlers while retaining relative and CJK/RTL URLs. Expand PHP and real WordPress browser regressions, including mandatory RTL 400% forced-colors evidence, without changing CSS/JS.
+
 + Restore an explicit empty decorative alt when filtered WordPress Core featured or attachment images omit the attribute entirely. Preserve meaningful CJK/RTL alt, native markup, responsive sources and editor parity; add executable PHP and real WordPress/Chromium axe regressions without new CSS/JS.
 
 + Normalize filtered Core media URLs after decoding percent-encoded invisible Unicode; suppress unreadable original-file recovery links and normalize invisible-only image alt to Core's decorative empty alt, preserving readable CJK/RTL and original media markup. Add 54 executable PHP cases and real WordPress browser/a11y evidence without new assets.

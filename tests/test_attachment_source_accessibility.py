@@ -17,7 +17,7 @@ class AttachmentSourceAccessibility(unittest.TestCase):
 
     def test_recovery_url_cases(self):
         self.run_fixture('attachment-file-url.php.fixture',
-                         'Attachment recovery URL: 22 cases passed')
+                         'Attachment recovery URL: 30 cases passed')
 
     def test_filtered_image_alt_cases(self):
         self.run_fixture('image-alt-visibility.php.fixture',
@@ -33,6 +33,7 @@ class AttachmentSourceAccessibility(unittest.TestCase):
         attachment = (ROOT / 'attachment.php').read_text(encoding='utf-8')
         self.assertIn('function slateframe_attachment_file_url( $url )', media)
         self.assertIn('slateframe_has_readable_media_url( $url )', media)
+        self.assertIn("esc_url_raw( $url, array( 'http', 'https' ) )", media)
         self.assertIn('slateframe_attachment_file_url( $slateframe_raw_url )', attachment)
         self.assertIn('function slateframe_normalize_image_alt( $processor )', media)
         self.assertIn('slateframe_normalize_image_alt( $image_processor )', featured)
@@ -47,6 +48,9 @@ class AttachmentSourceAccessibility(unittest.TestCase):
         self.assertIn(name, browser)
         self.assertIn(f'"{name}": 390', contract)
         self.assertIn("sf_invisible_alt", browser)
+        self.assertIn("sf_non_http_file_url", browser)
+        self.assertIn('media-non-http-file-url-390-rtl-400-forced-colors.png', browser)
+        self.assertIn('"media-non-http-file-url-390-rtl-400-forced-colors.png": 390', contract)
         self.assertIn("toHaveAttribute('alt', '')", browser)
 
 
