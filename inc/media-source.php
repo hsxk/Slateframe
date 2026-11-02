@@ -45,9 +45,32 @@ function slateframe_has_web_media_url( $url ) {
 		return false;
 	}
 
+	// Browsers treat leading backslashes as slashes on HTTP(S) pages.
+	// Do not mistake a disguised external authority for a relative file.
+	$leading = substr( $validation_url, 0, 2 );
+	if ( 2 === strspn( $leading, '/\\' ) && false !== strpos( $leading, '\\' ) ) {
+		return false;
+	}
+
 	$scheme = wp_parse_url( $validation_url, PHP_URL_SCHEME );
 	if ( false === $scheme || ( null !== $scheme && ! in_array( strtolower( $scheme ), array( 'http', 'https' ), true ) ) ) {
 		return false;
+	}
+
+	// PHP treats a backslash before @ as userinfo, while browsers treat
+	// it as a path separator. Reject ambiguous authorities, not backslashes
+	// inside ordinary media paths.
+	$authority_start = null;
+	if ( 0 === strpos( $validation_url, '//' ) ) {
+		$authority_start = 2;
+	} elseif ( null !== $scheme && '://' === substr( $validation_url, strlen( $scheme ), 3 ) ) {
+		$authority_start = strlen( $scheme ) + 3;
+	}
+	if ( null !== $authority_start ) {
+		$authority = substr( $validation_url, $authority_start, strcspn( $validation_url, '/?#', $authority_start ) );
+		if ( false !== strpos( $authority, '\\' ) ) {
+			return false;
+		}
 	}
 
 	// Relative media endpoints can be path- or query-only. Absolute and
