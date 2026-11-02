@@ -130,6 +130,47 @@ function slateframe_image_has_source( $src, $srcset ) {
 }
 
 /**
+ * Return a usable Core featured image for a classic listing card.
+ *
+ * A post may retain a thumbnail ID while an image filter returns empty,
+ * non-image, or unplayable markup. Do not leave an empty decorative link in
+ * the card. Keep Core's responsive attributes and original image filters.
+ *
+ * @param int $post_id Current listed post.
+ * @return string Sanitized image HTML, or an empty string.
+ */
+function slateframe_card_thumbnail_markup( $post_id ) {
+	if ( ! has_post_thumbnail( $post_id ) ) {
+		return '';
+	}
+
+	$html = get_the_post_thumbnail(
+		$post_id,
+		'large',
+		array(
+			'loading'  => 'lazy',
+			'decoding' => 'async',
+		)
+	);
+	if ( ! is_string( $html ) || '' === trim( $html ) ) {
+		return '';
+	}
+
+	$html      = wp_kses_post( $html );
+	$processor = new WP_HTML_Tag_Processor( $html );
+	if ( ! $processor->next_tag( 'img' ) ||
+		! slateframe_image_has_source( $processor->get_attribute( 'src' ), $processor->get_attribute( 'srcset' ) ) ) {
+		return '';
+	}
+
+	slateframe_normalize_image_alt( $processor );
+	// Post KSES can strip decoding; restore only fixed, safe Core hints.
+	$processor->set_attribute( 'loading', 'lazy' );
+	$processor->set_attribute( 'decoding', 'async' );
+	return $processor->get_updated_html();
+}
+
+/**
  * Sanitize native Core media shortcode markup without stripping <source>.
  *
  * Post KSES allows video/audio but omits the source element that Core emits

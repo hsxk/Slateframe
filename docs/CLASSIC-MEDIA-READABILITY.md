@@ -153,3 +153,24 @@ endpoints, CJK/RTL filenames and protocol-relative CDNs. Recovery URLs are
 rechecked after Core's `clean_url` filter, including fragment rewrites. Isolated
 PHP fixtures, real WordPress/Chromium media assertions and a required 390px RTL
 400% forced-colors screenshot cover the behavior without adding CSS or JS.
+
+## Classic listing-card thumbnail filters
+
+A WordPress post can retain its featured-image ID even when a plugin filters
+`post_thumbnail_html` to empty, non-image, or unplayable markup. Previously,
+classic index, search, archive and author cards still rendered a decorative
+anchor with no image. The shared Core-first card helper now obtains the
+filtered `get_the_post_thumbnail()` markup once, sanitizes it with
+`wp_kses_post()`, and uses the same HTML Tag Processor, usable web URL
+and explicit decorative-alt guards as classic featured and attachment images.
+The media link is emitted only when a valid image remains. The card's text
+title, date, excerpt, native post link, lazy loading, responsive candidates
+and CJK/RTL text remain intact. Core Query Loop and Gallery blocks are not
+rewritten; no CSS, JavaScript or dependency is added.
+
+Executable PHP tests cover malformed adapter returns, empty, fragment-only,
+non-web, invisible and srcset-only sources, missing alt, multilingual alt and
+unsafe handlers. A disposable WordPress/Chromium search-card fixture checks
+seven widths, LTR/RTL, 100%/400% text, forced colors, axe, and a mandatory
+390px RTL 400% screenshot. Exact-HEAD Actions, visual inspection and
+byte-identical ZIP builds remain required before merge.
