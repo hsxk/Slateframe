@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Parse whitespace-separated ARIA fallback role tokens in filtered classic thumbnail wrappers, so `role="unknown grid"` cannot bypass the composite widget guard; retain inert fallback roles. Extend PHP and disposable real WordPress browser regressions without CSS/JS changes. Pending exact-HEAD Actions.
+
 + Reject composite ARIA widget roles (grid/menu/tablist/tree/radiogroup/toolbar and related descendants) injected into classic filtered thumbnails inside decorative permalinks. Preserve noninteractive group/none wrappers and accessible titles; add PHP and real WordPress RTL 400% axe/screenshot regression without CSS/JS changes. Pending exact-HEAD acceptance.
 
 + Reject interactive ARIA roles injected by filtered Core thumbnail wrappers inside classic decorative card permalinks, even without tabindex; retain inert image/presentation roles and accessible post titles. Add PHP, real WordPress/Chromium 390px RTL 400% axe and mandatory screenshot evidence without CSS/JS or dependencies. Pending exact-HEAD Actions and manual review.

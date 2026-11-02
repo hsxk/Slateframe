@@ -212,9 +212,10 @@ function slateframe_card_thumbnail_markup( $post_id ) {
 		$tabindex = $markup_tags->get_attribute( 'tabindex' );
 		$editable = $markup_tags->get_attribute( 'contenteditable' );
 		$role     = $markup_tags->get_attribute( 'role' );
+		$roles    = is_string( $role ) ? preg_split( '/\s+/', strtolower( trim( $role ) ) ) : array();
 		if (
 			in_array( $markup_tags->get_tag(), $interactive, true ) ||
-			( is_string( $role ) && in_array( strtolower( trim( $role ) ), $interactive_roles, true ) ) ||
+			( ! empty( array_intersect( $roles, $interactive_roles ) ) ) ||
 			( null !== $tabindex && '-1' !== (string) $tabindex ) ||
 			( null !== $editable && 'false' !== strtolower( (string) $editable ) )
 		) {

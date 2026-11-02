@@ -12,7 +12,7 @@ class CardThumbnailBoundaries(unittest.TestCase):
         result = subprocess.run(['php', str(fixture)], cwd=ROOT,
                                 capture_output=True, text=True, check=False, timeout=20)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Card thumbnail boundaries: 109 assertions passed', result.stdout)
+        self.assertIn('Card thumbnail boundaries: 116 assertions passed', result.stdout)
 
     def test_shared_core_media_guard_and_no_duplicate_thumbnail_query(self):
         card = (ROOT / 'template-parts/content-card.php').read_text(encoding='utf-8')
@@ -45,6 +45,8 @@ class CardThumbnailBoundaries(unittest.TestCase):
         self.assertIn('sf_card_role_button', browser)
         self.assertIn('sf_card_role_grid', browser)
         self.assertIn('sf_card_role_menu', browser)
+        self.assertIn('sf_card_role_fallback', browser)
+        self.assertIn("preg_split( '/\\s+/'", media)
         self.assertIn('card-aria-composite-thumbnail-390-rtl-400-forced-colors.png', browser)
         self.assertIn('card-aria-composite-thumbnail-390-rtl-400-forced-colors.png', coverage)
         self.assertIn('card-aria-role-thumbnail-390-rtl-400-forced-colors.png', browser)

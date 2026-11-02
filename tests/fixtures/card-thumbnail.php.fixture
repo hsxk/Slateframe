@@ -130,6 +130,9 @@ foreach ( array(
 	'<span role="tree"><img src="/photo.jpg"></span>',
 	'<span role="treegrid"><img src="/photo.jpg"></span>',
 	'<span role=" MENU "><img src="/photo.jpg"></span>',
+	'<span role="unknown grid"><img src="/photo.jpg"></span>',
+	'<span role="menu presentation"><img src="/photo.jpg"></span>',
+	'<span role="GROUP BUTTON"><img src="/photo.jpg"></span>',
 ) as $interactive ) {
 	$output = render_card( true, $interactive );
 	assert_card( false === strpos( $output, 'slateframe-card-media' ), 'Interactive filtered thumbnail created nested controls' );
@@ -151,4 +154,6 @@ $group_role = render_card( true, '<span role="group"><img src="/photo.jpg"></spa
 assert_card( false !== strpos( $group_role, 'slateframe-card-media' ), 'Noninteractive group role discarded' );
 $none_role = render_card( true, '<span role="none"><img src="/photo.jpg"></span>' );
 assert_card( false !== strpos( $none_role, 'slateframe-card-media' ), 'Presentational none role discarded' );
+$fallback_none = render_card( true, '<span role="none group"><img src="/photo.jpg"></span>' );
+assert_card( false !== strpos( $fallback_none, 'slateframe-card-media' ), 'Inert role fallback discarded' );
 echo "Card thumbnail boundaries: {$checks} assertions passed\n";

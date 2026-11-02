@@ -219,3 +219,10 @@ The readable post-title permalink is always retained. Executable PHP regressions
 real WordPress search-card assertions, axe and mandatory 390px RTL 400%
 forced-colors screenshots cover the boundary. No editor-owned block markup,
 CSS, JavaScript or plugin responsibilities change.
+
+ARIA permits whitespace-separated fallback role tokens. A filtered wrapper with
+`role="unknown grid"` must not bypass the composite widget guard simply because
+the entire attribute is not an exact role name. Slateframe checks each token
+case-insensitively and rejects markup containing interactive widget roles;
+noninteractive `role="none group"` remains valid. PHP and real WordPress
+regressions cover both paths without changing Core-owned blocks.
