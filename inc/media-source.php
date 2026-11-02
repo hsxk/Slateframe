@@ -32,12 +32,20 @@ function slateframe_has_readable_media_url( $url ) {
  * @return bool Whether the source is usable for a browser media request.
  */
 function slateframe_has_web_media_url( $url ) {
-	// Fragment-only URLs resolve to the current HTML document, not a media file.
-	if ( ! slateframe_has_readable_media_url( $url ) || '#' === substr( ltrim( $url ), 0, 1 ) ) {
+	// Browsers trim surrounding spaces and can discard embedded tabs/newlines.
+	// Reject ASCII controls before parsing so a disguised non-web scheme
+	// (such as ja\nvascript:) never becomes a relative media URL.
+	if ( ! slateframe_has_readable_media_url( $url ) || 1 === preg_match( '/[\x00-\x1F\x7F]/', $url ) ) {
 		return false;
 	}
 
-	$scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+	// Validate the browser-visible token without rewriting Core's markup.
+	$validation_url = trim( $url );
+	if ( '#' === substr( $validation_url, 0, 1 ) ) {
+		return false;
+	}
+
+	$scheme = wp_parse_url( $validation_url, PHP_URL_SCHEME );
 	if ( false === $scheme || ( null !== $scheme && ! in_array( strtolower( $scheme ), array( 'http', 'https' ), true ) ) ) {
 		return false;
 	}
@@ -45,11 +53,11 @@ function slateframe_has_web_media_url( $url ) {
 	// Relative media endpoints can be path- or query-only. Absolute and
 	// protocol-relative URLs need a readable host: a percent-encoded space
 	// or zero-width hostname must not make a broken media preview visible.
-	if ( null === $scheme && 0 !== strpos( $url, '//' ) ) {
+	if ( null === $scheme && 0 !== strpos( $validation_url, '//' ) ) {
 		return true;
 	}
 
-	$host = wp_parse_url( $url, PHP_URL_HOST );
+	$host = wp_parse_url( $validation_url, PHP_URL_HOST );
 	if ( ! slateframe_has_readable_media_url( $host ) ) {
 		return false;
 	}
