@@ -42,7 +42,34 @@ function slateframe_has_web_media_url( $url ) {
 		return false;
 	}
 
-	return null === $scheme || (bool) wp_parse_url( $url, PHP_URL_HOST );
+	// Relative media endpoints can be path- or query-only. Absolute and
+	// protocol-relative URLs need a readable host: a percent-encoded space
+	// or zero-width hostname must not make a broken media preview visible.
+	if ( null === $scheme && 0 !== strpos( $url, '//' ) ) {
+		return true;
+	}
+
+	$host = wp_parse_url( $url, PHP_URL_HOST );
+	if ( ! slateframe_has_readable_media_url( $host ) ) {
+		return false;
+	}
+
+	// A host containing letters can still hide an encoded authority delimiter.
+	// Decode only for validation; never rewrite Core's original URL.
+	$decoded_host = rawurldecode( $host );
+	if ( 1 !== preg_match( '/[\\p{L}\\p{N}]/u', $decoded_host ) ) {
+		return false;
+	}
+
+	// Reject encoded slashes, credentials, query/fragment separators, spaces,
+	// controls and backslashes even when a readable domain follows them.
+	if ( 1 === preg_match( '/[\\/#?@\\\\\\x00-\\x20\\x7F]/', $decoded_host ) ) {
+		return false;
+	}
+
+	// A colon is valid inside an IPv6 literal, but not percent-encoded into
+	// the authority of an ordinary hostname.
+	return false === stripos( $host, '%3a' );
 }
 
 /**
