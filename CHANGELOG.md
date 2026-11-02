@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject browser-invalid bidi overrides, directional isolates and zero-width spaces in decoded HTTP(S) media hostnames. These could previously pass the PHP readable-host guard even when Chromium rejects the URL or silently normalizes its hostname. Preserve Arabic/CJK IDNs, relative media and contextual joiners; extend executable URL/srcset/attachment coverage from 96 to 110 cases without adding CSS, JS or dependencies. New exact-HEAD Actions and visual acceptance pending.
+
 + Reject browser-normalized backslash authority prefixes and ambiguous HTTP(S) userinfo that PHP otherwise misclassifies as relative media or a different host. Preserve ordinary backslashes within valid media paths and Core's original URL attributes. Extend executable PHP URL/srcset/attachment regressions from 82 to 96 cases without new CSS, JS or dependencies; exact-HEAD Actions and visual acceptance pending.
 
 + Reject ASCII control characters and parse space-padded media URLs using their browser-visible token before classifying HTTP(S), protocol-relative hosts, or relative paths. This closes a bypass where `  javascript:` and space-prefixed encoded-invalid hosts were accepted as relative media sources. Preserve the original Core URL, extend PHP URL/srcset/attachment regression cases to 82, and retain existing runtime budgets; exact-HEAD CI/visual review pending.
