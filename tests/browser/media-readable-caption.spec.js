@@ -20,7 +20,7 @@ const fixture = [
   '} );',
   "add_filter( 'wp_get_attachment_image', static function ( $html ) {",
   "  if ( ! isset( $_GET['sf_invisible_image'] ) ) { return $html; }",
-  "  return '<img src=\\\"&#x200B;\\\" srcset=\\\"&#x3164; 2x\\\" alt=\\\"Filtered image\\\">';",
+  "  return '<img src=\"&#x200B;\" srcset=\"&#x3164; 2x\" alt=\"Filtered image\">';",
   '} );',
 ].join('\n');
 
