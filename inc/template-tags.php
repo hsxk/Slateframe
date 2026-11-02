@@ -135,6 +135,7 @@ function slateframe_featured_media( $post_id = 0 ) {
 		return;
 	}
 
+	slateframe_normalize_image_alt( $image_processor );
 	$image_processor->set_attribute( 'loading', 'eager' );
 	$image_processor->set_attribute( 'decoding', 'async' );
 	$image_processor->set_attribute( 'fetchpriority', 'high' );

@@ -44,7 +44,7 @@ class AttachmentMediaTemplate(unittest.TestCase):
         self.assertIn("'type'  => true", media)
         self.assertIn("'media' => true", media)
         self.assertIn('is_string( $slateframe_raw_content )', source)
-        self.assertIn('esc_url_raw( $slateframe_raw_url )', source)
+        self.assertIn('slateframe_attachment_file_url( $slateframe_raw_url )', source)
         self.assertNotIn('time2log', source.lower())
 
 

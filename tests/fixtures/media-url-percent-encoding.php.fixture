@@ -1,0 +1,39 @@
+<?php
+/** Percent-encoded invisible Core media source guard. */
+define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+require dirname( __DIR__, 2 ) . '/inc/media-source.php';
+$cases = array(
+	array( '/写真.jpg', true ),
+	array( '/صورة.jpg', true ),
+	array( '/photo.jpg', true ),
+	array( '%E2%80%8B', false ),
+	array( '%E3%85%A4', false ),
+	array( '%E2%A0%80', false ),
+	array( '%CC%81', false ),
+	array( '%EF%BB%BF', false ),
+	array( '&#x200B;', false ),
+	array( "\u{200B}", false ),
+	array( 'https://example.org/写真.jpg', true ),
+	array( '%E5%86%99%E7%9C%9F.jpg', true ),
+);
+foreach ( $cases as $case ) {
+	if ( slateframe_has_readable_media_url( $case[0] ) !== $case[1] ) {
+		throw new RuntimeException( 'Media URL token failed: ' . $case[0] );
+	}
+}
+$srcset_cases = array(
+	array( '%E2%80%8B 2x', false ),
+	array( '%E3%85%A4 1200w', false ),
+	array( '%E2%80%8B 1x, %EF%BB%BF 2x', false ),
+	array( '%E2%80%8B 1x, /valid.jpg 2x', true ),
+	array( '/写真.jpg 1x, /صورة.jpg 2x', true ),
+	array( 'https://example.org/image.jpg 1x', true ),
+);
+foreach ( $srcset_cases as $case ) {
+	if ( slateframe_image_has_source( null, $case[0] ) !== $case[1] ) {
+		throw new RuntimeException( 'Media srcset failed: ' . $case[0] );
+	}
+}
+echo 'Media percent-encoded URLs: ' . ( count( $cases ) + count( $srcset_cases ) ) . " cases passed\n";

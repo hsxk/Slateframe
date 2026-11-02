@@ -10,6 +10,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Reject media URL tokens made entirely of invisible Unicode.
+ *
+ * Decode percent escapes for the decision, without modifying Core's URL.
+ *
+ * @param mixed $url Media URL token.
+ * @return bool Whether the decoded URL has readable characters.
+ */
+function slateframe_has_readable_media_url( $url ) {
+	return is_string( $url ) && slateframe_has_readable_label( rawurldecode( $url ) );
+}
+
+/**
+ * Keep only a readable, Core-sanitized attachment recovery URL.
+ *
+ * @param mixed $url WordPress attachment URL.
+ * @return string Safe URL or empty string.
+ */
+function slateframe_attachment_file_url( $url ) {
+	if ( ! slateframe_has_readable_media_url( $url ) ) {
+		return '';
+	}
+
+	$safe_url = esc_url_raw( $url );
+	return is_string( $safe_url ) && slateframe_has_readable_media_url( $safe_url ) ? $safe_url : '';
+}
+
+/**
+ * Treat a filtered Unicode-invisible image alt like Core's empty decorative alt.
+ *
+ * @param WP_HTML_Tag_Processor $processor Current image tag.
+ * @return void
+ */
+function slateframe_normalize_image_alt( $processor ) {
+	$alt = $processor->get_attribute( 'alt' );
+	if ( is_string( $alt ) && ! slateframe_has_readable_label( $alt ) ) {
+		$processor->set_attribute( 'alt', '' );
+	}
+}
+
+/**
  * Check actual image URL candidates, not srcset density descriptors.
  *
  * Filtered Core images can contain Unicode-invisible URLs. A readable "2x"
@@ -21,7 +61,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return bool Whether at least one URL candidate is readable.
  */
 function slateframe_image_has_source( $src, $srcset ) {
-	if ( slateframe_has_readable_label( $src ) ) {
+	if ( slateframe_has_readable_media_url( $src ) ) {
 		return true;
 	}
 
@@ -37,7 +77,7 @@ function slateframe_image_has_source( $src, $srcset ) {
 
 		// Ignore density/width descriptors: only the first token is a URL.
 		$parts = preg_split( '/\s+/u', $candidate, 2 );
-		if ( is_array( $parts ) && slateframe_has_readable_label( $parts[0] ) ) {
+		if ( is_array( $parts ) && slateframe_has_readable_media_url( $parts[0] ) ) {
 			return true;
 		}
 	}
@@ -92,7 +132,7 @@ function slateframe_media_has_source( $html, $tag ) {
 	}
 
 	$src = $processor->get_attribute( 'src' );
-	if ( slateframe_has_readable_label( $src ) ) {
+	if ( slateframe_has_readable_media_url( $src ) ) {
 		return true;
 	}
 
@@ -107,7 +147,7 @@ function slateframe_media_has_source( $html, $tag ) {
 			continue;
 		}
 		$src = $processor->get_attribute( 'src' );
-		if ( slateframe_has_readable_label( $src ) ) {
+		if ( slateframe_has_readable_media_url( $src ) ) {
 			return true;
 		}
 	}
