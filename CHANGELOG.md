@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Restore an explicit empty decorative alt when filtered WordPress Core featured or attachment images omit the attribute entirely. Preserve meaningful CJK/RTL alt, native markup, responsive sources and editor parity; add executable PHP and real WordPress/Chromium axe regressions without new CSS/JS.
+
 + Normalize filtered Core media URLs after decoding percent-encoded invisible Unicode; suppress unreadable original-file recovery links and normalize invisible-only image alt to Core's decorative empty alt, preserving readable CJK/RTL and original media markup. Add 54 executable PHP cases and real WordPress browser/a11y evidence without new assets.
 
 + Reject Unicode-invisible Core featured/attachment image URLs, including srcset-only candidates with readable density descriptors. Preserve CJK/RTL and valid responsive-only images; add PHP and real WordPress browser regression with RTL forced-colors evidence.
