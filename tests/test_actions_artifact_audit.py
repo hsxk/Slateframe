@@ -8,6 +8,7 @@ import stat
 import struct
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 import zlib
 
@@ -243,6 +244,21 @@ class ArtifactAudit(unittest.TestCase):
         self.write()
         with self.assertRaisesRegex(ValueError, "oversized 400% geometry evidence"):
             self.check()
+
+    def test_rejects_compressed_geometry_bomb_before_read(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json"
+        self.browser[key] = " " * (128 * 1024)
+        self.write()
+        original_read = zipfile.ZipFile.read
+
+        def guarded_read(archive, name, *args, **kwargs):
+            if name == key:
+                self.fail("oversized geometry member was read before size validation")
+            return original_read(archive, name, *args, **kwargs)
+
+        with mock.patch.object(zipfile.ZipFile, "read", guarded_read):
+            with self.assertRaisesRegex(ValueError, "oversized 400% geometry evidence"):
+                self.check()
 
     def test_rejects_browser_geometry_outside_expected_path(self):
         key = self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json"

@@ -4,6 +4,7 @@ import json
 import tempfile
 from pathlib import Path
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -263,6 +264,12 @@ class Gutenberg400MetricsContract(unittest.TestCase):
         self.file().write_text("{", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "invalid Gutenberg 400% metrics"):
             AUDIT.audit_knowledge_400_metrics(self.root)
+
+    def test_oversized_geometry_rejected_before_file_read(self):
+        self.file().write_text(" " * (128 * 1024), encoding="utf-8")
+        with mock.patch.object(Path, "read_text", side_effect=AssertionError("unbounded geometry read")):
+            with self.assertRaisesRegex(ValueError, "oversized Gutenberg 400% metrics"):
+                AUDIT.audit_knowledge_400_metrics(self.root)
 
     def test_symlink_evidence_rejected(self):
         target = self.file(390, "ltr")

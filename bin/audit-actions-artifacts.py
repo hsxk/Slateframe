@@ -216,6 +216,9 @@ def audit_evidence_payload(archive, manifest, kind):
                 filename = f"gutenberg-knowledge-400-{width}-{direction}-metrics.json"
                 metrics_path = root + "/test-artifacts/browser-metrics/" + filename
                 require(metrics_path in archive.namelist(), "missing 400% geometry evidence: " + filename)
+                # Reject large uncompressed members before allocating payloads.
+                require(archive.getinfo(metrics_path).file_size <= 8192,
+                        "oversized 400% geometry evidence: " + filename)
                 raw = archive.read(metrics_path)
                 require(len(raw) <= 8192, "oversized 400% geometry evidence: " + filename)
                 data = json.loads(raw)

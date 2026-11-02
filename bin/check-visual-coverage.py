@@ -110,6 +110,8 @@ def audit_knowledge_400_metrics(directory):
             name = f"gutenberg-knowledge-400-{width}-{direction}-metrics.json"
             path = directory / name
             require(path.is_file() and not path.is_symlink(), "missing Gutenberg 400% metrics: " + name)
+            require(path.stat().st_size <= 8192,
+                    "oversized Gutenberg 400% metrics: " + name)
             try:
                 metrics = json.loads(path.read_text(encoding="utf-8"))
             except (OSError, UnicodeError, json.JSONDecodeError) as exc:
