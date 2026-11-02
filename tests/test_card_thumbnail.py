@@ -29,6 +29,7 @@ class CardThumbnailBoundaries(unittest.TestCase):
         self.assertIn("get_attribute( 'contenteditable' )", media)
         self.assertIn("get_attribute( 'role' )", media)
         self.assertIn('interactive_roles', media)
+        self.assertIn("preg_split( '/\\s+/'", media)
         self.assertIn('slateframe_image_has_source( $processor->get_attribute(', media)
         self.assertIn('slateframe_normalize_image_alt( $processor )', media)
 
@@ -46,7 +47,6 @@ class CardThumbnailBoundaries(unittest.TestCase):
         self.assertIn('sf_card_role_grid', browser)
         self.assertIn('sf_card_role_menu', browser)
         self.assertIn('sf_card_role_fallback', browser)
-        self.assertIn("preg_split( '/\\s+/'", media)
         self.assertIn('card-aria-composite-thumbnail-390-rtl-400-forced-colors.png', browser)
         self.assertIn('card-aria-composite-thumbnail-390-rtl-400-forced-colors.png', coverage)
         self.assertIn('card-aria-role-thumbnail-390-rtl-400-forced-colors.png', browser)
