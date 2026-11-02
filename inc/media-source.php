@@ -162,9 +162,18 @@ function slateframe_card_thumbnail_markup( $post_id ) {
 	// nest another interactive control inside it. Preserve noninteractive
 	// wrappers, responsive image candidates, and Core's original attributes.
 	$markup_tags = new WP_HTML_Tag_Processor( $html );
-	$interactive = array( 'A', 'BUTTON', 'DETAILS', 'FORM', 'INPUT', 'LABEL', 'SELECT', 'SUMMARY', 'TEXTAREA' );
+	$interactive = array(
+		'A', 'AREA', 'AUDIO', 'BUTTON', 'DETAILS', 'EMBED', 'FORM', 'IFRAME',
+		'INPUT', 'LABEL', 'OBJECT', 'SELECT', 'SUMMARY', 'TEXTAREA', 'VIDEO',
+	);
 	while ( $markup_tags->next_tag() ) {
-		if ( in_array( $markup_tags->get_tag(), $interactive, true ) ) {
+		$tabindex = $markup_tags->get_attribute( 'tabindex' );
+		$editable = $markup_tags->get_attribute( 'contenteditable' );
+		if (
+			in_array( $markup_tags->get_tag(), $interactive, true ) ||
+			( null !== $tabindex && '-1' !== (string) $tabindex ) ||
+			( null !== $editable && 'false' !== strtolower( (string) $editable ) )
+		) {
 			return '';
 		}
 	}

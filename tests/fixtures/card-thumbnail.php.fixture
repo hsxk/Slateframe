@@ -108,6 +108,12 @@ foreach ( array(
 	'<img src="/photo.jpg"><form action="/">Submit</form>',
 	'<select><option>Item</option></select><img src="/photo.jpg">',
 	'<img src="/photo.jpg"><textarea>Text</textarea>',
+	'<audio controls src="/sound.mp3"></audio><img src="/photo.jpg">',
+	'<video controls src="/clip.mp4"></video><img src="/photo.jpg">',
+	'<img src="/photo.jpg" tabindex="0">',
+	'<span tabindex="0"><img src="/photo.jpg"></span>',
+	'<span contenteditable="true"><img src="/photo.jpg"></span>',
+	'<img src="/photo.jpg" contenteditable="">',
 ) as $interactive ) {
 	$output = render_card( true, $interactive );
 	assert_card( false === strpos( $output, 'slateframe-card-media' ), 'Interactive filtered thumbnail created nested controls' );
@@ -117,4 +123,8 @@ $wrapped = render_card( true, '<span class="image-wrap"><img src="/photo.jpg"></
 assert_card( false !== strpos( $wrapped, 'slateframe-card-media' ), 'Noninteractive image wrapper discarded' );
 $picture = render_card( true, '<picture><source srcset="/photo.webp"><img src="/photo.jpg"></picture>' );
 assert_card( false !== strpos( $picture, 'slateframe-card-media' ), 'Responsive picture wrapper discarded' );
+$nonfocus = render_card( true, '<img src="/photo.jpg" tabindex="-1">' );
+assert_card( false !== strpos( $nonfocus, 'slateframe-card-media' ), 'Nonfocusable image discarded' );
+$not_editable = render_card( true, '<span contenteditable="false"><img src="/photo.jpg"></span>' );
+assert_card( false !== strpos( $not_editable, 'slateframe-card-media' ), 'Noneditable image wrapper discarded' );
 echo "Card thumbnail boundaries: {$checks} assertions passed\n";

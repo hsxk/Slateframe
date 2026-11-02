@@ -182,7 +182,9 @@ image in another link or append a form control. Because the classic card already
 owns its decorative permalink, that filtered markup would create nested anchors
 or focusable controls inside an `aria-hidden` link. After Core post KSES,
 Slateframe's HTML Tag Processor rejects interactive tags before emitting the
-media link, while retaining the independent readable post-title permalink.
+media link, including Core audio/video controls, image maps, and focusable
+`tabindex` or editable wrappers. Explicit `tabindex="-1"` and
+`contenteditable="false"` remain noninteractive. The guard retains the independent readable post-title permalink.
 Ordinary noninteractive wrappers, Core `picture`/responsive sources, valid
 CJK/RTL alt, lazy loading and async decoding remain supported. This changes no
 editor-owned blocks, media storage, CSS or JavaScript.
