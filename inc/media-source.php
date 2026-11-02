@@ -34,7 +34,25 @@ function slateframe_attachment_file_url( $url ) {
 
 	// A file-recovery link must not launch mail, FTP, or custom protocol handlers.
 	$safe_url = esc_url_raw( $url, array( 'http', 'https' ) );
-	return is_string( $safe_url ) && slateframe_has_readable_media_url( $safe_url ) ? $safe_url : '';
+	if ( ! is_string( $safe_url ) || ! slateframe_has_readable_media_url( $safe_url ) ) {
+		return '';
+	}
+
+	// Core's clean_url filter runs after protocol sanitization. Verify its result.
+	$scheme = wp_parse_url( $safe_url, PHP_URL_SCHEME );
+	if (
+		false === $scheme
+		|| ( null !== $scheme && ! in_array( strtolower( $scheme ), array( 'http', 'https' ), true ) )
+	) {
+		return '';
+	}
+
+	// A scheme-bearing URL without a host cannot retrieve an original file.
+	if ( null !== $scheme && ! wp_parse_url( $safe_url, PHP_URL_HOST ) ) {
+		return '';
+	}
+
+	return $safe_url;
 }
 
 /**

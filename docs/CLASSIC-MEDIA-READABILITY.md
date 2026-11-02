@@ -126,3 +126,15 @@ storage, native Gallery/Lightbox, or editor blocks. The isolated PHP fixture
 covers 30 URL cases, while real WordPress/Chromium tests check mailto, FTP,
 telephone, 390px RTL 400% forced-colors, overflow and a mandatory screenshot.
 No CSS, JavaScript, dependency or external request is introduced.
+
+## Recovery URL validation after Core filters
+
+WordPress sanitizes the URL protocol before applying the public `clean_url`
+filter. An integration can subsequently rewrite an HTTP(S) recovery link to a
+mailto/data handler or a hostless URL. Slateframe rechecks the final Core
+sanitized result with `wp_parse_url()`, accepts site-relative and valid
+HTTP(S) URLs, and suppresses unsupported or malformed absolute destinations.
+This affects only the classic original-file action; Core media storage,
+rendering, Gallery/Lightbox and editor blocks remain unchanged. Executable
+PHP cases and real WordPress WP-CLI assertions cover valid and invalid
+post-filter rewrites without new CSS, JavaScript or dependencies.

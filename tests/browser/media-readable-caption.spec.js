@@ -122,6 +122,27 @@ test('Core media captions and attachment metadata have readable labels at all wi
     expect(recoverySchemes).toEqual({
       https: true, relative: true, mailto: true, ftp: true, tel: true,
     });
+    // A clean_url integration runs after esc_url_raw's scheme check.
+    // Revalidate the final result without rejecting valid CDN rewrites.
+    const postFilterSchemes = JSON.parse(wp('eval', `
+      $rewrite = static function ( $clean, $original ) {
+        if ( 'https://example.org/filter-rewrite' === $original ) { return 'mailto:editor@example.org'; }
+        if ( 'https://example.org/filter-cdn' === $original ) { return 'https://cdn.example.org/写真.jpg'; }
+        if ( 'https://example.org/filter-broken' === $original ) { return 'https://'; }
+        return $clean;
+      };
+      add_filter( 'clean_url', $rewrite, 10, 2 );
+      $result = array(
+        'non_web' => '' === slateframe_attachment_file_url('https://example.org/filter-rewrite'),
+        'valid_cdn' => '' !== slateframe_attachment_file_url('https://example.org/filter-cdn'),
+        'hostless' => '' === slateframe_attachment_file_url('https://example.org/filter-broken')
+      );
+      remove_filter( 'clean_url', $rewrite, 10 );
+      echo wp_json_encode( $result );
+    `));
+    expect(postFilterSchemes).toEqual({
+      non_web: true, valid_cdn: true, hostless: true,
+    });
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
     expect(attachmentId).toMatch(/^\d+$/);

@@ -17,7 +17,7 @@ class AttachmentSourceAccessibility(unittest.TestCase):
 
     def test_recovery_url_cases(self):
         self.run_fixture('attachment-file-url.php.fixture',
-                         'Attachment recovery URL: 30 cases passed')
+                         'Attachment recovery URL: 37 cases passed')
 
     def test_filtered_image_alt_cases(self):
         self.run_fixture('image-alt-visibility.php.fixture',
@@ -34,6 +34,8 @@ class AttachmentSourceAccessibility(unittest.TestCase):
         self.assertIn('function slateframe_attachment_file_url( $url )', media)
         self.assertIn('slateframe_has_readable_media_url( $url )', media)
         self.assertIn("esc_url_raw( $url, array( 'http', 'https' ) )", media)
+        self.assertIn('wp_parse_url( $safe_url, PHP_URL_SCHEME )', media)
+        self.assertIn('wp_parse_url( $safe_url, PHP_URL_HOST )', media)
         self.assertIn('slateframe_attachment_file_url( $slateframe_raw_url )', attachment)
         self.assertIn('function slateframe_normalize_image_alt( $processor )', media)
         self.assertIn('slateframe_normalize_image_alt( $image_processor )', featured)
