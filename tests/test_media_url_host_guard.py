@@ -14,11 +14,12 @@ class MediaURLHostGuard(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("17 web media URL cases, 8 srcset cases and 5 attachment cases passed", result.stdout)
+        self.assertIn("24 web media URL cases, 10 srcset cases and 7 attachment cases passed", result.stdout)
 
     def test_shared_host_guard_contract(self):
         helper = (ROOT / "inc/media-source.php").read_text(encoding="utf-8")
-        self.assertIn("slateframe_has_readable_media_url( wp_parse_url( $url, PHP_URL_HOST ) )", helper)
+        self.assertIn("slateframe_has_readable_media_url( $host )", helper)
+        self.assertIn("preg_match( '/[\\\\p{L}\\\\p{N}]/u'", helper)
         self.assertIn("0 !== strpos( $url, '//' )", helper)
 
 
