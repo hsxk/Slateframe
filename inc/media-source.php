@@ -42,7 +42,14 @@ function slateframe_has_web_media_url( $url ) {
 		return false;
 	}
 
-	return null === $scheme || (bool) wp_parse_url( $url, PHP_URL_HOST );
+	// Relative media endpoints can be path- or query-only. Absolute and
+	// protocol-relative URLs need a readable host: a percent-encoded space
+	// or zero-width hostname must not make a broken media preview visible.
+	if ( null === $scheme && 0 !== strpos( $url, '//' ) ) {
+		return true;
+	}
+
+	return slateframe_has_readable_media_url( wp_parse_url( $url, PHP_URL_HOST ) );
 }
 
 /**

@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject absolute and protocol-relative image/audio/video and attachment URLs with entirely unreadable percent-encoded hosts, while preserving valid CJK/RTL/IPv6 hosts, relative paths, query endpoints, and responsive srcset fallback. Add 30 executable PHP boundary cases and static regression checks; no new JS/CSS or dependencies.
+
 + Bound Gutenberg geometry evidence JSON files to 8 KiB before materializing ZIP members or reading local files; add regressions that reject oversized payloads without reading them. Existing screenshot and geometry thresholds remain unchanged.
 
 + Close the release-evidence gap introduced by downloadable Gutenberg 400% geometry JSON: accept only four exact fixture paths in the offline Actions ZIP auditor, validate bounded geometry/overflow and reject arbitrary private files. Require the same four reports in Browser CI, pin their screenshot widths, add adversarial tests, and update the 136-state provenance instructions. No runtime theme assets changed.

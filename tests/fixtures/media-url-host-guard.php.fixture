@@ -1,0 +1,80 @@
+<?php
+/** Regression for readable absolute media hosts and relative Core endpoints. */
+define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
+
+function slateframe_has_readable_label( $text ) {
+	if ( ! is_string( $text ) ) {
+		return false;
+	}
+	$plain = html_entity_decode( strip_tags( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	return 1 === preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u', $plain );
+}
+
+function wp_parse_url( $url, $component = -1 ) {
+	return parse_url( $url, $component );
+}
+
+function esc_url_raw( $url, $protocols = array() ) {
+	return $url;
+}
+
+require dirname( __DIR__, 2 ) . '/inc/media-source.php';
+
+$urls = array(
+	array( 'https://example.org/写真.jpg', true ),
+	array( '//cdn.example.org/صورة.jpg', true ),
+	array( '//[2001:db8::1]/photo.jpg', true ),
+	array( '/写真.jpg', true ),
+	array( '?image=1', true ),
+	array( '../img/写真.jpg', true ),
+	array( 'https://', false ),
+	array( '//', false ),
+	array( '///', false ),
+	array( '//%20/photo.jpg', false ),
+	array( 'https://%20/photo.jpg', false ),
+	array( '//%E2%80%8B/abc', false ),
+	array( 'https://%E2%80%8B/abc', false ),
+	array( 'https://%CC%81/abc', false ),
+	array( 'ftp://example.org/a.jpg', false ),
+	array( 'mailto:owner@example.org', false ),
+	array( '#fragment', false ),
+);
+
+foreach ( $urls as $case ) {
+	if ( slateframe_has_web_media_url( $case[0] ) !== $case[1] ) {
+		throw new RuntimeException( 'Invalid URL host result: ' . $case[0] );
+	}
+}
+
+$images = array(
+	array( null, '//%20/photo.jpg 1x', false ),
+	array( null, '//%E2%80%8B/photo.jpg 2x', false ),
+	array( null, '//%20/photo.jpg 1x, /valid.jpg 2x', true ),
+	array( null, 'https://%20/photo.jpg 1x', false ),
+	array( null, '//cdn.example.org/写真.jpg 1x', true ),
+	array( null, 'https://例子.测试/写真.jpg 2x', true ),
+	array( '//%20/photo.jpg', null, false ),
+	array( '/valid.jpg', '//%20/photo.jpg 2x', true ),
+);
+
+foreach ( $images as $case ) {
+	if ( slateframe_image_has_source( $case[0], $case[1] ) !== $case[2] ) {
+		throw new RuntimeException( 'Invalid srcset host result: ' . $case[1] );
+	}
+}
+
+$attachments = array(
+	array( '//%20/file.pdf', '' ),
+	array( 'https://%E2%80%8B/file.pdf', '' ),
+	array( 'https://example.org/file.pdf', 'https://example.org/file.pdf' ),
+	array( '//cdn.example.org/ファイル.pdf', '//cdn.example.org/ファイル.pdf' ),
+	array( '/files/資料.pdf', '/files/資料.pdf' ),
+);
+
+foreach ( $attachments as $case ) {
+	if ( slateframe_attachment_file_url( $case[0] ) !== $case[1] ) {
+		throw new RuntimeException( 'Invalid attachment host result: ' . $case[0] );
+	}
+}
+
+echo count( $urls ) . ' web media URL cases, ' . count( $images ) . ' srcset cases and ' . count( $attachments ) . " attachment cases passed\n";
