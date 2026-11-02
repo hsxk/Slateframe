@@ -42,6 +42,20 @@ $urls = array(
 	array( '//%3F/photo.jpg', false ),
 	array( '//%2D/photo.jpg', false ),
 	array( '//%2A/photo.jpg', false ),
+	array( 'https://example%2F.org/photo.jpg', false ),
+	array( '//%2Fcdn.example.org/photo.jpg', false ),
+	array( 'https://example%23.org/photo.jpg', false ),
+	array( 'https://example%3F.org/photo.jpg', false ),
+	array( 'https://example%40.org/photo.jpg', false ),
+	array( 'https://example%5C.org/photo.jpg', false ),
+	array( 'https://example%20.org/photo.jpg', false ),
+	array( 'https://example%00.org/photo.jpg', false ),
+	array( 'https://example%3A8080/photo.jpg', false ),
+	array( 'https://example%7F.org/photo.jpg', false ),
+	array( 'https://%2Fexample.org/photo.jpg', false ),
+	array( 'https://example%09.org/photo.jpg', false ),
+	array( 'https://%E4%BE%8B%E5%AD%90.%E6%B5%8B%E8%AF%95/photo.jpg', true ),
+	array( 'https://example.org:8443/photo.jpg', true ),
 	array( 'ftp://example.org/a.jpg', false ),
 	array( 'mailto:owner@example.org', false ),
 	array( '#fragment', false ),
@@ -64,6 +78,9 @@ $images = array(
 	array( '/valid.jpg', '//%20/photo.jpg 2x', true ),
 	array( null, '//%2F/photo.jpg 2x', false ),
 	array( null, '//%2F/photo.jpg 1x, /valid.jpg 2x', true ),
+	array( null, 'https://example%2F.org/photo.jpg 1x', false ),
+	array( null, 'https://example%2F.org/photo.jpg 1x, /valid.jpg 2x', true ),
+	array( null, 'https://%E4%BE%8B%E5%AD%90.%E6%B5%8B%E8%AF%95/photo.jpg 2x', true ),
 );
 
 foreach ( $images as $case ) {
@@ -80,6 +97,9 @@ $attachments = array(
 	array( '/files/資料.pdf', '/files/資料.pdf' ),
 	array( '//%2E/file.pdf', '' ),
 	array( 'https://%23/file.pdf', '' ),
+	array( 'https://example%2F.org/file.pdf', '' ),
+	array( '//example%40.org/file.pdf', '' ),
+	array( 'https://%E4%BE%8B%E5%AD%90.%E6%B5%8B%E8%AF%95/file.pdf', 'https://%E4%BE%8B%E5%AD%90.%E6%B5%8B%E8%AF%95/file.pdf' ),
 );
 
 foreach ( $attachments as $case ) {
