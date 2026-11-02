@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Ignore Unicode-invisible direct and nested Core audio/video source URLs when deciding whether a classic attachment preview is usable. Preserve valid CJK/RTL and later playable sources; add 18 executable PHP cases and real WordPress browser checks without changing runtime assets.
+
 + Restrict classic Core audio/video nested-source detection to the active player element: a `<source>` after `</video>` or `</audio>` must not create a nonfunctional preview or orphaned caption. Add executable PHP and real WordPress browser regressions without new assets or dependencies.
 
 + Preserve WordPress Core's native audio/video `<source>` children through a narrowly extended `wp_kses()` media-shortcode allowlist; default post KSES removes those children. Keep URL protocol filtering, reject script/event handlers, and test actual playable nested sources plus unsafe-source suppression.
