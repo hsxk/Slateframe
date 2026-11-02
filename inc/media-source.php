@@ -88,6 +88,12 @@ function slateframe_has_web_media_url( $url ) {
 	// A host containing letters can still hide an encoded authority delimiter.
 	// Decode only for validation; never rewrite Core's original URL.
 	$decoded_host = rawurldecode( $host );
+	// Browser URL parsing rejects bidi overrides/isolates and may silently
+	// remove zero-width spaces from a readable hostname. Reject those
+	// ambiguous controls while retaining CJK, RTL and contextual joiners.
+	if ( 1 === preg_match( '/[\x{061C}\x{200B}\x{200E}-\x{200F}\x{202A}-\x{202E}\x{2060}\x{2066}-\x{2069}]/u', $decoded_host ) ) {
+		return false;
+	}
 	if ( 1 !== preg_match( '/[\\p{L}\\p{N}]/u', $decoded_host ) ) {
 		return false;
 	}
