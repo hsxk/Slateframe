@@ -24,7 +24,7 @@ class VisualCoverageContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing mandatory browser coverage"):
             AUDIT.audit_browser_coverage({k: v for k, v in self.records.items() if k != name})
 
-    def test_complete_132_state_contract(self):
+    def test_complete_136_state_contract(self):
         self.assertEqual(AUDIT.audit_browser_coverage(self.records), 136)
 
     def test_all_seven_responsive_widths(self):
@@ -65,6 +65,16 @@ class VisualCoverageContract(unittest.TestCase):
             for direction in ('ltr', 'rtl'):
                 with self.subTest(width=width, direction=direction):
                     self.reject_missing(f"gutenberg-knowledge-400-{width}-{direction}-forced-colors.png")
+
+    def test_400_gutenberg_evidence_requires_actual_editor_width(self):
+        for width in (390, 1440):
+            for direction in ("ltr", "rtl"):
+                name = f"gutenberg-knowledge-400-{width}-{direction}-forced-colors.png"
+                self.records[name]["width"] = width - 1
+                with self.subTest(width=width, direction=direction):
+                    with self.assertRaisesRegex(ValueError, "wrong required browser viewport"):
+                        AUDIT.audit_browser_coverage(self.records)
+                self.records[name]["width"] = width
 
     def test_bidi_header_states_cannot_be_skipped(self):
         self.reject_missing("header-bidi-390-rtl-400-forced-colors.png")
