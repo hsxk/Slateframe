@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Add real Gutenberg 400% font-size and forced-colors checks for Knowledge glyph containment at 390/1440px, both LTR and RTL, with attached editor screenshots. Pending exact-HEAD Actions; no production CSS or JavaScript change.
+
 + Keep Gutenberg and published Knowledge procedure glyphs away from the viewport edge with a shared logical inline-gap inset. The seven-width editor glyph test now identifies the offending text source and independently checks viewport bounds; retain existing overflow thresholds and CSS budgets. Pending exact-HEAD WordPress/Chromium Actions and visual review.
 
 + Deduplicate Core checklist selectors and group first/last-child resets in `content-modes.css` without broadening scope or changing design tokens. Recover 255 bytes under the existing 7,000-byte budget; add explicit selector-scope regression tests. Pending exact-HEAD WordPress/Chromium visual and Actions verification.
