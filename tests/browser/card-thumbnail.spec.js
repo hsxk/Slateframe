@@ -15,6 +15,8 @@ const fixture = [
   "add_filter( 'post_thumbnail_html', static function ( $html ) {",
   "  if ( isset( $_GET['sf_card_empty'] ) ) { return ''; }",
   "  if ( isset( $_GET['sf_card_fragment'] ) ) { return '<img src=\"#photo\" alt=\"Unusable\">'; }",
+  "  if ( isset( $_GET['sf_card_nested_link'] ) ) { return '<a href=/nested>' . $html . '</a>'; }",
+  "  if ( isset( $_GET['sf_card_sibling_link'] ) ) { return $html . '<a href=/nested>Other</a>'; }",
   "  if ( isset( $_GET['sf_card_missing_alt'] ) ) {",
   "    $tags = new WP_HTML_Tag_Processor( $html );",
   "    if ( $tags->next_tag( 'img' ) ) { $tags->remove_attribute( 'alt' ); return $tags->get_updated_html(); }",
@@ -49,6 +51,13 @@ test('Core listing cards omit filtered broken thumbnails but retain accessible t
     await page.goto(search + '&sf_card_fragment=1', { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-card-media')).toHaveCount(0);
     await expect(page.locator('.slateframe-card-title a')).toContainText(slug);
+    for (const query of ['sf_card_nested_link', 'sf_card_sibling_link']) {
+      await page.goto(search + '&' + query + '=1', { waitUntil: 'networkidle' });
+      await expect(page.locator('.slateframe-card-media')).toHaveCount(0);
+      await expect(page.locator('.slateframe-card-title a')).toContainText(slug);
+      await expect(page.locator('.slateframe-card a a')).toHaveCount(0);
+    }
+    await page.goto(search + '&sf_card_nested_link=1', { waitUntil: 'networkidle' });
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const direction of ['ltr', 'rtl']) {
@@ -67,6 +76,13 @@ test('Core listing cards omit filtered broken thumbnails but retain accessible t
     expect(axe.violations).toEqual([]);
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await page.screenshot({ path: 'test-artifacts/screenshots/card-filtered-thumbnail-390-rtl-400-forced-colors.png', fullPage: true });
+    await page.goto(search + '&sf_card_nested_link=1', { waitUntil: 'networkidle' });
+    await setRootTextScale(page, 64, 'rtl');
+    await expect(page.locator('.slateframe-card-media')).toHaveCount(0);
+    const nestedAxe = await new AxeBuilder({ page }).include('main#main-content')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(nestedAxe.violations).toEqual([]);
+    await page.screenshot({ path: 'test-artifacts/screenshots/card-interactive-thumbnail-390-rtl-400-forced-colors.png', fullPage: true });
     await page.emulateMedia({ forcedColors: 'none' });
     await page.goto(search + '&sf_card_missing_alt=1', { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-card-media img')).toHaveAttribute('alt', '');

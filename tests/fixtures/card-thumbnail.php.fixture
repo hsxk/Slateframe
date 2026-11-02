@@ -20,12 +20,20 @@ function wp_kses_post( $html ) {
 class WP_HTML_Tag_Processor {
 	private $html;
 	private $tag = null;
+	private $offset = 0;
+	private $name = null;
 	public function __construct( $html ) { $this->html = $html; }
-	public function next_tag( $name ) {
-		if ( 'img' !== $name || ! preg_match( '~<img\b[^>]*>~is', $this->html, $matches ) ) { return false; }
-		$this->tag = $matches[0];
-		return true;
+	public function next_tag( $name = null ) {
+		while ( preg_match( '~<([a-z][a-z0-9]*)\b[^>]*>~is', $this->html, $matches, PREG_OFFSET_CAPTURE, $this->offset ) ) {
+			$this->offset = $matches[0][1] + strlen( $matches[0][0] );
+			if ( null !== $name && 0 !== strcasecmp( $matches[1][0], $name ) ) { continue; }
+			$this->tag = $matches[0][0];
+			$this->name = strtoupper( $matches[1][0] );
+			return true;
+		}
+		return false;
 	}
+	public function get_tag() { return $this->name; }
 	public function get_attribute( $name ) {
 		if ( null === $this->tag || ! preg_match( '~\s' . preg_quote( $name, '~' ) . '\s*=\s*(["\x27])(.*?)\1~is', $this->tag, $matches ) ) { return null; }
 		return html_entity_decode( $matches[2], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
@@ -90,4 +98,23 @@ $unsafe = render_card( true, '<img src="/photo.jpg" onerror="alert(1)"><script>a
 assert_card( false === strpos( $unsafe, 'onerror' ), 'Unsafe handler survived' );
 assert_card( false === strpos( $unsafe, '<script' ), 'Unsafe script survived' );
 assert_card( 1 === substr_count( $unsafe, 'slateframe-card-media' ), 'Safe image lost after KSES' );
+foreach ( array(
+	'<a href="/nested"><img src="/photo.jpg"></a>',
+	'<img src="/photo.jpg"><a href="/sibling">Other</a>',
+	'<button><img src="/photo.jpg"></button>',
+	'<img src="/photo.jpg"><input type="text">',
+	'<label><img src="/photo.jpg"></label>',
+	'<details><summary>Open</summary><img src="/photo.jpg"></details>',
+	'<img src="/photo.jpg"><form action="/">Submit</form>',
+	'<select><option>Item</option></select><img src="/photo.jpg">',
+	'<img src="/photo.jpg"><textarea>Text</textarea>',
+) as $interactive ) {
+	$output = render_card( true, $interactive );
+	assert_card( false === strpos( $output, 'slateframe-card-media' ), 'Interactive filtered thumbnail created nested controls' );
+	assert_card( false !== strpos( $output, '日本語 العربية' ), 'Interactive filtered thumbnail removed accessible title' );
+}
+$wrapped = render_card( true, '<span class="image-wrap"><img src="/photo.jpg"></span>' );
+assert_card( false !== strpos( $wrapped, 'slateframe-card-media' ), 'Noninteractive image wrapper discarded' );
+$picture = render_card( true, '<picture><source srcset="/photo.webp"><img src="/photo.jpg"></picture>' );
+assert_card( false !== strpos( $picture, 'slateframe-card-media' ), 'Responsive picture wrapper discarded' );
 echo "Card thumbnail boundaries: {$checks} assertions passed\n";
