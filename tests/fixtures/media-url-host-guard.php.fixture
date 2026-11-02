@@ -59,6 +59,19 @@ $urls = array(
 	array( 'ftp://example.org/a.jpg', false ),
 	array( 'mailto:owner@example.org', false ),
 	array( '#fragment', false ),
+	array( '  //%20/photo.jpg', false ),
+	array( '  //%2F/photo.jpg', false ),
+	array( '  https://example%2F.org/photo.jpg', false ),
+	array( '  javascript:alert(1)', false ),
+	array( "ja\nvascript:alert(1)", false ),
+	array( "https://example.org/\nphoto.jpg", false ),
+	array( " \t//cdn.example.org/photo.jpg", false ),
+	array( '  //cdn.example.org/photo.jpg', true ),
+	array( '  https://example.org/photo.jpg', true ),
+	array( '  #fragment', false ),
+	array( '  ftp://example.org/file.jpg', false ),
+	array( '  https://', false ),
+	array( '  mailto:owner@example.org', false ),
 );
 
 foreach ( $urls as $case ) {
@@ -81,6 +94,10 @@ $images = array(
 	array( null, 'https://example%2F.org/photo.jpg 1x', false ),
 	array( null, 'https://example%2F.org/photo.jpg 1x, /valid.jpg 2x', true ),
 	array( null, 'https://%E4%BE%8B%E5%AD%90.%E6%B5%8B%E8%AF%95/photo.jpg 2x', true ),
+	array( '  javascript:alert(1)', null, false ),
+	array( '  //%20/photo.jpg', null, false ),
+	array( '  //cdn.example.org/photo.jpg', null, true ),
+	array( "https://example.org/\nphoto.jpg", null, false ),
 );
 
 foreach ( $images as $case ) {
@@ -100,6 +117,10 @@ $attachments = array(
 	array( 'https://example%2F.org/file.pdf', '' ),
 	array( '//example%40.org/file.pdf', '' ),
 	array( 'https://%E4%BE%8B%E5%AD%90.%E6%B5%8B%E8%AF%95/file.pdf', 'https://%E4%BE%8B%E5%AD%90.%E6%B5%8B%E8%AF%95/file.pdf' ),
+	array( '  javascript:alert(1)', '' ),
+	array( '  //%20/file.pdf', '' ),
+	array( '  //cdn.example.org/file.pdf', '  //cdn.example.org/file.pdf' ),
+	array( "https://example.org/\nfile.pdf", '' ),
 );
 
 foreach ( $attachments as $case ) {

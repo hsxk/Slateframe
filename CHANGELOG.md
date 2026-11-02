@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject ASCII control characters and parse space-padded media URLs using their browser-visible token before classifying HTTP(S), protocol-relative hosts, or relative paths. This closes a bypass where `  javascript:` and space-prefixed encoded-invalid hosts were accepted as relative media sources. Preserve the original Core URL, extend PHP URL/srcset/attachment regression cases to 82, and retain existing runtime budgets; exact-HEAD CI/visual review pending.
+
 + Reject mixed percent-encoded authority delimiters, whitespace and control bytes inside otherwise readable HTTP(S) media hostnames (for example `example%2F.org`), preserving Unicode/percent-encoded IDNs, valid ports and bracketed IPv6. Expand executable media URL/srcset/attachment cases from 41 to 61 without adding CSS, JavaScript or dependencies; exact-HEAD Actions and visual acceptance pending.
 
 + Reject punctuation-only absolute media hosts (including percent-encoded `/`, `#`, `?`, `@`, `.`, `-`, `*`) after decoding. Preserve legitimate CJK/RTL/IPv6 domains, relative media endpoints, and existing srcset fallback; expand executable PHP regression coverage to 41 cases without adding dependencies or changing CSS/JS.
