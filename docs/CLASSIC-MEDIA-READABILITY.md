@@ -206,3 +206,16 @@ and `role="presentation"` wrappers, responsive images and CJK/RTL alt.
 The independent post-title link remains available. PHP and real WordPress
 390px RTL 400% forced-colors axe/screenshot evidence are mandatory.
 No CSS/JS, dependencies or editor-owned markup changes.
+
+## Composite ARIA widget roles in filtered thumbnails
+
+Filtered image wrappers may declare composite widget roles such as `grid`, `menu`,
+`tablist`, `tree`, `treegrid`, `radiogroup` or `toolbar` without any native
+focusable element. These semantics still conflict with the theme-owned decorative
+permalink. The shared card helper rejects these roles and `gridcell`/`menubar`
+wrappers after Core KSES; case/outer whitespace variations are normalized.
+Ordinary `group`, `none`, `img` and `presentation` wrappers remain supported.
+The readable post-title permalink is always retained. Executable PHP regressions,
+real WordPress search-card assertions, axe and mandatory 390px RTL 400%
+forced-colors screenshots cover the boundary. No editor-owned block markup,
+CSS, JavaScript or plugin responsibilities change.

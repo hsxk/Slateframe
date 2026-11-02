@@ -18,6 +18,8 @@ const fixture = [
   "  if ( isset( $_GET['sf_card_nested_link'] ) ) { return '<a href=/nested>' . $html . '</a>'; }",
   "  if ( isset( $_GET['sf_card_sibling_link'] ) ) { return $html . '<a href=/nested>Other</a>'; }",
   "  if ( isset( $_GET['sf_card_role_button'] ) ) { return '<span role=\"button\">' . $html . '</span>'; }",
+  "  if ( isset( $_GET['sf_card_role_grid'] ) ) { return '<span role=\"grid\">' . $html . '</span>'; }",
+  "  if ( isset( $_GET['sf_card_role_menu'] ) ) { return '<span role=\"menu\">' . $html . '</span>'; }",
   "  if ( isset( $_GET['sf_card_missing_alt'] ) ) {",
   "    $tags = new WP_HTML_Tag_Processor( $html );",
   "    if ( $tags->next_tag( 'img' ) ) { $tags->remove_attribute( 'alt' ); return $tags->get_updated_html(); }",
@@ -52,7 +54,7 @@ test('Core listing cards omit filtered broken thumbnails but retain accessible t
     await page.goto(search + '&sf_card_fragment=1', { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-card-media')).toHaveCount(0);
     await expect(page.locator('.slateframe-card-title a')).toContainText(slug);
-    for (const query of ['sf_card_nested_link', 'sf_card_sibling_link', 'sf_card_role_button']) {
+    for (const query of ['sf_card_nested_link', 'sf_card_sibling_link', 'sf_card_role_button', 'sf_card_role_grid', 'sf_card_role_menu']) {
       await page.goto(search + '&' + query + '=1', { waitUntil: 'networkidle' });
       await expect(page.locator('.slateframe-card-media')).toHaveCount(0);
       await expect(page.locator('.slateframe-card-title a')).toContainText(slug);
@@ -93,6 +95,14 @@ test('Core listing cards omit filtered broken thumbnails but retain accessible t
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(roleAxe.violations).toEqual([]);
     await page.screenshot({ path: 'test-artifacts/screenshots/card-aria-role-thumbnail-390-rtl-400-forced-colors.png', fullPage: true });
+    await page.goto(search + '&sf_card_role_grid=1', { waitUntil: 'networkidle' });
+    await setRootTextScale(page, 64, 'rtl');
+    await expect(page.locator('.slateframe-card-media')).toHaveCount(0);
+    await expect(page.locator('.slateframe-card-title a')).toContainText(slug);
+    const gridAxe = await new AxeBuilder({ page }).include('main#main-content')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(gridAxe.violations).toEqual([]);
+    await page.screenshot({ path: 'test-artifacts/screenshots/card-aria-composite-thumbnail-390-rtl-400-forced-colors.png', fullPage: true });
     await page.emulateMedia({ forcedColors: 'none' });
     await page.goto(search + '&sf_card_missing_alt=1', { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-card-media img')).toHaveAttribute('alt', '');

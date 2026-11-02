@@ -67,6 +67,7 @@ def required_browser_screenshots():
         "card-filtered-thumbnail-390-rtl-400-forced-colors.png": 390,
         "card-interactive-thumbnail-390-rtl-400-forced-colors.png": 390,
         "card-aria-role-thumbnail-390-rtl-400-forced-colors.png": 390,
+        "card-aria-composite-thumbnail-390-rtl-400-forced-colors.png": 390,
         "author-blank-identity-390-rtl-400-forced-colors.png": None,
         "author-blank-identity-1440-ltr.png": None,
         "header-bidi-390-rtl-400-forced-colors.png": 390,
