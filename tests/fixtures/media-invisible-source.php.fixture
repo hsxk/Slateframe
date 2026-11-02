@@ -1,0 +1,60 @@
+<?php
+/** Isolated executable regression for Unicode-invisible Core media URLs. */
+define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
+function slateframe_has_readable_label( $text ) {
+    if ( ! is_string( $text ) ) { return false; }
+    $plain = html_entity_decode( strip_tags( $text ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    return 1 === preg_match( '/[^\p{Z}\p{Cc}\p{Cf}\p{M}\x{115F}\x{1160}\x{3164}\x{FFA0}\x{2800}\s]/u', $plain );
+}
+class WP_HTML_Tag_Processor {
+    private $html;
+    private $offset = 0;
+    private $tag = '';
+    private $name = '';
+    private $closing = false;
+    public function __construct( $html ) { $this->html = $html; }
+    public function next_tag( $query = null ) {
+        $name = is_string( $query ) ? strtoupper( $query ) : null;
+        $closers = is_array( $query ) && 'visit' === ( $query['tag_closers'] ?? null );
+        while ( preg_match( '~<(\/?)(([a-z][a-z0-9-]*))(?=[\s\/>])[^>]*>~i', $this->html, $match, PREG_OFFSET_CAPTURE, $this->offset ) ) {
+            $this->tag = $match[0][0];
+            $this->offset = $match[0][1] + strlen( $this->tag );
+            $this->name = strtoupper( $match[2][0] );
+            $this->closing = '/' === $match[1][0];
+            if ( ( null === $name || $name === $this->name ) && ( ! $this->closing || $closers ) ) { return true; }
+        }
+        return false;
+    }
+    public function get_tag() { return $this->name; }
+    public function is_tag_closer() { return $this->closing; }
+    public function get_attribute( $name ) {
+        if ( ! preg_match( '/\s' . preg_quote( $name, '/' ) . '="([^"]*)"/i', $this->tag, $match ) ) { return null; }
+        return html_entity_decode( $match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+    }
+}
+require dirname( __DIR__, 2 ) . '/inc/media-source.php';
+$cases = array(
+    array( 'video', '<video src="&#x200B;"></video>', false ),
+    array( 'audio', '<audio src="&#x3164;"></audio>', false ),
+    array( 'video', '<video src="&#x2800;"></video>', false ),
+    array( 'audio', '<audio src="&#x200D;"></audio>', false ),
+    array( 'video', '<video src="&#x0301;"></video>', false ),
+    array( 'audio', '<audio src="   "></audio>', false ),
+    array( 'video', '<video><source src="&#x200B;"></video>', false ),
+    array( 'audio', '<audio><source src="&#x3164;"></audio>', false ),
+    array( 'video', '<video><source src="&#x2800;"></video>', false ),
+    array( 'audio', '<audio><source src="&#x200D;"></audio>', false ),
+    array( 'video', '<video><source src="&#x0301;"></video>', false ),
+    array( 'audio', '<audio><source src="&#x200B;"></audio><source src="/sibling.mp3">', false ),
+    array( 'video', '<video src="/動画.mp4"></video>', true ),
+    array( 'audio', '<audio src="/صوت.mp3"></audio>', true ),
+    array( 'video', '<video><source src="&#x200B;"><source src="/valid.mp4"></video>', true ),
+    array( 'audio', '<audio><source src="&#x3164;"><source src="/valid.mp3"></audio>', true ),
+    array( 'video', '<video src="0"></video>', true ),
+    array( 'audio', '<audio src="?file=1"></audio>', true ),
+);
+foreach ( $cases as $index => $case ) {
+    $actual = slateframe_media_has_source( $case[1], $case[0] );
+    if ( $actual !== $case[2] ) { throw new RuntimeException( 'Media URL regression case ' . $index . ' failed' ); }
+}
+echo 'Media invisible sources: ' . count( $cases ) . " assertions passed\n";
