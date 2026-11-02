@@ -64,15 +64,25 @@ provenance auditor; it is not a substitute for secret scanning or review.
 
 The Browser smoke job now checks its exact-HEAD screenshot inventory with
 `bin/check-visual-coverage.py` **after** generating and verifying the inventory
-and **before** uploading the artifact. The 98 required screenshot states cover
+and **before** uploading the artifact. The 136 required screenshot states cover
 compact/default/spacious Appearance, all seven 320–1920px breakpoints,
 LTR and RTL forced colors, Portfolio, Knowledge, Photography and Core Lightbox,
 Search/empty results, Gutenberg, Article, Header, Core Forms, Footer and CJK.
 Full-viewport screenshots must have their named viewport width; Core element
-screenshots may be narrower. Missing states, stale HEADs, invalid heights and
+screenshots may be narrower, except for the four full-width Gutenberg Knowledge
+400% LTR/RTL evidence states at 390/1440px. The Browser job additionally
+checks four named geometry JSON files (64px root font, direction, actual text
+fragments, viewport and procedure bounds, and no added editor-shell overflow).
+These files are intentionally stored under `test-artifacts/browser-metrics/`,
+not in the PNG-only screenshot inventory. The offline artifact auditor accepts
+only those four named JSON files, validates their bounded content, and rejects
+extra/private evidence paths. The Core editor shell can have its own 267px
+baseline overflow at 390px/400%; the theme's procedure and glyphs must remain
+inside the viewport without adding overflow. Missing states, stale HEADs, invalid heights and
 wrong viewport widths fail the job. The script uses only the standard library.
 
 For a downloaded Browser artifact, extract its `BROWSER_SCREENSHOT_INVENTORY.json`
-and run `python3 bin/check-visual-coverage.py --manifest INVENTORY.json --head FULL_SHA`.
+and the four geometry JSON files into a `browser-metrics/` directory,
+then run `python3 bin/check-visual-coverage.py --manifest INVENTORY.json --head FULL_SHA --metrics browser-metrics/`.
 This check supplements, never replaces, the complete ZIP/PNG provenance audit,
 Axe/keyboard/zoom/forced-colors assertions or manual review of real screenshots.

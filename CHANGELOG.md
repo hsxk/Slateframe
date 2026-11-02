@@ -4,6 +4,10 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Bound Gutenberg geometry evidence JSON files to 8 KiB before materializing ZIP members or reading local files; add regressions that reject oversized payloads without reading them. Existing screenshot and geometry thresholds remain unchanged.
+
++ Close the release-evidence gap introduced by downloadable Gutenberg 400% geometry JSON: accept only four exact fixture paths in the offline Actions ZIP auditor, validate bounded geometry/overflow and reject arbitrary private files. Require the same four reports in Browser CI, pin their screenshot widths, add adversarial tests, and update the 136-state provenance instructions. No runtime theme assets changed.
+
 + Persist four exact-HEAD Gutenberg Knowledge 400% LTR/RTL forced-colors element screenshots and geometry JSON in the actual Browser Actions artifact, not only Playwright report attachments. Require all four in the strict visual inventory without relaxing glyph or overflow assertions.
 
 + Add real Gutenberg 400% font-size and forced-colors checks for Knowledge glyph containment at 390/1440px, both LTR and RTL, with attached editor screenshots. Separate WordPress Core editor-shell overflow at 400% from theme procedure overflow: enforce the unchanged 1px tolerance on procedure reflow and any *additional* shell overflow, plus strict glyph/viewport containment. The first 390px run exposed 267px of root overflow in the full Core editor shell; pending new exact-HEAD WordPress/Chromium Actions and screenshot verification. No production CSS or JavaScript change.

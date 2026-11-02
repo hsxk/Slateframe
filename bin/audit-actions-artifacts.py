@@ -8,6 +8,7 @@ import argparse
 import hashlib
 import io
 import json
+import math
 from pathlib import PurePosixPath
 import re
 import stat
@@ -188,6 +189,14 @@ def audit_evidence_payload(archive, manifest, kind):
             root + "/test-artifacts/photography-review.html",
             "tmp/slateframe-photo-server.log",
         })
+    if kind == "browser":
+        # Four small, named geometry reports are public test evidence, not
+        # arbitrary JSON uploads. Reject unexpected files and stale states.
+        for width in (390, 1440):
+            for direction in ("ltr", "rtl"):
+                filename = f"gutenberg-knowledge-400-{width}-{direction}-metrics.json"
+                metrics_path = root + "/test-artifacts/browser-metrics/" + filename
+                metadata.add(metrics_path)
     for member in archive.infolist():
         if member.is_dir():
             require(member.filename.startswith(root + "/"),
@@ -201,6 +210,35 @@ def audit_evidence_payload(archive, manifest, kind):
                     "unexpected visual screenshot path: " + name)
         else:
             require(name in metadata, "unexpected visual artifact file: " + name)
+    if kind == "browser":
+        for width in (390, 1440):
+            for direction in ("ltr", "rtl"):
+                filename = f"gutenberg-knowledge-400-{width}-{direction}-metrics.json"
+                metrics_path = root + "/test-artifacts/browser-metrics/" + filename
+                require(metrics_path in archive.namelist(), "missing 400% geometry evidence: " + filename)
+                # Reject large uncompressed members before allocating payloads.
+                require(archive.getinfo(metrics_path).file_size <= 8192,
+                        "oversized 400% geometry evidence: " + filename)
+                raw = archive.read(metrics_path)
+                require(len(raw) <= 8192, "oversized 400% geometry evidence: " + filename)
+                data = json.loads(raw)
+                require(isinstance(data, dict) and data.get("rootFont") == "64px"
+                        and data.get("direction") == direction and data.get("viewport") == width,
+                        "invalid 400% geometry state: " + filename)
+                require(type(data.get("measured")) is int and data["measured"] > 8
+                        and data.get("escaped") == [], "invalid 400% glyph evidence: " + filename)
+                region = data.get("region")
+                finite = lambda value: type(value) in (int, float) and math.isfinite(value)
+                require(isinstance(region, dict)
+                        and all(finite(region.get(k)) for k in ("left", "right"))
+                        and -2 <= region["left"] < region["right"] <= width + 2,
+                        "invalid 400% region evidence: " + filename)
+                baseline, overflow, procedure = (data.get(k) for k in
+                                                 ("editorShellBaseline", "overflow", "procedureOverflow"))
+                require(all(finite(v) for v in (baseline, overflow, procedure))
+                        and baseline >= 0 and overflow >= 0 and procedure >= 0
+                        and overflow <= baseline + 1 and procedure <= 1,
+                        "invalid 400% overflow evidence: " + filename)
 
 
 def audit_theme_paths(theme):

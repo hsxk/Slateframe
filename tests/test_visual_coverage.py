@@ -1,7 +1,10 @@
 """Adversarial tests for mandatory exact-SHA WordPress visual coverage."""
 import importlib.util
+import json
+import tempfile
 from pathlib import Path
 import unittest
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -22,7 +25,7 @@ class VisualCoverageContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing mandatory browser coverage"):
             AUDIT.audit_browser_coverage({k: v for k, v in self.records.items() if k != name})
 
-    def test_complete_132_state_contract(self):
+    def test_complete_136_state_contract(self):
         self.assertEqual(AUDIT.audit_browser_coverage(self.records), 136)
 
     def test_all_seven_responsive_widths(self):
@@ -63,6 +66,16 @@ class VisualCoverageContract(unittest.TestCase):
             for direction in ('ltr', 'rtl'):
                 with self.subTest(width=width, direction=direction):
                     self.reject_missing(f"gutenberg-knowledge-400-{width}-{direction}-forced-colors.png")
+
+    def test_400_gutenberg_evidence_requires_actual_editor_width(self):
+        for width in (390, 1440):
+            for direction in ("ltr", "rtl"):
+                name = f"gutenberg-knowledge-400-{width}-{direction}-forced-colors.png"
+                self.records[name]["width"] = width - 1
+                with self.subTest(width=width, direction=direction):
+                    with self.assertRaisesRegex(ValueError, "wrong required browser viewport"):
+                        AUDIT.audit_browser_coverage(self.records)
+                self.records[name]["width"] = width
 
     def test_bidi_header_states_cannot_be_skipped(self):
         self.reject_missing("header-bidi-390-rtl-400-forced-colors.png")
@@ -169,6 +182,102 @@ class VisualCoverageContract(unittest.TestCase):
         self.records["extra-fixture.png"] = {"width": 320, "height": 900}
         self.assertEqual(AUDIT.audit_browser_coverage(self.records), 136)
         self.reject_missing("appearance-default-viewport-390-portfolio.png")
+
+
+class Gutenberg400MetricsContract(unittest.TestCase):
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.root = Path(self.directory.name)
+        self.base = {
+            "editorShellBaseline": 267,
+            "rootFont": "64px",
+            "direction": "ltr",
+            "viewport": 390,
+            "region": {"left": 0, "right": 390},
+            "overflow": 267,
+            "procedureOverflow": 0,
+            "measured": 140,
+            "escaped": [],
+        }
+        for width in (390, 1440):
+            for direction in ("ltr", "rtl"):
+                data = {**self.base, "viewport": width, "direction": direction,
+                        "region": {"left": 0, "right": width}}
+                self.write(width, direction, data)
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def file(self, width=390, direction="ltr"):
+        return self.root / f"gutenberg-knowledge-400-{width}-{direction}-metrics.json"
+
+    def write(self, width, direction, data):
+        self.file(width, direction).write_text(json.dumps(data), encoding="utf-8")
+
+    def reject(self, field, value, message, width=390, direction="ltr"):
+        data = json.loads(self.file(width, direction).read_text(encoding="utf-8"))
+        data[field] = value
+        self.write(width, direction, data)
+        with self.assertRaisesRegex(ValueError, message):
+            AUDIT.audit_knowledge_400_metrics(self.root)
+
+    def test_four_real_direction_and_width_states(self):
+        self.assertEqual(AUDIT.audit_knowledge_400_metrics(self.root), 4)
+
+    def test_missing_state_rejected(self):
+        self.file(1440, "rtl").unlink()
+        with self.assertRaisesRegex(ValueError, "missing Gutenberg 400% metrics"):
+            AUDIT.audit_knowledge_400_metrics(self.root)
+
+    def test_wrong_font_size_rejected(self):
+        self.reject("rootFont", "16px", "wrong Gutenberg 400% state")
+
+    def test_wrong_direction_rejected(self):
+        self.reject("direction", "rtl", "wrong Gutenberg 400% state")
+
+    def test_wrong_viewport_rejected(self):
+        self.reject("viewport", 375, "wrong Gutenberg 400% state")
+
+    def test_unmeasured_glyphs_rejected(self):
+        self.reject("measured", 0, "clipped or unmeasured")
+
+    def test_clipped_glyphs_rejected(self):
+        self.reject("escaped", [{"text": "clipped"}], "clipped or unmeasured")
+
+    def test_outside_viewport_rejected(self):
+        self.reject("region", {"left": -4, "right": 390}, "region outside viewport")
+
+    def test_procedure_overflow_rejected(self):
+        self.reject("procedureOverflow", 2, "overflow regression")
+
+    def test_editor_shell_regression_rejected(self):
+        self.reject("overflow", 269, "overflow regression")
+
+    def test_negative_or_nonfinite_overflow_rejected(self):
+        for value in (-1, float("nan"), True):
+            with self.subTest(value=value):
+                self.write(390, "ltr", {**self.base, "overflow": value})
+                with self.assertRaisesRegex(ValueError, "overflow regression"):
+                    AUDIT.audit_knowledge_400_metrics(self.root)
+
+    def test_corrupt_json_rejected(self):
+        self.file().write_text("{", encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "invalid Gutenberg 400% metrics"):
+            AUDIT.audit_knowledge_400_metrics(self.root)
+
+    def test_oversized_geometry_rejected_before_file_read(self):
+        self.file().write_text(" " * (128 * 1024), encoding="utf-8")
+        with mock.patch.object(Path, "read_text", side_effect=AssertionError("unbounded geometry read")):
+            with self.assertRaisesRegex(ValueError, "oversized Gutenberg 400% metrics"):
+                AUDIT.audit_knowledge_400_metrics(self.root)
+
+    def test_symlink_evidence_rejected(self):
+        target = self.file(390, "ltr")
+        other = self.file(1440, "ltr")
+        target.unlink()
+        target.symlink_to(other)
+        with self.assertRaisesRegex(ValueError, "missing Gutenberg 400% metrics"):
+            AUDIT.audit_knowledge_400_metrics(self.root)
 
 
 if __name__ == "__main__":

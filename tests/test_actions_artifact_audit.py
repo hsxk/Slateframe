@@ -8,6 +8,7 @@ import stat
 import struct
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 import zlib
 
@@ -65,6 +66,17 @@ class ArtifactAudit(unittest.TestCase):
                 "head_sha": HEAD, "screenshots": {"example.png": meta}
             }),
         }
+        self.metrics_prefix = "home/runner/work/Slateframe/Slateframe/test-artifacts/browser-metrics/"
+        for width in (390, 1440):
+            for direction in ("ltr", "rtl"):
+                name = f"gutenberg-knowledge-400-{width}-{direction}-metrics.json"
+                self.browser[self.metrics_prefix + name] = json.dumps({
+                    "editorShellBaseline": 267 if width == 390 else 0,
+                    "rootFont": "64px", "direction": direction, "viewport": width,
+                    "region": {"left": 0, "right": width},
+                    "overflow": 267 if width == 390 else 0,
+                    "procedureOverflow": 0, "measured": 25, "escaped": [],
+                })
         self.photo = {
             self.photo_name: self.picture,
             "home/runner/work/Slateframe/Slateframe/test-artifacts/photography-lightbox/gallery-evidence-manifest.json": json.dumps({
@@ -177,6 +189,83 @@ class ArtifactAudit(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "PNG CRC mismatch"):
             self.check()
 
+
+    def test_rejects_missing_browser_geometry_report(self):
+        self.browser.pop(self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json")
+        self.write()
+        with self.assertRaisesRegex(ValueError, "missing 400% geometry evidence"):
+            self.check()
+
+    def test_rejects_wrong_browser_geometry_direction(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-390-rtl-metrics.json"
+        data = json.loads(self.browser[key])
+        data["direction"] = "ltr"
+        self.browser[key] = json.dumps(data)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "invalid 400% geometry state"):
+            self.check()
+
+    def test_rejects_browser_geometry_glyph_escape(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-1440-ltr-metrics.json"
+        data = json.loads(self.browser[key])
+        data["escaped"] = [{"text": "outside"}]
+        self.browser[key] = json.dumps(data)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "invalid 400% glyph evidence"):
+            self.check()
+
+    def test_rejects_browser_geometry_overflow(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json"
+        data = json.loads(self.browser[key])
+        data["overflow"] = 270
+        self.browser[key] = json.dumps(data)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "invalid 400% overflow evidence"):
+            self.check()
+
+    def test_rejects_browser_geometry_outside_viewport(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json"
+        data = json.loads(self.browser[key])
+        data["region"]["right"] = 410
+        self.browser[key] = json.dumps(data)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "invalid 400% region evidence"):
+            self.check()
+
+    def test_rejects_extra_browser_geometry_file(self):
+        self.browser[self.metrics_prefix + "private.json"] = "{}"
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
+
+    def test_rejects_oversized_browser_geometry_file(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json"
+        self.browser[key] = self.browser[key] + (" " * 8192)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "oversized 400% geometry evidence"):
+            self.check()
+
+    def test_rejects_compressed_geometry_bomb_before_read(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json"
+        self.browser[key] = " " * (128 * 1024)
+        self.write()
+        original_read = zipfile.ZipFile.read
+
+        def guarded_read(archive, name, *args, **kwargs):
+            if name == key:
+                self.fail("oversized geometry member was read before size validation")
+            return original_read(archive, name, *args, **kwargs)
+
+        with mock.patch.object(zipfile.ZipFile, "read", guarded_read):
+            with self.assertRaisesRegex(ValueError, "oversized 400% geometry evidence"):
+                self.check()
+
+    def test_rejects_browser_geometry_outside_expected_path(self):
+        key = self.metrics_prefix + "gutenberg-knowledge-400-390-ltr-metrics.json"
+        self.browser["tmp/gutenberg-knowledge-400-390-ltr-metrics.json"] = self.browser.pop(key)
+        self.write()
+        with self.assertRaisesRegex(ValueError, "unexpected visual artifact file"):
+            self.check()
 
     def test_rejects_extra_browser_private_file(self):
         self.browser["home/runner/work/Slateframe/Slateframe/test-artifacts/screenshots/.env"] = "SECRET"
