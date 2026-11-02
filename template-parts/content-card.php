@@ -4,19 +4,12 @@
  *
  * @package Slateframe
  */
+$slateframe_card_image = slateframe_card_thumbnail_markup( get_the_ID() );
 ?>
 <article <?php post_class( 'slateframe-card' ); ?>>
-	<?php if ( has_post_thumbnail() ) : ?>
+	<?php if ( '' !== $slateframe_card_image ) : ?>
 		<a class="slateframe-card-media" href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
-			<?php
-			the_post_thumbnail(
-				'large',
-				array(
-					'loading'  => 'lazy',
-					'decoding' => 'async',
-				)
-			);
-			?>
+			<?php echo $slateframe_card_image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</a>
 	<?php endif; ?>
 
