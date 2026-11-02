@@ -1,0 +1,93 @@
+<?php
+/** Executable classic card thumbnail filter boundaries. */
+define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
+$GLOBALS['card_thumbnail'] = array( 'exists' => false, 'html' => '' );
+$GLOBALS['thumbnail_calls'] = 0;
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
+function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); }
+function has_post_thumbnail( $id ) { return 17 === $id && $GLOBALS['card_thumbnail']['exists']; }
+function get_the_post_thumbnail( $id, $size, $attrs ) {
+	++$GLOBALS['thumbnail_calls'];
+	if ( 17 !== $id || 'large' !== $size || 'lazy' !== $attrs['loading'] || 'async' !== $attrs['decoding'] ) {
+		throw new RuntimeException( 'Lost Core thumbnail contract' );
+	}
+	return $GLOBALS['card_thumbnail']['html'];
+}
+function wp_kses_post( $html ) {
+	if ( ! is_string( $html ) ) { throw new TypeError( 'KSES requires string' ); }
+	return preg_replace( array( '~<script\b[^>]*>.*?</script>~is', '~\s+onerror\s*=\s*"[^"]*"~i' ), '', $html );
+}
+class WP_HTML_Tag_Processor {
+	private $html;
+	private $tag = null;
+	public function __construct( $html ) { $this->html = $html; }
+	public function next_tag( $name ) {
+		if ( 'img' !== $name || ! preg_match( '~<img\b[^>]*>~is', $this->html, $matches ) ) { return false; }
+		$this->tag = $matches[0];
+		return true;
+	}
+	public function get_attribute( $name ) {
+		if ( null === $this->tag || ! preg_match( '~\s' . preg_quote( $name, '~' ) . '\s*=\s*(["\x27])(.*?)\1~is', $this->tag, $matches ) ) { return null; }
+		return html_entity_decode( $matches[2], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+	}
+	public function set_attribute( $name, $value ) {
+		$attribute = ' ' . $name . '="' . htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' ) . '"';
+		if ( preg_match( '~\s' . preg_quote( $name, '~' ) . '\s*=\s*(["\x27]).*?\1~is', $this->tag ) ) {
+			$this->tag = preg_replace( '~\s' . preg_quote( $name, '~' ) . '\s*=\s*(["\x27]).*?\1~is', $attribute, $this->tag, 1 );
+		} else {
+			$this->tag = preg_replace( '~<img\b~i', '<img' . $attribute, $this->tag, 1 );
+		}
+	}
+	public function get_updated_html() { return preg_replace( '~<img\b[^>]*>~is', $this->tag, $this->html, 1 ); }
+}
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+require dirname( __DIR__, 2 ) . '/inc/media-source.php';
+function get_the_ID() { return 17; }
+function post_class( $class ) { echo 'class="' . $class . '"'; }
+function the_permalink() { echo 'https://example.org/post'; }
+function get_post_type() { return 'page'; }
+function is_sticky() { return false; }
+function is_home() { return false; }
+function is_paged() { return false; }
+function esc_html_e( $value, $domain ) { echo htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' ); }
+function get_the_title( $id = 0 ) { return '日本語 العربية'; }
+function __( $text, $domain ) { return $text; }
+function the_excerpt() { echo '<p>Excerpt</p>'; }
+function render_card( $exists, $html ) {
+	$GLOBALS['card_thumbnail'] = array( 'exists' => $exists, 'html' => $html );
+	$GLOBALS['thumbnail_calls'] = 0;
+	ob_start();
+	include dirname( __DIR__, 2 ) . '/template-parts/content-card.php';
+	return ob_get_clean();
+}
+$checks = 0;
+function assert_card( $condition, $message ) {
+	global $checks;
+	if ( ! $condition ) { throw new RuntimeException( $message ); }
+	++$checks;
+}
+$none = render_card( false, '<img src="/valid.jpg">' );
+assert_card( false === strpos( $none, 'slateframe-card-media' ), 'No thumbnail must not create a link' );
+assert_card( 0 === $GLOBALS['thumbnail_calls'], 'No thumbnail must not fetch media' );
+foreach ( array( false, null, array( 'broken' ), '', '  ', '<p>Only text</p>', '<img>', '<img src="">', '<img src="#photo">', '<img src="mailto:editor@example.org">', '<img src="&#x200B;">', '<img srcset="#photo 2x">', '<img srcset="data:image/png;base64,AAAA 1x">' ) as $invalid ) {
+	$output = render_card( true, $invalid );
+	assert_card( false === strpos( $output, 'slateframe-card-media' ), 'Invalid filtered image left an empty card link' );
+	assert_card( false !== strpos( $output, '日本語 العربية' ), 'Invalid thumbnail removed readable title' );
+}
+$valid = render_card( true, '<img src="/写真.jpg" alt="日本語 العربية" loading="lazy" decoding="async">' );
+assert_card( 1 === substr_count( $valid, 'slateframe-card-media' ), 'Valid thumbnail lost link' );
+assert_card( false !== strpos( $valid, 'alt="日本語 العربية"' ), 'CJK/RTL alt changed' );
+assert_card( false !== strpos( $valid, 'loading="lazy"' ), 'Lazy loading lost' );
+assert_card( false !== strpos( $valid, 'decoding="async"' ), 'Core decoding hint lost' );
+$srcset = render_card( true, '<img srcset="/small.jpg 1x, /写真.jpg 2x" alt="">' );
+assert_card( false !== strpos( $srcset, 'slateframe-card-media' ), 'Valid srcset-only image discarded' );
+assert_card( false !== strpos( $srcset, '/写真.jpg 2x' ), 'Responsive candidate lost' );
+$missing_alt = render_card( true, '<img src="/photo.jpg">' );
+assert_card( false !== strpos( $missing_alt, 'alt=""' ), 'Missing alt not restored' );
+$invisible_alt = render_card( true, '<img src="/photo.jpg" alt="&#x200B;">' );
+assert_card( false !== strpos( $invisible_alt, 'alt=""' ), 'Invisible alt not normalized' );
+$unsafe = render_card( true, '<img src="/photo.jpg" onerror="alert(1)"><script>alert(2)</script>' );
+assert_card( false === strpos( $unsafe, 'onerror' ), 'Unsafe handler survived' );
+assert_card( false === strpos( $unsafe, '<script' ), 'Unsafe script survived' );
+assert_card( 1 === substr_count( $unsafe, 'slateframe-card-media' ), 'Safe image lost after KSES' );
+echo "Card thumbnail boundaries: {$checks} assertions passed\n";
