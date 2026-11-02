@@ -92,6 +92,21 @@ $urls = array(
 	array( 'https://مثال.إختبار/photo.jpg', true ),
 	array( 'https://例子.测试/photo.jpg', true ),
 	array( '/images\\photo.jpg', true ),
+
+	// WHATWG URL parsing rejects malformed host escapes and literal decoded %.
+	array( 'https://exa%ZZmple.org/photo.jpg', false ),
+	array( 'https://exa%mple.org/photo.jpg', false ),
+	array( 'https://exa%2mple.org/photo.jpg', false ),
+	array( '//exa%G0mple.org/photo.jpg', false ),
+	array( 'https://exa%25mple.org/photo.jpg', false ),
+	array( 'https://exa%252Fmple.org/photo.jpg', false ),
+	array( 'https://exa%2Emple%25.org/photo.jpg', false ),
+	array( 'https://exa%ffmple.org/photo.jpg', false ),
+	array( 'https://exa%E4%BDmple.org/photo.jpg', false ),
+	// Valid percent-encoded dot, letter, and path percent remain usable.
+	array( 'https://exa%2Emple.org/photo.jpg', true ),
+	array( '//exa%6Dple.org/photo.jpg', true ),
+	array( 'https://example.org/photo%25.jpg', true ),
 );
 
 foreach ( $urls as $case ) {
@@ -125,6 +140,11 @@ $images = array(
 	array( null, 'https://exa%E2%80%8Bmple.org/photo.jpg 1x', false ),
 	array( null, 'https://exam%E2%80%AEple.org/photo.jpg 1x, /valid.jpg 2x', true ),
 	array( null, 'https://مثال.إختبار/photo.jpg 1x', true ),
+
+	array( null, 'https://exa%ZZmple.org/photo.jpg 1x', false ),
+	array( null, 'https://exa%25mple.org/photo.jpg 1x, /valid.jpg 2x', true ),
+	array( null, '//exa%6Dple.org/photo.jpg 1x', true ),
+	array( null, 'https://exa%252Fmple.org/photo.jpg 2x', false ),
 );
 
 foreach ( $images as $case ) {
@@ -154,6 +174,11 @@ $attachments = array(
 	array( 'https://exam%E2%81%A6ple.org/file.pdf', '' ),
 	array( '//exa%E2%80%8Bmple.org/file.pdf', '' ),
 	array( 'https://مثال.إختبار/file.pdf', 'https://مثال.إختبار/file.pdf' ),
+
+	array( 'https://exa%ZZmple.org/file.pdf', '' ),
+	array( 'https://exa%25mple.org/file.pdf', '' ),
+	array( 'https://exa%2Emple.org/file.pdf', 'https://exa%2Emple.org/file.pdf' ),
+	array( 'https://example.org/file%25.pdf', 'https://example.org/file%25.pdf' ),
 );
 
 foreach ( $attachments as $case ) {
