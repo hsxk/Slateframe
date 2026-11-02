@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Deduplicate Core checklist selectors and group first/last-child resets in `content-modes.css` without broadening scope or changing design tokens. Recover 255 bytes under the existing 7,000-byte budget; add explicit selector-scope regression tests. Pending exact-HEAD WordPress/Chromium visual and Actions verification.
+
 + Parse whitespace-separated ARIA fallback role tokens in filtered classic thumbnail wrappers, so `role="unknown grid"` cannot bypass the composite widget guard; retain inert fallback roles. Extend PHP and disposable real WordPress browser regressions without CSS/JS changes. Pending exact-HEAD Actions.
 
 + Reject composite ARIA widget roles (grid/menu/tablist/tree/radiogroup/toolbar and related descendants) injected into classic filtered thumbnails inside decorative permalinks. Preserve noninteractive group/none wrappers and accessible titles; add PHP and real WordPress RTL 400% axe/screenshot regression without CSS/JS changes. Pending exact-HEAD acceptance.

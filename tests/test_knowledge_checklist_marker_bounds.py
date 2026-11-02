@@ -9,7 +9,8 @@ ROOT = Path(__file__).resolve().parents[1]
 class KnowledgeChecklistMarkerBounds(unittest.TestCase):
     def test_bounded_core_list_presentation_and_original_budgets(self):
         css = (ROOT / "assets/css/content-modes.css").read_text(encoding="utf-8")
-        self.assertIn(".wp-block-list.is-style-slateframe-checklist>li,.is-style-slateframe-checklist>li{", css)
+        self.assertIn(".is-style-slateframe-checklist>li{", css)
+        self.assertNotIn(".wp-block-list.is-style-slateframe-checklist>li,", css)
         self.assertIn("padding-inline-start:min(1.65rem,36px);margin-block:.65rem", css)
         self.assertIn('content:"✓";font-size:min(1em,24px);color:var(--slateframe-accent)', css)
         self.assertIn("inset-inline-start:0", css)
