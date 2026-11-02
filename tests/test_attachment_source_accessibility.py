@@ -21,7 +21,7 @@ class AttachmentSourceAccessibility(unittest.TestCase):
 
     def test_filtered_image_alt_cases(self):
         self.run_fixture('image-alt-visibility.php.fixture',
-                         'Image alt normalization: 14 cases passed')
+                         'Image alt normalization: 19 cases passed')
 
     def test_percent_encoded_invisible_media_urls(self):
         self.run_fixture('media-url-percent-encoding.php.fixture',
@@ -37,6 +37,7 @@ class AttachmentSourceAccessibility(unittest.TestCase):
         self.assertIn('function slateframe_normalize_image_alt( $processor )', media)
         self.assertIn('slateframe_normalize_image_alt( $image_processor )', featured)
         self.assertIn('slateframe_normalize_image_alt( $slateframe_image_processor )', attachment)
+        self.assertIn('if ( ! slateframe_has_readable_label( $alt ) )', media)
         self.assertNotIn('time2log', media.lower())
 
     def test_real_browser_recovery_and_alt_evidence(self):

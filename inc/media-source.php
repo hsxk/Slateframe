@@ -37,14 +37,14 @@ function slateframe_attachment_file_url( $url ) {
 }
 
 /**
- * Treat a filtered Unicode-invisible image alt like Core's empty decorative alt.
+ * Restore Core's explicit empty decorative alt when a filter removes or hides it.
  *
  * @param WP_HTML_Tag_Processor $processor Current image tag.
  * @return void
  */
 function slateframe_normalize_image_alt( $processor ) {
 	$alt = $processor->get_attribute( 'alt' );
-	if ( is_string( $alt ) && ! slateframe_has_readable_label( $alt ) ) {
+	if ( ! slateframe_has_readable_label( $alt ) ) {
 		$processor->set_attribute( 'alt', '' );
 	}
 }
