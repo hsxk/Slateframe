@@ -47,7 +47,12 @@ test('Knowledge procedure text fragments stay inside the real Gutenberg canvas i
           range.selectNodeContents(textNode);
           for (const rect of range.getClientRects()) {
             if (rect.width > 0 && rect.height > 0) {
-              fragments.push({ left: rect.left, right: rect.right });
+              fragments.push({
+                left: rect.left,
+                right: rect.right,
+                source: target.tagName.toLowerCase(),
+                text: textNode.textContent.trim().slice(0, 72),
+              });
             }
           }
         }
@@ -70,8 +75,11 @@ test('Knowledge procedure text fragments stay inside the real Gutenberg canvas i
     expect(metrics.textNodes, label).toBeGreaterThan(5);
     expect(metrics.fragments.length, label).toBeGreaterThanOrEqual(metrics.textNodes);
     for (const fragment of metrics.fragments) {
-      expect(fragment.left, `${label} glyph left`).toBeGreaterThanOrEqual(metrics.region.left - 2);
-      expect(fragment.right, `${label} glyph right`).toBeLessThanOrEqual(metrics.region.right + 2);
+      const context = `${label} ${fragment.source} ${fragment.text}`;
+      expect(fragment.left, `${context} glyph left`).toBeGreaterThanOrEqual(metrics.region.left - 2);
+      expect(fragment.right, `${context} glyph right`).toBeLessThanOrEqual(metrics.region.right + 2);
+      expect(fragment.left, `${context} viewport left`).toBeGreaterThanOrEqual(-2);
+      expect(fragment.right, `${context} viewport right`).toBeLessThanOrEqual(metrics.viewport + 2);
     }
   }
 });
