@@ -15,7 +15,7 @@ function get_the_post_thumbnail( $id, $size, $attrs ) {
 }
 function wp_kses_post( $html ) {
 	if ( ! is_string( $html ) ) { throw new TypeError( 'KSES requires string' ); }
-	return preg_replace( array( '~<script\b[^>]*>.*?</script>~is', '~\s+onerror\s*=\s*"[^"]*"~i' ), '', $html );
+	return preg_replace( array( '~<script\b[^>]*>.*?</script>~is', '~\s+onerror\s*=\s*"[^"]*"~i', '~\s+decoding\s*=\s*"[^"]*"~i' ), '', $html );
 }
 class WP_HTML_Tag_Processor {
 	private $html;
