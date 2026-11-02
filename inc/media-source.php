@@ -88,6 +88,16 @@ function slateframe_has_web_media_url( $url ) {
 	// A host containing letters can still hide an encoded authority delimiter.
 	// Decode only for validation; never rewrite Core's original URL.
 	$decoded_host = rawurldecode( $host );
+	// Browser URL parsers reject malformed percent escapes and decoded
+	// literal percent signs in hostnames. Validate only the authority:
+	// percent escapes in paths and valid encoded IDNs remain supported.
+	if (
+		1 === preg_match( '/%(?![0-9A-Fa-f]{2})/', $host ) ||
+		false !== strpos( $decoded_host, '%' ) ||
+		1 !== preg_match( '//u', $decoded_host )
+	) {
+		return false;
+	}
 	// Browser URL parsing rejects bidi overrides/isolates and may silently
 	// remove zero-width spaces from a readable hostname. Reject those
 	// ambiguous controls while retaining CJK, RTL and contextual joiners.
