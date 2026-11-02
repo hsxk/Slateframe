@@ -163,8 +163,21 @@ function slateframe_card_thumbnail_markup( $post_id ) {
 	// wrappers, responsive image candidates, and Core's original attributes.
 	$markup_tags = new WP_HTML_Tag_Processor( $html );
 	$interactive = array(
-		'A', 'AREA', 'AUDIO', 'BUTTON', 'DETAILS', 'EMBED', 'FORM', 'IFRAME',
-		'INPUT', 'LABEL', 'OBJECT', 'SELECT', 'SUMMARY', 'TEXTAREA', 'VIDEO',
+		'A',
+		'AREA',
+		'AUDIO',
+		'BUTTON',
+		'DETAILS',
+		'EMBED',
+		'FORM',
+		'IFRAME',
+		'INPUT',
+		'LABEL',
+		'OBJECT',
+		'SELECT',
+		'SUMMARY',
+		'TEXTAREA',
+		'VIDEO',
 	);
 	while ( $markup_tags->next_tag() ) {
 		$tabindex = $markup_tags->get_attribute( 'tabindex' );
