@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Keep Gutenberg and published Knowledge procedure glyphs away from the viewport edge with a shared logical inline-gap inset. The seven-width editor glyph test now identifies the offending text source and independently checks viewport bounds; retain existing overflow thresholds and CSS budgets. Pending exact-HEAD WordPress/Chromium Actions and visual review.
+
 + Deduplicate Core checklist selectors and group first/last-child resets in `content-modes.css` without broadening scope or changing design tokens. Recover 255 bytes under the existing 7,000-byte budget; add explicit selector-scope regression tests. Pending exact-HEAD WordPress/Chromium visual and Actions verification.
 
 + Parse whitespace-separated ARIA fallback role tokens in filtered classic thumbnail wrappers, so `role="unknown grid"` cannot bypass the composite widget guard; retain inert fallback roles. Extend PHP and disposable real WordPress browser regressions without CSS/JS changes. Pending exact-HEAD Actions.

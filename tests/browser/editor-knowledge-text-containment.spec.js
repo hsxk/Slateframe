@@ -2,10 +2,11 @@ const { test, expect } = require('@playwright/test');
 const { openAuthenticatedEditor } = require('./support/editor-login');
 
 const editorPostId = process.env.SLATEFRAME_EDITOR_POST_ID;
+const supportedWidths = [320, 375, 390, 412, 768, 1440, 1920];
 
-test('Knowledge procedure text stays within the real Gutenberg canvas in RTL and LTR', async ({ page }, testInfo) => {
+test('Knowledge procedure text fragments stay inside the real Gutenberg canvas in RTL and LTR', async ({ page }, testInfo) => {
   const width = testInfo.project.use.viewport?.width;
-  test.skip(!editorPostId || ![390, 1440].includes(width), 'Requires the real WordPress editor fixture at mobile or desktop width.');
+  test.skip(!editorPostId || !supportedWidths.includes(width), 'Requires the real WordPress editor fixture at a supported viewport.');
 
   await openAuthenticatedEditor(page, editorPostId);
   const framed = (await page.locator('iframe[name="editor-canvas"]').count()) > 0;
@@ -32,18 +33,36 @@ test('Knowledge procedure text stays within the real Gutenberg canvas in RTL and
         ...node.querySelectorAll('.is-style-slateframe-steps > li'),
         ...node.querySelectorAll('.is-style-slateframe-checklist > li'),
       ].filter(Boolean);
-      const fragments = targets.flatMap((target) => {
-        const range = document.createRange();
-        range.selectNodeContents(target);
-        return [...range.getClientRects()]
-          .filter((rect) => rect.width > 0 && rect.height > 0)
-          .map((rect) => ({ left: rect.left, right: rect.right }));
-      });
+      const fragments = [];
+      let textNodes = 0;
+      for (const target of targets) {
+        // Range.selectNodeContents(element) can return element boxes rather than
+        // glyph geometry. Measure actual text nodes so clipped text cannot pass.
+        const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+          const textNode = walker.currentNode;
+          if (!textNode.textContent.trim()) continue;
+          textNodes += 1;
+          const range = document.createRange();
+          range.selectNodeContents(textNode);
+          for (const rect of range.getClientRects()) {
+            if (rect.width > 0 && rect.height > 0) {
+              fragments.push({
+                left: rect.left,
+                right: rect.right,
+                source: target.tagName.toLowerCase(),
+                text: textNode.textContent.trim().slice(0, 72),
+              });
+            }
+          }
+        }
+      }
       return {
         region: { left: region.left, right: region.right, width: region.width },
         viewport,
         direction: getComputedStyle(node).direction,
         overflow: document.documentElement.scrollWidth - viewport,
+        textNodes,
         fragments,
       };
     });
@@ -53,10 +72,14 @@ test('Knowledge procedure text stays within the real Gutenberg canvas in RTL and
     expect(metrics.region.width, label).toBeGreaterThan(0);
     expect(metrics.region.left, label).toBeGreaterThanOrEqual(-2);
     expect(metrics.region.right, label).toBeLessThanOrEqual(metrics.viewport + 2);
-    expect(metrics.fragments.length, label).toBeGreaterThan(5);
+    expect(metrics.textNodes, label).toBeGreaterThan(5);
+    expect(metrics.fragments.length, label).toBeGreaterThanOrEqual(metrics.textNodes);
     for (const fragment of metrics.fragments) {
-      expect(fragment.left, `${label} text left`).toBeGreaterThanOrEqual(metrics.region.left - 2);
-      expect(fragment.right, `${label} text right`).toBeLessThanOrEqual(metrics.region.right + 2);
+      const context = `${label} ${fragment.source} ${fragment.text}`;
+      expect(fragment.left, `${context} glyph left`).toBeGreaterThanOrEqual(metrics.region.left - 2);
+      expect(fragment.right, `${context} glyph right`).toBeLessThanOrEqual(metrics.region.right + 2);
+      expect(fragment.left, `${context} viewport left`).toBeGreaterThanOrEqual(-2);
+      expect(fragment.right, `${context} viewport right`).toBeLessThanOrEqual(metrics.viewport + 2);
     }
   }
 });
