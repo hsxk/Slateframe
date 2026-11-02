@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject punctuation-only absolute media hosts (including percent-encoded `/`, `#`, `?`, `@`, `.`, `-`, `*`) after decoding. Preserve legitimate CJK/RTL/IPv6 domains, relative media endpoints, and existing srcset fallback; expand executable PHP regression coverage to 41 cases without adding dependencies or changing CSS/JS.
+
 + Reject absolute and protocol-relative image/audio/video and attachment URLs with entirely unreadable percent-encoded hosts, while preserving valid CJK/RTL/IPv6 hosts, relative paths, query endpoints, and responsive srcset fallback. Add 30 executable PHP boundary cases and static regression checks; no new JS/CSS or dependencies.
 
 + Bound Gutenberg geometry evidence JSON files to 8 KiB before materializing ZIP members or reading local files; add regressions that reject oversized payloads without reading them. Existing screenshot and geometry thresholds remain unchanged.
