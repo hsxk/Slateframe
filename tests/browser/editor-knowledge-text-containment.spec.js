@@ -1,4 +1,6 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 const { openAuthenticatedEditor } = require('./support/editor-login');
 
 const editorPostId = process.env.SLATEFRAME_EDITOR_POST_ID;
@@ -156,8 +158,20 @@ test('Knowledge Gutenberg glyphs remain visible at 400% in both writing directio
       body: Buffer.from(JSON.stringify({ editorShellBaseline, ...metrics }, null, 2)),
       contentType: 'application/json',
     });
+    // Playwright HTML-report attachments alone are not downloadable from the
+    // Actions browser artifact. Persist exact-SHA evidence in the inventory
+    // directory before assertions, including on failures.
+    const directory = path.resolve('test-artifacts/screenshots');
+    const basename = `gutenberg-knowledge-400-${width}-${direction}`;
+    await fs.mkdir(directory, { recursive: true });
+    await fs.writeFile(path.join(directory, `${basename}-metrics.json`),
+      JSON.stringify({ editorShellBaseline, ...metrics }, null, 2));
+    const screenshot = await knowledge.screenshot({
+      path: path.join(directory, `${basename}-forced-colors.png`),
+      animations: 'disabled',
+    });
     await testInfo.attach(`knowledge-editor-${width}-${direction}-400-forced-colors`, {
-      body: await knowledge.screenshot(),
+      body: screenshot,
       contentType: 'image/png',
     });
     expect(metrics.rootFont, label).toBe('64px');
