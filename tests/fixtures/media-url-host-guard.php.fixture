@@ -81,6 +81,16 @@ $urls = array(
 	array( 'https://safe.test\\@evil.test/photo.jpg', false ),
 	// Ordinary path backslashes remain compatible with Core media markup.
 	array( 'https://safe.test/images\\photo.jpg', true ),
+	// Unicode bidi controls can make a hostname browser-invalid; zero-width
+	// spaces may be removed by URL parsing and silently change its host.
+	array( 'https://exam%E2%80%AEple.org/photo.jpg', false ),
+	array( 'https://exam%E2%81%A6ple.org/photo.jpg', false ),
+	array( 'https://exa%E2%80%8Bmple.org/photo.jpg', false ),
+	array( 'https://exam%E2%80%8Fple.org/photo.jpg', false ),
+	array( '//exam%E2%80%AEple.org/photo.jpg', false ),
+	array( 'https://exam%E2%81%A9ple.org/photo.jpg', false ),
+	array( 'https://مثال.إختبار/photo.jpg', true ),
+	array( 'https://例子.测试/photo.jpg', true ),
 	array( '/images\\photo.jpg', true ),
 );
 
@@ -112,6 +122,9 @@ $images = array(
 	array( '/\\evil.test/photo.jpg', null, false ),
 	array( null, '//safe.test\\@evil.test/photo.jpg 1x', false ),
 	array( null, '//safe.test\\@evil.test/photo.jpg 1x, /valid.jpg 2x', true ),
+	array( null, 'https://exa%E2%80%8Bmple.org/photo.jpg 1x', false ),
+	array( null, 'https://exam%E2%80%AEple.org/photo.jpg 1x, /valid.jpg 2x', true ),
+	array( null, 'https://مثال.إختبار/photo.jpg 1x', true ),
 );
 
 foreach ( $images as $case ) {
@@ -138,6 +151,9 @@ $attachments = array(
 	array( '\\\\evil.test/file.pdf', '' ),
 	array( 'https://safe.test\\@evil.test/file.pdf', '' ),
 	array( 'https://safe.test/files\\report.pdf', 'https://safe.test/files\\report.pdf' ),
+	array( 'https://exam%E2%81%A6ple.org/file.pdf', '' ),
+	array( '//exa%E2%80%8Bmple.org/file.pdf', '' ),
+	array( 'https://مثال.إختبار/file.pdf', 'https://مثال.إختبار/file.pdf' ),
 );
 
 foreach ( $attachments as $case ) {
