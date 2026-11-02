@@ -20,7 +20,7 @@ class MediaURLHostGuard(unittest.TestCase):
         helper = (ROOT / "inc/media-source.php").read_text(encoding="utf-8")
         self.assertIn("slateframe_has_readable_media_url( $host )", helper)
         self.assertIn("preg_match( '/[\\\\p{L}\\\\p{N}]/u'", helper)
-        self.assertIn("0 !== strpos( $url, '//' )", helper)
+        self.assertIn("0 !== strpos( $validation_url, '//' )", helper)
         self.assertIn("rawurldecode( $host )", helper)
         self.assertIn("wp_parse_url( $validation_url, PHP_URL_SCHEME )", helper)
         self.assertIn("wp_parse_url( $validation_url, PHP_URL_HOST )", helper)
