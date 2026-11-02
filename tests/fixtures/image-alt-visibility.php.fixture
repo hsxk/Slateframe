@@ -4,13 +4,18 @@ define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
 function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 class WP_HTML_Tag_Processor {
 	private $attributes;
-	public function __construct( $alt ) { $this->attributes = array( 'alt' => $alt ); }
-	public function get_attribute( $name ) { return $this->attributes[ $name ]; }
+	public function __construct( $alt ) { $this->attributes = null === $alt ? array() : array( 'alt' => $alt ); }
+	public function get_attribute( $name ) { return isset( $this->attributes[ $name ] ) ? $this->attributes[ $name ] : null; }
 	public function set_attribute( $name, $value ) { $this->attributes[ $name ] = $value; }
 }
 require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
 require dirname( __DIR__, 2 ) . '/inc/media-source.php';
 $cases = array(
+	array( null, '' ),
+	array( false, '' ),
+	array( true, '' ),
+	array( array( 'invalid' ), '' ),
+	array( 42, '' ),
 	array( '', '' ),
 	array( ' ', '' ),
 	array( '&#x200B;', '' ),
