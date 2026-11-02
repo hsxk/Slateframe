@@ -35,6 +35,13 @@ $urls = array(
 	array( '//%E2%80%8B/abc', false ),
 	array( 'https://%E2%80%8B/abc', false ),
 	array( 'https://%CC%81/abc', false ),
+	array( '//%2F/photo.jpg', false ),
+	array( 'https://%23/photo.jpg', false ),
+	array( '//%2E/photo.jpg', false ),
+	array( '//%40/photo.jpg', false ),
+	array( '//%3F/photo.jpg', false ),
+	array( '//%2D/photo.jpg', false ),
+	array( '//%2A/photo.jpg', false ),
 	array( 'ftp://example.org/a.jpg', false ),
 	array( 'mailto:owner@example.org', false ),
 	array( '#fragment', false ),
@@ -55,6 +62,8 @@ $images = array(
 	array( null, 'https://例子.测试/写真.jpg 2x', true ),
 	array( '//%20/photo.jpg', null, false ),
 	array( '/valid.jpg', '//%20/photo.jpg 2x', true ),
+	array( null, '//%2F/photo.jpg 2x', false ),
+	array( null, '//%2F/photo.jpg 1x, /valid.jpg 2x', true ),
 );
 
 foreach ( $images as $case ) {
@@ -69,6 +78,8 @@ $attachments = array(
 	array( 'https://example.org/file.pdf', 'https://example.org/file.pdf' ),
 	array( '//cdn.example.org/ファイル.pdf', '//cdn.example.org/ファイル.pdf' ),
 	array( '/files/資料.pdf', '/files/資料.pdf' ),
+	array( '//%2E/file.pdf', '' ),
+	array( 'https://%23/file.pdf', '' ),
 );
 
 foreach ( $attachments as $case ) {
