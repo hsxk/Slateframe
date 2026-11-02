@@ -114,6 +114,12 @@ foreach ( array(
 	'<span tabindex="0"><img src="/photo.jpg"></span>',
 	'<span contenteditable="true"><img src="/photo.jpg"></span>',
 	'<img src="/photo.jpg" contenteditable="">',
+	'<span role="button"><img src="/photo.jpg"></span>',
+	'<img src="/photo.jpg" role="link">',
+	'<span role="checkbox"><img src="/photo.jpg"></span>',
+	'<span role="switch"><img src="/photo.jpg"></span>',
+	'<span role="textbox"><img src="/photo.jpg"></span>',
+	'<span role="menuitem"><img src="/photo.jpg"></span>',
 ) as $interactive ) {
 	$output = render_card( true, $interactive );
 	assert_card( false === strpos( $output, 'slateframe-card-media' ), 'Interactive filtered thumbnail created nested controls' );
@@ -127,4 +133,8 @@ $nonfocus = render_card( true, '<img src="/photo.jpg" tabindex="-1">' );
 assert_card( false !== strpos( $nonfocus, 'slateframe-card-media' ), 'Nonfocusable image discarded' );
 $not_editable = render_card( true, '<span contenteditable="false"><img src="/photo.jpg"></span>' );
 assert_card( false !== strpos( $not_editable, 'slateframe-card-media' ), 'Noneditable image wrapper discarded' );
+$presentation_role = render_card( true, '<span role="presentation"><img src="/photo.jpg"></span>' );
+assert_card( false !== strpos( $presentation_role, 'slateframe-card-media' ), 'Presentational image wrapper discarded' );
+$img_role = render_card( true, '<img src="/photo.jpg" role="img" alt="日本語 العربية">' );
+assert_card( false !== strpos( $img_role, 'slateframe-card-media' ), 'Inert image role discarded' );
 echo "Card thumbnail boundaries: {$checks} assertions passed\n";
