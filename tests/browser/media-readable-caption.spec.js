@@ -184,6 +184,8 @@ test('Core media captions and attachment metadata have readable labels at all wi
     await page.emulateMedia({ forcedColors: 'none' });
     await page.goto(attachmentUrl + '&sf_invisible_file_url=1', { waitUntil: 'networkidle' });
     await expect(page.getByRole('link', { name: 'Open original file' })).toHaveCount(0);
+    // A mailto source is not an image preview either: no broken figure/icon.
+    await expect(page.locator('.slateframe-prose > figure.alignwide')).toHaveCount(0);
     await page.setViewportSize({ width: 390, height: 900 });
     await setRootTextScale(page, 64, 'rtl');
     await page.emulateMedia({ forcedColors: 'active' });

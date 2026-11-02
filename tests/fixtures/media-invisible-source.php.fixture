@@ -32,6 +32,7 @@ class WP_HTML_Tag_Processor {
         return html_entity_decode( $match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8' );
     }
 }
+function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); }
 require dirname( __DIR__, 2 ) . '/inc/media-source.php';
 $cases = array(
     array( 'video', '<video src="&#x200B;"></video>', false ),
@@ -52,6 +53,16 @@ $cases = array(
     array( 'audio', '<audio><source src="&#x3164;"><source src="/valid.mp3"></audio>', true ),
     array( 'video', '<video src="0"></video>', true ),
     array( 'audio', '<audio src="?file=1"></audio>', true ),
+    array( 'video', '<video src="mailto:owner@example.org"></video>', false ),
+    array( 'audio', '<audio src="ftp://example.org/clip.mp3"></audio>', false ),
+    array( 'video', '<video><source src="mailto:owner@example.org"></video>', false ),
+    array( 'audio', '<audio><source src="ftp://example.org/clip.mp3"></audio>', false ),
+    array( 'video', '<video><source src="mailto:owner@example.org"><source src="/valid.mp4"></video>', true ),
+    array( 'audio', '<audio><source src="ftp://example.org/clip.mp3"><source src="/valid.mp3"></audio>', true ),
+    array( 'video', '<video src="https://example.org/動画.mp4"></video>', true ),
+    array( 'audio', '<audio src="//cdn.example.org/صوت.mp3"></audio>', true ),
+    array( 'video', '<video src="https://"></video>', false ),
+    array( 'audio', '<audio src="data:audio/mp3,abc"></audio>', false ),
 );
 foreach ( $cases as $index => $case ) {
     $actual = slateframe_media_has_source( $case[1], $case[0] );

@@ -138,3 +138,7 @@ This affects only the classic original-file action; Core media storage,
 rendering, Gallery/Lightbox and editor blocks remain unchanged. Executable
 PHP cases and real WordPress WP-CLI assertions cover valid and invalid
 post-filter rewrites without new CSS, JavaScript or dependencies.
+
+## Browser-fetchable source boundary
+
+Classic Core image, audio and video previews now reject non-web schemes such as `mailto:`, FTP, `tel:`, and `data:` even when KSES retains a readable source attribute. Site-relative, protocol-relative, CJK/RTL and HTTP(S) sources remain usable. `srcset` candidates are tokenized without interpreting the comma within a data URL as a separate relative image. This prevents a broken attachment image from remaining visible after a filtered original-file URL has been suppressed. The real WordPress/Chromium `media-non-http-file-url-390-rtl-400-forced-colors.png` screenshot and its no-figure assertion must be checked on the exact new HEAD; the prior screenshot visibly exposed a broken image icon.
