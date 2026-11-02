@@ -164,6 +164,9 @@ function slateframe_card_thumbnail_markup( $post_id ) {
 	}
 
 	slateframe_normalize_image_alt( $processor );
+	// Post KSES can strip decoding; restore only fixed, safe Core hints.
+	$processor->set_attribute( 'loading', 'lazy' );
+	$processor->set_attribute( 'decoding', 'async' );
 	return $processor->get_updated_html();
 }
 
