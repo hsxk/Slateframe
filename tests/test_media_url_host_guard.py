@@ -14,7 +14,7 @@ class MediaURLHostGuard(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn("66 web media URL cases, 24 srcset cases and 20 attachment cases passed", result.stdout)
+        self.assertIn("78 web media URL cases, 28 srcset cases and 24 attachment cases passed", result.stdout)
 
     def test_shared_host_guard_contract(self):
         helper = (ROOT / "inc/media-source.php").read_text(encoding="utf-8")
@@ -22,6 +22,9 @@ class MediaURLHostGuard(unittest.TestCase):
         self.assertIn("preg_match( '/[\\\\p{L}\\\\p{N}]/u'", helper)
         self.assertIn("0 !== strpos( $validation_url, '//' )", helper)
         self.assertIn("rawurldecode( $host )", helper)
+        self.assertIn("preg_match( '/%(?![0-9A-Fa-f]{2})/', $host )", helper)
+        self.assertIn("false !== strpos( $decoded_host, '%' )", helper)
+        self.assertIn("preg_match( '//u', $decoded_host )", helper)
         self.assertIn("wp_parse_url( $validation_url, PHP_URL_SCHEME )", helper)
         self.assertIn("wp_parse_url( $validation_url, PHP_URL_HOST )", helper)
         self.assertIn("preg_match( '/[\\x00-\\x1F\\x7F]/', $url )", helper)
