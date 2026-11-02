@@ -164,7 +164,9 @@ test('Knowledge Gutenberg glyphs remain visible at 400% in both writing directio
     const directory = path.resolve('test-artifacts/screenshots');
     const basename = `gutenberg-knowledge-400-${width}-${direction}`;
     await fs.mkdir(directory, { recursive: true });
-    await fs.writeFile(path.join(directory, `${basename}-metrics.json`),
+    const metricsDirectory = path.resolve('test-artifacts/browser-metrics');
+    await fs.mkdir(metricsDirectory, { recursive: true });
+    await fs.writeFile(path.join(metricsDirectory, `${basename}-metrics.json`),
       JSON.stringify({ editorShellBaseline, ...metrics }, null, 2));
     const screenshot = await knowledge.screenshot({
       path: path.join(directory, `${basename}-forced-colors.png`),

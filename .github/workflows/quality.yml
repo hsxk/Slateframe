@@ -1447,6 +1447,7 @@ jobs:
           name: slateframe-browser
           path: |
             test-artifacts/screenshots/
+            test-artifacts/browser-metrics/
             test-artifacts/browser-review.html
             test-artifacts/browser-failure/
             playwright-report/
