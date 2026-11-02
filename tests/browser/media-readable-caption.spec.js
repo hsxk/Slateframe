@@ -45,6 +45,22 @@ test('Core media captions and attachment metadata have readable labels at all wi
       ));
     `));
     expect(siblingPlayers).toEqual({ video: false, audio: false });
+    // Native Tag Processor decodes numeric entities: invisible-only URLs
+    // must not turn a filtered player shell into a usable media preview.
+    const invisiblePlayers = JSON.parse(wp('eval', `
+      echo wp_json_encode(array(
+        'video_direct' => slateframe_media_has_source('<video src="&#x200B;"></video>', 'video'),
+        'audio_direct' => slateframe_media_has_source('<audio src="&#x3164;"></audio>', 'audio'),
+        'video_nested' => slateframe_media_has_source('<video><source src="&#x2800;"></video>', 'video'),
+        'audio_nested' => slateframe_media_has_source('<audio><source src="&#x200D;"></audio>', 'audio'),
+        'video_valid' => slateframe_media_has_source('<video><source src="&#x200B;"><source src="/動画.mp4"></video>', 'video'),
+        'audio_valid' => slateframe_media_has_source('<audio src="/صوت.mp3"></audio>', 'audio')
+      ));
+    `));
+    expect(invisiblePlayers).toEqual({
+      video_direct: false, audio_direct: false, video_nested: false,
+      audio_nested: false, video_valid: true, audio_valid: true,
+    });
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
     expect(attachmentId).toMatch(/^\d+$/);

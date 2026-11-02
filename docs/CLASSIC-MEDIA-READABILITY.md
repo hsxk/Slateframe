@@ -55,3 +55,16 @@ allowlist only for the `source` element (`src`, `type`, `media`), using Core
 `wp_kses()` protocol validation. It does not allow arbitrary scripts, event
 handlers or unsafe source protocols. Regression verifies source preservation,
 unsafe source removal and absence of nonfunctional figures.
+
+## Unicode-invisible native player URLs
+
+A shortcode filter can leave a media `src` or nested `<source src>` containing
+only invisible Unicode characters (including encoded zero-width characters,
+Hangul filler, Braille blank or combining marks). Nonblank string length is not
+proof of a playable URL. The classic media guard reuses Slateframe's existing
+readable-text contract on the decoded attribute before displaying a player or
+caption. It still accepts valid CJK/RTL URLs, relative paths, numeric paths and
+later usable `<source>` candidates, and never scans beyond the current player.
+An isolated executable PHP fixture covers 18 direct/nested/boundary cases; the
+real WordPress/Chromium fixture exercises Core's HTML Tag Processor entity
+decoding. No media library, extra request, CSS or JavaScript is added.

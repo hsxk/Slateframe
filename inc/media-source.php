@@ -37,7 +37,7 @@ function slateframe_sanitize_media_shortcode( $html ) {
 /**
  * Check that a sanitized Core video/audio player has a usable media source.
  *
- * Shortcode filters may return an empty player shell. Preserve Core's direct
+ * Shortcode filters may return an empty player shell or Unicode-invisible URL. Preserve Core's direct
  * src and nested source candidates, but never emit a source-less figure or
  * its orphaned caption.
  *
@@ -56,7 +56,7 @@ function slateframe_media_has_source( $html, $tag ) {
 	}
 
 	$src = $processor->get_attribute( 'src' );
-	if ( is_string( $src ) && '' !== trim( $src ) ) {
+	if ( slateframe_has_readable_label( $src ) ) {
 		return true;
 	}
 
@@ -71,7 +71,7 @@ function slateframe_media_has_source( $html, $tag ) {
 			continue;
 		}
 		$src = $processor->get_attribute( 'src' );
-		if ( is_string( $src ) && '' !== trim( $src ) ) {
+		if ( slateframe_has_readable_label( $src ) ) {
 			return true;
 		}
 	}
