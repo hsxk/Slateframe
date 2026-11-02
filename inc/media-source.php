@@ -156,7 +156,41 @@ function slateframe_card_thumbnail_markup( $post_id ) {
 		return '';
 	}
 
-	$html      = wp_kses_post( $html );
+	$html = wp_kses_post( $html );
+
+	// This card owns a decorative permalink. Filtered thumbnails must not
+	// nest another interactive control inside it. Preserve noninteractive
+	// wrappers, responsive image candidates, and Core's original attributes.
+	$markup_tags = new WP_HTML_Tag_Processor( $html );
+	$interactive = array(
+		'A',
+		'AREA',
+		'AUDIO',
+		'BUTTON',
+		'DETAILS',
+		'EMBED',
+		'FORM',
+		'IFRAME',
+		'INPUT',
+		'LABEL',
+		'OBJECT',
+		'SELECT',
+		'SUMMARY',
+		'TEXTAREA',
+		'VIDEO',
+	);
+	while ( $markup_tags->next_tag() ) {
+		$tabindex = $markup_tags->get_attribute( 'tabindex' );
+		$editable = $markup_tags->get_attribute( 'contenteditable' );
+		if (
+			in_array( $markup_tags->get_tag(), $interactive, true ) ||
+			( null !== $tabindex && '-1' !== (string) $tabindex ) ||
+			( null !== $editable && 'false' !== strtolower( (string) $editable ) )
+		) {
+			return '';
+		}
+	}
+
 	$processor = new WP_HTML_Tag_Processor( $html );
 	if ( ! $processor->next_tag( 'img' ) ||
 		! slateframe_image_has_source( $processor->get_attribute( 'src' ), $processor->get_attribute( 'srcset' ) ) ) {

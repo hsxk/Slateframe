@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject interactive elements injected into filtered classic card thumbnail HTML before it is placed inside the card's native decorative permalink. Prevent nested links, media controls, and focusable/editable wrappers while preserving safe Core image wrappers, CJK/RTL, responsive sources and title navigation; extend executable PHP, real WordPress/Chromium RTL 400% axe, visual evidence and docs without CSS/JS changes. Pending exact-HEAD Actions and screenshot acceptance.
+
 + Omit empty or broken decorative thumbnail links from classic WordPress index, archive, author and search cards when Core image filters return non-image, fragment-only, non-web or invisible sources. Preserve responsive Core images, lazy loading, readable multilingual alt and title links; add executable PHP, real WordPress seven-width RTL/400%/axe tests and mandatory screenshot evidence without new CSS/JS. Pending exact-HEAD Actions and manual visual acceptance.
 
 + Reject fragment-only Core media and attachment recovery URLs that resolve to the current HTML page instead of an image/audio/video file; preserve real URLs with fragments, relative query endpoints and multilingual media. Extend PHP and WordPress/Chromium regressions and mandatory RTL 400% visual evidence without new runtime assets.

@@ -174,3 +174,24 @@ unsafe handlers. A disposable WordPress/Chromium search-card fixture checks
 seven widths, LTR/RTL, 100%/400% text, forced colors, axe, and a mandatory
 390px RTL 400% screenshot. Exact-HEAD Actions, visual inspection and
 byte-identical ZIP builds remain required before merge.
+
+## Interactive markup in filtered card thumbnails
+
+A third-party `post_thumbnail_html` filter can wrap an otherwise valid Core
+image in another link or append a form control. Because the classic card already
+owns its decorative permalink, that filtered markup would create nested anchors
+or focusable controls inside an `aria-hidden` link. After Core post KSES,
+Slateframe's HTML Tag Processor rejects interactive tags before emitting the
+media link, including Core audio/video controls, image maps, and focusable
+`tabindex` or editable wrappers. Explicit `tabindex="-1"` and
+`contenteditable="false"` remain noninteractive. The guard retains the independent readable post-title permalink.
+Ordinary noninteractive wrappers, Core `picture`/responsive sources, valid
+CJK/RTL alt, lazy loading and async decoding remain supported. This changes no
+editor-owned blocks, media storage, CSS or JavaScript.
+
+The executable PHP fixture covers links before and after the image, form
+controls, details/summary and valid noninteractive wrappers. Disposable real
+WordPress/Chromium tests assert both filtered link variants, seven responsive
+widths, LTR/RTL, 100%/400% text, axe and forced colors. The new 390px RTL
+400% screenshot is mandatory evidence. Only exact-HEAD successful Actions,
+manual screenshots and byte-identical distribution builds permit merging.
