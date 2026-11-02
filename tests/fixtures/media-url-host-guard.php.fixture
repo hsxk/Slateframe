@@ -72,6 +72,16 @@ $urls = array(
 	array( '  ftp://example.org/file.jpg', false ),
 	array( '  https://', false ),
 	array( '  mailto:owner@example.org', false ),
+	// Browser URL parsing treats leading backslashes as authority separators.
+	array( '\\\\evil.test/photo.jpg', false ),
+	array( '/\\evil.test/photo.jpg', false ),
+	array( '\\/evil.test/photo.jpg', false ),
+	// PHP and browsers disagree on backslashes before authority userinfo.
+	array( '//safe.test\\@evil.test/photo.jpg', false ),
+	array( 'https://safe.test\\@evil.test/photo.jpg', false ),
+	// Ordinary path backslashes remain compatible with Core media markup.
+	array( 'https://safe.test/images\\photo.jpg', true ),
+	array( '/images\\photo.jpg', true ),
 );
 
 foreach ( $urls as $case ) {
@@ -98,6 +108,10 @@ $images = array(
 	array( '  //%20/photo.jpg', null, false ),
 	array( '  //cdn.example.org/photo.jpg', null, true ),
 	array( "https://example.org/\nphoto.jpg", null, false ),
+	array( '\\\\evil.test/photo.jpg', null, false ),
+	array( '/\\evil.test/photo.jpg', null, false ),
+	array( null, '//safe.test\\@evil.test/photo.jpg 1x', false ),
+	array( null, '//safe.test\\@evil.test/photo.jpg 1x, /valid.jpg 2x', true ),
 );
 
 foreach ( $images as $case ) {
@@ -121,6 +135,9 @@ $attachments = array(
 	array( '  //%20/file.pdf', '' ),
 	array( '  //cdn.example.org/file.pdf', '  //cdn.example.org/file.pdf' ),
 	array( "https://example.org/\nfile.pdf", '' ),
+	array( '\\\\evil.test/file.pdf', '' ),
+	array( 'https://safe.test\\@evil.test/file.pdf', '' ),
+	array( 'https://safe.test/files\\report.pdf', 'https://safe.test/files\\report.pdf' ),
 );
 
 foreach ( $attachments as $case ) {
