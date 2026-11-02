@@ -12,7 +12,7 @@ class CardThumbnailBoundaries(unittest.TestCase):
         result = subprocess.run(['php', str(fixture)], cwd=ROOT,
                                 capture_output=True, text=True, check=False, timeout=20)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn('Card thumbnail boundaries: 87 assertions passed', result.stdout)
+        self.assertIn('Card thumbnail boundaries: 116 assertions passed', result.stdout)
 
     def test_shared_core_media_guard_and_no_duplicate_thumbnail_query(self):
         card = (ROOT / 'template-parts/content-card.php').read_text(encoding='utf-8')
@@ -29,6 +29,7 @@ class CardThumbnailBoundaries(unittest.TestCase):
         self.assertIn("get_attribute( 'contenteditable' )", media)
         self.assertIn("get_attribute( 'role' )", media)
         self.assertIn('interactive_roles', media)
+        self.assertIn("preg_split( '/\\s+/'", media)
         self.assertIn('slateframe_image_has_source( $processor->get_attribute(', media)
         self.assertIn('slateframe_normalize_image_alt( $processor )', media)
 
@@ -43,6 +44,11 @@ class CardThumbnailBoundaries(unittest.TestCase):
         self.assertIn('AxeBuilder', browser)
         self.assertIn('sf_card_nested_link', browser)
         self.assertIn('sf_card_role_button', browser)
+        self.assertIn('sf_card_role_grid', browser)
+        self.assertIn('sf_card_role_menu', browser)
+        self.assertIn('sf_card_role_fallback', browser)
+        self.assertIn('card-aria-composite-thumbnail-390-rtl-400-forced-colors.png', browser)
+        self.assertIn('card-aria-composite-thumbnail-390-rtl-400-forced-colors.png', coverage)
         self.assertIn('card-aria-role-thumbnail-390-rtl-400-forced-colors.png', browser)
         self.assertIn('card-aria-role-thumbnail-390-rtl-400-forced-colors.png', coverage)
         self.assertIn('card-interactive-thumbnail-390-rtl-400-forced-colors.png', browser)

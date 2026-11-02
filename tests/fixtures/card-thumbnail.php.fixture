@@ -120,6 +120,19 @@ foreach ( array(
 	'<span role="switch"><img src="/photo.jpg"></span>',
 	'<span role="textbox"><img src="/photo.jpg"></span>',
 	'<span role="menuitem"><img src="/photo.jpg"></span>',
+	'<span role="grid"><img src="/photo.jpg"></span>',
+	'<span role="gridcell"><img src="/photo.jpg"></span>',
+	'<span role="menu"><img src="/photo.jpg"></span>',
+	'<span role="menubar"><img src="/photo.jpg"></span>',
+	'<span role="radiogroup"><img src="/photo.jpg"></span>',
+	'<span role="tablist"><img src="/photo.jpg"></span>',
+	'<span role="toolbar"><img src="/photo.jpg"></span>',
+	'<span role="tree"><img src="/photo.jpg"></span>',
+	'<span role="treegrid"><img src="/photo.jpg"></span>',
+	'<span role=" MENU "><img src="/photo.jpg"></span>',
+	'<span role="unknown grid"><img src="/photo.jpg"></span>',
+	'<span role="menu presentation"><img src="/photo.jpg"></span>',
+	'<span role="GROUP BUTTON"><img src="/photo.jpg"></span>',
 ) as $interactive ) {
 	$output = render_card( true, $interactive );
 	assert_card( false === strpos( $output, 'slateframe-card-media' ), 'Interactive filtered thumbnail created nested controls' );
@@ -137,4 +150,10 @@ $presentation_role = render_card( true, '<span role="presentation"><img src="/ph
 assert_card( false !== strpos( $presentation_role, 'slateframe-card-media' ), 'Presentational image wrapper discarded' );
 $img_role = render_card( true, '<img src="/photo.jpg" role="img" alt="日本語 العربية">' );
 assert_card( false !== strpos( $img_role, 'slateframe-card-media' ), 'Inert image role discarded' );
+$group_role = render_card( true, '<span role="group"><img src="/photo.jpg"></span>' );
+assert_card( false !== strpos( $group_role, 'slateframe-card-media' ), 'Noninteractive group role discarded' );
+$none_role = render_card( true, '<span role="none"><img src="/photo.jpg"></span>' );
+assert_card( false !== strpos( $none_role, 'slateframe-card-media' ), 'Presentational none role discarded' );
+$fallback_none = render_card( true, '<span role="none group"><img src="/photo.jpg"></span>' );
+assert_card( false !== strpos( $fallback_none, 'slateframe-card-media' ), 'Inert role fallback discarded' );
 echo "Card thumbnail boundaries: {$checks} assertions passed\n";
