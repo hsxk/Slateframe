@@ -150,6 +150,16 @@ test('Knowledge Gutenberg glyphs remain visible at 400% in both writing directio
     });
 
     const label = `${width}px ${direction} at 400%`;
+    // Attach the failing direction's actual screenshot and measurements before
+    // assertions, so CI failures preserve evidence instead of only a trace.
+    await testInfo.attach(`knowledge-editor-${width}-${direction}-400-metrics`, {
+      body: Buffer.from(JSON.stringify({ editorShellBaseline, ...metrics }, null, 2)),
+      contentType: 'application/json',
+    });
+    await testInfo.attach(`knowledge-editor-${width}-${direction}-400-forced-colors`, {
+      body: await knowledge.screenshot(),
+      contentType: 'image/png',
+    });
     expect(metrics.rootFont, label).toBe('64px');
     expect(metrics.direction, label).toBe(direction);
     expect(metrics.measured, label).toBeGreaterThan(8);
@@ -159,9 +169,5 @@ test('Knowledge Gutenberg glyphs remain visible at 400% in both writing directio
     expect(metrics.region.right, label).toBeLessThanOrEqual(metrics.viewport + 2);
     expect(metrics.escaped, label).toEqual([]);
 
-    await testInfo.attach(`knowledge-editor-${width}-${direction}-400-forced-colors`, {
-      body: await knowledge.screenshot(),
-      contentType: 'image/png',
-    });
   }
 });
