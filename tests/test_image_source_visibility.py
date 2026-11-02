@@ -21,7 +21,7 @@ class ImageSourceVisibility(unittest.TestCase):
         featured = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
         attachment = (ROOT / 'attachment.php').read_text(encoding='utf-8')
         self.assertIn('function slateframe_image_has_source( $src, $srcset )', helper)
-        self.assertIn("slateframe_has_web_media_url( rtrim( $token, \u0027,\u0027 ) )", helper)
+        self.assertIn("slateframe_has_web_media_url( rtrim( $token, ',' ) )", helper)
         self.assertIn('slateframe_image_has_source( $image_src, $image_srcset )', featured)
         self.assertIn('slateframe_image_has_source(', attachment)
         self.assertIn('$slateframe_image_srcset', attachment)
