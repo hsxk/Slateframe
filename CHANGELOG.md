@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject Unicode-invisible Core featured/attachment image URLs, including srcset-only candidates with readable density descriptors. Preserve CJK/RTL and valid responsive-only images; add PHP and real WordPress browser regression with RTL forced-colors evidence.
+
 + Ignore Unicode-invisible direct and nested Core audio/video source URLs when deciding whether a classic attachment preview is usable. Preserve valid CJK/RTL and later playable sources; add 18 executable PHP cases and real WordPress browser checks without changing runtime assets.
 
 + Restrict classic Core audio/video nested-source detection to the active player element: a `<source>` after `</video>` or `</audio>` must not create a nonfunctional preview or orphaned caption. Add executable PHP and real WordPress browser regressions without new assets or dependencies.

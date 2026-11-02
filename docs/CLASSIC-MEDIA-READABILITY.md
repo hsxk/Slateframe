@@ -68,3 +68,15 @@ later usable `<source>` candidates, and never scans beyond the current player.
 An isolated executable PHP fixture covers 18 direct/nested/boundary cases; the
 real WordPress/Chromium fixture exercises Core's HTML Tag Processor entity
 decoding. No media library, extra request, CSS or JavaScript is added.
+
+
+## Invisible image URLs and responsive candidates
+
+Core featured and attachment images may be filtered into a broken `src` or
+`srcset` containing only invisible Unicode. Slateframe checks the actual URL
+token of each responsive candidate rather than treating its readable `2x` or
+`1200w` descriptor as a usable image. It suppresses broken classic figures and
+orphan captions while retaining the original-file recovery link. Normal CJK/RTL
+paths, later valid responsive candidates, and srcset-only Core images remain
+supported. An executable 18-case PHP fixture and real WordPress browser checks
+cover the source contract without adding runtime CSS or JavaScript.
