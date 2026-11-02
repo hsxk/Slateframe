@@ -19,6 +19,9 @@ function get_the_ID() { return 42; }
 function slateframe_public_attachment_parent_id($id) { return 0; }
 function wp_get_attachment_url($id) { return ''; }
 function esc_url_raw($value) { return $value; }
+define('ABSPATH', getcwd() . '/');
+function slateframe_has_readable_label($text) { return is_string($text) && '' !== trim($text); }
+require getcwd() . '/inc/media-source.php';
 function get_post_mime_type($id) { return 'application/octet-stream'; }
 function wp_get_attachment_caption($id) { return ''; }
 function slateframe_attachment_details($id) { return []; }
@@ -67,6 +70,10 @@ class AttachmentCommentsCoreOwnership(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 0, result.stderr)
                 self.assertEqual(result.stdout, 'SLATEFRAME_RESULT:' + str(expected))
+
+    def test_uses_real_media_source_helper_for_attachment_fixture(self):
+        self.assertIn("require getcwd() . '/inc/media-source.php';", PHP)
+        self.assertIn('function slateframe_has_readable_label($text)', PHP)
 
     def test_templates_share_core_discussion_ownership(self):
         source = (ROOT / 'attachment.php').read_text(encoding='utf-8')

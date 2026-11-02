@@ -55,6 +55,7 @@ class WP_HTML_Tag_Processor {
     public function get_updated_html() { return $this->html; }
 }
 require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+require dirname( __DIR__, 2 ) . '/inc/media-source.php';
 set_error_handler( function( $severity, $message ) { throw new ErrorException( $message, 0, $severity ); } );
 $cases = 0;
 function verify_case( $ok, $message ) {

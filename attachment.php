@@ -15,7 +15,7 @@ while ( have_posts() ) :
 	// Core normally returns strings, but attachment filters can supply invalid
 	// values. Do not cast arrays/objects into visible metadata or unsafe links.
 	$slateframe_raw_url     = wp_get_attachment_url( $slateframe_attachment_id );
-	$slateframe_file_url    = is_string( $slateframe_raw_url ) ? esc_url_raw( $slateframe_raw_url ) : '';
+	$slateframe_file_url    = slateframe_attachment_file_url( $slateframe_raw_url );
 	$slateframe_raw_mime    = get_post_mime_type( $slateframe_attachment_id );
 	$slateframe_mime_type   = is_string( $slateframe_raw_mime ) ? $slateframe_raw_mime : '';
 	$slateframe_raw_caption = wp_get_attachment_caption( $slateframe_attachment_id );
@@ -55,10 +55,13 @@ while ( have_posts() ) :
 							// Preserve valid srcset-only responsive markup supplied by Core filters.
 							$slateframe_image_src    = $slateframe_image_processor->get_attribute( 'src' );
 							$slateframe_image_srcset = $slateframe_image_processor->get_attribute( 'srcset' );
-							$slateframe_image_valid  = ( is_string( $slateframe_image_src ) && '' !== trim( $slateframe_image_src ) )
-								|| ( is_string( $slateframe_image_srcset ) && '' !== trim( $slateframe_image_srcset ) );
+							$slateframe_image_valid  = slateframe_image_has_source(
+								$slateframe_image_src,
+								$slateframe_image_srcset
+							);
 						}
 						if ( $slateframe_image_valid ) {
+							slateframe_normalize_image_alt( $slateframe_image_processor );
 							$slateframe_image_processor->set_attribute( 'loading', 'eager' );
 							$slateframe_image_processor->set_attribute( 'decoding', 'async' );
 							$slateframe_image_processor->set_attribute( 'fetchpriority', 'high' );

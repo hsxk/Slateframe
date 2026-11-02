@@ -18,6 +18,19 @@ const fixture = [
   "  return array( '&#x200B;' => 'Invisible label', 'Hidden value' => '&#x3164;',",
   "    '日本語 العربية' => '写真 1200 × 900', 'File type' => 'image/png' );",
   '} );',
+  "add_filter( 'wp_get_attachment_image', static function ( $html ) {",
+  "  if ( ! isset( $_GET['sf_invisible_image'] ) ) { return $html; }",
+  "  return '<img src=\"&#x200B;\" srcset=\"&#x3164; 2x\" alt=\"Filtered image\">';",
+  '} );',
+  "add_filter( 'wp_get_attachment_url', static function ( $url ) {",
+  "  return isset( $_GET['sf_invisible_file_url'] ) ? '%E2%80%8B' : $url;",
+  '} );',
+  "add_filter( 'wp_get_attachment_image', static function ( $html ) {",
+  "  if ( ! isset( $_GET['sf_invisible_alt'] ) ) { return $html; }",
+  "  $tags = new WP_HTML_Tag_Processor( $html );",
+  "  if ( $tags->next_tag( 'img' ) ) { $tags->set_attribute( 'alt', '&#x200B;' ); return $tags->get_updated_html(); }",
+  "  return $html;",
+  '} );',
 ].join('\n');
 
 test('Core media captions and attachment metadata have readable labels at all widths', async ({ page }, info) => {
@@ -54,12 +67,40 @@ test('Core media captions and attachment metadata have readable labels at all wi
         'video_nested' => slateframe_media_has_source('<video><source src="&#x2800;"></video>', 'video'),
         'audio_nested' => slateframe_media_has_source('<audio><source src="&#x200D;"></audio>', 'audio'),
         'video_valid' => slateframe_media_has_source('<video><source src="&#x200B;"><source src="/動画.mp4"></video>', 'video'),
-        'audio_valid' => slateframe_media_has_source('<audio src="/صوت.mp3"></audio>', 'audio')
+        'audio_valid' => slateframe_media_has_source('<audio src="/صوت.mp3"></audio>', 'audio'),
+        'video_encoded' => slateframe_media_has_source('<video src="%E2%80%8B"></video>', 'video'),
+        'audio_encoded' => slateframe_media_has_source('<audio><source src="%E3%85%A4"></audio>', 'audio')
       ));
     `));
     expect(invisiblePlayers).toEqual({
       video_direct: false, audio_direct: false, video_nested: false,
       audio_nested: false, video_valid: true, audio_valid: true,
+      video_encoded: false, audio_encoded: false,
+    });
+    // Check native WordPress HTML Tag Processor entity decoding: readable
+    // srcset density descriptors do not rescue invisible-only URLs.
+    const imageSources = JSON.parse(wp('eval', `
+      $htmls = array(
+        'invisible_src' => '<img src="&#x200B;">',
+        'invisible_srcset' => '<img srcset="&#x3164; 2x">',
+        'invisible_multi' => '<img srcset="&#x2800; 1x, &#x200D; 2x">',
+        'valid_srcset' => '<img srcset="&#x200B; 1x, /写真.jpg 2x">',
+        'valid_rtl' => '<img src="/صورة.jpg">',
+        'encoded_invisible_src' => '<img src="%E2%80%8B">',
+        'encoded_invisible_srcset' => '<img srcset="%E3%85%A4 2x">'
+      );
+      $results = array();
+      foreach ( $htmls as $key => $html ) {
+        $tag = new WP_HTML_Tag_Processor( $html );
+        $tag->next_tag( 'img' );
+        $results[$key] = slateframe_image_has_source( $tag->get_attribute( 'src' ), $tag->get_attribute( 'srcset' ) );
+      }
+      echo wp_json_encode( $results );
+    `));
+    expect(imageSources).toEqual({
+      invisible_src: false, invisible_srcset: false, invisible_multi: false,
+      valid_srcset: true, valid_rtl: true,
+      encoded_invisible_src: false, encoded_invisible_srcset: false,
     });
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
@@ -71,6 +112,8 @@ test('Core media captions and attachment metadata have readable labels at all wi
     const heroUrl = '/?p=' + postId;
     const invisible = '&#x200B;';
     wp('post', 'update', attachmentId, '--post_excerpt=' + invisible);
+    // This test must also work alone, without another spec creating the directory.
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
 
     await page.goto(attachmentUrl, { waitUntil: 'networkidle' });
     await expect(page.locator('main#main-content')).toBeVisible();
@@ -86,6 +129,36 @@ test('Core media captions and attachment metadata have readable labels at all wi
     await expect(page.locator('.slateframe-entry-footer')).toContainText('写真 1200 × 900');
     await expect(page.locator('.slateframe-entry-footer')).not.toContainText('Invisible label');
     await expect(page.locator('.slateframe-entry-footer')).not.toContainText('Hidden value');
+    // Filtered invisible-only image URLs must not create a broken figure
+    // or orphan caption, while the original-file recovery link survives.
+    await page.goto(attachmentUrl + '&sf_invisible_image=1', { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-prose > figure.alignwide')).toHaveCount(0);
+    await expect(page.getByRole('link', { name: 'Open original file' })).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 900 });
+    await setRootTextScale(page, 64, 'rtl');
+    await page.emulateMedia({ forcedColors: 'active' });
+    const invisibleOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(invisibleOverflow).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: 'test-artifacts/screenshots/media-invisible-image-390-rtl-400-forced-colors.png', fullPage: true });
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.goto(attachmentUrl + '&sf_invisible_file_url=1', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('link', { name: 'Open original file' })).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 900 });
+    await setRootTextScale(page, 64, 'rtl');
+    await page.emulateMedia({ forcedColors: 'active' });
+    const recoveryOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(recoveryOverflow).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: 'test-artifacts/screenshots/media-invisible-file-url-390-rtl-400-forced-colors.png', fullPage: true });
+    await page.emulateMedia({ forcedColors: 'none' });
+    await page.goto(heroUrl + '&sf_invisible_alt=1', { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-entry-hero img')).toHaveAttribute('alt', '');
+    await page.goto(attachmentUrl + '&sf_invisible_alt=1', { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-prose > figure.alignwide img')).toHaveAttribute('alt', '');
+    const altAxe = await new AxeBuilder({ page }).include('main#main-content')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(altAxe.violations).toEqual([]);
+    await page.goto(heroUrl + '&sf_invisible_image=1', { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-entry-hero')).toHaveCount(0);
     await page.goto(heroUrl, { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-entry-hero img')).toBeVisible();
     await expect(page.locator('.slateframe-entry-hero figcaption')).toHaveCount(0);
@@ -94,7 +167,6 @@ test('Core media captions and attachment metadata have readable labels at all wi
     wp('post', 'update', attachmentId, '--post_excerpt=' + visibleCaption);
     await page.goto(heroUrl, { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-entry-hero figcaption')).toHaveText(visibleCaption);
-    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await page.setViewportSize({ width: 390, height: 900 });
     await setRootTextScale(page, 64, 'rtl');
     await page.emulateMedia({ forcedColors: 'active' });

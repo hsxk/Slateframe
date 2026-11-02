@@ -1,0 +1,43 @@
+<?php
+/** Executable Core attachment recovery URL boundary fixture. */
+define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
+function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
+function esc_url_raw( $url ) {
+	if ( preg_match( '/^(?:javascript|data|vbscript):/i', $url ) ) {
+		return '';
+	}
+	return trim( $url );
+}
+require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+require dirname( __DIR__, 2 ) . '/inc/media-source.php';
+$cases = array(
+	array( 'https://example.org/photo.jpg', true, 'HTTPS image' ),
+	array( 'http://example.org/video.mp4', true, 'HTTP video' ),
+	array( '/uploads/photo.jpg', true, 'relative path' ),
+	array( '/写真.jpg', true, 'CJK path' ),
+	array( '/صورة.jpg', true, 'Arabic path' ),
+	array( '/📷.jpg', true, 'emoji path' ),
+	array( 'https://example.org/?a=1&b=2', true, 'query parameters' ),
+	array( '/%E5%86%99%E7%9C%9F.jpg', true, 'encoded CJK path' ),
+	array( '&#x200B;', false, 'entity zero width' ),
+	array( '&#x3164;', false, 'entity Hangul filler' ),
+	array( '%E2%80%8B', false, 'encoded zero width' ),
+	array( '%E3%85%A4', false, 'encoded Hangul filler' ),
+	array( "\u{200D}", false, 'literal zero width joiner' ),
+	array( "\u{2800}", false, 'Braille blank' ),
+	array( "\u{0301}", false, 'combining mark' ),
+	array( ' ', false, 'whitespace' ),
+	array( '', false, 'empty string' ),
+	array( 'javascript:alert(1)', false, 'unsafe protocol' ),
+	array( null, false, 'null' ),
+	array( false, false, 'boolean' ),
+	array( 42, false, 'number' ),
+	array( array( 'url' ), false, 'array' ),
+);
+foreach ( $cases as $case ) {
+	$url = slateframe_attachment_file_url( $case[0] );
+	if ( ( '' !== $url ) !== $case[1] ) {
+		throw new RuntimeException( 'Failed: ' . $case[2] );
+	}
+}
+echo 'Attachment recovery URL: ' . count( $cases ) . " cases passed\n";

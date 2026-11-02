@@ -18,7 +18,8 @@ class MediaInvisibleSource(unittest.TestCase):
 
     def test_reuses_shared_readable_label_contract(self):
         media = (ROOT / 'inc/media-source.php').read_text(encoding='utf-8')
-        self.assertEqual(media.count('slateframe_has_readable_label( $src )'), 2)
+        self.assertEqual(media.count('slateframe_has_readable_media_url( $src )'), 3)
+        self.assertIn('function slateframe_image_has_source( $src, $srcset )', media)
         self.assertIn("'SOURCE' !== $current_tag", media)
         self.assertIn("strtoupper( $tag ) === $current_tag", media)
 

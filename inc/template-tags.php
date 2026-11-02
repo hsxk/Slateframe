@@ -130,12 +130,12 @@ function slateframe_featured_media( $post_id = 0 ) {
 	// Match attachment previews: accept Core responsive srcset-only images.
 	$image_src    = $image_processor->get_attribute( 'src' );
 	$image_srcset = $image_processor->get_attribute( 'srcset' );
-	$has_source   = ( is_string( $image_src ) && '' !== trim( $image_src ) )
-		|| ( is_string( $image_srcset ) && '' !== trim( $image_srcset ) );
+	$has_source   = slateframe_image_has_source( $image_src, $image_srcset );
 	if ( ! $has_source ) {
 		return;
 	}
 
+	slateframe_normalize_image_alt( $image_processor );
 	$image_processor->set_attribute( 'loading', 'eager' );
 	$image_processor->set_attribute( 'decoding', 'async' );
 	$image_processor->set_attribute( 'fetchpriority', 'high' );
