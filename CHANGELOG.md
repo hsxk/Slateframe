@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject mixed percent-encoded authority delimiters, whitespace and control bytes inside otherwise readable HTTP(S) media hostnames (for example `example%2F.org`), preserving Unicode/percent-encoded IDNs, valid ports and bracketed IPv6. Expand executable media URL/srcset/attachment cases from 41 to 61 without adding CSS, JavaScript or dependencies; exact-HEAD Actions and visual acceptance pending.
+
 + Reject punctuation-only absolute media hosts (including percent-encoded `/`, `#`, `?`, `@`, `.`, `-`, `*`) after decoding. Preserve legitimate CJK/RTL/IPv6 domains, relative media endpoints, and existing srcset fallback; expand executable PHP regression coverage to 41 cases without adding dependencies or changing CSS/JS.
 
 + Reject absolute and protocol-relative image/audio/video and attachment URLs with entirely unreadable percent-encoded hosts, while preserving valid CJK/RTL/IPv6 hosts, relative paths, query endpoints, and responsive srcset fallback. Add 30 executable PHP boundary cases and static regression checks; no new JS/CSS or dependencies.
