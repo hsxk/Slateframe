@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Omit empty or broken decorative thumbnail links from classic WordPress index, archive, author and search cards when Core image filters return non-image, fragment-only, non-web or invisible sources. Preserve responsive Core images, lazy loading, readable multilingual alt and title links; add executable PHP, real WordPress seven-width RTL/400%/axe tests and mandatory screenshot evidence without new CSS/JS. Pending exact-HEAD Actions and manual visual acceptance.
+
 + Reject fragment-only Core media and attachment recovery URLs that resolve to the current HTML page instead of an image/audio/video file; preserve real URLs with fragments, relative query endpoints and multilingual media. Extend PHP and WordPress/Chromium regressions and mandatory RTL 400% visual evidence without new runtime assets.
 
 + Reject non-web Core image/audio/video preview sources, including srcset data-URL comma false positives, while preserving valid multilingual HTTP(S)/relative sources. Add executable PHP and exact-SHA WordPress/Chromium broken-image regression evidence without new CSS/JS.
