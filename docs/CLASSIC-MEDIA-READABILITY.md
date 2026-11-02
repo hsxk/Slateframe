@@ -99,3 +99,16 @@ Three isolated executable PHP fixtures cover 54 cases. The real WordPress
 browser fixture checks recovery-link omission, both classic image alt surfaces,
 percent-encoded sources, RTL 400% reflow, axe and mandatory forced-colors
 screenshot evidence. No new CSS, JavaScript, dependencies or external requests.
+
+## Missing filtered image alt attributes
+
+WordPress Core normally emits an explicit `alt` attribute. Third-party
+`wp_get_attachment_image` filters can remove it entirely, which may cause
+assistive technology to announce an image filename. For the two classic
+Slateframe-owned image surfaces (featured hero and attachment preview), the
+shared HTML Tag Processor guard now restores `alt=""` when the attribute is
+missing, invalid, or Unicode-invisible. Readable CJK, RTL, numeric, and
+ordinary descriptive alt text remains unchanged. Core image markup, responsive
+sources, Gallery/Lightbox, and editor-owned blocks are not rewritten.
+Executable PHP cases and a disposable real WordPress/Chromium fixture assert
+both image surfaces and axe behavior. No new CSS, JS, or dependencies.
