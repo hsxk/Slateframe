@@ -195,3 +195,14 @@ WordPress/Chromium tests assert both filtered link variants, seven responsive
 widths, LTR/RTL, 100%/400% text, axe and forced colors. The new 390px RTL
 400% screenshot is mandatory evidence. Only exact-HEAD successful Actions,
 manual screenshots and byte-identical distribution builds permit merging.
+
+## Interactive ARIA roles in filtered thumbnail wrappers
+
+A filtered thumbnail may use a non-native wrapper such as `<span role="button">`
+without a focusable `tabindex`. Nesting that interactive accessibility role
+inside a decorative permalink creates conflicting semantics. The card helper
+rejects interactive ARIA roles after Core KSES, preserving inert `role="img"`
+and `role="presentation"` wrappers, responsive images and CJK/RTL alt.
+The independent post-title link remains available. PHP and real WordPress
+390px RTL 400% forced-colors axe/screenshot evidence are mandatory.
+No CSS/JS, dependencies or editor-owned markup changes.
