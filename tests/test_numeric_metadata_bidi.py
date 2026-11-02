@@ -65,6 +65,7 @@ function slateframe_public_attachment_parent_id($id) { return 42; }
 function wp_get_attachment_url($id) { return ''; }
 function esc_url_raw($url) { return $url; }
 function slateframe_has_readable_label($text) { return is_string($text) && '' !== trim($text); }
+define('ABSPATH', getcwd() . '/');
 require getcwd() . '/inc/media-source.php';
 function get_post_mime_type($id) { return 'application/pdf'; }
 function wp_get_attachment_caption($id) { return ''; }
@@ -84,6 +85,7 @@ function comments_open() { return false; }
 function get_comments_number() { return 0; }
 include $argv[1];
 '''
+        self.assertIn("define('ABSPATH', getcwd() . '/');", fixture)
         self.assertIn("require getcwd() . '/inc/media-source.php';", fixture)
         result = subprocess.run(['php', '-r', fixture, str(ROOT / 'attachment.php')],
                                 text=True, capture_output=True, timeout=15)
