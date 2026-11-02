@@ -31,6 +31,12 @@ const fixture = [
   "  if ( $tags->next_tag( 'img' ) ) { $tags->set_attribute( 'alt', '&#x200B;' ); return $tags->get_updated_html(); }",
   "  return $html;",
   '} );',
+  "add_filter( 'wp_get_attachment_image', static function ( $html ) {",
+  "  if ( ! isset( $_GET['sf_missing_alt'] ) ) { return $html; }",
+  "  $tags = new WP_HTML_Tag_Processor( $html );",
+  "  if ( $tags->next_tag( 'img' ) ) { $tags->remove_attribute( 'alt' ); return $tags->get_updated_html(); }",
+  "  return $html;",
+  '} );',
 ].join('\n');
 
 test('Core media captions and attachment metadata have readable labels at all widths', async ({ page }, info) => {
@@ -157,6 +163,15 @@ test('Core media captions and attachment metadata have readable labels at all wi
     const altAxe = await new AxeBuilder({ page }).include('main#main-content')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
     expect(altAxe.violations).toEqual([]);
+    // A plugin can remove alt entirely. Restore an explicit decorative alt,
+    // rather than exposing the filename as an unintended accessible name.
+    await page.goto(heroUrl + '&sf_missing_alt=1', { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-entry-hero img')).toHaveAttribute('alt', '');
+    await page.goto(attachmentUrl + '&sf_missing_alt=1', { waitUntil: 'networkidle' });
+    await expect(page.locator('.slateframe-prose > figure.alignwide img')).toHaveAttribute('alt', '');
+    const missingAltAxe = await new AxeBuilder({ page }).include('main#main-content')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+    expect(missingAltAxe.violations).toEqual([]);
     await page.goto(heroUrl + '&sf_invisible_image=1', { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-entry-hero')).toHaveCount(0);
     await page.goto(heroUrl, { waitUntil: 'networkidle' });
