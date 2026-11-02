@@ -6,6 +6,7 @@ existing inventory verifier and human visual inspection remain mandatory.
 """
 import argparse
 import json
+import math
 from pathlib import Path
 import re
 
@@ -96,17 +97,58 @@ def audit_browser_coverage(records):
     return len(required)
 
 
+def audit_knowledge_400_metrics(directory):
+    """Validate real 400% Gutenberg glyph geometry in all four directions/widths."""
+    directory = Path(directory)
+    require(directory.is_dir() and not directory.is_symlink(), "missing Gutenberg 400% metrics directory")
+
+    def finite_number(value):
+        return type(value) in (int, float) and math.isfinite(value)
+
+    for width in (390, 1440):
+        for direction in ("ltr", "rtl"):
+            name = f"gutenberg-knowledge-400-{width}-{direction}-metrics.json"
+            path = directory / name
+            require(path.is_file() and not path.is_symlink(), "missing Gutenberg 400% metrics: " + name)
+            try:
+                metrics = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError, json.JSONDecodeError) as exc:
+                raise ValueError("invalid Gutenberg 400% metrics: " + name) from exc
+            require(isinstance(metrics, dict), "invalid Gutenberg 400% metrics: " + name)
+            require(metrics.get("rootFont") == "64px" and metrics.get("direction") == direction
+                    and metrics.get("viewport") == width,
+                    "wrong Gutenberg 400% state: " + name)
+            require(type(metrics.get("measured")) is int and metrics["measured"] > 8
+                    and metrics.get("escaped") == [],
+                    "clipped or unmeasured Gutenberg 400% glyphs: " + name)
+            region = metrics.get("region")
+            require(isinstance(region, dict) and all(finite_number(region.get(k)) for k in ("left", "right"))
+                    and -2 <= region["left"] < region["right"] <= width + 2,
+                    "Gutenberg 400% region outside viewport: " + name)
+            baseline = metrics.get("editorShellBaseline")
+            overflow = metrics.get("overflow")
+            procedure = metrics.get("procedureOverflow")
+            require(all(finite_number(v) for v in (baseline, overflow, procedure))
+                    and baseline >= 0 and overflow >= 0 and procedure >= 0
+                    and overflow <= baseline + 1 and procedure <= 1,
+                    "Gutenberg 400% overflow regression: " + name)
+    return 4
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--head", required=True)
+    parser.add_argument("--metrics", required=True)
     args = parser.parse_args()
     require(re.fullmatch(r"[0-9a-f]{40}", args.head) is not None, "invalid HEAD SHA")
     manifest = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
     require(manifest.get("head_sha") == args.head, "stale screenshot inventory")
     count = audit_browser_coverage(manifest.get("screenshots"))
+    metric_count = audit_knowledge_400_metrics(args.metrics)
     print(json.dumps({"head_sha": args.head, "required_states": count,
-                      "total_screenshots": len(manifest["screenshots"])}, sort_keys=True))
+                      "total_screenshots": len(manifest["screenshots"]),
+                      "verified_400_percent_states": metric_count}, sort_keys=True))
     print("Full artifact audit and manual visual inspection remain mandatory.")
 
 
