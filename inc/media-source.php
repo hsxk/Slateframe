@@ -22,6 +22,30 @@ function slateframe_has_readable_media_url( $url ) {
 }
 
 /**
+ * Require usable browser media URLs after Core has sanitized media markup.
+ *
+ * KSES may allow mail or FTP handlers in attributes, but images, audio and
+ * video require HTTP(S). Preserve site-relative, protocol-relative and
+ * multilingual web sources without changing Core's original markup.
+ *
+ * @param mixed $url Media source URL.
+ * @return bool Whether the source is usable for a browser media request.
+ */
+function slateframe_has_web_media_url( $url ) {
+	// Fragment-only URLs resolve to the current HTML document, not a media file.
+	if ( ! slateframe_has_readable_media_url( $url ) || '#' === substr( ltrim( $url ), 0, 1 ) ) {
+		return false;
+	}
+
+	$scheme = wp_parse_url( $url, PHP_URL_SCHEME );
+	if ( false === $scheme || ( null !== $scheme && ! in_array( strtolower( $scheme ), array( 'http', 'https' ), true ) ) ) {
+		return false;
+	}
+
+	return null === $scheme || (bool) wp_parse_url( $url, PHP_URL_HOST );
+}
+
+/**
  * Keep only a readable, Core-sanitized attachment recovery URL.
  *
  * @param mixed $url WordPress attachment URL.
@@ -32,8 +56,14 @@ function slateframe_attachment_file_url( $url ) {
 		return '';
 	}
 
-	$safe_url = esc_url_raw( $url );
-	return is_string( $safe_url ) && slateframe_has_readable_media_url( $safe_url ) ? $safe_url : '';
+	// A file-recovery link must not launch mail, FTP, or custom protocol handlers.
+	$safe_url = esc_url_raw( $url, array( 'http', 'https' ) );
+	// Core's clean_url filter runs after sanitization; recheck the final URL.
+	if ( ! slateframe_has_web_media_url( $safe_url ) ) {
+		return '';
+	}
+
+	return $safe_url;
 }
 
 /**
@@ -61,7 +91,7 @@ function slateframe_normalize_image_alt( $processor ) {
  * @return bool Whether at least one URL candidate is readable.
  */
 function slateframe_image_has_source( $src, $srcset ) {
-	if ( slateframe_has_readable_media_url( $src ) ) {
+	if ( slateframe_has_web_media_url( $src ) ) {
 		return true;
 	}
 
@@ -69,16 +99,30 @@ function slateframe_image_has_source( $src, $srcset ) {
 		return false;
 	}
 
-	foreach ( explode( ',', $srcset ) as $candidate ) {
-		$candidate = trim( $candidate );
-		if ( '' === $candidate ) {
-			continue;
+	// Commas within a URL token (notably data URLs) are not new srcset
+	// candidates. Parse URL tokens before density/width descriptors.
+	$length = strlen( $srcset );
+	$offset = 0;
+	while ( $offset < $length ) {
+		while ( $offset < $length && ( ',' === $srcset[ $offset ] || ctype_space( $srcset[ $offset ] ) ) ) {
+			++$offset;
 		}
-
-		// Ignore density/width descriptors: only the first token is a URL.
-		$parts = preg_split( '/\s+/u', $candidate, 2 );
-		if ( is_array( $parts ) && slateframe_has_readable_media_url( $parts[0] ) ) {
+		$start = $offset;
+		while ( $offset < $length && ! ctype_space( $srcset[ $offset ] ) ) {
+			++$offset;
+		}
+		$token = substr( $srcset, $start, $offset - $start );
+		if ( '' === $token ) {
+			break;
+		}
+		$trailing_comma = ',' === substr( $token, -1 );
+		if ( slateframe_has_web_media_url( rtrim( $token, ',' ) ) ) {
 			return true;
+		}
+		if ( ! $trailing_comma ) {
+			while ( $offset < $length && ',' !== $srcset[ $offset ] ) {
+				++$offset;
+			}
 		}
 	}
 
@@ -132,7 +176,7 @@ function slateframe_media_has_source( $html, $tag ) {
 	}
 
 	$src = $processor->get_attribute( 'src' );
-	if ( slateframe_has_readable_media_url( $src ) ) {
+	if ( slateframe_has_web_media_url( $src ) ) {
 		return true;
 	}
 
@@ -147,7 +191,7 @@ function slateframe_media_has_source( $html, $tag ) {
 			continue;
 		}
 		$src = $processor->get_attribute( 'src' );
-		if ( slateframe_has_readable_media_url( $src ) ) {
+		if ( slateframe_has_web_media_url( $src ) ) {
 			return true;
 		}
 	}

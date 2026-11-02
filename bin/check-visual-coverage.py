@@ -62,6 +62,8 @@ def required_browser_screenshots():
         "media-readable-hero-390-rtl-400-forced-colors.png": 390,
         "media-invisible-image-390-rtl-400-forced-colors.png": 390,
         "media-invisible-file-url-390-rtl-400-forced-colors.png": 390,
+        "media-non-http-file-url-390-rtl-400-forced-colors.png": 390,
+        "media-fragment-file-url-390-rtl-400-forced-colors.png": 390,
         "author-blank-identity-390-rtl-400-forced-colors.png": None,
         "author-blank-identity-1440-ltr.png": None,
         "header-bidi-390-rtl-400-forced-colors.png": 390,

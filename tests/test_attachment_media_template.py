@@ -7,6 +7,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class AttachmentMediaTemplate(unittest.TestCase):
+    def test_fixture_models_core_url_parser(self):
+        fixture = (ROOT / 'tests/fixtures/attachment-media-template.php.fixture').read_text(encoding='utf-8')
+        self.assertIn('function wp_parse_url( $url, $component = -1 )', fixture)
+
     def test_php_runtime_media_boundaries(self):
         fixture = ROOT / 'tests/fixtures/attachment-media-template.php.fixture'
         result = subprocess.run(

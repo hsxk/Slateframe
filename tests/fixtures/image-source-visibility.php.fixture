@@ -3,9 +3,16 @@
 define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
 function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); }
 require dirname( __DIR__, 2 ) . '/inc/media-source.php';
 $cases = array(
 	array( '/photo.jpg', null, true, 'direct URL' ),
+	array( '#photo', null, false, 'fragment-only image' ),
+	array( '#صورة', null, false, 'RTL fragment-only image' ),
+	array( null, '#photo 1x', false, 'fragment-only srcset' ),
+	array( null, '#photo 1x, /valid.jpg 2x', true, 'valid source after fragment' ),
+	array( '/photo.jpg#view', null, true, 'real image with fragment' ),
+	array( '?image=1', null, true, 'query-only media endpoint' ),
 	array( '/写真.jpg', null, true, 'CJK URL' ),
 	array( '/صورة.jpg', null, true, 'RTL URL' ),
 	array( '&#x200B;', null, false, 'zero-width direct URL' ),
@@ -23,6 +30,20 @@ $cases = array(
 	array( null, null, false, 'missing both attributes' ),
 	array( null, array( 'invalid' ), false, 'malformed srcset adapter' ),
 	array( 42, null, false, 'nonstring direct source' ),
+	array( 'mailto:owner@example.org', null, false, 'mail handler image' ),
+	array( 'ftp://example.org/photo.jpg', null, false, 'FTP image' ),
+	array( 'tel:+123', null, false, 'telephone image' ),
+	array( 'data:image/png,abc', null, false, 'data image' ),
+	array( 'https://', null, false, 'hostless HTTPS image' ),
+	array( 'https://example.org/写真.jpg', null, true, 'web CJK image' ),
+	array( '//cdn.example.org/صورة.jpg', null, true, 'protocol-relative RTL image' ),
+	array( null, 'mailto:owner@example.org 1x', false, 'mail srcset' ),
+	array( null, 'ftp://example.org/photo.jpg 2x', false, 'FTP srcset' ),
+	array( null, 'data:image/png,abc 2x', false, 'data comma must not create fake candidate' ),
+	array( null, 'data:image/png,abc 2x, https://example.org/写真.jpg 1x', true, 'valid candidate after data' ),
+	array( null, 'mailto:owner@example.org 1x, /valid.jpg 2x', true, 'valid candidate after mail' ),
+	array( null, 'https://example.org/写真.jpg 1x', true, 'web CJK srcset' ),
+	array( null, 'https:// 2x', false, 'hostless HTTPS srcset' ),
 );
 foreach ( $cases as $case ) {
 	$actual = slateframe_image_has_source( $case[0], $case[1] );

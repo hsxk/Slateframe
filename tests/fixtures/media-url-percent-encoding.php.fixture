@@ -3,6 +3,7 @@
 define( 'ABSPATH', dirname( __DIR__, 2 ) . '/' );
 function wp_strip_all_tags( $value ) { return strip_tags( $value ); }
 require dirname( __DIR__, 2 ) . '/inc/template-tags.php';
+function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); }
 require dirname( __DIR__, 2 ) . '/inc/media-source.php';
 $cases = array(
 	array( '/写真.jpg', true ),

@@ -9,6 +9,7 @@ function wp_strip_all_tags( $text ) {
     if ( ! is_string( $text ) ) { throw new TypeError( 'Invalid title' ); }
     return strip_tags( $text );
 }
+function wp_parse_url( $url, $component = -1 ) { return parse_url( $url, $component ); }
 function absint( $value ) { return abs( (int) $value ); }
 function get_the_ID() { return 17; }
 function has_post_thumbnail( $id ) { return true; }

@@ -14,14 +14,14 @@ class ImageSourceVisibility(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn('Image source visibility: 18 cases passed', result.stdout)
+        self.assertIn('Image source visibility: 38 cases passed', result.stdout)
 
     def test_shared_guard_on_hero_and_attachment(self):
         helper = (ROOT / 'inc/media-source.php').read_text(encoding='utf-8')
         featured = (ROOT / 'inc/template-tags.php').read_text(encoding='utf-8')
         attachment = (ROOT / 'attachment.php').read_text(encoding='utf-8')
         self.assertIn('function slateframe_image_has_source( $src, $srcset )', helper)
-        self.assertIn('slateframe_has_readable_media_url( $parts[0] )', helper)
+        self.assertIn("slateframe_has_web_media_url( rtrim( $token, ',' ) )", helper)
         self.assertIn('slateframe_image_has_source( $image_src, $image_srcset )', featured)
         self.assertIn('slateframe_image_has_source(', attachment)
         self.assertIn('$slateframe_image_srcset', attachment)
