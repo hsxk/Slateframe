@@ -82,3 +82,20 @@ supported. An executable 18-case PHP fixture and real WordPress browser checks
 cover the source contract without adding runtime CSS or JavaScript. The 390px RTL,
 400% text, forced-colors invisible-image screenshot is mandatory exact-HEAD
 browser evidence; its directory is created by the isolated fixture itself.
+
+## Filtered recovery links, alt text, and percent-encoded URL tokens
+
+Core attachment URLs may be filtered to a Unicode-invisible or percent-encoded
+invisible value. Slateframe checks the decoded URL before and after Core
+`esc_url_raw()` sanitization, omitting the unusable original-file link while
+preserving valid relative, CJK, RTL and encoded media URLs. The same readable
+URL-token guard applies to direct and responsive image sources and native
+Core audio/video candidates; a percent-encoded invisible URL is not a playable
+source. Filtered image alt containing only invisible characters becomes the
+native empty decorative alt, while readable alt text is preserved. The source
+markup, Core image generation and lightbox remain untouched.
+
+Three isolated executable PHP fixtures cover 54 cases. The real WordPress
+browser fixture checks recovery-link omission, both classic image alt surfaces,
+percent-encoded sources, RTL 400% reflow, axe and mandatory forced-colors
+screenshot evidence. No new CSS, JavaScript, dependencies or external requests.

@@ -39,6 +39,15 @@ class AttachmentSourceAccessibility(unittest.TestCase):
         self.assertIn('slateframe_normalize_image_alt( $slateframe_image_processor )', attachment)
         self.assertNotIn('time2log', media.lower())
 
+    def test_real_browser_recovery_and_alt_evidence(self):
+        browser = (ROOT / 'tests/browser/media-readable-caption.spec.js').read_text(encoding='utf-8')
+        contract = (ROOT / 'bin/check-visual-coverage.py').read_text(encoding='utf-8')
+        name = 'media-invisible-file-url-390-rtl-400-forced-colors.png'
+        self.assertIn(name, browser)
+        self.assertIn(f'"{name}": 390', contract)
+        self.assertIn("sf_invisible_alt", browser)
+        self.assertIn("toHaveAttribute('alt', '')", browser)
+
 
 if __name__ == '__main__':
     unittest.main()
