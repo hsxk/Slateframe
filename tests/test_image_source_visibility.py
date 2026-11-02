@@ -14,7 +14,7 @@ class ImageSourceVisibility(unittest.TestCase):
             text=True, check=False, timeout=20,
         )
         self.assertEqual(result.returncode, 0, result.stderr + result.stdout)
-        self.assertIn('Image source visibility: 32 cases passed', result.stdout)
+        self.assertIn('Image source visibility: 38 cases passed', result.stdout)
 
     def test_shared_guard_on_hero_and_attachment(self):
         helper = (ROOT / 'inc/media-source.php').read_text(encoding='utf-8')

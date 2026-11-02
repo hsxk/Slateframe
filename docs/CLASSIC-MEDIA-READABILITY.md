@@ -142,3 +142,14 @@ post-filter rewrites without new CSS, JavaScript or dependencies.
 ## Browser-fetchable source boundary
 
 Classic Core image, audio and video previews now reject non-web schemes such as `mailto:`, FTP, `tel:`, and `data:` even when KSES retains a readable source attribute. Site-relative, protocol-relative, CJK/RTL and HTTP(S) sources remain usable. `srcset` candidates are tokenized without interpreting the comma within a data URL as a separate relative image. This prevents a broken attachment image from remaining visible after a filtered original-file URL has been suppressed. The real WordPress/Chromium `media-non-http-file-url-390-rtl-400-forced-colors.png` screenshot and its no-figure assertion must be checked on the exact new HEAD; the prior screenshot visibly exposed a broken image icon.
+
+## Fragment-only browser media URLs
+
+A fragment-only URL (`#photo`) resolves to the current HTML document, not to a
+media file. Filtered Core image `src`/`srcset`, audio/video sources, and classic
+attachment recovery links now reject these false positives. The shared guard
+still accepts legitimate file paths with fragments, query-based relative media
+endpoints, CJK/RTL filenames and protocol-relative CDNs. Recovery URLs are
+rechecked after Core's `clean_url` filter, including fragment rewrites. Isolated
+PHP fixtures, real WordPress/Chromium media assertions and a required 390px RTL
+400% forced-colors screenshot cover the behavior without adding CSS or JS.

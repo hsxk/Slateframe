@@ -24,6 +24,7 @@ const fixture = [
   '} );',
   "add_filter( 'wp_get_attachment_url', static function ( $url ) {",
   "  if ( isset( $_GET['sf_non_http_file_url'] ) ) { return 'mailto:editor@example.org'; }",
+  "  if ( isset( $_GET['sf_fragment_file_url'] ) ) { return '#photo'; }",
   "  return isset( $_GET['sf_invisible_file_url'] ) ? '%E2%80%8B' : $url;",
   '} );',
   "add_filter( 'wp_get_attachment_image', static function ( $html ) {",
@@ -76,13 +77,16 @@ test('Core media captions and attachment metadata have readable labels at all wi
         'video_valid' => slateframe_media_has_source('<video><source src="&#x200B;"><source src="/動画.mp4"></video>', 'video'),
         'audio_valid' => slateframe_media_has_source('<audio src="/صوت.mp3"></audio>', 'audio'),
         'video_encoded' => slateframe_media_has_source('<video src="%E2%80%8B"></video>', 'video'),
-        'audio_encoded' => slateframe_media_has_source('<audio><source src="%E3%85%A4"></audio>', 'audio')
+        'audio_encoded' => slateframe_media_has_source('<audio><source src="%E3%85%A4"></audio>', 'audio'),
+        'video_fragment' => slateframe_media_has_source('<video src="#photo"></video>', 'video'),
+        'audio_fragment' => slateframe_media_has_source('<audio><source src="#photo"></audio>', 'audio')
       ));
     `));
     expect(invisiblePlayers).toEqual({
       video_direct: false, audio_direct: false, video_nested: false,
       audio_nested: false, video_valid: true, audio_valid: true,
       video_encoded: false, audio_encoded: false,
+      video_fragment: false, audio_fragment: false,
     });
     // Check native WordPress HTML Tag Processor entity decoding: readable
     // srcset density descriptors do not rescue invisible-only URLs.
@@ -94,7 +98,9 @@ test('Core media captions and attachment metadata have readable labels at all wi
         'valid_srcset' => '<img srcset="&#x200B; 1x, /写真.jpg 2x">',
         'valid_rtl' => '<img src="/صورة.jpg">',
         'encoded_invisible_src' => '<img src="%E2%80%8B">',
-        'encoded_invisible_srcset' => '<img srcset="%E3%85%A4 2x">'
+        'encoded_invisible_srcset' => '<img srcset="%E3%85%A4 2x">',
+        'fragment_src' => '<img src="#photo">',
+        'fragment_srcset' => '<img srcset="#photo 2x">'
       );
       $results = array();
       foreach ( $htmls as $key => $html ) {
@@ -108,6 +114,7 @@ test('Core media captions and attachment metadata have readable labels at all wi
       invisible_src: false, invisible_srcset: false, invisible_multi: false,
       valid_srcset: true, valid_rtl: true,
       encoded_invisible_src: false, encoded_invisible_srcset: false,
+      fragment_src: false, fragment_srcset: false,
     });
     // Real WordPress protocol sanitization, not only the isolated PHP stub.
     const recoverySchemes = JSON.parse(wp('eval', `
@@ -116,11 +123,14 @@ test('Core media captions and attachment metadata have readable labels at all wi
         'relative' => slateframe_attachment_file_url('/写真.jpg') !== '',
         'mailto' => slateframe_attachment_file_url('mailto:editor@example.org') === '',
         'ftp' => slateframe_attachment_file_url('ftp://example.org/image.jpg') === '',
-        'tel' => slateframe_attachment_file_url('tel:+12025550123') === ''
+        'tel' => slateframe_attachment_file_url('tel:+12025550123') === '',
+        'fragment' => slateframe_attachment_file_url('#photo') === '',
+        'query_relative' => slateframe_attachment_file_url('?image=1') !== ''
       ));
     `));
     expect(recoverySchemes).toEqual({
       https: true, relative: true, mailto: true, ftp: true, tel: true,
+      fragment: true, query_relative: true,
     });
     // A clean_url integration runs after esc_url_raw's scheme check.
     // Revalidate the final result without rejecting valid CDN rewrites.
@@ -129,19 +139,21 @@ test('Core media captions and attachment metadata have readable labels at all wi
         if ( 'https://example.org/filter-rewrite' === $original ) { return 'mailto:editor@example.org'; }
         if ( 'https://example.org/filter-cdn' === $original ) { return 'https://cdn.example.org/写真.jpg'; }
         if ( 'https://example.org/filter-broken' === $original ) { return 'https://'; }
+        if ( 'https://example.org/filter-fragment' === $original ) { return '#photo'; }
         return $clean;
       };
       add_filter( 'clean_url', $rewrite, 10, 2 );
       $result = array(
         'non_web' => '' === slateframe_attachment_file_url('https://example.org/filter-rewrite'),
         'valid_cdn' => '' !== slateframe_attachment_file_url('https://example.org/filter-cdn'),
-        'hostless' => '' === slateframe_attachment_file_url('https://example.org/filter-broken')
+        'hostless' => '' === slateframe_attachment_file_url('https://example.org/filter-broken'),
+        'fragment' => '' === slateframe_attachment_file_url('https://example.org/filter-fragment')
       );
       remove_filter( 'clean_url', $rewrite, 10 );
       echo wp_json_encode( $result );
     `));
     expect(postFilterSchemes).toEqual({
-      non_web: true, valid_cdn: true, hostless: true,
+      non_web: true, valid_cdn: true, hostless: true, fragment: true,
     });
     const screenshot = wp('eval', 'echo get_template_directory()."/screenshot.png";');
     attachmentId = wp('media', 'import', screenshot, '--post_id=' + postId, '--porcelain');
@@ -202,6 +214,17 @@ test('Core media captions and attachment metadata have readable labels at all wi
     const schemeOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     expect(schemeOverflow).toBeLessThanOrEqual(1);
     await page.screenshot({ path: 'test-artifacts/screenshots/media-non-http-file-url-390-rtl-400-forced-colors.png', fullPage: true });
+    await page.emulateMedia({ forcedColors: 'none' });
+    // A fragment-only recovery URL points back to this HTML document, not an image.
+    await page.goto(attachmentUrl + '&sf_fragment_file_url=1', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('link', { name: 'Open original file' })).toHaveCount(0);
+    await expect(page.locator('.slateframe-prose > figure.alignwide')).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 900 });
+    await setRootTextScale(page, 64, 'rtl');
+    await page.emulateMedia({ forcedColors: 'active' });
+    const fragmentOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(fragmentOverflow).toBeLessThanOrEqual(1);
+    await page.screenshot({ path: 'test-artifacts/screenshots/media-fragment-file-url-390-rtl-400-forced-colors.png', fullPage: true });
     await page.emulateMedia({ forcedColors: 'none' });
     await page.goto(heroUrl + '&sf_invisible_alt=1', { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-entry-hero img')).toHaveAttribute('alt', '');

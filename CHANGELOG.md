@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject fragment-only Core media and attachment recovery URLs that resolve to the current HTML page instead of an image/audio/video file; preserve real URLs with fragments, relative query endpoints and multilingual media. Extend PHP and WordPress/Chromium regressions and mandatory RTL 400% visual evidence without new runtime assets.
+
 + Reject non-web Core image/audio/video preview sources, including srcset data-URL comma false positives, while preserving valid multilingual HTTP(S)/relative sources. Add executable PHP and exact-SHA WordPress/Chromium broken-image regression evidence without new CSS/JS.
 
 + Revalidate classic attachment recovery URLs after WordPress's `clean_url` filter, rejecting non-web and hostless rewrites while preserving valid relative/CDN destinations. Add executable PHP and real WordPress regression coverage without changing CSS/JS.

@@ -8,6 +8,7 @@ function esc_url_raw( $url, $protocols = null ) {
 	if ( 'https://example.org/filter-data' === $url ) { return 'data:image/svg+xml,abc'; }
 	if ( 'https://example.org/filter-cdn' === $url ) { return 'https://cdn.example.org/写真.jpg'; }
 	if ( 'https://example.org/filter-relative' === $url ) { return '/uploads/写真.jpg'; }
+	if ( 'https://example.org/filter-fragment' === $url ) { return '#photo'; }
 	if ( preg_match( '/^([a-z][a-z0-9+.-]*):/i', $url, $matches ) ) {
 		$scheme = strtolower( $matches[1] );
 		if ( in_array( $scheme, array( 'javascript', 'data', 'vbscript' ), true ) || ( is_array( $protocols ) && ! in_array( $scheme, $protocols, true ) ) ) {
@@ -43,6 +44,13 @@ $cases = array(
 	array( 42, false, 'number' ),
 	array( array( 'url' ), false, 'array' ),
 	array( '//cdn.example.org/photo.jpg', true, 'protocol-relative CDN' ),
+	array( '#photo', false, 'fragment-only recovery' ),
+	array( '#', false, 'bare fragment marker' ),
+	array( '#写真', false, 'CJK fragment-only recovery' ),
+	array( '?image=1', true, 'query-only relative endpoint' ),
+	array( './photo.jpg', true, 'dot-relative file' ),
+	array( '/photo.jpg#view', true, 'relative file with fragment' ),
+	array( 'https://example.org/filter-fragment', false, 'filtered fragment rewrite' ),
 	array( 'https://example.org/photo.jpg#fragment', true, 'HTTP fragment' ),
 	array( 'mailto:editor@example.org', false, 'email is not a file' ),
 	array( 'tel:+12025550123', false, 'telephone is not a file' ),

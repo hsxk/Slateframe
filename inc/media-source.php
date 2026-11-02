@@ -32,7 +32,8 @@ function slateframe_has_readable_media_url( $url ) {
  * @return bool Whether the source is usable for a browser media request.
  */
 function slateframe_has_web_media_url( $url ) {
-	if ( ! slateframe_has_readable_media_url( $url ) ) {
+	// Fragment-only URLs resolve to the current HTML document, not a media file.
+	if ( ! slateframe_has_readable_media_url( $url ) || '#' === substr( ltrim( $url ), 0, 1 ) ) {
 		return false;
 	}
 
@@ -57,21 +58,8 @@ function slateframe_attachment_file_url( $url ) {
 
 	// A file-recovery link must not launch mail, FTP, or custom protocol handlers.
 	$safe_url = esc_url_raw( $url, array( 'http', 'https' ) );
-	if ( ! is_string( $safe_url ) || ! slateframe_has_readable_media_url( $safe_url ) ) {
-		return '';
-	}
-
-	// Core's clean_url filter runs after protocol sanitization. Verify its result.
-	$scheme = wp_parse_url( $safe_url, PHP_URL_SCHEME );
-	if (
-		false === $scheme
-		|| ( null !== $scheme && ! in_array( strtolower( $scheme ), array( 'http', 'https' ), true ) )
-	) {
-		return '';
-	}
-
-	// A scheme-bearing URL without a host cannot retrieve an original file.
-	if ( null !== $scheme && ! wp_parse_url( $safe_url, PHP_URL_HOST ) ) {
+	// Core's clean_url filter runs after sanitization; recheck the final URL.
+	if ( ! slateframe_has_web_media_url( $safe_url ) ) {
 		return '';
 	}
 
