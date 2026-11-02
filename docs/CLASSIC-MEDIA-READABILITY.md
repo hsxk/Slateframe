@@ -79,4 +79,6 @@ token of each responsive candidate rather than treating its readable `2x` or
 orphan captions while retaining the original-file recovery link. Normal CJK/RTL
 paths, later valid responsive candidates, and srcset-only Core images remain
 supported. An executable 18-case PHP fixture and real WordPress browser checks
-cover the source contract without adding runtime CSS or JavaScript.
+cover the source contract without adding runtime CSS or JavaScript. The 390px RTL,
+400% text, forced-colors invisible-image screenshot is mandatory exact-HEAD
+browser evidence; its directory is created by the isolated fixture itself.

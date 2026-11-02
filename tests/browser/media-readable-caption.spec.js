@@ -97,6 +97,8 @@ test('Core media captions and attachment metadata have readable labels at all wi
     const heroUrl = '/?p=' + postId;
     const invisible = '&#x200B;';
     wp('post', 'update', attachmentId, '--post_excerpt=' + invisible);
+    // This test must also work alone, without another spec creating the directory.
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
 
     await page.goto(attachmentUrl, { waitUntil: 'networkidle' });
     await expect(page.locator('main#main-content')).toBeVisible();
@@ -120,6 +122,8 @@ test('Core media captions and attachment metadata have readable labels at all wi
     await page.setViewportSize({ width: 390, height: 900 });
     await setRootTextScale(page, 64, 'rtl');
     await page.emulateMedia({ forcedColors: 'active' });
+    const invisibleOverflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    expect(invisibleOverflow).toBeLessThanOrEqual(1);
     await page.screenshot({ path: 'test-artifacts/screenshots/media-invisible-image-390-rtl-400-forced-colors.png', fullPage: true });
     await page.emulateMedia({ forcedColors: 'none' });
     await page.goto(heroUrl + '&sf_invisible_image=1', { waitUntil: 'networkidle' });
@@ -132,7 +136,6 @@ test('Core media captions and attachment metadata have readable labels at all wi
     wp('post', 'update', attachmentId, '--post_excerpt=' + visibleCaption);
     await page.goto(heroUrl, { waitUntil: 'networkidle' });
     await expect(page.locator('.slateframe-entry-hero figcaption')).toHaveText(visibleCaption);
-    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await page.setViewportSize({ width: 390, height: 900 });
     await setRootTextScale(page, 64, 'rtl');
     await page.emulateMedia({ forcedColors: 'active' });

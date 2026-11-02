@@ -27,6 +27,15 @@ class ImageSourceVisibility(unittest.TestCase):
         self.assertIn('$slateframe_image_srcset', attachment)
         self.assertNotIn('time2log', helper.lower())
 
+    def test_invisible_image_visual_evidence_is_mandatory(self):
+        name = "media-invisible-image-390-rtl-400-forced-colors.png"
+        contract = (ROOT / "bin/check-visual-coverage.py").read_text(encoding="utf-8")
+        browser = (ROOT / "tests/browser/media-readable-caption.spec.js").read_text(encoding="utf-8")
+        self.assertIn(f'"{name}": 390', contract)
+        self.assertIn(name, browser)
+        self.assertLess(browser.index("await fs.mkdir('test-artifacts/screenshots'"),
+                        browser.index(f"test-artifacts/screenshots/{name}"))
+
 
 if __name__ == '__main__':
     unittest.main()
