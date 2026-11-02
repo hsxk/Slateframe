@@ -1,12 +1,48 @@
 <?php
 /**
- * Core audio/video attachment presentation guard.
+ * Core image, audio, and video attachment source guards.
  *
  * @package Slateframe
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+/**
+ * Check actual image URL candidates, not srcset density descriptors.
+ *
+ * Filtered Core images can contain Unicode-invisible URLs. A readable "2x"
+ * descriptor alone cannot make an invisible candidate URL usable. Preserve
+ * valid srcset-only images and CJK/RTL paths.
+ *
+ * @param mixed $src    HTML Tag Processor src attribute.
+ * @param mixed $srcset HTML Tag Processor srcset attribute.
+ * @return bool Whether at least one URL candidate is readable.
+ */
+function slateframe_image_has_source( $src, $srcset ) {
+	if ( slateframe_has_readable_label( $src ) ) {
+		return true;
+	}
+
+	if ( ! is_string( $srcset ) ) {
+		return false;
+	}
+
+	foreach ( explode( ',', $srcset ) as $candidate ) {
+		$candidate = trim( $candidate );
+		if ( '' === $candidate ) {
+			continue;
+		}
+
+		// Ignore density/width descriptors: only the first token is a URL.
+		$parts = preg_split( '/\s+/u', $candidate, 2 );
+		if ( is_array( $parts ) && slateframe_has_readable_label( $parts[0] ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**
