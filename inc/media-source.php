@@ -49,7 +49,13 @@ function slateframe_has_web_media_url( $url ) {
 		return true;
 	}
 
-	return slateframe_has_readable_media_url( wp_parse_url( $url, PHP_URL_HOST ) );
+	$host = wp_parse_url( $url, PHP_URL_HOST );
+	if ( ! slateframe_has_readable_media_url( $host ) ) {
+		return false;
+	}
+
+	// A punctuation-only hostname (including encoded URL delimiters) is not a media host.
+	return 1 === preg_match( '/[\\p{L}\\p{N}]/u', rawurldecode( $host ) );
 }
 
 /**
