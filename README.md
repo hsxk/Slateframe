@@ -197,6 +197,7 @@ Repository documentation:
 - [Public extension points](docs/EXTENSIONS.md)
 - [Roadmap](docs/ROADMAP.md)
 - [WordPress.org readiness](docs/WORDPRESS-ORG.md)
+- [Release candidate acceptance ledger](docs/RELEASE-CANDIDATE-ACCEPTANCE.md)
 - [Core code and preformatted keyboard scrolling](docs/CORE-CODE-SCROLL.md)
 - [Core Classic/Freeform keyboard scrolling](docs/CORE-FREEFORM-SCROLL.md)
 - [Native Core Buttons reflow](docs/CORE-BUTTON-GROUP-REFLOW.md)
