@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Add a portable Knowledge troubleshooting guide pattern with Core headings, list styles and groups for symptoms, safe reversible checks, verification and escalation. No custom blocks, external images, CSS, JavaScript or plugin dependency; the pattern is subject to the existing exact-HEAD WordPress registration, Gutenberg, responsive and package gates. Release-candidate visual acceptance remains pending.
+
 + Reject hexadecimal IPv4-like final domain labels after alphabetic labels (for example `example.0x10`), which WHATWG interprets as invalid IPv4 rather than DNS. Preserve valid hexadecimal IPv4 shorthand, CJK hosts and responsive srcset fallback. Add seven executable URL/srcset/attachment cases and a source contract; exact-HEAD Actions and visual evidence required.
 
 + Reject numeric-only final labels after alphabetic labels in HTTP(S) media hosts (e.g. `example.123`): WHATWG parses these as invalid IPv4 rather than DNS. Preserve numeric IPv4 shorthand, CJK/RTL hosts and ordinary TLDs; add 13 URL/srcset/attachment regression cases (163 total). Exact-HEAD Actions and screenshot acceptance required.
