@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Extend the native Photography shoot plan with an accessible publishing workflow: responsive crop/sequence review, meaningful alternative text and captions, consent and licensing, and keyboard/touch checks for Core Gallery and Lightbox. No new runtime assets or proprietary blocks; pending exact-HEAD Actions and visual acceptance.
+
 + Add a portable Photography shoot-plan pattern built entirely from native WordPress groups, headings, paragraphs and lists. Covers scene/light, composition, access and consent, equipment checks, controlled frame comparison, backups and safe publishing. Reuses existing Slateframe styles without new runtime CSS, JavaScript, remote media or proprietary content; exact-HEAD Actions and visual acceptance required.
 
 + Show native post categories in Portfolio Query Loop cards so mixed editorial/project collections retain useful context without a custom taxonomy, post type, or proprietary block. Category terms remain WordPress-owned and editable in the Query Loop; exact-HEAD Actions, Gutenberg and responsive visual acceptance pending.
