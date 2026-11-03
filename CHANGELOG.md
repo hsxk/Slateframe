@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Show native post categories in Portfolio Query Loop cards so mixed editorial/project collections retain useful context without a custom taxonomy, post type, or proprietary block. Category terms remain WordPress-owned and editable in the Query Loop; exact-HEAD Actions, Gutenberg and responsive visual acceptance pending.
+
 + Extend the native Knowledge troubleshooting guide with an explicit expected-versus-observed result checkpoint, a keep-or-revert decision, and privacy-safe escalation evidence. Reuse Core headings/lists and existing Slateframe checklist styling; no new assets, dependencies, or proprietary content. Requires exact-HEAD WordPress/Gutenberg/visual acceptance.
 
 + Add a portable Knowledge troubleshooting guide pattern with Core headings, list styles and groups for symptoms, safe reversible checks, verification and escalation. No custom blocks, external images, CSS, JavaScript or plugin dependency; the pattern is subject to the existing exact-HEAD WordPress registration, Gutenberg, responsive and package gates. Release-candidate visual acceptance remains pending.
