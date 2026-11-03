@@ -124,6 +124,19 @@ function slateframe_has_web_media_url( $url ) {
 		}
 	}
 
+	// WHATWG treats a numeric final domain label as an IPv4 address.
+	// A preceding alphabetic label makes that IPv4 parse fail, rather than
+	// falling back to DNS (example.123). Preserve numeric IPv4 shorthand.
+	$domain_labels = explode( '.', rtrim( $decoded_host, '.' ) );
+	$last_label    = end( $domain_labels );
+	if (
+		count( $domain_labels ) > 1 &&
+		1 === preg_match( '/^[0-9]+$/D', $last_label ) &&
+		1 === preg_match( '/[\\p{L}]/u', implode( '.', array_slice( $domain_labels, 0, -1 ) ) )
+	) {
+		return false;
+	}
+
 	// Reject encoded slashes, credentials, query/fragment separators, spaces,
 	// controls and backslashes even when a readable domain follows them.
 	if ( 1 === preg_match( '/[\\/#?@\\\\\\x00-\\x20\\x7F]/', $decoded_host ) ) {
