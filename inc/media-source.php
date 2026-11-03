@@ -108,6 +108,22 @@ function slateframe_has_web_media_url( $url ) {
 		return false;
 	}
 
+	// WHATWG rejects these forbidden domain code points even when PHP
+	// returns a readable hostname. Square brackets are reserved for a
+	// genuine IPv6 literal, not an arbitrary bracketed domain label.
+	if ( 1 === preg_match( '/[<>^|]/', $decoded_host ) ) {
+		return false;
+	}
+	if ( false !== strpos( $decoded_host, '[' ) || false !== strpos( $decoded_host, ']' ) ) {
+		if (
+			'[' !== substr( $decoded_host, 0, 1 ) ||
+			']' !== substr( $decoded_host, -1 ) ||
+			false === filter_var( substr( $decoded_host, 1, -1 ), FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 )
+		) {
+			return false;
+		}
+	}
+
 	// Reject encoded slashes, credentials, query/fragment separators, spaces,
 	// controls and backslashes even when a readable domain follows them.
 	if ( 1 === preg_match( '/[\\/#?@\\\\\\x00-\\x20\\x7F]/', $decoded_host ) ) {

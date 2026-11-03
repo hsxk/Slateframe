@@ -16,7 +16,9 @@ Slateframe's `attachment.php` renders WordPress attachment pages without creatin
 
 Core-sanitized HTTP(S), protocol-relative and relative media URLs remain the source of truth. `slateframe_has_web_media_url()` only decides whether a filtered source is usable; it does not normalize, decode, or rewrite the original attribute. For absolute and protocol-relative authorities, reject malformed percent triplets (`%ZZ`, `%2`, bare `%`), decoded literal percent signs (`%25`, nested `%252F`), and invalid UTF-8 bytes. Browser URL parsers reject those hostnames even though PHP `parse_url()` can return a readable host. The same rule protects `src`, each `srcset` candidate and attachment recovery links; a valid second `srcset` candidate remains usable. Preserve percent-encoded IDNs and dots, CJK/Arabic domains, and percent escapes inside a *path*, which are not authority errors.
 
-The executable `tests/fixtures/media-url-host-guard.php.fixture` now covers 78 URL, 28 `srcset` and 24 attachment cases (130 total). It runs without a production site; the exact-SHA WordPress/PHP matrix and real Browser/Photography Actions are still mandatory for release acceptance.
+WHATWG URL parsing also rejects literal or percent-encoded `<`, `>`, `^`, `|` and non-IPv6 square brackets inside domain names. Slateframe rejects these without rewriting Core URLs; genuine bracketed IPv6 literals (including IPv4-mapped IPv6) remain valid, as do browser-accepted punctuation and multilingual IDNs. This distinction is tested for direct media URLs, `srcset` fallback and attachment links.
+
+The executable `tests/fixtures/media-url-host-guard.php.fixture` now covers 90 URL, 32 `srcset` and 28 attachment cases (150 total). It runs without a production site; the exact-SHA WordPress/PHP matrix and real Browser/Photography Actions are still mandatory for release acceptance.
 
 ## Acceptance and limits
 
