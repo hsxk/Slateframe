@@ -103,6 +103,20 @@ $urls = array(
 	array( 'https://exa%2Emple%25.org/photo.jpg', false ),
 	array( 'https://exa%ffmple.org/photo.jpg', false ),
 	array( 'https://exa%E4%BDmple.org/photo.jpg', false ),
+	// WHATWG rejects these domain code points, including encoded forms.
+	array( 'https://exa%3Cmple.org/photo.jpg', false ),
+	array( 'https://exa%3Emple.org/photo.jpg', false ),
+	array( 'https://exa%5Emple.org/photo.jpg', false ),
+	array( 'https://exa%7Cmple.org/photo.jpg', false ),
+	array( '//exa<mple.org/photo.jpg', false ),
+	array( 'https://exa>mple.org/photo.jpg', false ),
+	array( 'https://exa^mple.org/photo.jpg', false ),
+	array( 'https://exa|mple.org/photo.jpg', false ),
+	array( 'https://exa[foo].org/photo.jpg', false ),
+	array( 'https://exa%5Bfoo%5D.org/photo.jpg', false ),
+	// A real bracketed IPv6 host and browser-accepted punctuation remain valid.
+	array( 'https://[::ffff:192.0.2.1]:8443/photo.jpg', true ),
+	array( 'https://exa%7Bmple.org/photo.jpg', true ),
 	// Valid percent-encoded dot, letter, and path percent remain usable.
 	array( 'https://exa%2Emple.org/photo.jpg', true ),
 	array( '//exa%6Dple.org/photo.jpg', true ),
@@ -145,6 +159,10 @@ $images = array(
 	array( null, 'https://exa%25mple.org/photo.jpg 1x, /valid.jpg 2x', true ),
 	array( null, '//exa%6Dple.org/photo.jpg 1x', true ),
 	array( null, 'https://exa%252Fmple.org/photo.jpg 2x', false ),
+	array( null, 'https://exa%3Cmple.org/photo.jpg 1x', false ),
+	array( null, 'https://exa%7Cmple.org/photo.jpg 1x, /valid.jpg 2x', true ),
+	array( null, 'https://exa%5Bfoo%5D.org/photo.jpg 1x', false ),
+	array( null, 'https://[::ffff:192.0.2.1]/photo.jpg 1x', true ),
 );
 
 foreach ( $images as $case ) {
@@ -179,6 +197,10 @@ $attachments = array(
 	array( 'https://exa%25mple.org/file.pdf', '' ),
 	array( 'https://exa%2Emple.org/file.pdf', 'https://exa%2Emple.org/file.pdf' ),
 	array( 'https://example.org/file%25.pdf', 'https://example.org/file%25.pdf' ),
+	array( 'https://exa%3Emple.org/file.pdf', '' ),
+	array( 'https://exa%5Emple.org/file.pdf', '' ),
+	array( 'https://exa[foo].org/file.pdf', '' ),
+	array( 'https://[::ffff:192.0.2.1]:8443/file.pdf', 'https://[::ffff:192.0.2.1]:8443/file.pdf' ),
 );
 
 foreach ( $attachments as $case ) {
