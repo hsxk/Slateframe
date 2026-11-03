@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject literal/percent-encoded WHATWG-forbidden `<`, `>`, `^`, `|` and non-IPv6 square brackets in absolute/protocol-relative media hostnames, while preserving genuine IPv6, CJK/RTL IDNs, browser-accepted punctuation, Core URLs and `srcset` fallback. Add 20 executable cases (150 total), static source-contract checks and attachment-boundary docs. No new CSS/JS/dependencies; exact-HEAD Actions and screenshot review required.
+
 + Reject malformed percent escapes and decoded literal percent signs in absolute/protocol-relative media hostnames that PHP accepted but Chromium's URL parser rejects (`%ZZ`, bare `%`, `%25`, nested `%252F`). Preserve valid encoded IDNs, encoded hostname dots/letters, and path percent escapes; add 20 executable URL/srcset/attachment cases (130 total), shared contract assertions, and Core attachment boundary documentation. No CSS/JS or dependencies added; exact-HEAD Actions and visual acceptance pending.
 
 + Reject browser-invalid bidi overrides, directional isolates and zero-width spaces in decoded HTTP(S) media hostnames. These could previously pass the PHP readable-host guard even when Chromium rejects the URL or silently normalizes its hostname. Preserve Arabic/CJK IDNs, relative media and contextual joiners; extend executable URL/srcset/attachment coverage from 96 to 110 cases without adding CSS, JS or dependencies. New exact-HEAD Actions and visual acceptance pending.
