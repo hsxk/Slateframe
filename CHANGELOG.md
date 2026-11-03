@@ -2,6 +2,27 @@
 
 All notable changes to Slateframe will be documented here.
 
+## Release verification status
+
+This changelog records changes when they were proposed, so statements such as
+“pending exact-HEAD Actions” below describe the **original PR state**, not a
+fresh assertion that a merged change is still awaiting its original checks.
+A successful PR workflow does not establish success for the later squash-merge
+commit on `main`. Before publishing a release, verify the release commit's
+required checks and artifacts independently, including WordPress/PHP compatibility,
+Theme Check, WPCS, static budgets, real WordPress/Chromium responsive and editor
+screenshots, accessibility checks, Photography/Lightbox, and reproducible theme ZIPs.
+
+The latest Gutenberg title-width change was merged in PR #295 at
+`ba9bf4ab5b48ca6bd7be70e1b3c8c798ddbdd269` after the PR-head workflows
+[Theme quality #41700006966](https://github.com/hsxk/Slateframe/actions/runs/41700006966)
+and [Photography runtime #41700006951](https://github.com/hsxk/Slateframe/actions/runs/41700006951)
+passed. Those are **PR-head checks only**. The merge commit's own required
+Actions and release-level manual acceptance remain **unverified** here.
+Safari/VoiceOver, Firefox, Gutenberg 400% visual polish, real-content
+Photography/Portfolio review, and final WordPress.org artwork are also open
+release-readiness work; do not infer completion from the changelog entries.
+
 ## Unreleased
 
 + Extend the native Photography shoot plan with an accessible publishing workflow: responsive crop/sequence review, meaningful alternative text and captions, consent and licensing, and keyboard/touch checks for Core Gallery and Lightbox. No new runtime assets or proprietary blocks; pending exact-HEAD Actions and visual acceptance.
