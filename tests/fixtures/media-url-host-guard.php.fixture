@@ -120,6 +120,9 @@ $urls = array(
 	// Numeric final labels are parsed as IPv4 by browsers; alphabetic
 	// prefixes cannot form valid IPv4, while numeric shorthand remains valid.
 	array( 'https://example.123/photo.jpg', false ),
+	array( 'https://example.0x10/photo.jpg', false ),
+	array( 'https://例子.0Xff/photo.jpg', false ),
+	array( 'https://127.0x1/photo.jpg', true ),
 	array( '//cdn.456/photo.jpg', false ),
 	array( 'https://例子.123/photo.jpg', false ),
 	array( 'https://example%2E123/photo.jpg', false ),
@@ -173,6 +176,8 @@ $images = array(
 	array( null, 'https://exa%5Bfoo%5D.org/photo.jpg 1x', false ),
 	array( null, 'https://[::ffff:192.0.2.1]/photo.jpg 1x', true ),
 	array( null, 'https://example.123/photo.jpg 1x', false ),
+	array( null, 'https://example.0x10/photo.jpg 1x', false ),
+	array( null, 'https://example.0x10/photo.jpg 1x, /valid.jpg 2x', true ),
 	array( null, 'https://example.123/photo.jpg 1x, /valid.jpg 2x', true ),
 	array( null, 'https://127.1/photo.jpg 1x', true ),
 );
@@ -214,6 +219,8 @@ $attachments = array(
 	array( 'https://exa[foo].org/file.pdf', '' ),
 	array( 'https://[::ffff:192.0.2.1]:8443/file.pdf', 'https://[::ffff:192.0.2.1]:8443/file.pdf' ),
 	array( 'https://example.123/file.pdf', '' ),
+	array( 'https://example.0x10/file.pdf', '' ),
+	array( 'https://127.0x1/file.pdf', 'https://127.0x1/file.pdf' ),
 	array( 'https://例子.123/file.pdf', '' ),
 	array( 'https://127.1/file.pdf', 'https://127.1/file.pdf' ),
 );

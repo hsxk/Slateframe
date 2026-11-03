@@ -125,13 +125,14 @@ function slateframe_has_web_media_url( $url ) {
 	}
 
 	// WHATWG treats a numeric final domain label as an IPv4 address.
+	// Numeric hex endings (0x10) also trigger WHATWG IPv4 parsing.
 	// A preceding alphabetic label makes that IPv4 parse fail, rather than
 	// falling back to DNS (example.123). Preserve numeric IPv4 shorthand.
 	$domain_labels = explode( '.', rtrim( $decoded_host, '.' ) );
 	$last_label    = end( $domain_labels );
 	if (
 		count( $domain_labels ) > 1 &&
-		1 === preg_match( '/^[0-9]+$/D', $last_label ) &&
+		1 === preg_match( '/^(?:[0-9]+|0[xX][0-9A-Fa-f]+)$/D', $last_label ) &&
 		1 === preg_match( '/[\\p{L}]/u', implode( '.', array_slice( $domain_labels, 0, -1 ) ) )
 	) {
 		return false;
