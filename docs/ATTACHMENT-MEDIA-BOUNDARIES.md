@@ -12,6 +12,12 @@ Slateframe's `attachment.php` renders WordPress attachment pages without creatin
 - Core's video shortcode uses a fixed-width `.wp-video` wrapper and may gain a `.mejs-container` player. Slateframe bounds both wrappers to the reading column without rewriting Core markup or adding JavaScript; Gutenberg receives the matching containment rule. A real WordPress attachment browser matrix covers 320–1920px, RTL/CJK, 200% zoom and forced colors.
 - Public-parent visibility is decided separately by `slateframe_public_attachment_parent_id()`. Invalid media adapters cannot make a private parent visible.
 
+### Browser-equivalent host parsing boundary
+
+Core-sanitized HTTP(S), protocol-relative and relative media URLs remain the source of truth. `slateframe_has_web_media_url()` only decides whether a filtered source is usable; it does not normalize, decode, or rewrite the original attribute. For absolute and protocol-relative authorities, reject malformed percent triplets (`%ZZ`, `%2`, bare `%`), decoded literal percent signs (`%25`, nested `%252F`), and invalid UTF-8 bytes. Browser URL parsers reject those hostnames even though PHP `parse_url()` can return a readable host. The same rule protects `src`, each `srcset` candidate and attachment recovery links; a valid second `srcset` candidate remains usable. Preserve percent-encoded IDNs and dots, CJK/Arabic domains, and percent escapes inside a *path*, which are not authority errors.
+
+The executable `tests/fixtures/media-url-host-guard.php.fixture` now covers 78 URL, 28 `srcset` and 24 attachment cases (130 total). It runs without a production site; the exact-SHA WordPress/PHP matrix and real Browser/Photography Actions are still mandatory for release acceptance.
+
 ## Acceptance and limits
 
 `tests/fixtures/attachment-media-template.php.fixture` executes the **real** `attachment.php` with error-to-exception conversion, including valid image/CJK caption, responsive `srcset`, source-less/blank-source image suppression, valid `srcset`-only images, native video/audio, invalid image HTML, malformed MIME/caption/URL types, unsafe filtered image markup, non-string, empty and sanitized-empty video/audio shortcode results, captioned native media, malicious shortcode markup, malformed article content, unsupported URL protocols, and public-parent fallback. `tests/test_attachment_media_template.py` runs the fixture and checks the Core-only template boundary.
