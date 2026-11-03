@@ -4,6 +4,8 @@ All notable changes to Slateframe will be documented here.
 
 ## Unreleased
 
++ Reject numeric-only final labels after alphabetic labels in HTTP(S) media hosts (e.g. `example.123`): WHATWG parses these as invalid IPv4 rather than DNS. Preserve numeric IPv4 shorthand, CJK/RTL hosts and ordinary TLDs; add 13 URL/srcset/attachment regression cases (163 total). Exact-HEAD Actions and screenshot acceptance required.
+
 + Reject literal/percent-encoded WHATWG-forbidden `<`, `>`, `^`, `|` and non-IPv6 square brackets in absolute/protocol-relative media hostnames, while preserving genuine IPv6, CJK/RTL IDNs, browser-accepted punctuation, Core URLs and `srcset` fallback. Add 20 executable cases (150 total), static source-contract checks and attachment-boundary docs. No new CSS/JS/dependencies; exact-HEAD Actions and screenshot review required.
 
 + Reject malformed percent escapes and decoded literal percent signs in absolute/protocol-relative media hostnames that PHP accepted but Chromium's URL parser rejects (`%ZZ`, bare `%`, `%25`, nested `%252F`). Preserve valid encoded IDNs, encoded hostname dots/letters, and path percent escapes; add 20 executable URL/srcset/attachment cases (130 total), shared contract assertions, and Core attachment boundary documentation. No CSS/JS or dependencies added; exact-HEAD Actions and visual acceptance pending.

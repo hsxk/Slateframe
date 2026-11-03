@@ -25,3 +25,7 @@ The executable `tests/fixtures/media-url-host-guard.php.fixture` now covers 90 U
 `tests/fixtures/attachment-media-template.php.fixture` executes the **real** `attachment.php` with error-to-exception conversion, including valid image/CJK caption, responsive `srcset`, source-less/blank-source image suppression, valid `srcset`-only images, native video/audio, invalid image HTML, malformed MIME/caption/URL types, unsafe filtered image markup, non-string, empty and sanitized-empty video/audio shortcode results, captioned native media, malicious shortcode markup, malformed article content, unsupported URL protocols, and public-parent fallback. `tests/test_attachment_media_template.py` runs the fixture and checks the Core-only template boundary.
 
 The isolated PHP test is not a substitute for real WordPress + Chromium acceptance. Confirm both required GitHub Actions on the exact PR HEAD SHA; review mobile and desktop attachment screenshots in the Theme quality artifact; verify the main merge SHA separately. No production WordPress installation is involved.
+
+## Numeric final-label browser parity
+
+WHATWG treats a numeric-only final host label as IPv4 syntax, not a conventional DNS TLD. An alphabetic prefix such as `example.123` cannot be converted to IPv4, so Core media previews must reject it rather than rendering a broken URL. Numeric IPv4 shorthand (such as `127.1`), regular IPv4, IPv6, and readable CJK/RTL domains remain supported. The guard validates only the URL host and preserves Core's original attributes and srcset fallback.
