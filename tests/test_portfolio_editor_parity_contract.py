@@ -41,6 +41,14 @@ class PortfolioEditorParityContract(unittest.TestCase):
         )
         self.assertLessEqual(CSS.stat().st_size, 7000)
 
+    def test_knowledge_procedure_shrinks_and_wraps_long_content(self):
+        css = CSS.read_text(encoding="utf-8")
+        self.assertIn(
+            ".slateframe-knowledge-procedure{padding-inline:var(--slateframe-inline-gap);min-inline-size:0;overflow-wrap:anywhere}",
+            css,
+        )
+        self.assertLessEqual(CSS.stat().st_size, 7000)
+
     def test_existing_budget_is_unchanged(self):
         self.assertLessEqual(CSS.stat().st_size, 7000)
 
