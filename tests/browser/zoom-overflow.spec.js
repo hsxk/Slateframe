@@ -22,7 +22,8 @@ test('400% reflow keeps distinct content routes inside a 360px CSS viewport in L
 
   for (const direction of ['ltr', 'rtl']) {
     for (const [name, route] of paths) {
-      await page.goto(route, { waitUntil: 'networkidle' });
+      const response = await page.goto(route, { waitUntil: 'networkidle' });
+      expect(response?.status(), `${name} ${direction}: fixture must return HTTP 200`).toBe(200);
       await page.evaluate((dir) => { document.documentElement.dir = dir; }, direction);
       await page.evaluate(() => document.fonts.ready);
       const geometry = await page.evaluate(() => {
@@ -49,6 +50,7 @@ test('400% reflow keeps distinct content routes inside a 360px CSS viewport in L
       expect(geometry.viewport, `${name} ${direction}: effective viewport`).toBe(360);
       expect(geometry.width, `${name} ${direction}: document layout viewport`).toBe(360);
       expect(geometry.overflow, `${name} ${direction}: ${JSON.stringify(geometry)}`).toBeLessThanOrEqual(2);
+      expect(geometry.bodyScrollWidth - geometry.width, `${name} ${direction}: body overflow ${JSON.stringify(geometry)}`).toBeLessThanOrEqual(2);
     }
   }
 });
