@@ -49,6 +49,14 @@ class PortfolioEditorParityContract(unittest.TestCase):
         )
         self.assertLessEqual(CSS.stat().st_size, 7000)
 
+    def test_project_metadata_wraps_long_unbroken_values(self):
+        css = CSS.read_text(encoding="utf-8")
+        self.assertIn(
+            ".slateframe-project-meta{overflow-wrap:anywhere;display:grid;",
+            css,
+        )
+        self.assertLessEqual(CSS.stat().st_size, 7000)
+
     def test_existing_budget_is_unchanged(self):
         self.assertLessEqual(CSS.stat().st_size, 7000)
 
