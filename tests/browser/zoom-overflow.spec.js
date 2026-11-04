@@ -1,4 +1,6 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 
 const routes = [
   ['article', 'SLATEFRAME_POST_PATH'],
@@ -20,6 +22,8 @@ test('400% reflow keeps distinct content routes inside a 360px CSS viewport in L
   });
   expect(new Set(paths.map(([, route]) => route)).size, 'Content fixtures must use distinct routes').toBe(paths.length);
 
+  const screenshotDir = path.resolve('test-artifacts/screenshots');
+  await fs.mkdir(screenshotDir, { recursive: true });
   for (const direction of ['ltr', 'rtl']) {
     for (const [name, route] of paths) {
       const response = await page.goto(route, { waitUntil: 'networkidle' });
@@ -51,6 +55,12 @@ test('400% reflow keeps distinct content routes inside a 360px CSS viewport in L
       expect(geometry.width, `${name} ${direction}: document layout viewport`).toBe(360);
       expect(geometry.overflow, `${name} ${direction}: ${JSON.stringify(geometry)}`).toBeLessThanOrEqual(2);
       expect(geometry.bodyScrollWidth - geometry.width, `${name} ${direction}: body overflow ${JSON.stringify(geometry)}`).toBeLessThanOrEqual(2);
+      // Keep inspectable real-WordPress evidence for every seeded route and direction.
+      await page.screenshot({
+        path: path.join(screenshotDir, `reflow-360-${name}-${direction}.png`),
+        animations: 'disabled',
+        fullPage: true,
+      });
     }
   }
 });
