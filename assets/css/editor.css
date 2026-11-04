@@ -27,12 +27,12 @@
 
 .editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .wp-block {
 	min-inline-size: 0;
-	max-width: var(--slateframe-content);
+	max-width: min(100%, var(--slateframe-content));
 }
 
 .editor-styles-wrapper .block-editor-block-list__layout.is-root-container > [data-align="wide"],
 .editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .alignwide {
-	max-width: var(--slateframe-wide);
+	max-width: min(100%, var(--slateframe-wide));
 }
 
 .editor-styles-wrapper .block-editor-block-list__layout.is-root-container > [data-align="full"],
