@@ -25,6 +25,14 @@ class PortfolioEditorParityContract(unittest.TestCase):
         self.assertIn("'assets/css/content-modes.css'", functions)
         self.assertIn("add_editor_style(", functions)
 
+    def test_nested_knowledge_and_ledger_respect_editor_canvas(self):
+        editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
+        self.assertIn("max-width: min(100%, var(--slateframe-content));", editor)
+        self.assertIn("max-width: min(100%, var(--slateframe-wide));", editor)
+        self.assertNotIn("max-width: var(--slateframe-content);", editor)
+        self.assertNotIn("max-width: var(--slateframe-wide);", editor)
+        self.assertLessEqual((ROOT / "assets/css/editor.css").stat().st_size, 5000)
+
     def test_existing_budget_is_unchanged(self):
         self.assertLessEqual(CSS.stat().st_size, 7000)
 
