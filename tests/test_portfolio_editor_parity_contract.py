@@ -33,6 +33,14 @@ class PortfolioEditorParityContract(unittest.TestCase):
         self.assertNotIn("max-width: var(--slateframe-wide);", editor)
         self.assertLessEqual((ROOT / "assets/css/editor.css").stat().st_size, 5000)
 
+    def test_nested_core_columns_can_shrink_in_editor(self):
+        css = CSS.read_text(encoding="utf-8")
+        self.assertIn(
+            ".editor-styles-wrapper .wp-block-columns>.wp-block-column{min-inline-size:0;overflow-wrap:anywhere}",
+            css,
+        )
+        self.assertLessEqual(CSS.stat().st_size, 7000)
+
     def test_existing_budget_is_unchanged(self):
         self.assertLessEqual(CSS.stat().st_size, 7000)
 
