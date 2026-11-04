@@ -63,11 +63,11 @@
 }
 
 .editor-styles-wrapper :is(.is-style-slateframe-steps, .is-style-slateframe-checklist) {
-	max-width: var(--slateframe-content);
+	max-width: min(100%, var(--slateframe-content));
 }
 
 .editor-styles-wrapper .is-style-slateframe-ledger {
-	max-width: var(--slateframe-wide);
+	max-width: min(100%, var(--slateframe-wide));
 }
 
 .editor-styles-wrapper .wp-block-quote {
@@ -88,7 +88,6 @@
 
 .editor-styles-wrapper :is(audio,iframe,embed,object,.wp-video,.mejs-container){max-inline-size:100%}
 
-/* Preserve native Core Calendar table semantics inside the editor canvas. */
 .editor-styles-wrapper .wp-block-calendar{max-inline-size:100%;overflow-x:auto}
 .editor-styles-wrapper .wp-block-calendar th{white-space:nowrap}
 
