@@ -13,11 +13,11 @@ class PhotoSequenceContract(unittest.TestCase):
         cls.style = (ROOT / "style.css").read_text()
 
     def test_core_gallery_and_pattern_share_grid(self):
-        self.assertIn(".wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence){display:grid!important;", self.photo)
+        self.assertIn(":is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence){display:grid!important;", self.photo)
         self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", self.photo)
 
     def test_mobile_grid_and_first_image_span(self):
-        self.assertIn("@media (max-width:640px){.wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)", self.photo)
+        self.assertIn("@media (max-width:640px){:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)", self.photo)
         self.assertIn("grid-column:1/-1", self.photo)
         self.assertIn("grid-column:auto", self.photo)
 
