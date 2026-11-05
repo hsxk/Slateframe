@@ -28,6 +28,7 @@ REQUIRED = {
 # Include auxiliary Core crops and zoom captures in the exact-SHA hash manifest.
 # Crop widths are measured from PNG data, never assumed equal to the viewport.
 SUPPLEMENTAL = {
+    **{f'lightbox-close-{direction}-viewport-{w}.png': w for w in (375, 412) for direction in ('ltr', 'rtl')},
     **{f'core-sequence-{w}.png': w for w in (320, 375, 390, 412, 768, 1440, 1920)},
     **{f'sequence-caption-rtl-zoom-{w}.png': w for w in (390, 1440, 1920)},
     'sequence-caption-textzoom-360x225.png': 360,

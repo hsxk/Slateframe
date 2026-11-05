@@ -114,6 +114,27 @@ test('native Core gallery navigation respects mobile bottom safe area and deskto
   }
 });
 
+
+test('RTL and LTR close controls remain in view at 375px and 412px', async ({page}, info) => {
+  test.skip(width(info) !== 390, 'Intermediate phone widths run once in the 390px project.');
+  for (const w of [375, 412]) {
+    await page.setViewportSize({ width:w, height:800 });
+    for (const direction of ['ltr', 'rtl']) {
+      const { trigger, dialog, close } = await open(page, direction);
+      const bounds = await close.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds.x).toBeGreaterThanOrEqual(-1);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(w + 1);
+      expect(bounds.width).toBeGreaterThanOrEqual(44);
+      expect(bounds.height).toBeGreaterThanOrEqual(44);
+      await capture(page, 'lightbox-close-' + direction + '-viewport-' + w + '.png');
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeFocused();
+    }
+  }
+});
+
 test('native Core navigation preserves its 959px/960px breakpoint', async ({page}, info) => {
   test.skip(width(info) !== 390, 'Boundary evidence is collected in the 390px project.');
   const { dialog } = await open(page, 'rtl', true);
