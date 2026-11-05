@@ -94,6 +94,10 @@ test('native Core gallery navigation respects mobile bottom safe area and deskto
       expect(m.height).toBeGreaterThanOrEqual(44);
       expect(m.left).toBeGreaterThanOrEqual(-1);
       expect(m.right).toBeLessThanOrEqual(m.vw + 1);
+      expect(m.bottomGap).toBeGreaterThanOrEqual(-1);
+      // Navigation must remain fully operable at narrow widths, not just
+      // meet the nominal touch-target dimensions.
+      expect(m.bottomGap + m.height).toBeLessThanOrEqual(m.vh + 1);
       if (width(info) < 960) {
         expect(Math.abs(m.bottomGap - m.gap)).toBeLessThanOrEqual(2);
       } else {
