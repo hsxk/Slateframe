@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 
 const fixture = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
-const evidenceWidths = [320, 390, 768, 1440, 1920];
+const evidenceWidths = [320, 375, 390, 412, 768, 1440, 1920];
 const width = (info) => Number(info.project.name.replace('viewport-', ''));
 test.skip(!fixture, 'Requires real WordPress raster photography fixture.');
 
