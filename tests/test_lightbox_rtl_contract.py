@@ -13,7 +13,7 @@ EVIDENCE = (ROOT / 'tests/verify_gallery_screenshots.py').read_text()
 class NativeLightboxContract(unittest.TestCase):
     def test_rtl_reanchors_without_double_counting_safe_area(self):
         self.assertIn('.wp-lightbox-overlay:dir(rtl) .wp-lightbox-close-button', CSS)
-        self.assertIn('right:auto;left:calc(env(safe-area-inset-left,0px)', CSS)
+        self.assertIn('right:auto;left:var(--slateframe-space-4);margin-inline-end:calc(var(--slateframe-component-gap) + env(safe-area-inset-left,0px))', CSS)
         self.assertIn('margin-inline-end:calc(var(--slateframe-component-gap) + env(safe-area-inset-right,0px))', CSS)
         self.assertNotIn('margin-inline-end:0}', CSS)
         self.assertIn('margin-block-start:calc(var(--slateframe-component-gap) + env(safe-area-inset-top,0px))', CSS)
