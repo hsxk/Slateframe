@@ -127,6 +127,25 @@ test('RTL and LTR close controls remain in view at 375px and 412px', async ({pag
       expect(bounds.x + bounds.width).toBeLessThanOrEqual(w + 1);
       expect(bounds.width).toBeGreaterThanOrEqual(44);
       expect(bounds.height).toBeGreaterThanOrEqual(44);
+      expect(bounds.y).toBeGreaterThanOrEqual(-1);
+      expect(bounds.y + bounds.height).toBeLessThanOrEqual(801);
+      const geometry = await close.evaluate((node) => {
+        const style = getComputedStyle(node);
+        return {
+          direction: style.direction,
+          viewportWidth: document.documentElement.clientWidth,
+          scrollWidth: document.documentElement.scrollWidth,
+          visible: style.visibility !== 'hidden' && style.display !== 'none'
+        };
+      });
+      expect(geometry.direction).toBe(direction);
+      expect(geometry.visible).toBe(true);
+      expect(geometry.scrollWidth - geometry.viewportWidth).toBeLessThanOrEqual(1);
+      if (direction === 'rtl') {
+        expect(bounds.x).toBeLessThan(w - bounds.x - bounds.width);
+      } else {
+        expect(w - bounds.x - bounds.width).toBeLessThan(bounds.x);
+      }
       await capture(page, 'lightbox-close-' + direction + '-viewport-' + w + '.png');
       await page.keyboard.press('Escape');
       await expect(dialog).toBeHidden();
