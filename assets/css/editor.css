@@ -103,19 +103,3 @@
 .editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
 
 .editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))}
-
-
-/* Preserve Core Gallery geometry while editing rather than stretching images. */
-.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-diptych,.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence){display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;gap:var(--slateframe-media-gap)}
-.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-diptych>.wp-block-image{min-inline-size:0;inline-size:100%;margin:0}
-.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>.wp-block-image:first-child{grid-column:1/-1}
-.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>.wp-block-image:nth-child(2):last-child{grid-column:1/-1}
-.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-diptych,.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence) .wp-block-image img{inline-size:auto;max-inline-size:100%;block-size:auto;max-block-size:min(62dvh,42rem);object-fit:contain}
-.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>.wp-block-image{min-inline-size:0;max-inline-size:100%;justify-self:center}
-.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence) figcaption{max-inline-size:100%;overflow-wrap:anywhere}
-.editor-styles-wrapper .wp-block-image.is-style-slateframe-photo-feature img{inline-size:100%;max-block-size:88dvh;object-fit:contain}
-.editor-styles-wrapper .wp-block-image.is-style-slateframe-photo-feature figcaption{padding:var(--slateframe-caption-gap) var(--slateframe-component-gap);overflow-wrap:anywhere;text-align:start}
-@media(max-width:781px){.editor-styles-wrapper .wp-block-image.is-style-slateframe-photo-feature img{max-block-size:78dvh}}
-@media(max-width:640px){.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence){grid-template-columns:minmax(0,1fr)}.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>.wp-block-image:first-child{grid-column:auto}}
-@media(max-width:540px){.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-diptych{grid-template-columns:minmax(0,1fr)}}
-@media(max-width:420px){.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet{display:grid;grid-template-columns:minmax(0,1fr)}}
