@@ -2,7 +2,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('node:fs/promises');
 
 const fixture = process.env.SLATEFRAME_RASTER_PHOTO_PATH;
-const evidenceWidths = [320, 375, 390, 412, 768, 1440, 1920];
+const evidenceWidths = [320, 390, 768, 1440, 1920];
 const width = (info) => Number(info.project.name.replace('viewport-', ''));
 test.skip(!fixture, 'Requires real WordPress raster photography fixture.');
 
@@ -111,6 +111,27 @@ test('native Core gallery navigation respects mobile bottom safe area and deskto
     await page.keyboard.press('Escape');
     await expect(dialog).toBeHidden();
     await expect(trigger).toBeFocused();
+  }
+});
+
+
+test('RTL and LTR close controls remain in view at 375px and 412px', async ({page}, info) => {
+  test.skip(width(info) !== 390, 'Intermediate phone widths run once in the 390px project.');
+  for (const w of [375, 412]) {
+    await page.setViewportSize({ width:w, height:800 });
+    for (const direction of ['ltr', 'rtl']) {
+      const { trigger, dialog, close } = await open(page, direction);
+      const bounds = await close.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds.x).toBeGreaterThanOrEqual(-1);
+      expect(bounds.x + bounds.width).toBeLessThanOrEqual(w + 1);
+      expect(bounds.width).toBeGreaterThanOrEqual(44);
+      expect(bounds.height).toBeGreaterThanOrEqual(44);
+      await capture(page, 'lightbox-close-' + direction + '-viewport-' + w + '.png');
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeFocused();
+    }
   }
 });
 
