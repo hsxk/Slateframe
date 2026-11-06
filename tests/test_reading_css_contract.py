@@ -51,6 +51,8 @@ class SharedReadingCssTest(unittest.TestCase):
             "var(--slateframe-stack-gap))}}",
             css,
         )
+        # The mobile header is relative, so native fragment scrolling must stay unshifted.
+        self.assertNotIn("\\n.slateframe-prose [id]{", css)
         self.assertNotIn(".editor-styles-wrapper [id]:not(", css)
         browser = (ROOT / "tests/browser/native-anchor-offset.spec.js").read_text(encoding="utf-8")
         for value in ("320, 375, 390, 412, 768, 1440, 1920", "['ltr', 'rtl']",
