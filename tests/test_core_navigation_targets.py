@@ -27,7 +27,7 @@ class CoreNavigationTargets(unittest.TestCase):
             with self.subTest(token=token):
                 self.assertIn(token, css)
         self.assertIn(".wp-block-navigation__container{min-inline-size:0;max-inline-size:100%}", css)
-        self.assertIn(".wp-block-navigation-item__label{overflow-wrap:anywhere}", css)
+        self.assertIn(".wp-block-navigation-item__label{min-inline-size:0;white-space:normal;overflow-wrap:anywhere}", css)
         self.assertIn("align-items:center;justify-content:center", css)
         self.assertNotIn("display:inline-grid", css)
         self.assertNotIn(".disable-default-overlay", css)
