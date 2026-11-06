@@ -13,15 +13,15 @@ EVIDENCE = (ROOT / 'tests/verify_gallery_screenshots.py').read_text()
 class NativeLightboxContract(unittest.TestCase):
     def test_rtl_reanchors_without_double_counting_safe_area(self):
         self.assertIn('.wp-lightbox-overlay:dir(rtl) .wp-lightbox-close-button', CSS)
-        self.assertIn('right:auto;left:var(--slateframe-space-4);margin-inline-end:calc(var(--slateframe-component-gap) + env(safe-area-inset-left,0px))', CSS)
-        self.assertIn('margin-inline-end:calc(var(--slateframe-component-gap) + env(safe-area-inset-right,0px))', CSS)
+        self.assertIn('right:auto;left:var(--slateframe-space-4);margin-inline-end:calc(var(--slateframe-component-gap) + env(safe-area-inset-left,0))', CSS)
+        self.assertIn('margin-inline-end:calc(var(--slateframe-component-gap) + env(safe-area-inset-right,0))', CSS)
         self.assertNotIn('margin-inline-end:0}', CSS)
-        self.assertIn('margin-block-start:calc(var(--slateframe-component-gap) + env(safe-area-inset-top,0px))', CSS)
+        self.assertIn('margin-block-start:calc(var(--slateframe-component-gap) + env(safe-area-inset-top,0))', CSS)
         self.assertNotIn('margin-block-start:max(', CSS)
 
     def test_mobile_navigation_preserves_core_desktop_breakpoint(self):
         self.assertIn('@media(max-width:959.98px)', CSS)
-        self.assertIn('bottom:calc(var(--slateframe-space-4) + env(safe-area-inset-bottom,0px))', CSS)
+        self.assertIn('bottom:calc(var(--slateframe-space-4) + env(safe-area-inset-bottom,0))', CSS)
         self.assertIn('page.setViewportSize({ width:w, height:800 })', TEST)
         self.assertIn("for (const direction of ['ltr', 'rtl'])", TEST)
 
