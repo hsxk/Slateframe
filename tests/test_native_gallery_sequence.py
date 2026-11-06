@@ -17,7 +17,7 @@ class PhotoSequenceContract(unittest.TestCase):
         self.assertIn("grid-template-columns:repeat(2,minmax(0,1fr))", self.photo)
 
     def test_mobile_grid_and_first_image_span(self):
-        self.assertIn("@media (max-width:640px){:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)", self.photo)
+        self.assertIn("@media(max-width:640px){:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)", self.photo)
         self.assertIn("grid-column:1/-1", self.photo)
         self.assertIn("grid-column:auto", self.photo)
 
