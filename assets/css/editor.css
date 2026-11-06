@@ -1,9 +1,4 @@
-/**
- * Block editor parity for Slateframe's publishing canvas.
- *
- * Frontend primitives live in style.css; this file only bridges editor
- * wrappers so content width and title rhythm match the published result.
- */
+/* Gutenberg canvas parity; frontend primitives remain in style.css. */
 
 .editor-styles-wrapper {
 	background: var(--slateframe-bg);
@@ -103,3 +98,6 @@
 .editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}
 
 .editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))}
+
+/* Match published mobile article title rhythm without affecting Query Loop cards. */
+@media(max-width:480px){.editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title){max-width:none;font-size:clamp(1.65rem,7.2vw,2.4rem);line-height:1.16;letter-spacing:-.025em;text-wrap:pretty}}
