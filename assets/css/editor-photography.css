@@ -13,3 +13,14 @@
 @media(max-width:640px){.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence){grid-template-columns:minmax(0,1fr)}.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>.wp-block-image:first-child{grid-column:auto}}
 @media(max-width:540px){.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-diptych{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:420px){.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet{display:grid;grid-template-columns:minmax(0,1fr)}}
+
+/* Match the front-end contact-sheet card surface and caption flow. */
+.editor-styles-wrapper .wp-block-gallery.has-nested-images:is(.is-style-slateframe-contact-sheet,.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>figure.wp-block-image{min-inline-size:0;max-inline-size:100%;align-self:start;flex-direction:column;justify-content:flex-start;background:var(--slateframe-surface-soft)}
+.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-contact-sheet,.is-style-slateframe-diptych,.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence) .wp-block-image figcaption{position:static;max-inline-size:100%;margin:0;padding:var(--slateframe-caption-gap) 0 0;overflow:visible;overflow-wrap:anywhere;background:none;color:var(--slateframe-muted);font-size:.875rem;line-height:1.55;text-align:start;text-shadow:none;font-weight:400}
+/* Keep sequence figures intrinsic and centred, as on the published page. */
+.editor-styles-wrapper .wp-block-gallery.has-nested-images:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>figure.wp-block-image{inline-size:fit-content;min-inline-size:min(100%,28ch);margin:0;justify-self:center}
+.editor-styles-wrapper .wp-block-gallery.has-nested-images:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>figure.wp-block-image figcaption{inline-size:0;min-inline-size:100%}
+@media(max-width:640px) and (max-height:480px){.editor-styles-wrapper .wp-block-gallery.has-nested-images:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>figure.wp-block-image{inline-size:min(100%,24ch)}.editor-styles-wrapper .wp-block-gallery.has-nested-images:is(.is-style-slateframe-photo-sequence,.slateframe-gallery-sequence)>figure.wp-block-image figcaption{inline-size:100%;min-inline-size:0}}
+/* Photo feature captions retain their dark media-chrome contrast in the editor. */
+.editor-styles-wrapper .wp-block-image.is-style-slateframe-photo-feature{background:var(--slateframe-media-chrome)}
+.editor-styles-wrapper .wp-block-image.is-style-slateframe-photo-feature figcaption{margin:0;max-inline-size:100%;background:var(--slateframe-media-chrome);color:var(--slateframe-media-chrome-text);font-size:.875rem;line-height:1.55}
