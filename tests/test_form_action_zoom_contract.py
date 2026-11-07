@@ -22,7 +22,7 @@ class FormActionZoomContract(unittest.TestCase):
 
     def test_control_height_and_existing_layout_contracts_survive(self):
         self.assertIn("min-block-size:var(--slateframe-control)", FORMS)
-        self.assertIn(".wp-block-search__inside-wrapper{min-width:0}", FORMS)
+        self.assertIn(".wp-block-search__inside-wrapper{min-width:0;max-width:100%}", FORMS)
         self.assertIn("form .slateframe-form-actions>", FORMS)
         self.assertIn("overflow-wrap:anywhere", FORMS)
         self.assertIn(".wp-block-search__button-outside button{margin-inline-start:0}", FORMS)
