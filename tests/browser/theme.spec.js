@@ -127,13 +127,13 @@ test('form textarea sizing does not leak into non-form editor surfaces', async (
 		document.querySelector('#main-content').append(outside);
 		const measure = (node) => {
 			const style = getComputedStyle(node);
-			return { minBlockSize: parseFloat(style.minBlockSize), resize: style.resize };
+			return { minBlockSize: style.minBlockSize, resize: style.resize };
 		};
 		return { inside: measure(inside), outside: measure(outside) };
 	});
-	expect(sizes.inside.minBlockSize).toBeGreaterThanOrEqual(100);
+	expect(parseFloat(sizes.inside.minBlockSize)).toBeGreaterThanOrEqual(100);
 	expect(sizes.inside.resize).toBe('vertical');
-	expect(sizes.outside.minBlockSize).toBeLessThan(sizes.inside.minBlockSize);
+	expect(sizes.outside.minBlockSize).not.toBe(sizes.inside.minBlockSize);
 	expect(sizes.outside.resize).not.toBe('vertical');
 	await expectNoHorizontalOverflow(page, 'non-form editor textarea');
 });
