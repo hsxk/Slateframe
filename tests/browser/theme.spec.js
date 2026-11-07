@@ -645,6 +645,36 @@ test('comment reply and cancel actions keep complete touch targets', async ({ pa
 	await expectNoHorizontalOverflow(page, pagePath + '#respond');
 });
 
+test('long multilingual comment authors remain readable in narrow and RTL threads', async ({ page }, testInfo) => {
+	test.skip(![320, 375, 390, 412, 768].includes(projectWidth(testInfo)), 'Comment author wrapping covers phone and tablet layouts.');
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const author = page.locator('.slateframe-comment-list .comment-author').first();
+	await expect(author).toBeVisible();
+	const label = author.locator('.fn, .says').first();
+	await expect(label).toHaveCount(1);
+	await label.evaluate((node) => {
+		node.textContent = '非常长的评论作者名 日本語 العربية ' + 'unbroken-comment-author-'.repeat(9);
+	});
+	for (const direction of ['ltr', 'rtl']) {
+		await page.locator('html').evaluate((node, dir) => { node.dir = dir; }, direction);
+		const metrics = await label.evaluate((node) => {
+			const box = node.getBoundingClientRect();
+			const parent = node.closest('.comment-body').getBoundingClientRect();
+			return {
+				width: box.width,
+				parentWidth: parent.width,
+				scrollWidth: node.scrollWidth,
+				clientWidth: node.clientWidth,
+				wrap: getComputedStyle(node).overflowWrap,
+			};
+		});
+		expect(metrics.wrap).toBe('anywhere');
+		expect(metrics.width).toBeLessThanOrEqual(metrics.parentWidth + 1);
+		expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+		await expectNoHorizontalOverflow(page, pagePath + '#long-author-' + direction);
+	}
+});
+
 test('threaded comment replies load only on singular discussions', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	await expect(page.locator('#comment-reply-js')).toHaveCount(1);
