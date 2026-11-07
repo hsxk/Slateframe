@@ -158,6 +158,27 @@ test('semantic forms and editorial primitives stay usable across responsive view
 	await expectNoHorizontalOverflow(page, 'semantic form fixture in forced colors');
 });
 
+test('multilingual form content remains contained in narrow and RTL layouts', async ({ page }, testInfo) => {
+	const width = projectWidth(testInfo);
+	test.skip(![320, 375, 390, 412, 768].includes(width), 'Form overflow regression targets phone and tablet widths.');
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const form = page.locator('.browser-semantic-form');
+	await expect(form).toBeVisible();
+	const notes = page.locator('#browser-notes');
+	await notes.fill('日本語の長い文章'.repeat(18) + ' العربية '.repeat(18));
+	await expect(notes).toHaveValue(/日本語の長い文章/);
+	await expectNoHorizontalOverflow(page, 'multilingual form text');
+	await form.evaluate((node) => node.setAttribute('dir', 'rtl'));
+	await expect(notes).toHaveAttribute('dir', 'rtl');
+	await expectNoHorizontalOverflow(page, 'RTL multilingual form text');
+	const action = page.locator('#browser-form-action');
+	const bounds = await action.boundingBox();
+	expect(bounds?.width || 0).toBeGreaterThanOrEqual(44);
+	expect(bounds?.height || 0).toBeGreaterThanOrEqual(44);
+	await page.emulateMedia({ forcedColors: 'active' });
+	await expectNoHorizontalOverflow(page, 'RTL multilingual form in forced colors');
+});
+
 test('skip link moves keyboard users to the main landmark', async ({ page }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 	await page.keyboard.press('Tab');
