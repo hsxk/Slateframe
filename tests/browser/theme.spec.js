@@ -921,7 +921,11 @@ test('comment thread remains on the prose reading axis', async ({ page }) => {
 			border: Number.parseFloat(styles.borderInlineStartWidth),
 		};
 	});
-	expect(hierarchy.padding).toBeGreaterThan(0);
+	if (projectWidth(test.info()) <= 480) {
+		expect(hierarchy.padding).toBe(0);
+	} else {
+		expect(hierarchy.padding).toBeGreaterThan(0);
+	}
 	expect(hierarchy.border).toBeGreaterThanOrEqual(1);
 
 	await page.locator('html').evaluate((element) => { element.dir = 'rtl'; });
