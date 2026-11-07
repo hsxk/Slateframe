@@ -179,6 +179,32 @@ test('multilingual form content remains contained in narrow and RTL layouts', as
 	await expectNoHorizontalOverflow(page, 'RTL multilingual form in forced colors');
 });
 
+test('form labels and validation remain readable at 200% zoom in RTL', async ({ page }, testInfo) => {
+	test.skip(![320, 375, 390, 412, 768].includes(projectWidth(testInfo)), 'Zoomed form regression targets narrow and tablet viewports.');
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	const form = page.locator('.browser-semantic-form');
+	await expect(form).toBeVisible();
+	await form.evaluate((node) => { node.dir = 'rtl'; });
+	await page.locator('html').evaluate((node) => { node.style.fontSize = '200%'; });
+	const email = page.locator('#browser-email');
+	await expect(email).toHaveAttribute('aria-invalid', 'true');
+	await email.focus();
+	await expect(email).toBeFocused();
+	const metrics = await email.evaluate((node) => {
+		const rect = node.getBoundingClientRect();
+		const style = getComputedStyle(node);
+		return { left: rect.left, right: rect.right, height: rect.height, direction: style.direction };
+	});
+	expect(metrics.direction).toBe('rtl');
+	expect(metrics.left).toBeGreaterThanOrEqual(-1);
+	expect(metrics.right).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
+	expect(metrics.height).toBeGreaterThanOrEqual(44);
+	await expectNoHorizontalOverflow(page, '200% zoom RTL form');
+	await page.emulateMedia({ forcedColors: 'active' });
+	expect(await email.evaluate((node) => getComputedStyle(node).borderStyle)).toBe('double');
+	await expectNoHorizontalOverflow(page, '200% zoom RTL form in forced colors');
+});
+
 test('skip link moves keyboard users to the main landmark', async ({ page }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 	await page.keyboard.press('Tab');
