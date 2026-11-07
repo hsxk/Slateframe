@@ -116,6 +116,28 @@ test('form presentation stays contextual instead of leaking into form-free route
 	expect(await assetCount('search-form')).toBe(0);
 });
 
+test('form textarea sizing does not leak into non-form editor surfaces', async ({ page }) => {
+	await page.goto(pagePath, { waitUntil: 'networkidle' });
+	await expect(page.locator('.browser-semantic-form #browser-notes')).toBeVisible();
+	const sizes = await page.evaluate(() => {
+		const inside = document.querySelector('.browser-semantic-form #browser-notes');
+		const outside = document.createElement('textarea');
+		outside.id = 'browser-outside-form-textarea';
+		outside.setAttribute('aria-label', 'Non-form editor');
+		document.querySelector('#main-content').append(outside);
+		const measure = (node) => {
+			const style = getComputedStyle(node);
+			return { minBlockSize: style.minBlockSize, resize: style.resize };
+		};
+		return { inside: measure(inside), outside: measure(outside) };
+	});
+	expect(parseFloat(sizes.inside.minBlockSize)).toBeGreaterThanOrEqual(100);
+	expect(sizes.inside.resize).toBe('vertical');
+	expect(sizes.outside.minBlockSize).not.toBe(sizes.inside.minBlockSize);
+	expect(sizes.outside.resize).not.toBe('vertical');
+	await expectNoHorizontalOverflow(page, 'non-form editor textarea');
+});
+
 test('semantic forms and editorial primitives stay usable across responsive viewports', async ({ page }) => {
 	await page.goto(pagePath, { waitUntil: 'networkidle' });
 	const form = page.locator('.browser-semantic-form');
