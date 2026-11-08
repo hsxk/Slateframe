@@ -27,10 +27,11 @@ class PortfolioEditorParityContract(unittest.TestCase):
 
     def test_nested_knowledge_and_ledger_respect_editor_canvas(self):
         editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
-        self.assertIn("max-width: min(100%, var(--slateframe-content));", editor)
-        self.assertIn("max-width: min(100%, var(--slateframe-wide));", editor)
-        self.assertNotIn("max-width: var(--slateframe-content);", editor)
-        self.assertNotIn("max-width: var(--slateframe-wide);", editor)
+        compact = editor.replace(" ", "")
+        self.assertIn("max-width:min(100%,var(--slateframe-content));", compact)
+        self.assertIn("max-width:min(100%,var(--slateframe-wide));", compact)
+        self.assertNotIn("max-width:var(--slateframe-content);", compact)
+        self.assertNotIn("max-width:var(--slateframe-wide);", compact)
         self.assertLessEqual((ROOT / "assets/css/editor.css").stat().st_size, 5000)
 
     def test_nested_core_columns_can_shrink_in_editor(self):
