@@ -61,7 +61,7 @@ global $wp_query;
 		if ( function_exists( 'slateframe_search_recent_posts_query' ) && class_exists( 'WP_Query', false ) ) :
 			$slateframe_recent_posts = slateframe_search_recent_posts_query();
 			if ( $slateframe_recent_posts->have_posts() ) :
-			?>
+				?>
 			<section class="slateframe-shell" aria-labelledby="slateframe-recent-posts-heading">
 				<h2 id="slateframe-recent-posts-heading"><?php esc_html_e( 'Recent posts', 'slateframe' ); ?></h2>
 				<div class="slateframe-grid">
@@ -73,7 +73,7 @@ global $wp_query;
 					?>
 				</div>
 			</section>
-			<?php
+				<?php
 			endif;
 			wp_reset_postdata();
 		endif;
