@@ -26,8 +26,8 @@ class PhotoSequenceContract(unittest.TestCase):
 
     def test_captions_are_not_overlay_text(self):
         self.assertIn("text-shadow:none;font-weight:400", self.photo)
-        self.assertIn("text-shadow: none;", self.editor)
-        self.assertIn("font-weight: 400;", self.editor)
+        self.assertIn("text-shadow:none;", self.editor.replace(" ", ""))
+        self.assertIn("font-weight:400;", self.editor.replace(" ", ""))
 
     def test_reduced_motion_and_touch(self):
         self.assertIn("@media(hover:hover){.slateframe-card-media:hover img", self.style)

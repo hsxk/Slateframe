@@ -34,8 +34,8 @@ class PhotographyCaptionContractTest(unittest.TestCase):
         selector = ".editor-styles-wrapper .wp-element-caption {"
         self.assertIn(selector, editor)
         declarations = editor.split(selector, 1)[1].split("}", 1)[0]
-        self.assertIn("font-size: 0.875rem", declarations)
-        self.assertIn("line-height: 1.55", declarations)
+        self.assertIn("font-size:0.875rem", declarations.replace(" ", ""))
+        self.assertIn("line-height:1.55", declarations.replace(" ", ""))
 
 
 if __name__ == "__main__":

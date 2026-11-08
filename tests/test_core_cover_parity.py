@@ -12,7 +12,7 @@ class CoreCoverParity(unittest.TestCase):
         self.assertEqual(css.count(selector), 1)
         self.assertIn("overflow-wrap:anywhere", css)
         self.assertIn("overflow-wrap:anywhere", (ROOT / "assets/css/reading.css").read_text(encoding="utf-8"))
-        self.assertIn("overflow-wrap: anywhere;", (ROOT / "assets/css/editor.css").read_text(encoding="utf-8"))
+        self.assertIn("overflow-wrap:anywhere", (ROOT / "assets/css/editor.css").read_text(encoding="utf-8").replace(" ", ""))
         self.assertNotIn(".wp-block-cover__image-background{", css)
         self.assertLessEqual((ROOT / "style.css").stat().st_size, 16000)
 
