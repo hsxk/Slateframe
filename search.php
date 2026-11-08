@@ -57,16 +57,10 @@ global $wp_query;
 	<?php
 	// Offer a useful next step when a search has no matches, without changing its results.
 	if ( 0 === (int) $wp_query->found_posts ) :
-		$slateframe_recent_posts = new WP_Query(
-			array(
-				'post_type'           => 'post',
-				'post_status'         => 'publish',
-				'posts_per_page'      => 3,
-				'ignore_sticky_posts' => true,
-				'no_found_rows'       => true,
-			)
-		);
-		if ( $slateframe_recent_posts->have_posts() ) :
+		// The isolated listing harness does not load discovery helpers or WordPress classes.
+		if ( function_exists( 'slateframe_search_recent_posts_query' ) && class_exists( 'WP_Query', false ) ) :
+			$slateframe_recent_posts = slateframe_search_recent_posts_query();
+			if ( $slateframe_recent_posts->have_posts() ) :
 			?>
 			<section class="slateframe-shell" aria-labelledby="slateframe-recent-posts-heading">
 				<h2 id="slateframe-recent-posts-heading"><?php esc_html_e( 'Recent posts', 'slateframe' ); ?></h2>
@@ -80,8 +74,9 @@ global $wp_query;
 				</div>
 			</section>
 			<?php
+			endif;
+			wp_reset_postdata();
 		endif;
-		wp_reset_postdata();
 	endif;
 	?>
 
