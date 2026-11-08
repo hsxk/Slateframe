@@ -1,11 +1,5 @@
 
-.editor-styles-wrapper {
-	background: var(--slateframe-bg);
-	color: var(--slateframe-text);
-	font-family: var(--slateframe-sans);
-	line-height: 1.72;
-	overflow-wrap: anywhere;
-}
+.editor-styles-wrapper{background:var(--slateframe-bg);color:var(--slateframe-text);font-family:var(--slateframe-sans);line-height:1.72;overflow-wrap:anywhere}
 
 .editor-styles-wrapper .wp-block-post-title:not(.wp-block-query .wp-block-post-title) {
 	max-width: min(14em, 100%);
