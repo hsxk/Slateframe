@@ -204,6 +204,12 @@ test('multilingual form content remains contained in narrow and RTL layouts', as
 	expect(bounds?.width || 0).toBeGreaterThanOrEqual(44);
 	expect(bounds?.height || 0).toBeGreaterThanOrEqual(44);
 	await page.emulateMedia({ forcedColors: 'active' });
+	const forcedTextareaBox = await notes.boundingBox();
+	const forcedFormBox = await form.boundingBox();
+	expect(forcedTextareaBox, 'Forced-colors RTL textarea must remain rendered').not.toBeNull();
+	expect(forcedFormBox, 'Forced-colors RTL form must remain rendered').not.toBeNull();
+	expect(forcedTextareaBox.x).toBeGreaterThanOrEqual(forcedFormBox.x - 1);
+	expect(forcedTextareaBox.x + forcedTextareaBox.width).toBeLessThanOrEqual(forcedFormBox.x + forcedFormBox.width + 1);
 	await expectNoHorizontalOverflow(page, 'RTL multilingual form in forced colors');
 });
 
@@ -237,6 +243,12 @@ test('form labels and validation remain readable at 200% zoom in RTL', async ({ 
 	await expectNoHorizontalOverflow(page, '200% zoom RTL form');
 	await page.emulateMedia({ forcedColors: 'active' });
 	expect(await email.evaluate((node) => getComputedStyle(node).borderStyle)).toBe('double');
+	const forcedZoomTextarea = await notes.boundingBox();
+	const forcedZoomForm = await form.boundingBox();
+	expect(forcedZoomTextarea, 'Forced-colors zoomed textarea must remain rendered').not.toBeNull();
+	expect(forcedZoomForm, 'Forced-colors zoomed form must remain rendered').not.toBeNull();
+	expect(forcedZoomTextarea.x).toBeGreaterThanOrEqual(forcedZoomForm.x - 1);
+	expect(forcedZoomTextarea.x + forcedZoomTextarea.width).toBeLessThanOrEqual(forcedZoomForm.x + forcedZoomForm.width + 1);
 	await expectNoHorizontalOverflow(page, '200% zoom RTL form in forced colors');
 });
 
