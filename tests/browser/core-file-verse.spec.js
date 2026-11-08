@@ -50,9 +50,11 @@ async function metrics(page) {
     const verse = root.querySelector('.wp-block-verse');
     const code = root.querySelector('.wp-block-code');
     const a = filename.getBoundingClientRect();
+    const container = filename.parentElement.getBoundingClientRect();
     const b = download.getBoundingClientRect();
     return {
       filename: { width: a.width, height: a.height },
+      filenameContained: a.left >= container.left - 1 && a.right <= container.right + 1,
       filenameOverflowWrap: getComputedStyle(filename).overflowWrap,
       download: { width: b.width, height: b.height, minHeight: parseFloat(getComputedStyle(download).minHeight) },
       verseDirection: getComputedStyle(verse).direction,
@@ -90,6 +92,7 @@ test('native Core File and Verse preserve geometry and writing direction at seve
       expect(m.filename.height, width + 'px ' + dir).toBeGreaterThanOrEqual(43);
       expect(m.filename.width).toBeGreaterThanOrEqual(43);
       expect(m.filenameOverflowWrap).toBe('anywhere');
+      expect(m.filenameContained, width + 'px ' + dir + ' native file link must remain inside its Core File wrapper').toBe(true);
       expect(m.download.minHeight, width + 'px ' + dir).toBeGreaterThanOrEqual(44);
       expect(m.download.height, width + 'px ' + dir).toBeGreaterThanOrEqual(44);
       expect(m.download.width).toBeGreaterThanOrEqual(43);
