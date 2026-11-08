@@ -55,6 +55,7 @@ async function metrics(page) {
     return {
       filename: { width: a.width, height: a.height },
       filenameContained: a.left >= container.left - 1 && a.right <= container.right + 1,
+      downloadContained: b.left >= container.left - 1 && b.right <= container.right + 1,
       filenameOverflowWrap: getComputedStyle(filename).overflowWrap,
       download: { width: b.width, height: b.height, minHeight: parseFloat(getComputedStyle(download).minHeight) },
       verseDirection: getComputedStyle(verse).direction,
@@ -93,6 +94,7 @@ test('native Core File and Verse preserve geometry and writing direction at seve
       expect(m.filename.width).toBeGreaterThanOrEqual(43);
       expect(m.filenameOverflowWrap).toBe('anywhere');
       expect(m.filenameContained, width + 'px ' + dir + ' native file link must remain inside its Core File wrapper').toBe(true);
+      expect(m.downloadContained, width + 'px ' + dir + ' download button must remain inside its Core File wrapper').toBe(true);
       expect(m.download.minHeight, width + 'px ' + dir).toBeGreaterThanOrEqual(44);
       expect(m.download.height, width + 'px ' + dir).toBeGreaterThanOrEqual(44);
       expect(m.download.width).toBeGreaterThanOrEqual(43);
@@ -142,6 +144,8 @@ test('Core File keyboard focus remains visible in forced colors and 200% text zo
   const m = await metrics(page);
   expect(m.verseDirection).toBe('rtl');
   expect(m.codeDirection).toBe('ltr');
+  expect(m.filenameContained, 'RTL 200% zoom filename must remain within the Core File wrapper').toBe(true);
+  expect(m.downloadContained, 'RTL 200% zoom download button must remain within the Core File wrapper').toBe(true);
   expect(m.documentOverflow).toBeLessThanOrEqual(1);
   await fs.mkdir('test-artifacts/screenshots', { recursive: true });
   await page.locator('.slateframe-core-file-verse-fixture').screenshot({
