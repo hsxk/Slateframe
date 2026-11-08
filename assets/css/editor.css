@@ -12,40 +12,17 @@
 .editor-styles-wrapper .block-editor-block-list__layout.is-root-container > .alignfull {max-width:none;}
 
 .editor-styles-wrapper figcaption,
-.editor-styles-wrapper .wp-element-caption {
-	color: var(--slateframe-muted);
-	font-size: 0.875rem;
-	line-height: 1.55;
-}
+.editor-styles-wrapper .wp-element-caption {color:var(--slateframe-muted);font-size:0.875rem;line-height:1.55;}
 
-.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-contact-sheet, .is-style-slateframe-diptych, .is-style-slateframe-photo-sequence, .slateframe-gallery-sequence) .wp-block-image figcaption {
-	position: static;
-	background: none;
-	color: var(--slateframe-muted);
-	text-shadow: none;
-	font-weight: 400;
-	text-align: start;
-}
+.editor-styles-wrapper .wp-block-gallery:is(.is-style-slateframe-contact-sheet, .is-style-slateframe-diptych, .is-style-slateframe-photo-sequence, .slateframe-gallery-sequence) .wp-block-image figcaption {position:static;background:none;color:var(--slateframe-muted);text-shadow:none;font-weight:400;text-align:start;}
 
-.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {
-	height: auto;
-	aspect-ratio: auto;
-	object-fit: contain;
-}
+.editor-styles-wrapper .wp-block-gallery.is-style-slateframe-contact-sheet .wp-block-image img {height:auto;aspect-ratio:auto;object-fit:contain;}
 
-.editor-styles-wrapper :is(.is-style-slateframe-steps, .is-style-slateframe-checklist) {
-	max-width: min(100%, var(--slateframe-content));
-}
+.editor-styles-wrapper :is(.is-style-slateframe-steps, .is-style-slateframe-checklist) {max-width:min(100%, var(--slateframe-content));}
 
-.editor-styles-wrapper .is-style-slateframe-ledger {
-	max-width: min(100%, var(--slateframe-wide));
-}
+.editor-styles-wrapper .is-style-slateframe-ledger {max-width:min(100%, var(--slateframe-wide));}
 
-.editor-styles-wrapper .wp-block-quote {
-	padding-inline-start: var(--slateframe-space-4);
-	border-inline-start: 3px solid var(--slateframe-accent);
-	color: var(--slateframe-muted);
-}
+.editor-styles-wrapper .wp-block-quote {padding-inline-start:var(--slateframe-space-4);border-inline-start:3px solid var(--slateframe-accent);color:var(--slateframe-muted);}
 
 .editor-styles-wrapper .wp-block-table{min-inline-size:0;max-inline-size:100%;overflow-x:auto;scrollbar-gutter:stable;overscroll-behavior-inline:contain;contain:inline-size}
 .editor-styles-wrapper .wp-block-table table{inline-size:max-content;min-inline-size:100%;max-inline-size:none;border-collapse:collapse}
