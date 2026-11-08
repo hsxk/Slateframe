@@ -193,6 +193,12 @@ test('multilingual form content remains contained in narrow and RTL layouts', as
 	await form.evaluate((node) => node.setAttribute('dir', 'rtl'));
 	await expect(notes).toHaveAttribute('dir', 'rtl');
 	await expectNoHorizontalOverflow(page, 'RTL multilingual form text');
+	const textareaBox = await notes.boundingBox();
+	const formBox = await form.boundingBox();
+	expect(textareaBox, 'RTL textarea must have a rendered box').not.toBeNull();
+	expect(formBox, 'RTL form must have a rendered box').not.toBeNull();
+	expect(textareaBox.x).toBeGreaterThanOrEqual(formBox.x - 1);
+	expect(textareaBox.x + textareaBox.width).toBeLessThanOrEqual(formBox.x + formBox.width + 1);
 	const action = page.locator('#browser-form-action');
 	const bounds = await action.boundingBox();
 	expect(bounds?.width || 0).toBeGreaterThanOrEqual(44);
