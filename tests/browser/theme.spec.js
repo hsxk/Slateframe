@@ -227,6 +227,13 @@ test('form labels and validation remain readable at 200% zoom in RTL', async ({ 
 	expect(metrics.left).toBeGreaterThanOrEqual(-1);
 	expect(metrics.right).toBeLessThanOrEqual(projectWidth(testInfo) + 1);
 	expect(metrics.height).toBeGreaterThanOrEqual(44);
+	const notes = page.locator('#browser-notes');
+	const textareaBox = await notes.boundingBox();
+	const formBox = await form.boundingBox();
+	expect(textareaBox, 'Zoomed RTL textarea must remain rendered').not.toBeNull();
+	expect(formBox, 'Zoomed RTL form must remain rendered').not.toBeNull();
+	expect(textareaBox.x).toBeGreaterThanOrEqual(formBox.x - 1);
+	expect(textareaBox.x + textareaBox.width).toBeLessThanOrEqual(formBox.x + formBox.width + 1);
 	await expectNoHorizontalOverflow(page, '200% zoom RTL form');
 	await page.emulateMedia({ forcedColors: 'active' });
 	expect(await email.evaluate((node) => getComputedStyle(node).borderStyle)).toBe('double');
