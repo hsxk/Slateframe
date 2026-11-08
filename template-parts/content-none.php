@@ -22,6 +22,11 @@ if ( is_search() ) {
 <section class="slateframe-empty-state">
 	<h2><?php echo esc_html( $slateframe_empty_title ); ?></h2>
 	<p><?php echo esc_html( $slateframe_empty_message ); ?></p>
+	<?php if ( is_search() ) : ?>
+		<div class="slateframe-not-found-actions">
+			<a class="slateframe-action-link" href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php esc_html_e( 'Return home', 'slateframe' ); ?></a>
+		</div>
+	<?php endif; ?>
 	<?php if ( ! is_search() ) : ?>
 		<?php get_search_form(); ?>
 	<?php endif; ?>
