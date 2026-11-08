@@ -244,3 +244,33 @@ function slateframe_not_found_posts_query() {
 
 	return new WP_Query( slateframe_discovery_bound_query_args( $args ) );
 }
+
+/**
+ * Query recent published posts for an empty-search recovery surface.
+ *
+ * Keep secondary queries outside the main search template, as for 404 recovery.
+ *
+ * @return WP_Query
+ */
+function slateframe_search_recent_posts_query() {
+	$args = array(
+		'post_type'           => 'post',
+		'post_status'         => 'publish',
+		'posts_per_page'      => 3,
+		'ignore_sticky_posts' => true,
+		'no_found_rows'       => true,
+		'suppress_filters'    => false,
+		'orderby'             => 'date',
+		'order'               => 'DESC',
+	);
+
+	/**
+	 * Filters the recent-content query used only on empty search results.
+	 *
+	 * @param array $args WP_Query arguments.
+	 */
+	$filtered = apply_filters( 'slateframe_search_recent_posts_args', $args );
+	$args     = is_array( $filtered ) && ! empty( $filtered ) ? $filtered : $args;
+
+	return new WP_Query( slateframe_discovery_bound_query_args( $args ) );
+}
