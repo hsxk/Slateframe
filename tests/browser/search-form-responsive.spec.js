@@ -117,3 +117,16 @@ test('native search preserves uncommitted Japanese IME text until composition en
   await page.locator('.slateframe-search-form button[type="submit"]').first().click();
   await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === '写真');
 });
+
+test('native search submits a committed CJK query with Enter from the input in narrow RTL layout', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/?s=slateframe-search-layout-fixture', { waitUntil: 'networkidle' });
+  await page.addStyleTag({ path: 'rtl.css' });
+  await page.evaluate(() => { document.documentElement.dir = 'rtl'; });
+  const field = page.locator('.slateframe-search-form input[name="s"]').first();
+  await expect(field).toBeVisible();
+  await field.fill('写真 中文 العربية');
+  await field.press('Enter');
+  await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === '写真 中文 العربية');
+  await expect(page.locator('.slateframe-search-form input[name="s"]').first()).toHaveValue('写真 中文 العربية');
+});
