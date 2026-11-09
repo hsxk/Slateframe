@@ -54,3 +54,44 @@ test('native search submits Unicode terms through WordPress GET and preserves th
   await expect(page.locator('.slateframe-search-form input[name="s"]').first()).toHaveValue(query);
   await expect(page.locator('.slateframe-search-form label').first()).toContainText('Search for:');
 });
+
+test('native search remains keyboard-operable at 200% text zoom in narrow RTL forced-colors mode', async ({ page }) => {
+  await page.goto('/?s=slateframe-search-layout-fixture', { waitUntil: 'networkidle' });
+  await page.addStyleTag({ path: 'rtl.css' });
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.evaluate(() => {
+    document.documentElement.dir = 'rtl';
+    document.documentElement.style.fontSize = '200%';
+  });
+  await page.emulateMedia({ forcedColors: 'active' });
+  const form = page.locator('.slateframe-search-form').first();
+  const field = form.locator('input[name="s"]');
+  const submit = form.locator('button[type="submit"]');
+  await expect(field).toBeVisible();
+  await expect(submit).toBeVisible();
+  await field.fill('写真 中文 العربية');
+  await page.keyboard.press('Tab');
+  await expect(submit).toBeFocused();
+  const geometry = await form.evaluate(node => {
+    const formRect = node.getBoundingClientRect();
+    const button = node.querySelector('button[type="submit"]');
+    const buttonRect = button.getBoundingClientRect();
+    const inputRect = node.querySelector('input[name="s"]').getBoundingClientRect();
+    return {
+      inputContained: inputRect.left >= formRect.left - 1 && inputRect.right <= formRect.right + 1,
+      buttonContained: buttonRect.left >= formRect.left - 1 && buttonRect.right <= formRect.right + 1,
+      buttonHeight: buttonRect.height,
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      focusVisible: button.matches(':focus-visible'),
+      outlineStyle: getComputedStyle(button).outlineStyle,
+    };
+  });
+  expect(geometry.inputContained).toBe(true);
+  expect(geometry.buttonContained).toBe(true);
+  expect(geometry.buttonHeight).toBeGreaterThanOrEqual(44);
+  expect(geometry.overflow).toBeLessThanOrEqual(1);
+  expect(geometry.focusVisible).toBe(true);
+  expect(geometry.outlineStyle).not.toBe('none');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === '写真 中文 العربية');
+});
