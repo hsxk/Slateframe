@@ -40,3 +40,17 @@ test('native search keeps its labeled input and submit control within the page a
     }
   }
 });
+
+test('native search submits Unicode terms through WordPress GET and preserves the accessible label', async ({ page }) => {
+  await page.goto('/?s=slateframe-search-layout-fixture', { waitUntil: 'networkidle' });
+  const form = page.locator('.slateframe-search-form').first();
+  await expect(form).toBeVisible();
+  const field = form.locator('input[name="s"]');
+  const submit = form.locator('button[type="submit"]');
+  const query = '写真 撮影 العربية 2026';
+  await field.fill(query);
+  await submit.click();
+  await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === query);
+  await expect(page.locator('.slateframe-search-form input[name="s"]').first()).toHaveValue(query);
+  await expect(page.locator('.slateframe-search-form label').first()).toContainText('Search for:');
+});
