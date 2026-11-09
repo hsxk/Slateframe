@@ -14,7 +14,7 @@ class SearchLandmarkContract(unittest.TestCase):
 
     def test_native_search_keyboard_and_label_are_preserved(self):
         source = (ROOT / 'searchform.php').read_text(encoding='utf-8')
-        self.assertIn('type="search" name="s" dir="auto" enterkeyhint="search"', source)
+        self.assertIn('type="search" name="s" inputmode="search" dir="auto" enterkeyhint="search"', source)
         self.assertIn('esc_html_e( \'Search for:\', \'slateframe\' )', source)
         self.assertIn('esc_attr( get_search_query( false ) )', source)
         self.assertIn('method="get"', source)

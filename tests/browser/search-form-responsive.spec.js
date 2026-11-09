@@ -7,6 +7,7 @@ test('native search keeps its labeled input and submit control within the page a
   const field = form.locator('input[name="s"]');
   const submit = form.locator('button[type="submit"]');
   await expect(field).toBeVisible();
+  await expect(field).toHaveAttribute('inputmode', 'search');
   await expect(submit).toBeVisible();
   await expect(field.locator('xpath=parent::label')).toHaveCount(1);
   await page.addStyleTag({ path: 'rtl.css' });
