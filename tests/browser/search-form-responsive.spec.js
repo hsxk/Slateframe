@@ -42,7 +42,7 @@ test('native search keeps its labeled input and submit control within the page a
 });
 
 test('native search submits Unicode terms through WordPress GET and preserves the accessible label', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/?s=slateframe-search-layout-fixture', { waitUntil: 'networkidle' });
   const form = page.locator('.slateframe-search-form').first();
   await expect(form).toBeVisible();
   const field = form.locator('input[name="s"]');
