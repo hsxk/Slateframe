@@ -96,3 +96,24 @@ test('native search remains keyboard-operable at 200% text zoom in narrow RTL fo
   await page.keyboard.press('Enter');
   await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === '写真 中文 العربية');
 });
+
+test('native search preserves uncommitted Japanese IME text until composition ends', async ({ page }) => {
+  await page.goto('/?s=slateframe-search-layout-fixture', { waitUntil: 'networkidle' });
+  const field = page.locator('.slateframe-search-form input[name="s"]').first();
+  await field.focus();
+  await field.evaluate(input => {
+    input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true, data: '' }));
+    input.value = 'しゃしん';
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertCompositionText', data: 'しゃしん', isComposing: true }));
+  });
+  await expect(field).toHaveValue('しゃしん');
+  await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === 'slateframe-search-layout-fixture');
+  await field.evaluate(input => {
+    input.value = '写真';
+    input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '写真' }));
+    input.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: '写真' }));
+  });
+  await expect(field).toHaveValue('写真');
+  await page.locator('.slateframe-search-form button[type="submit"]').first().click();
+  await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === '写真');
+});
