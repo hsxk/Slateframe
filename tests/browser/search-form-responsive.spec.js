@@ -140,24 +140,36 @@ test('native search action wraps a long localized label without horizontal overf
     button.style.maxInlineSize = '140px';
   });
   await expect(submit).toBeVisible();
-  const layout = await submit.evaluate(button => {
-    const rect = button.getBoundingClientRect();
-    return {
-      whiteSpace: getComputedStyle(button).whiteSpace,
-      height: rect.height,
-      labelLines: (() => {
+  await page.addStyleTag({ path: 'rtl.css' });
+
+  // Exercise the same localized action under both writing directions and
+  // every narrow breakpoint rather than only the default 320px LTR case.
+  for (const width of [320, 375, 390, 412]) {
+    await page.setViewportSize({ width, height: 900 });
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
+      const layout = await submit.evaluate(button => {
+        const rect = button.getBoundingClientRect();
         const range = document.createRange();
         range.selectNodeContents(button);
-        return range.getClientRects().length;
-      })(),
-      scrollWidth: button.scrollWidth,
-      clientWidth: button.clientWidth,
-      pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    };
-  });
-  expect(layout.whiteSpace).toBe('normal');
-  expect(layout.height).toBeGreaterThanOrEqual(44);
-  expect(layout.labelLines).toBeGreaterThan(1);
-  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
-  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+        const formRect = button.closest('form').getBoundingClientRect();
+        return {
+          whiteSpace: getComputedStyle(button).whiteSpace,
+          height: rect.height,
+          labelLines: range.getClientRects().length,
+          scrollWidth: button.scrollWidth,
+          clientWidth: button.clientWidth,
+          contained: rect.left >= formRect.left - 1 && rect.right <= formRect.right + 1,
+          pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        };
+      });
+      const context = `${width}px ${direction}`;
+      expect(layout.whiteSpace, context).toBe('normal');
+      expect(layout.height, context).toBeGreaterThanOrEqual(44);
+      expect(layout.labelLines, context).toBeGreaterThan(1);
+      expect(layout.scrollWidth, context).toBeLessThanOrEqual(layout.clientWidth + 1);
+      expect(layout.contained, context).toBe(true);
+      expect(layout.pageOverflow, context).toBeLessThanOrEqual(1);
+    }
+  }
 });
