@@ -173,3 +173,39 @@ test('native search action wraps a long localized label without horizontal overf
     }
   }
 });
+
+test('localized search action remains operable with 200% text at narrow RTL widths', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/?s=slateframe-search-layout-fixture', { waitUntil: 'networkidle' });
+  await page.addStyleTag({ path: 'rtl.css' });
+  await page.evaluate(() => {
+    document.documentElement.dir = 'rtl';
+    document.documentElement.style.fontSize = '200%';
+  });
+  const form = page.locator('.slateframe-search-form').first();
+  const field = form.locator('input[name="s"]');
+  const submit = form.locator('button[type="submit"]');
+  await submit.evaluate(button => {
+    button.textContent = '検索結果を表示するための非常に長いボタンラベル';
+    button.style.maxInlineSize = '140px';
+  });
+  await field.fill('写真 中文 العربية');
+  await field.press('Tab');
+  await expect(submit).toBeFocused();
+  const layout = await submit.evaluate(button => {
+    const rect = button.getBoundingClientRect();
+    const formRect = button.closest('form').getBoundingClientRect();
+    return {
+      height: rect.height,
+      contained: rect.left >= formRect.left - 1 && rect.right <= formRect.right + 1,
+      textContained: button.scrollWidth <= button.clientWidth + 1,
+      pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  expect(layout.height).toBeGreaterThanOrEqual(44);
+  expect(layout.contained).toBe(true);
+  expect(layout.textContained).toBe(true);
+  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === '写真 中文 العربية');
+});
