@@ -130,3 +130,28 @@ test('native search submits a committed CJK query with Enter from the input in n
   await expect(page).toHaveURL(url => new URL(url).searchParams.get('s') === '写真 中文 العربية');
   await expect(page.locator('.slateframe-search-form input[name="s"]').first()).toHaveValue('写真 中文 العربية');
 });
+
+test('native search action wraps a long localized label without horizontal overflow', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto('/?s=slateframe-search-layout-fixture', { waitUntil: 'networkidle' });
+  const submit = page.locator('.slateframe-search-form button[type="submit"]').first();
+  await submit.evaluate(button => {
+    button.textContent = '検索結果を表示するための非常に長いボタンラベル';
+    button.style.maxInlineSize = '140px';
+  });
+  await expect(submit).toBeVisible();
+  const layout = await submit.evaluate(button => {
+    const rect = button.getBoundingClientRect();
+    return {
+      whiteSpace: getComputedStyle(button).whiteSpace,
+      height: rect.height,
+      scrollWidth: button.scrollWidth,
+      clientWidth: button.clientWidth,
+      pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  expect(layout.whiteSpace).toBe('normal');
+  expect(layout.height).toBeGreaterThanOrEqual(44);
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
+  expect(layout.pageOverflow).toBeLessThanOrEqual(1);
+});
