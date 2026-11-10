@@ -145,6 +145,11 @@ test('native search action wraps a long localized label without horizontal overf
     return {
       whiteSpace: getComputedStyle(button).whiteSpace,
       height: rect.height,
+      labelLines: (() => {
+        const range = document.createRange();
+        range.selectNodeContents(button);
+        return range.getClientRects().length;
+      })(),
       scrollWidth: button.scrollWidth,
       clientWidth: button.clientWidth,
       pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -152,6 +157,7 @@ test('native search action wraps a long localized label without horizontal overf
   });
   expect(layout.whiteSpace).toBe('normal');
   expect(layout.height).toBeGreaterThanOrEqual(44);
+  expect(layout.labelLines).toBeGreaterThan(1);
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.clientWidth + 1);
   expect(layout.pageOverflow).toBeLessThanOrEqual(1);
 });
