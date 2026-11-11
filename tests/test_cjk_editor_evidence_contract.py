@@ -17,7 +17,8 @@ class CjkEditorEvidenceContract(unittest.TestCase):
     def test_inherited_cjk_and_latin_override(self):
         script = (ROOT / 'tests/browser/cjk-heading-editor.spec.js').read_text(encoding='utf-8')
         for needle in ('<div lang="ja">', 'inheritedJapanese', 'lang="zh-Hant"',
-                       'lang="ko-KR"', 'English override', 'toHaveCount(3)',
+                       'lang="ko-KR"', 'English override', 'toHaveCount(5)',
+                       '.wp-block-heading[lang="ja"]', '.wp-block-heading[lang="zh-Hans"]',
                        'toHaveCount(2)', 'forcedColors', 'rtl', '200%'):
             self.assertIn(needle, script)
         # Explicit English descendants must not be counted as inherited Japanese.
