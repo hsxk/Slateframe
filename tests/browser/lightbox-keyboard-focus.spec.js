@@ -3,6 +3,9 @@ const fs = require('node:fs/promises');
 
 test('Core lightbox controls expose a visible keyboard focus ring', async ({ page }, info) => {
   await page.goto('/', { waitUntil: 'networkidle' });
+  // The homepage does not enqueue photography.css; load the real distributable
+  // stylesheet for this isolated Core-control fixture, not a test-only mock.
+  await page.addStyleTag({ url: '/wp-content/themes/slateframe/assets/css/photography.css' });
   await page.evaluate(() => {
     const overlay = document.createElement('div');
     overlay.className = 'wp-lightbox-overlay active';
