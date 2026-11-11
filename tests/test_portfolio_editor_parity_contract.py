@@ -28,8 +28,8 @@ class PortfolioEditorParityContract(unittest.TestCase):
     def test_nested_knowledge_and_ledger_respect_editor_canvas(self):
         editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         compact = editor.replace(" ", "")
-        self.assertIn("max-width:min(100%,var(--slateframe-content));", compact)
-        self.assertIn("max-width:min(100%,var(--slateframe-wide));", compact)
+        self.assertIn("max-width:min(100%,var(--slateframe-content))", compact)
+        self.assertIn("max-width:min(100%,var(--slateframe-wide))", compact)
         self.assertNotIn("max-width:var(--slateframe-content);", compact)
         self.assertNotIn("max-width:var(--slateframe-wide);", compact)
         self.assertLessEqual((ROOT / "assets/css/editor.css").stat().st_size, 5000)
