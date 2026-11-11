@@ -1,2 +1,5 @@
 @media(forced-colors:active){.wp-block-button__link{background:ButtonFace!important;color:ButtonText!important;border-color:ButtonText!important;&:focus-visible{outline-color:Highlight}}}
 .wp-block-buttons.is-nowrap:not(:has(.has-custom-width)){&:has(>:nth-child(2):last-child)>.wp-block-button{min-inline-size:min(8rem,35%)}@media(width<481px){flex-flow:column;align-items:stretch;& a{width:100%}}}
+/* Keep Core Button labels usable at narrow widths and with long CJK/URLs. */
+.wp-block-button__link{box-sizing:border-box;min-block-size:var(--slateframe-control,44px);overflow-wrap:anywhere;white-space:normal}
+.wp-block-buttons>.wp-block-button{min-inline-size:0;max-inline-size:100%}
