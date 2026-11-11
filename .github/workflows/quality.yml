@@ -915,7 +915,17 @@ jobs:
       - name: Install Playwright and start WordPress
         run: |
           npm install --package-lock=false --no-audit --no-fund
-          npx playwright install --with-deps chromium
+          # Keep the complete browser and OS dependency setup; retry only transient provisioning failures.
+          for attempt in 1 2 3; do
+            if npx playwright install --with-deps chromium; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo 'Playwright Chromium/dependency provisioning failed after 3 attempts' >&2
+              exit 1
+            fi
+            sleep "$((attempt * 15))"
+          done
           wp server --path=/tmp/wp-browser --host=127.0.0.1 --port=8080 >/tmp/slateframe-server.log 2>&1 &
           for attempt in {1..30}; do curl -fsS http://127.0.0.1:8080/ >/dev/null && break; sleep 1; done
       - name: Run responsive browser smoke
