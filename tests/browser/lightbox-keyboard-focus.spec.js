@@ -33,6 +33,10 @@ test('Core lightbox controls expose a visible keyboard focus ring', async ({ pag
         expect(style.outlineStyle, width + 'px ' + direction + ' focus style').not.toBe('none');
         expect(style.outlineWidth, width + 'px ' + direction + ' focus width').toBeGreaterThanOrEqual(2);
         expect(style.size, width + 'px ' + direction + ' control size').toBeGreaterThanOrEqual(44);
+        const bounds = await button.boundingBox();
+        expect(bounds, width + 'px ' + direction + ' control bounds').not.toBeNull();
+        expect(bounds.x, width + 'px ' + direction + ' left edge').toBeGreaterThanOrEqual(0);
+        expect(bounds.x + bounds.width, width + 'px ' + direction + ' right edge').toBeLessThanOrEqual(width);
         if (index === 1) await page.keyboard.press('Tab');
       }
       // Reverse keyboard navigation must restore focus to the previous control.
