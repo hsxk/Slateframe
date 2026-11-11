@@ -28,16 +28,26 @@ test('Core lightbox controls expose a visible keyboard focus ring', async ({ pag
         await expect(button).toBeFocused();
         const style = await button.evaluate(node => {
           const computed = getComputedStyle(node);
-          return { outlineStyle: computed.outlineStyle, outlineWidth: parseFloat(computed.outlineWidth), outlineColor: computed.outlineColor, size: node.getBoundingClientRect().width };
+          return { outlineStyle: computed.outlineStyle, outlineWidth: parseFloat(computed.outlineWidth), outlineColor: computed.outlineColor, width: node.getBoundingClientRect().width, height: node.getBoundingClientRect().height };
         });
         expect(style.outlineStyle, width + 'px ' + direction + ' focus style').not.toBe('none');
         expect(style.outlineWidth, width + 'px ' + direction + ' focus width').toBeGreaterThanOrEqual(2);
-        expect(style.size, width + 'px ' + direction + ' control size').toBeGreaterThanOrEqual(44);
+        expect(style.width, width + 'px ' + direction + ' control width').toBeGreaterThanOrEqual(44);
+        expect(style.height, width + 'px ' + direction + ' control height').toBeGreaterThanOrEqual(44);
         const bounds = await button.boundingBox();
         expect(bounds, width + 'px ' + direction + ' control bounds').not.toBeNull();
         expect(bounds.x, width + 'px ' + direction + ' left edge').toBeGreaterThanOrEqual(0);
         expect(bounds.x + bounds.width, width + 'px ' + direction + ' right edge').toBeLessThanOrEqual(width);
         if (index === 1) await page.keyboard.press('Tab');
+      }
+      // Every interactive control, including Close, must remain inside the viewport.
+      for (let index = 0; index < 3; index++) {
+        const bounds = await controls.nth(index).boundingBox();
+        expect(bounds, width + 'px ' + direction + ' control ' + index).not.toBeNull();
+        expect(bounds.x).toBeGreaterThanOrEqual(0);
+        expect(bounds.y).toBeGreaterThanOrEqual(0);
+        expect(bounds.x + bounds.width).toBeLessThanOrEqual(width);
+        expect(bounds.y + bounds.height).toBeLessThanOrEqual(900);
       }
       // Reverse keyboard navigation must restore focus to the previous control.
       await page.keyboard.press('Shift+Tab');
