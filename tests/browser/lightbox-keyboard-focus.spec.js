@@ -21,6 +21,7 @@ test('Core lightbox controls expose a visible keyboard focus ring', async ({ pag
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
       await controls.first().focus();
+      await expect(controls.first()).toBeFocused();
       await page.keyboard.press('Tab');
       for (const index of [1, 2]) {
         const button = controls.nth(index);
@@ -34,6 +35,14 @@ test('Core lightbox controls expose a visible keyboard focus ring', async ({ pag
         expect(style.size, width + 'px ' + direction + ' control size').toBeGreaterThanOrEqual(44);
         if (index === 1) await page.keyboard.press('Tab');
       }
+      // Reverse keyboard navigation must restore focus to the previous control.
+      await page.keyboard.press('Shift+Tab');
+      await expect(controls.nth(1)).toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(controls.first()).toBeFocused();
+      const closeFocus = await controls.first().evaluate(node => getComputedStyle(node));
+      expect(closeFocus.outlineStyle, width + 'px ' + direction + ' close focus').not.toBe('none');
+      expect(parseFloat(closeFocus.outlineWidth)).toBeGreaterThanOrEqual(2);
     }
   }
   await page.setViewportSize({ width: info.project.use.viewport?.width || 390, height: 900 });
