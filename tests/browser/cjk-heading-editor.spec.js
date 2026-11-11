@@ -25,15 +25,15 @@ test('real Gutenberg post title preserves inherited and explicit CJK tracking', 
   await editor.evaluate(node => {
     const section = document.createElement('section');
     section.className = 'slateframe-cjk-editor-fixture';
-    section.innerHTML = '<div lang="ja"><h1 class="wp-block-post-title">日本語の見出し「確認」</h1><h1 lang="en" class="wp-block-post-title">English override</h1></div><h1 lang="zh-Hant" class="wp-block-post-title">繁體中文標題</h1><h1 lang="ko-KR" class="wp-block-post-title">한국어 제목</h1><h1 lang="en" class="wp-block-post-title">English title rhythm</h1>';
+    section.innerHTML = '<div lang="ja"><h1 class="wp-block-post-title">日本語の見出し「確認」</h1><h1 lang="en" class="wp-block-post-title">English override</h1></div><h1 lang="zh-Hant" class="wp-block-post-title">繁體中文標題</h1><h1 lang="ko-KR" class="wp-block-post-title">한국어 제목</h1><h2 lang="ja" class="wp-block-heading">日本語の小見出し</h2><h2 lang="zh-Hans" class="wp-block-heading">简体中文标题</h2><h1 lang="en" class="wp-block-post-title">English title rhythm</h1>';
     node.prepend(section);
   });
   const fixture = editor.locator('.slateframe-cjk-editor-fixture');
   const inheritedJapanese = fixture.locator('[lang="ja"] > .wp-block-post-title:not([lang])');
-  const cjk = fixture.locator('[lang="ja"] > .wp-block-post-title:not([lang]), [lang="zh-Hant"], [lang="ko-KR"]');
+  const cjk = fixture.locator('[lang="ja"] > .wp-block-post-title:not([lang]), [lang="zh-Hant"], [lang="ko-KR"], .wp-block-heading[lang="ja"], .wp-block-heading[lang="zh-Hans"]');
   const english = fixture.locator('[lang="en"]');
   await expect(inheritedJapanese).toHaveAttribute('class', /wp-block-post-title/);
-  await expect(cjk).toHaveCount(3);
+  await expect(cjk).toHaveCount(5);
   for (const heading of await cjk.all()) {
     expect(await heading.evaluate(node => getComputedStyle(node).letterSpacing)).toBe('normal');
   }
