@@ -12,7 +12,16 @@ class CjkHeadingTrackingContract(unittest.TestCase):
         editor = (ROOT / 'assets/css/editor.css').read_text(encoding='utf-8')
         self.assertEqual(css.count(RULE), 1)
         self.assertNotIn(':lang(zh,ja,ko)', css)
-        self.assertIn('.wp-block-post-title:not(.wp-block-query .wp-block-post-title):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}', editor)
+        # Editor coverage now includes heading blocks and Query Loop titles.
+        # The language-sensitive rule must follow the narrow-screen Latin tracking
+        # override so the same CJK behavior survives mobile editing.
+        cjk_rule = '.editor-styles-wrapper :is(.wp-block-post-title,.wp-block-heading):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}'
+        mobile_rule = '@media(max-width:480px){.editor-styles-wrapper .wp-block-post-title'
+        self.assertEqual(editor.count(cjk_rule), 1)
+        self.assertIn(mobile_rule, editor)
+        self.assertGreater(editor.index(cjk_rule), editor.index(mobile_rule))
+        self.assertIn('letter-spacing:-.025em', editor)
+        self.assertNotIn(':lang(zh,ja,ko)', editor)
         self.assertIn('letter-spacing:-0.05em', css)
 
     def test_static_budgets_unchanged(self):
