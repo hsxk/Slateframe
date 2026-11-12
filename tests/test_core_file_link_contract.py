@@ -25,7 +25,7 @@ class CoreFileLinkContract(unittest.TestCase):
     def test_inherited_filename_wrapping_is_checked_in_real_browser(self):
         css = (ROOT / 'style.css').read_text(encoding='utf-8')
         browser = (ROOT / 'tests/browser/core-file-verse.spec.js').read_text(encoding='utf-8')
-        self.assertIn('overflow-wrap:anywhere;text-rendering:optimizeLegibility}', css)
+        self.assertIn('overflow-wrap:anywhere}', css)
         self.assertIn('filenameOverflowWrap', browser)
         self.assertIn("expect(m.filenameOverflowWrap).toBe('anywhere')", browser)
 
