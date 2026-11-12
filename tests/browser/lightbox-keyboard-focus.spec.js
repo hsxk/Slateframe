@@ -113,6 +113,6 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
   expect(metrics.height).toBeGreaterThanOrEqual(44);
   expect(metrics.outlineStyle).not.toBe('none');
   expect(metrics.outlineWidth).toBeGreaterThanOrEqual(2);
-  expect(metrics.transitionDuration).toMatch(/^(0s|0\\.00001s)(, 0s|, 0\\.00001s)*$/);
-  expect(metrics.animationDuration).toMatch(/^(0s|0\\.00001s)(, 0s|, 0\\.00001s)*$/);
+  expect(metrics.transitionDuration.split(',').every(value => parseFloat(value) <= 0.00001)).toBe(true);
+  expect(metrics.animationDuration.split(',').every(value => parseFloat(value) <= 0.00001)).toBe(true);
 });
