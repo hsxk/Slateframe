@@ -22,6 +22,15 @@ test('Core lightbox controls expose a visible keyboard focus ring', async ({ pag
       await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
       await controls.first().focus();
       await expect(controls.first()).toBeFocused();
+      const closeMetrics = await controls.first().evaluate(node => {
+        const style = getComputedStyle(node);
+        const bounds = node.getBoundingClientRect();
+        return { width: bounds.width, height: bounds.height, outlineStyle: style.outlineStyle, outlineWidth: parseFloat(style.outlineWidth) };
+      });
+      expect(closeMetrics.width, width + 'px ' + direction + ' close width').toBeGreaterThanOrEqual(44);
+      expect(closeMetrics.height, width + 'px ' + direction + ' close height').toBeGreaterThanOrEqual(44);
+      expect(closeMetrics.outlineStyle, width + 'px ' + direction + ' close outline').not.toBe('none');
+      expect(closeMetrics.outlineWidth, width + 'px ' + direction + ' close outline width').toBeGreaterThanOrEqual(2);
       await page.keyboard.press('Tab');
       for (const index of [1, 2]) {
         const button = controls.nth(index);
@@ -38,6 +47,8 @@ test('Core lightbox controls expose a visible keyboard focus ring', async ({ pag
         expect(bounds, width + 'px ' + direction + ' control bounds').not.toBeNull();
         expect(bounds.x, width + 'px ' + direction + ' left edge').toBeGreaterThanOrEqual(0);
         expect(bounds.x + bounds.width, width + 'px ' + direction + ' right edge').toBeLessThanOrEqual(width);
+        expect(bounds.y, width + 'px ' + direction + ' top edge').toBeGreaterThanOrEqual(0);
+        expect(bounds.y + bounds.height, width + 'px ' + direction + ' bottom edge').toBeLessThanOrEqual(900);
         if (index === 1) await page.keyboard.press('Tab');
       }
       // Every interactive control, including Close, must remain inside the viewport.
