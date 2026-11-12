@@ -91,28 +91,59 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
     const overlay = document.createElement('div');
     overlay.className = 'wp-lightbox-overlay active';
     overlay.id = 'slateframe-lightbox-accessibility-fixture';
+    // Model the Core overlay as a full-viewport surface; the standalone button
+    // fixture lacks Core's image-container layout and must not inherit its
+    // collapsed, bottom-aligned overlay geometry.
+    overlay.style.cssText = 'position:fixed;inset:0;display:flex;align-items:flex-start';
     overlay.innerHTML = '<button type="button" class="wp-lightbox-close-button" aria-label="Close">×</button>';
     document.body.append(overlay);
   });
   const close = page.locator('#slateframe-lightbox-accessibility-fixture button');
-  await close.focus();
-  await expect(close).toBeFocused();
-  const metrics = await close.evaluate(node => {
-    const style = getComputedStyle(node);
-    const bounds = node.getBoundingClientRect();
-    return {
-      width: bounds.width,
-      height: bounds.height,
-      outlineStyle: style.outlineStyle,
-      outlineWidth: parseFloat(style.outlineWidth),
-      transitionDuration: style.transitionDuration,
-      animationDuration: style.animationDuration,
-    };
-  });
-  expect(metrics.width).toBeGreaterThanOrEqual(44);
-  expect(metrics.height).toBeGreaterThanOrEqual(44);
-  expect(metrics.outlineStyle).not.toBe('none');
-  expect(metrics.outlineWidth).toBeGreaterThanOrEqual(2);
-  expect(metrics.transitionDuration.split(',').every(value => parseFloat(value) <= 0.00001)).toBe(true);
-  expect(metrics.animationDuration.split(',').every(value => parseFloat(value) <= 0.00001)).toBe(true);
+  for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+    await page.setViewportSize({ width, height: 900 });
+    // Wait for Core's dynamic viewport units and fixed overlay to settle after resize.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    for (const direction of ['ltr', 'rtl']) {
+      await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
+      await close.focus();
+      await expect(close).toBeFocused();
+      const metrics = await close.evaluate(node => {
+        const style = getComputedStyle(node);
+        const bounds = node.getBoundingClientRect();
+        return {
+          x: bounds.x,
+          y: bounds.y,
+          right: bounds.right,
+          bottom: bounds.bottom,
+          width: bounds.width,
+          height: bounds.height,
+          outlineStyle: style.outlineStyle,
+          outlineWidth: parseFloat(style.outlineWidth),
+          transitionDuration: style.transitionDuration,
+          animationDuration: style.animationDuration,
+          viewportHeight: document.documentElement.clientHeight,
+          innerHeight: window.innerHeight,
+          overlayBounds: node.closest('.wp-lightbox-overlay').getBoundingClientRect().toJSON(),
+          position: style.position,
+        };
+      });
+      const context = width + 'px ' + direction;
+      // Detect a collapsed fixture instead of misreporting its placement as a
+      // Core button overflow; real native overlay layout is tested separately.
+      expect(metrics.overlayBounds.x, context + ' overlay left').toBe(0);
+      expect(metrics.overlayBounds.y, context + ' overlay top').toBe(0);
+      expect(metrics.overlayBounds.width, context + ' overlay width').toBe(width);
+      expect(metrics.overlayBounds.height, context + ' overlay height').toBe(900);
+      expect(metrics.width, context + ' width').toBeGreaterThanOrEqual(44);
+      expect(metrics.height, context + ' height').toBeGreaterThanOrEqual(44);
+      expect(metrics.x, context + ' left edge').toBeGreaterThanOrEqual(0);
+      expect(metrics.y, context + ' top edge').toBeGreaterThanOrEqual(0);
+      expect(metrics.right, context + ' right edge').toBeLessThanOrEqual(width);
+      expect(metrics.bottom, context + ' bottom edge ' + JSON.stringify(metrics)).toBeLessThanOrEqual(900);
+      expect(metrics.outlineStyle, context + ' outline').not.toBe('none');
+      expect(metrics.outlineWidth, context + ' outline width').toBeGreaterThanOrEqual(2);
+      expect(metrics.transitionDuration.split(',').every(value => parseFloat(value) <= 0.00001), context + ' transition').toBe(true);
+      expect(metrics.animationDuration.split(',').every(value => parseFloat(value) <= 0.00001), context + ' animation').toBe(true);
+    }
+  }
 });
