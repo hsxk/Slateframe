@@ -128,6 +128,12 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
         };
       });
       const context = width + 'px ' + direction;
+      // Detect a collapsed fixture instead of misreporting its placement as a
+      // Core button overflow; real native overlay layout is tested separately.
+      expect(metrics.overlayBounds.x, context + ' overlay left').toBe(0);
+      expect(metrics.overlayBounds.y, context + ' overlay top').toBe(0);
+      expect(metrics.overlayBounds.width, context + ' overlay width').toBe(width);
+      expect(metrics.overlayBounds.height, context + ' overlay height').toBe(900);
       expect(metrics.width, context + ' width').toBeGreaterThanOrEqual(44);
       expect(metrics.height, context + ' height').toBeGreaterThanOrEqual(44);
       expect(metrics.x, context + ' left edge').toBeGreaterThanOrEqual(0);
