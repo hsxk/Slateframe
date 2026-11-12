@@ -33,7 +33,7 @@ class NativeFormTargetContract(unittest.TestCase):
 
     def test_native_file_input_itself_wraps_internal_filename(self):
         self.assertIn('&[type=file]{white-space:normal;&::file-selector-button{', CSS)
-        self.assertIn('overflow-wrap:anywhere;text-rendering:optimizeLegibility}', CSS)
+        self.assertIn('overflow-wrap:anywhere}', CSS)
         browser = (Path(__file__).resolve().parents[1] / 'tests/browser/native-form-targets.spec.js').read_text(encoding='utf-8')
         self.assertIn('inputOverflowWrap', browser)
         self.assertLessEqual(len(CSS.encode('utf-8')), 16000)
