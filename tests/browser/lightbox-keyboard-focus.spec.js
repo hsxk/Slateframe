@@ -95,10 +95,12 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
     // fixture lacks Core's image-container layout and must not inherit its
     // collapsed, bottom-aligned overlay geometry.
     overlay.style.cssText = 'position:fixed;inset:0;display:flex;align-items:flex-start';
-    overlay.innerHTML = '<button type="button" class="wp-lightbox-close-button" aria-label="Close">×</button>';
+    overlay.innerHTML = '<button type="button" class="wp-lightbox-close-button" aria-label="Close">×</button><button type="button" class="wp-lightbox-navigation-button-prev" aria-label="Previous">‹</button><button type="button" class="wp-lightbox-navigation-button-next" aria-label="Next">›</button>';
     document.body.append(overlay);
   });
-  const close = page.locator('#slateframe-lightbox-accessibility-fixture button');
+  const close = page.locator('#slateframe-lightbox-accessibility-fixture .wp-lightbox-close-button');
+  const buttons = page.locator('#slateframe-lightbox-accessibility-fixture button');
+  await expect(buttons).toHaveCount(3);
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
     // Wait for Core's dynamic viewport units and fixed overlay to settle after resize.
@@ -144,6 +146,36 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
       expect(metrics.outlineWidth, context + ' outline width').toBeGreaterThanOrEqual(2);
       expect(metrics.transitionDuration.split(',').every(value => parseFloat(value) <= 0.00001), context + ' transition').toBe(true);
       expect(metrics.animationDuration.split(',').every(value => parseFloat(value) <= 0.00001), context + ' animation').toBe(true);
+      // All three Core controls, not only Close, must preserve keyboard focus
+      // and reduced-motion behavior under forced colors in both directions.
+      for (let index = 0; index < 3; index++) {
+        const button = buttons.nth(index);
+        await button.focus();
+        await expect(button).toBeFocused();
+        const state = await button.evaluate(node => {
+          const computed = getComputedStyle(node);
+          const rect = node.getBoundingClientRect();
+          return {
+            width: rect.width, height: rect.height,
+            x: rect.x, y: rect.y, right: rect.right, bottom: rect.bottom,
+            outline: computed.outlineStyle,
+            outlineWidth: parseFloat(computed.outlineWidth),
+            transition: computed.transitionDuration,
+            animation: computed.animationDuration,
+          };
+        });
+        const label = context + ' control ' + index;
+        expect(state.width, label + ' width').toBeGreaterThanOrEqual(44);
+        expect(state.height, label + ' height').toBeGreaterThanOrEqual(44);
+        expect(state.x, label + ' left').toBeGreaterThanOrEqual(0);
+        expect(state.y, label + ' top').toBeGreaterThanOrEqual(0);
+        expect(state.right, label + ' right').toBeLessThanOrEqual(width);
+        expect(state.bottom, label + ' bottom').toBeLessThanOrEqual(900);
+        expect(state.outline, label + ' focus').not.toBe('none');
+        expect(state.outlineWidth, label + ' focus width').toBeGreaterThanOrEqual(2);
+        expect(state.transition.split(',').every(value => parseFloat(value) <= 0.00001), label + ' transition').toBe(true);
+        expect(state.animation.split(',').every(value => parseFloat(value) <= 0.00001), label + ' animation').toBe(true);
+      }
     }
   }
 });
