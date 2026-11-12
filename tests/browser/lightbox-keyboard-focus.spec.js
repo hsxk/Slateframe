@@ -91,6 +91,10 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
     const overlay = document.createElement('div');
     overlay.className = 'wp-lightbox-overlay active';
     overlay.id = 'slateframe-lightbox-accessibility-fixture';
+    // Model the Core overlay as a full-viewport surface; the standalone button
+    // fixture lacks Core's image-container layout and must not inherit its
+    // collapsed, bottom-aligned overlay geometry.
+    overlay.style.cssText = 'position:fixed;inset:0;display:flex;align-items:flex-start';
     overlay.innerHTML = '<button type="button" class="wp-lightbox-close-button" aria-label="Close">×</button>';
     document.body.append(overlay);
   });
@@ -129,8 +133,6 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
       expect(metrics.x, context + ' left edge').toBeGreaterThanOrEqual(0);
       expect(metrics.y, context + ' top edge').toBeGreaterThanOrEqual(0);
       expect(metrics.right, context + ' right edge').toBeLessThanOrEqual(width);
-      // Chromium reports fractional CSS pixels (e.g. 900.109375) for Core's
-      // fixed-position control; compare at the painted pixel boundary.
       expect(metrics.bottom, context + ' bottom edge ' + JSON.stringify(metrics)).toBeLessThanOrEqual(900);
       expect(metrics.outlineStyle, context + ' outline').not.toBe('none');
       expect(metrics.outlineWidth, context + ' outline width').toBeGreaterThanOrEqual(2);
