@@ -68,7 +68,7 @@ Slateframe treats ordinary WordPress content as a complete product surface: unti
 
 ### Photography, portfolio, and knowledge
 
-Slateframe currently ships 30 site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
+Slateframe currently ships 31 site-neutral starter patterns across publishing, photography, portfolio, and knowledge work:
 
 1. **Photo essay** — image-led storytelling with the native Gallery block.
 2. **Project case study** — role/scope context with Context, Approach, and Outcome sections.
@@ -100,6 +100,7 @@ Slateframe currently ships 30 site-neutral starter patterns across publishing, p
 28. **Knowledge article Query Loop** — a typography-led native Query chooser for portable article lists, dates, excerpts, pagination and empty states.
 29. **Knowledge troubleshooting guide** — a Core-only symptom → diagnosis → reversible fix → verification flow with escalation guidance.
 30. **Photography shoot plan** — a Core-only pre-shoot field guide for light, composition, safety, capture decisions, and responsible review.
+31. **Knowledge diagnostic decision log** — a Core-only hypothesis/evidence/decision table for comparing checks and recording follow-up, complementing the full troubleshooting guide without duplicating its instructions.
 
 Block styles add editorial notes and leads, framed images, photo sequences, contact sheets, diptychs, photography features, project features/briefs/metrics, learning paths/callouts/definitions, data tables, native disclosures, numbered steps, checklists, key facts, and editorial ledgers. Photography layouts load their own contextual CSS only when Photography or Core-lightbox content needs it, share a readable 0.875rem/1.55-line-height caption rhythm with Gutenberg editor parity, preserve natural image geometry, and use WordPress Core's native lightbox with Slateframe's shared control geometry, dynamic-viewport containment, safe-area handling, keyboard focus, forced-colors, RTL/200%-text, scroll-lock, and reduced-motion safeguards. Focused runtime CI uses real generated landscape, portrait, and square raster attachments rather than SVG-only geometry, and retains reviewable page plus lightbox screenshots. Portfolio and knowledge patterns deliberately compose shared styles instead of introducing one-off component CSS.
 
