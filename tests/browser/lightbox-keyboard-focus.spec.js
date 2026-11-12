@@ -146,6 +146,17 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
       expect(metrics.outlineWidth, context + ' outline width').toBeGreaterThanOrEqual(2);
       expect(metrics.transitionDuration.split(',').every(value => parseFloat(value) <= 0.00001), context + ' transition').toBe(true);
       expect(metrics.animationDuration.split(',').every(value => parseFloat(value) <= 0.00001), context + ' animation').toBe(true);
+      // Exercise the real sequential keyboard order under both accessibility
+      // media modes; programmatic focus alone cannot catch a broken tab order.
+      await close.focus();
+      await page.keyboard.press('Tab');
+      await expect(buttons.nth(1), context + ' next tab stop').toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(buttons.nth(2), context + ' last tab stop').toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(buttons.nth(1), context + ' reverse tab stop').toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(close, context + ' return to Close').toBeFocused();
       // All three Core controls, not only Close, must preserve keyboard focus
       // and reduced-motion behavior under forced colors in both directions.
       for (let index = 0; index < 3; index++) {
