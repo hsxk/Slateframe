@@ -82,3 +82,37 @@ test('Core lightbox controls expose a visible keyboard focus ring', async ({ pag
   expect(forced).not.toBe('none');
   await page.locator('#slateframe-lightbox-focus-fixture').screenshot({ path: 'test-artifacts/screenshots/lightbox-keyboard-focus-forced-colors.png' });
 });
+
+test('Core lightbox controls remain operable with reduced motion and forced colors', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce', forcedColors: 'active' });
+  await page.goto('/', { waitUntil: 'networkidle' });
+  await page.addStyleTag({ url: '/wp-content/themes/slateframe/assets/css/photography.css' });
+  await page.evaluate(() => {
+    const overlay = document.createElement('div');
+    overlay.className = 'wp-lightbox-overlay active';
+    overlay.id = 'slateframe-lightbox-accessibility-fixture';
+    overlay.innerHTML = '<button type="button" class="wp-lightbox-close-button" aria-label="Close">×</button>';
+    document.body.append(overlay);
+  });
+  const close = page.locator('#slateframe-lightbox-accessibility-fixture button');
+  await close.focus();
+  await expect(close).toBeFocused();
+  const metrics = await close.evaluate(node => {
+    const style = getComputedStyle(node);
+    const bounds = node.getBoundingClientRect();
+    return {
+      width: bounds.width,
+      height: bounds.height,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: parseFloat(style.outlineWidth),
+      transitionDuration: style.transitionDuration,
+      animationDuration: style.animationDuration,
+    };
+  });
+  expect(metrics.width).toBeGreaterThanOrEqual(44);
+  expect(metrics.height).toBeGreaterThanOrEqual(44);
+  expect(metrics.outlineStyle).not.toBe('none');
+  expect(metrics.outlineWidth).toBeGreaterThanOrEqual(2);
+  expect(metrics.transitionDuration.split(',').every(value => parseFloat(value) <= 0.00001)).toBe(true);
+  expect(metrics.animationDuration.split(',').every(value => parseFloat(value) <= 0.00001)).toBe(true);
+});
