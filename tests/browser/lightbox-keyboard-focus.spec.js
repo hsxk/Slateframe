@@ -97,6 +97,8 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
   const close = page.locator('#slateframe-lightbox-accessibility-fixture button');
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
+    // Wait for Core's dynamic viewport units and fixed overlay to settle after resize.
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     for (const direction of ['ltr', 'rtl']) {
       await page.evaluate(dir => { document.documentElement.dir = dir; }, direction);
       await close.focus();
@@ -115,6 +117,10 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
           outlineWidth: parseFloat(style.outlineWidth),
           transitionDuration: style.transitionDuration,
           animationDuration: style.animationDuration,
+          viewportHeight: document.documentElement.clientHeight,
+          innerHeight: window.innerHeight,
+          overlayBounds: node.closest('.wp-lightbox-overlay').getBoundingClientRect().toJSON(),
+          position: style.position,
         };
       });
       const context = width + 'px ' + direction;
@@ -125,7 +131,7 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
       expect(metrics.right, context + ' right edge').toBeLessThanOrEqual(width);
       // Chromium reports fractional CSS pixels (e.g. 900.109375) for Core's
       // fixed-position control; compare at the painted pixel boundary.
-      expect(Math.round(metrics.bottom), context + ' bottom painted pixel').toBeLessThanOrEqual(900);
+      expect(metrics.bottom, context + ' bottom edge ' + JSON.stringify(metrics)).toBeLessThanOrEqual(900);
       expect(metrics.outlineStyle, context + ' outline').not.toBe('none');
       expect(metrics.outlineWidth, context + ' outline width').toBeGreaterThanOrEqual(2);
       expect(metrics.transitionDuration.split(',').every(value => parseFloat(value) <= 0.00001), context + ' transition').toBe(true);
