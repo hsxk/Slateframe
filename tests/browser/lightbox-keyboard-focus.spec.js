@@ -98,7 +98,7 @@ test('Core lightbox controls remain operable with reduced motion and forced colo
     overlay.innerHTML = '<button type="button" class="wp-lightbox-close-button" aria-label="Close">×</button><button type="button" class="wp-lightbox-navigation-button-prev" aria-label="Previous">‹</button><button type="button" class="wp-lightbox-navigation-button-next" aria-label="Next">›</button>';
     document.body.append(overlay);
   });
-  const close = page.locator('#slateframe-lightbox-accessibility-fixture button');
+  const close = page.locator('#slateframe-lightbox-accessibility-fixture .wp-lightbox-close-button');
   const buttons = page.locator('#slateframe-lightbox-accessibility-fixture button');
   await expect(buttons).toHaveCount(3);
   for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
