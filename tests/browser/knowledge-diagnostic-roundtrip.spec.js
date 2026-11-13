@@ -31,7 +31,7 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
         invalid: all.filter(block => block.isValid === false).map(block => block.name),
         missing: all.filter(block => block.name === 'core/missing').length,
         tables: all.filter(block => block.name === 'core/table').length,
-        tableMarkup: first.match(/<figure class="wp-block-table">[\\s\\S]*?<\\/figure>/)?.[0] || '',
+        tableMarkup: first.slice(first.indexOf('<figure class="wp-block-table">'), first.indexOf('</figure>') + '</figure>'.length),
       };
     });
     expect(evidence.invalid).toEqual([]);
