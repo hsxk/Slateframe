@@ -75,10 +75,34 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
         invalid: blocks.filter(block => block.isValid === false || block.name === 'core/missing').map(block => block.name),
       };
     })).toEqual({ found: true, invalid: [] });
-    const reopened = framed ? page.frameLocator('iframe[name="editor-canvas"]') : page;
-    await expect(reopened.locator('.slateframe-knowledge-troubleshooting table')).toBeVisible();
-    await reopened.locator('.slateframe-knowledge-troubleshooting').first().screenshot({
+    // Reload may change the editor canvas mode; resolve the current frame afresh.
+    const reopenedFrame = await page.locator('iframe[name="editor-canvas"]').count() > 0;
+    const reopened = reopenedFrame ? page.frameLocator('iframe[name="editor-canvas"]') : page;
+    const reopenedLog = reopened.locator('.slateframe-knowledge-troubleshooting').first();
+    await expect(reopenedLog.locator('table')).toBeVisible();
+    await expect(reopenedLog.locator('figcaption')).toBeVisible();
+    await reopenedLog.screenshot({
       path: 'test-artifacts/screenshots/gutenberg-diagnostic-reopened-390.png',
+    });
+
+    // A persisted edit must not damage the diagnostic table or its heading structure.
+    const persisted = await page.evaluate(() => {
+      const editor = window.wp.data.select('core/block-editor');
+      const core = window.wp.blocks;
+      const flatten = (blocks) => blocks.flatMap(block => [block, ...flatten(block.innerBlocks || [])]);
+      const blocks = flatten(editor.getBlocks());
+      const serialized = core.serialize(editor.getBlocks());
+      return {
+        headings: blocks.filter(block => block.name === 'core/heading').length,
+        tables: blocks.filter(block => block.name === 'core/table').length,
+        invalid: blocks.filter(block => block.isValid === false || block.name === 'core/missing').length,
+        stable: core.serialize(core.parse(serialized)) === serialized,
+        hasCaption: serialized.includes('<figcaption'),
+        hasHeader: serialized.includes('<thead>'),
+      };
+    });
+    expect(persisted).toEqual({
+      headings: 4, tables: 1, invalid: 0, stable: true, hasCaption: true, hasHeader: true,
     });
   } finally {
     wp('post', 'delete', postId, '--force');
