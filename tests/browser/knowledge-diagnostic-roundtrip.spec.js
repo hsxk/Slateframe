@@ -63,7 +63,16 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
       dispatch.updateBlockAttributes(paragraph.clientId, { content: text });
       await window.wp.data.dispatch('core/editor').savePost();
     }, marker);
-    await expect.poll(() => wp('post', 'get', postId, '--field=post_content')).toContain(marker);
+    await expect.poll(() => {
+      const saved = wp('post', 'get', postId, '--field=post_content');
+      return {
+        marker: saved.includes(marker),
+        table: saved.includes('<!-- wp:table'),
+        header: saved.includes('<thead>'),
+        caption: saved.includes('<figcaption'),
+        headings: (saved.match(/<!-- wp:heading\b/g) || []).length,
+      };
+    }).toEqual({ marker: true, table: true, header: true, caption: true, headings: 4 });
     await page.reload();
     await expect.poll(async () => page.evaluate(() => {
       const editor = window.wp?.data?.select('core/block-editor');
