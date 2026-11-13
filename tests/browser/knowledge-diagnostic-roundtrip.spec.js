@@ -70,7 +70,7 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
         table: saved.includes('<!-- wp:table'),
         header: saved.includes('<thead>'),
         caption: saved.includes('<figcaption'),
-        headings: (saved.match(/<!-- wp:heading\\b/g) || []).length,
+        headings: (saved.match(/<!-- wp:heading\b/g) || []).length,
       };
     }).toEqual({ marker: true, table: true, header: true, caption: true, headings: 4 });
     await page.reload();
