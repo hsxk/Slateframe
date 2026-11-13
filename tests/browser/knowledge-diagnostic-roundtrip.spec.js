@@ -90,6 +90,25 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
     const reopenedLog = reopened.locator('.slateframe-knowledge-troubleshooting').first();
     await expect(reopenedLog.locator('table')).toBeVisible();
     await expect(reopenedLog.locator('figcaption')).toBeVisible();
+    // Reopened Core Table must remain horizontally navigable at the narrow viewport.
+    // Check actual layout rather than inferring scrolling from a CSS declaration.
+    const reopenedTable = reopenedLog.locator('.wp-block-table').first();
+    await expect(reopenedTable).toBeVisible();
+    const tableLayout = await reopenedTable.evaluate(element => ({
+      viewport: element.clientWidth,
+      content: element.scrollWidth,
+      overflow: getComputedStyle(element).overflowX,
+    }));
+    expect(tableLayout.viewport).toBeGreaterThan(0);
+    expect(tableLayout.content).toBeGreaterThanOrEqual(tableLayout.viewport);
+    if (tableLayout.content > tableLayout.viewport) {
+      expect(['auto', 'scroll']).toContain(tableLayout.overflow);
+      const moved = await reopenedTable.evaluate(element => {
+        element.scrollLeft = element.scrollWidth;
+        return Math.abs(element.scrollLeft) > 0;
+      });
+      expect(moved).toBe(true);
+    }
     await reopenedLog.screenshot({
       path: 'test-artifacts/screenshots/gutenberg-diagnostic-reopened-390.png',
     });
