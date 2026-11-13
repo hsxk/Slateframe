@@ -108,6 +108,13 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
         return Math.abs(element.scrollLeft) > 0;
       });
       expect(moved).toBe(true);
+      // Scrolling a wide table must not move the surrounding editor canvas.
+      // Restore the start edge before taking the persisted-content screenshot.
+      const restored = await reopenedTable.evaluate(element => {
+        element.scrollLeft = 0;
+        return element.scrollLeft === 0;
+      });
+      expect(restored).toBe(true);
     }
     await reopenedLog.screenshot({
       path: 'test-artifacts/screenshots/gutenberg-diagnostic-reopened-390.png',
