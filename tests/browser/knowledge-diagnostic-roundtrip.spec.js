@@ -51,6 +51,35 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
     await expect(log.locator('figcaption')).toBeVisible();
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     await log.screenshot({ path: 'test-artifacts/screenshots/gutenberg-diagnostic-decision-log-390.png' });
+
+    // Exercise persistence through the real editor, not just in-memory block serialization.
+    const marker = 'Slateframe verified after editor reload';
+    await page.evaluate(async (text) => {
+      const select = window.wp.data.select('core/block-editor');
+      const dispatch = window.wp.data.dispatch('core/block-editor');
+      const flatten = (blocks) => blocks.flatMap(block => [block, ...flatten(block.innerBlocks || [])]);
+      const paragraph = flatten(select.getBlocks()).find(block => block.name === 'core/paragraph');
+      if (!paragraph) throw new Error('Diagnostic pattern has no editable paragraph');
+      dispatch.updateBlockAttributes(paragraph.clientId, { content: text });
+      await window.wp.data.dispatch('core/editor').savePost();
+    }, marker);
+    await expect.poll(() => wp('post', 'get', postId, '--field=post_content')).toContain(marker);
+    await page.reload();
+    await expect.poll(async () => page.evaluate(() => {
+      const editor = window.wp?.data?.select('core/block-editor');
+      if (!editor?.getBlocks) return { found: false, invalid: ['not-loaded'] };
+      const flatten = (blocks) => blocks.flatMap(block => [block, ...flatten(block.innerBlocks || [])]);
+      const blocks = flatten(editor.getBlocks());
+      return {
+        found: blocks.some(block => block.name === 'core/paragraph' && String(block.attributes?.content || '').includes('Slateframe verified after editor reload')),
+        invalid: blocks.filter(block => block.isValid === false || block.name === 'core/missing').map(block => block.name),
+      };
+    })).toEqual({ found: true, invalid: [] });
+    const reopened = framed ? page.frameLocator('iframe[name="editor-canvas"]') : page;
+    await expect(reopened.locator('.slateframe-knowledge-troubleshooting table')).toBeVisible();
+    await reopened.locator('.slateframe-knowledge-troubleshooting').first().screenshot({
+      path: 'test-artifacts/screenshots/gutenberg-diagnostic-reopened-390.png',
+    });
   } finally {
     wp('post', 'delete', postId, '--force');
   }
