@@ -44,7 +44,7 @@ class KnowledgeStepZoomEvidence(unittest.TestCase):
         self.assertNotIn("font-size:.72rem;font-variant-numeric:tabular-nums", css)
         self.assertIn("inset-inline-start:0", css)
         self.assertIn("'assets/css/content-modes.css'", bootstrap)
-        self.assertIn(".editor-styles-wrapper .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))}", editor)
+        self.assertIn("& .wp-block-list.is-style-slateframe-steps>li{padding-inline-start:calc(var(--slateframe-step) + min(var(--slateframe-component-gap),20px))}", editor)
         self.assertNotIn("2.15rem", editor)
         self.assertLessEqual(len(editor.encode("utf-8")), 5000)
         self.assertLessEqual(len(css.encode("utf-8")), 7000)

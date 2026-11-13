@@ -31,7 +31,7 @@ class PhotographyCaptionContractTest(unittest.TestCase):
 
     def test_editor_caption_matches_published_scale(self):
         editor = EDITOR.read_text(encoding="utf-8")
-        selector = ".editor-styles-wrapper .wp-element-caption{"
+        selector = "& .wp-element-caption{"
         self.assertIn(selector, editor)
         declarations = editor.split(selector, 1)[1].split("}", 1)[0]
         self.assertIn("font-size:0.875rem", declarations.replace(" ", ""))

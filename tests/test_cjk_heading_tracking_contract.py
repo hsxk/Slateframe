@@ -15,8 +15,8 @@ class CjkHeadingTrackingContract(unittest.TestCase):
         # Editor coverage now includes heading blocks and Query Loop titles.
         # The language-sensitive rule must follow the narrow-screen Latin tracking
         # override so the same CJK behavior survives mobile editing.
-        cjk_rule = '.editor-styles-wrapper :is(.wp-block-post-title.wp-block-post-title,.wp-block-heading):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}'
-        mobile_rule = '@media(max-width:480px){.editor-styles-wrapper .wp-block-post-title'
+        cjk_rule = '& :is(.wp-block-post-title.wp-block-post-title,.wp-block-heading):is(:lang(zh),:lang(ja),:lang(ko)){letter-spacing:normal}'
+        mobile_rule = '@media(max-width:480px){& .wp-block-post-title'
         self.assertEqual(editor.count(cjk_rule), 1)
         # The duplicate class is intentional: match the more specific Core
         # post-title rule, including its :not() compound selector.
