@@ -11,8 +11,8 @@ class CoreCalendarContract(unittest.TestCase):
         editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         self.assertIn(".slateframe-prose .wp-block-calendar{max-inline-size:100%;overflow-x:auto;", front)
         self.assertIn("& th{white-space:nowrap}}", front)
-        self.assertIn(".editor-styles-wrapper .wp-block-calendar{max-inline-size:100%;overflow-x:auto}", editor)
-        self.assertIn(".editor-styles-wrapper .wp-block-calendar th{white-space:nowrap}", editor)
+        self.assertIn("& .wp-block-calendar{max-inline-size:100%;overflow-x:auto}", editor)
+        self.assertIn("& .wp-block-calendar th{white-space:nowrap}", editor)
 
     def test_no_table_semantics_replacement(self):
         front = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")

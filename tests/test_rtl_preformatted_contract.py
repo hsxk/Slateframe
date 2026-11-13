@@ -19,7 +19,7 @@ class RtlPreformattedContract(unittest.TestCase):
         # and Verse remain authored prose, including in Arabic and CJK content.
         self.assertIn('.wp-block-code{direction:ltr;text-align:left}', reading)
         self.assertIn('.wp-block-code code{white-space:pre-wrap;overflow-wrap:anywhere}', reading)
-        self.assertIn('.editor-styles-wrapper .wp-block-code{direction:ltr;text-align:left}', editor)
+        self.assertIn('& .wp-block-code{direction:ltr;text-align:left}', editor)
         self.assertNotIn('.wp-block-preformatted{direction:ltr', reading)
         self.assertNotIn('.wp-block-verse{direction:ltr', reading)
         self.assertNotIn('.wp-block-preformatted{direction:ltr', editor)
@@ -27,7 +27,7 @@ class RtlPreformattedContract(unittest.TestCase):
 
     def test_editor_does_not_force_preformatted_ltr(self):
         editor = (ROOT / 'assets/css/editor.css').read_text(encoding='utf-8')
-        self.assertIn('.editor-styles-wrapper .wp-block-code{direction:ltr;text-align:left}', editor)
+        self.assertIn('& .wp-block-code{direction:ltr;text-align:left}', editor)
         self.assertNotIn('.editor-styles-wrapper .wp-block-preformatted{direction:ltr', editor)
 
 

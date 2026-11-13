@@ -14,8 +14,8 @@ class RtlVerseContract(unittest.TestCase):
 
     def test_editor_code_parity(self):
         css = (ROOT / 'assets/css/editor.css').read_text()
-        self.assertIn('.editor-styles-wrapper .wp-block-code{direction:ltr;text-align:left}', css)
-        self.assertIn('.editor-styles-wrapper .wp-block-verse{font-family:inherit', css)
+        self.assertIn('& .wp-block-code{direction:ltr;text-align:left}', css)
+        self.assertIn('& .wp-block-verse{font-family:inherit', css)
 
     def test_browser_regression_inspects_direction(self):
         source = (ROOT / 'tests/browser/core-file-verse.spec.js').read_text()

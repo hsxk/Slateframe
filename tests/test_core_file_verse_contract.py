@@ -9,7 +9,7 @@ class NativeCorePublishing(unittest.TestCase):
     def test_file_button_geometry_in_frontend_and_editor(self):
         cases = (
             ("reading.css", ".slateframe-prose a.wp-block-file__button", "min-height:var(--slateframe-control)"),
-            ("editor.css", ".editor-styles-wrapper .wp-block-file__button", "min-block-size:var(--slateframe-control)"),
+            ("editor.css", "& .wp-block-file__button", "min-block-size:var(--slateframe-control)"),
         )
         for filename, selector, minimum in cases:
             with self.subTest(filename=filename):
@@ -31,7 +31,7 @@ class NativeCorePublishing(unittest.TestCase):
         publishing = (ROOT / "assets/css/publishing.css").read_text(encoding="utf-8")
         editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         self.assertIn(".slateframe-prose pre:not(.wp-block-verse),.wp-block-code{", reading)
-        for css, scope in ((publishing, ".slateframe-prose"), (editor, ".editor-styles-wrapper")):
+        for css, scope in ((publishing, ".slateframe-prose"), (editor, "&")):
             self.assertIn(scope + " .wp-block-verse{font-family:inherit;white-space:pre-wrap;overflow-wrap:anywhere", css)
         self.assertIn("overscroll-behavior-inline:contain", reading)
 
