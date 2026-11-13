@@ -17,6 +17,9 @@
 .editor-styles-wrapper .wp-block-table table{inline-size:max-content;min-inline-size:100%;max-inline-size:none;border-collapse:collapse}
 .editor-styles-wrapper .wp-block-table :is(th,td){min-inline-size:min(9rem,68vw);max-inline-size:100%;padding:var(--slateframe-space-3);border-block-end:var(--slateframe-rule);overflow-wrap:anywhere;white-space:normal;text-align:start;vertical-align:top}
 .editor-styles-wrapper .wp-block-table th{background:var(--slateframe-surface-soft);font-weight:700}
+/* Preserve a visible editing boundary when a wide Core Table scrolls horizontally. */
+.editor-styles-wrapper .wp-block-table:focus-within{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}
+@media(forced-colors:active){.editor-styles-wrapper .wp-block-table:focus-within{outline-color:Highlight}.editor-styles-wrapper .wp-block-table th{background:Canvas;color:CanvasText;border:1px solid CanvasText}}
 .editor-styles-wrapper :is(.wp-block-code,.wp-block-preformatted){max-inline-size:100%;overflow:auto;padding:var(--slateframe-stack-gap) var(--slateframe-prose-gap);border-radius:var(--slateframe-radius);background:#111715;color:#eef4f1;font-family:var(--slateframe-mono);line-height:1.6;scrollbar-gutter:stable;overscroll-behavior-inline:contain}
 .editor-styles-wrapper .slateframe-project-grid .wp-block-post-title{max-width:none}
 .editor-styles-wrapper .slateframe-project-grid .slateframe-project-card :is(.wp-block-post-title,.wp-block-post-excerpt,.wp-block-post-date){inline-size:100%;min-inline-size:0;overflow-wrap:anywhere}
