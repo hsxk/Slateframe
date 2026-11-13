@@ -103,17 +103,24 @@ test('registered diagnostic decision log round-trips in real Gutenberg without i
     expect(tableLayout.content).toBeGreaterThanOrEqual(tableLayout.viewport);
     if (tableLayout.content > tableLayout.viewport) {
       expect(['auto', 'scroll']).toContain(tableLayout.overflow);
-      const moved = await reopenedTable.evaluate(element => {
-        element.scrollLeft = element.scrollWidth;
-        return Math.abs(element.scrollLeft) > 0;
+      // Browsers use different scrollLeft signs for RTL scroll containers.
+      // Exercise both physical edges rather than assuming positive offsets.
+      const navigation = await reopenedTable.evaluate(element => {
+        const initial = element.scrollLeft;
+        const extent = element.scrollWidth - element.clientWidth;
+        element.scrollLeft = extent;
+        const positiveEdge = element.scrollLeft;
+        element.scrollLeft = -extent;
+        const negativeEdge = element.scrollLeft;
+        element.scrollLeft = initial;
+        return { initial, positiveEdge, negativeEdge, restored: element.scrollLeft };
       });
-      expect(moved).toBe(true);
-      // Restore the start edge before taking the persisted-content screenshot.
-      const restored = await reopenedTable.evaluate(element => {
-        element.scrollLeft = 0;
-        return element.scrollLeft === 0;
-      });
-      expect(restored).toBe(true);
+      expect(Math.max(
+        Math.abs(navigation.positiveEdge - navigation.initial),
+        Math.abs(navigation.negativeEdge - navigation.initial),
+      )).toBeGreaterThan(0);
+      // Preserve the original edge before the persisted-content screenshot.
+      expect(navigation.restored).toBe(navigation.initial);
     }
     await reopenedLog.screenshot({
       path: 'test-artifacts/screenshots/gutenberg-diagnostic-reopened-390.png',
