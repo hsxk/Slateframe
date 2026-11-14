@@ -9,7 +9,7 @@ This is a maintainer-facing verification contract, not a claim that a release is
 - Compare the ZIP manifest with the distributable allowlist; reject symlinks, tests, private configuration, credentials, and machine-local paths.
 - Rebuild the same source twice and compare normalized archive entries and content hashes. A ZIP created for a different commit is not evidence.
 - Confirm `style.css` identifies Theme Name `Slateframe`, Text Domain `slateframe`, and a release-compatible WordPress/PHP baseline.
-- Search packaged source for deprecated Time2Log-specific identifiers, personal domains, hardcoded user content, license gates, premium upsells, and third-party runtime dependencies. Record findings; do not assume absence from a successful build.
+- Search packaged source for deprecated legacy-theme identifiers, personal domains, hardcoded user content, license gates, premium upsells, and third-party runtime dependencies. Record findings; do not assume absence from a successful build.
 
 ## Real WordPress + Chromium visual matrix
 
