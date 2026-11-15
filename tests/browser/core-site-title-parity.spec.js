@@ -62,7 +62,7 @@ test('Core Site Title preserves native heading levels, linked titles and seven-w
           expect(state.right, label + ' right').toBeLessThanOrEqual(width + 1);
           expect(state.width, label + ' width').toBeGreaterThanOrEqual(43);
           expect(state.height, label + ' height').toBeGreaterThanOrEqual(43);
-          expect(state.wrap, label + ' wrapping').toBe('anywhere');
+          expect(state.wrap, label + ' wrapping').toBe('break-word');
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-site-title-' + width + '-' + dir + '.png'
           });
