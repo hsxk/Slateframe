@@ -43,6 +43,10 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
     await taglines.first().evaluate(el => {
       el.textContent = '日本語 中文 العربية ' + 'LongUnbrokenSiteTagline'.repeat(9);
     });
+    // Heading-level Core Site Tagline can inherit different typography.
+    await taglines.last().evaluate(el => {
+      el.textContent = '日本語 中文 العربية ' + 'LongUnbrokenHeadingTagline'.repeat(9);
+    });
     await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
@@ -51,7 +55,7 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
           await page.locator('html').evaluate((node, value) => {
             node.dir = value.dir; node.style.fontSize = value.font + 'px';
           }, { dir, font });
-          const state = await taglines.first().evaluate(node => {
+          const state = await taglines.evaluateAll(nodes => nodes.map(node => {
             const rect = node.getBoundingClientRect();
             return {
               overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -60,17 +64,19 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
               lineHeight: parseFloat(getComputedStyle(node).lineHeight),
               blockSize: rect.height
             };
-          });
+          }));
           const label = width + 'px ' + dir + ' ' + font + 'px';
-          expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
-          expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);
-          expect(state.right, label + ' right').toBeLessThanOrEqual(width + 1);
-          expect(state.wrap, label + ' wrapping').toBe('break-word');
-          if (width === 320 && font === 16) {
-            // The stress string must actually reflow, not merely stay inside
-            // the viewport because of clipping or a single unbroken line.
-            expect(state.lineHeight, label + ' resolved line height').toBeGreaterThan(0);
-            expect(state.blockSize, label + ' multiline tagline').toBeGreaterThan(state.lineHeight * 1.5);
+          for (const [index, variant] of ['paragraph', 'heading'].entries()) {
+            const item = state[index];
+            const context = label + ' ' + variant;
+            expect(item.overflow, context + ' document overflow').toBeLessThanOrEqual(1);
+            expect(item.left, context + ' left').toBeGreaterThanOrEqual(-1);
+            expect(item.right, context + ' right').toBeLessThanOrEqual(width + 1);
+            // WordPress Core's heading typography may resolve to `anywhere`\n            // while the paragraph retains Slateframe's `break-word`. Verify\n            // each native variant explicitly; geometry and multiline checks\n            // still guard against clipping and horizontal overflow.\n            expect(item.wrap, context + ' wrapping').toBe(variant === 'heading' ? 'anywhere' : 'break-word');
+            if (width === 320 && font === 16) {
+              expect(item.lineHeight, context + ' resolved line height').toBeGreaterThan(0);
+              expect(item.blockSize, context + ' multiline tagline').toBeGreaterThan(item.lineHeight * 1.5);
+            }
           }
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-site-tagline-' + width + '-' + dir + '.png'
