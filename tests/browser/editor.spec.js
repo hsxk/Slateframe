@@ -422,3 +422,32 @@ test('real Gutenberg canvas applies native Core Footnote return control geometry
 		await fixture.evaluate((node) => node.remove()).catch(() => {});
 	}
 });
+
+test('real Gutenberg Code focus ring survives keyboard navigation and forced colors', async ({ page }, testInfo) => {
+	const canvas = await loginAndOpenEditor(page);
+	const code = canvas.locator('.wp-block-code').first();
+	await expect(code).toBeVisible();
+	const editable = code.locator('[contenteditable="true"]').first();
+	await expect(editable).toBeVisible();
+	await editable.focus();
+	await expect(editable).toBeFocused();
+	await page.keyboard.press('ArrowRight');
+	const normal = await code.evaluate((node) => {
+		const style = getComputedStyle(node);
+		return { focused: node.contains(document.activeElement), outline: style.outlineStyle, width: parseFloat(style.outlineWidth), color: style.outlineColor };
+	});
+	expect(normal.focused).toBe(true);
+	expect(normal.outline).toBe('solid');
+	expect(normal.width).toBeGreaterThan(0);
+	await page.emulateMedia({ forcedColors: 'active' });
+	const forced = await code.evaluate((node) => {
+		const style = getComputedStyle(node);
+		return { focused: node.contains(document.activeElement), outline: style.outlineStyle, width: parseFloat(style.outlineWidth), color: style.outlineColor };
+	});
+	expect(forced.focused).toBe(true);
+	expect(forced.outline).toBe('solid');
+	expect(forced.width).toBeGreaterThan(0);
+	const screenshotDir = path.resolve('test-artifacts/screenshots');
+	await fs.mkdir(screenshotDir, { recursive: true });
+	await code.screenshot({ path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-code-keyboard-forced-colors.png`) });
+});
