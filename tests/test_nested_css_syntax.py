@@ -15,6 +15,13 @@ class NestedCssContract(unittest.TestCase):
         self.assertIn('color:var(--slateframe-text);& :is(', css)
         self.assertIn('background:var(--slateframe-media-chrome);& img{', css)
 
+    def test_editor_scrollable_code_focus_contract(self):
+        css = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
+        selector = ':is(.wp-block-code,.wp-block-preformatted):focus-within'
+        self.assertIn('& ' + selector + '{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}', css)
+        self.assertIn('@media(forced-colors:active){& ' + selector + '{outline-color:Highlight}}', css)
+        self.assertIn('scrollbar-gutter:stable;overscroll-behavior-inline:contain', css)
+
     def test_highest_combined_asset_budgets_remain_strict(self):
         size = lambda name: (ROOT / name).stat().st_size
         base = sum(size(name) for name in (
