@@ -19,8 +19,12 @@ class CoreSiteTitleParity(unittest.TestCase):
         for value in ('.wp-block-site-title', '.wp-block-site-title a',
                       'min-inline-size:0', 'max-inline-size:100%',
                       'min-inline-size:min(100%,var(--slateframe-control))',
-                      'min-block-size:var(--slateframe-control)', 'overflow-wrap:anywhere'):
+                      'min-block-size:var(--slateframe-control)'):
             self.assertIn(value, css)
+        # Both the Core block and its link must preserve word boundaries while
+        # allowing exceptionally long unbroken site names to wrap within 320px.
+        self.assertEqual(css.count('overflow-wrap:break-word;word-break:normal'), 2)
+        self.assertNotIn('overflow-wrap:anywhere', css)
         self.assertLessEqual(len(css.encode()), 400)
         self.assertIn('test $(wc -c < assets/css/core-site-title.css) -le 400', ci)
         for forbidden in ('!important', 'time2log_', 'wpcode_', 'javascript', 'display:none'):
