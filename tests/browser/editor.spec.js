@@ -447,6 +447,19 @@ test('real Gutenberg Code focus ring survives keyboard navigation and forced col
 	expect(forced.focused).toBe(true);
 	expect(forced.outline).toBe('solid');
 	expect(forced.width).toBeGreaterThan(0);
+	// In forced-colors mode the outline must resolve to the system Highlight color,
+	// rather than merely remaining a nonzero author-defined outline.
+	const systemHighlight = await code.evaluate((node) => {
+		const probe = document.createElement('span');
+		probe.style.color = 'Highlight';
+		node.append(probe);
+		try {
+			return getComputedStyle(probe).color;
+		} finally {
+			probe.remove();
+		}
+	});
+	expect(forced.color).toBe(systemHighlight);
 	const screenshotDir = path.resolve('test-artifacts/screenshots');
 	await fs.mkdir(screenshotDir, { recursive: true });
 	await code.screenshot({ path: path.join(screenshotDir, `gutenberg-${testInfo.project.name}-code-keyboard-forced-colors.png`) });
