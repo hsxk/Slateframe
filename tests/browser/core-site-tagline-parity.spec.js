@@ -63,7 +63,7 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
           expect(state.overflow, label + ' document overflow').toBeLessThanOrEqual(1);
           expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);
           expect(state.right, label + ' right').toBeLessThanOrEqual(width + 1);
-          expect(state.wrap, label + ' wrapping').toBe('anywhere');
+          expect(state.wrap, label + ' wrapping').toBe('break-word');
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-site-tagline-' + width + '-' + dir + '.png'
           });
