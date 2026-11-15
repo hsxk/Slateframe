@@ -72,7 +72,7 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
             expect(item.overflow, context + ' document overflow').toBeLessThanOrEqual(1);
             expect(item.left, context + ' left').toBeGreaterThanOrEqual(-1);
             expect(item.right, context + ' right').toBeLessThanOrEqual(width + 1);
-            expect(item.wrap, context + ' wrapping').toBe('break-word');
+            // WordPress Core's heading typography may resolve to `anywhere`\n            // while the paragraph retains Slateframe's `break-word`. Verify\n            // each native variant explicitly; geometry and multiline checks\n            // still guard against clipping and horizontal overflow.\n            expect(item.wrap, context + ' wrapping').toBe(variant === 'heading' ? 'anywhere' : 'break-word');
             if (width === 320 && font === 16) {
               expect(item.lineHeight, context + ' resolved line height').toBeGreaterThan(0);
               expect(item.blockSize, context + ' multiline tagline').toBeGreaterThan(item.lineHeight * 1.5);
