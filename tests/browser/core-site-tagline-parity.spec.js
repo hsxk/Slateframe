@@ -56,7 +56,9 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
             return {
               overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
               left: rect.left, right: rect.right,
-              wrap: getComputedStyle(node).overflowWrap
+              wrap: getComputedStyle(node).overflowWrap,
+              lineHeight: parseFloat(getComputedStyle(node).lineHeight),
+              blockSize: rect.height
             };
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
@@ -64,6 +66,12 @@ test('Core Site Tagline retains WordPress description and multilingual reflow', 
           expect(state.left, label + ' left').toBeGreaterThanOrEqual(-1);
           expect(state.right, label + ' right').toBeLessThanOrEqual(width + 1);
           expect(state.wrap, label + ' wrapping').toBe('break-word');
+          if (width === 320 && font === 16) {
+            // The stress string must actually reflow, not merely stay inside
+            // the viewport because of clipping or a single unbroken line.
+            expect(state.lineHeight, label + ' resolved line height').toBeGreaterThan(0);
+            expect(state.blockSize, label + ' multiline tagline').toBeGreaterThan(state.lineHeight * 1.5);
+          }
           if (font === 16) await root.screenshot({
             path: 'test-artifacts/screenshots/core-site-tagline-' + width + '-' + dir + '.png'
           });
