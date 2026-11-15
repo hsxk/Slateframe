@@ -17,8 +17,9 @@ class CoreSiteTaglineParity(unittest.TestCase):
             self.assertIn(value, php)
         self.assertIn("'assets/css/core-site-tagline.css'", php.split('add_editor_style(', 1)[1].split(');', 1)[0])
         for value in ('.wp-block-site-tagline', 'min-inline-size:0', 'max-inline-size:100%',
-                      'overflow-wrap:anywhere', ':not(.alignwide):not(.alignfull)'):
+                      'overflow-wrap:break-word', 'word-break:normal', ':not(.alignwide):not(.alignfull)'):
             self.assertIn(value, css)
+        self.assertNotIn('overflow-wrap:anywhere', css)
         self.assertNotIn('white-space:', css, 'Do not override Core fitText wrapping semantics')
         self.assertLessEqual(len(css.encode()), 240)
         self.assertIn('test $(wc -c < assets/css/core-site-tagline.css) -le 240', ci)
