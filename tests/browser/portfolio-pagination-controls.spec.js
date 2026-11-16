@@ -142,6 +142,19 @@ test('native Core Query Pagination has bounded targets, RTL reflow and high-cont
   expect(box?.height || 0).toBeGreaterThanOrEqual(44);
   await back.click();
   await expect(page.locator('.browser-project-grid .wp-block-query-pagination .page-numbers.current')).toHaveText('1');
+  // Keyboard activation must follow the same native WordPress pagination path
+  // as pointer activation, without a theme-owned click handler or focus trap.
+  const keyboardNext = page.locator('.browser-project-grid .wp-block-query-pagination a.wp-block-query-pagination-next');
+  await keyboardNext.focus();
+  await expect(keyboardNext).toBeFocused();
+  await page.keyboard.press('Enter');
+  const keyboardPageTwo = page.locator('.browser-project-grid .wp-block-query-pagination').first();
+  await expect(keyboardPageTwo.locator('.page-numbers.current')).toHaveText('2');
+  const keyboardBack = keyboardPageTwo.locator('a.wp-block-query-pagination-previous');
+  await keyboardBack.focus();
+  await expect(keyboardBack).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('.browser-project-grid .wp-block-query-pagination .page-numbers.current')).toHaveText('1');
 });
 
 test('Core Query Pagination retains native emphasis without the Portfolio presentation wrapper', async ({ page }, info) => {
