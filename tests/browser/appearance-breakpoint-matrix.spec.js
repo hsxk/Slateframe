@@ -37,12 +37,23 @@ test('Appearance keeps controls, RTL/CJK and layout within seven breakpoints', a
   if (width === 390) {
     const brand = page.locator('.slateframe-brand-title');
     const shortTitle = await brand.evaluate(node => {
-      const range = document.createRange();
-      range.selectNodeContents(node);
-      const lines = [...range.getClientRects()];
+      // Element ranges include boxes for nested inline elements as well as
+      // their text, so rect count is not a reliable rendered line count.
+      // Measure text nodes only and group fragments by their physical row.
+      const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+      const rows = [];
+      while (walker.nextNode()) {
+        const textNode = walker.currentNode;
+        if (!textNode.textContent.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(textNode);
+        for (const rect of range.getClientRects()) {
+          if (!rows.some(top => Math.abs(top - rect.top) < 1)) rows.push(rect.top);
+        }
+      }
       return {
         text: node.textContent.trim(),
-        lineCount: lines.length,
+        lineCount: rows.length,
         available: node.getBoundingClientRect().width,
         intrinsic: (() => {
           const probe = node.cloneNode(true);
