@@ -31,6 +31,45 @@ test('Appearance keeps controls, RTL/CJK and layout within seven breakpoints', a
   for (const key of ['headerLeft', 'footerLeft']) expect(state[key], key).toBeGreaterThanOrEqual(-1);
   for (const key of ['headerRight', 'footerRight']) expect(state[key], key).toBeLessThanOrEqual(width + 1);
 
+  // A short brand name should remain intact at ordinary text size when the
+  // available header space can accommodate its intrinsic width. Extreme text
+  // enlargement is different: WCAG reflow permits wrapping, but not clipping.
+  if (width === 390) {
+    const brand = page.locator('.slateframe-brand-title');
+    const shortTitle = await brand.evaluate(node => {
+      // Element ranges include boxes for nested inline elements as well as
+      // their text, so rect count is not a reliable rendered line count.
+      // Measure text nodes only and group fragments by their physical row.
+      const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+      const rows = [];
+      while (walker.nextNode()) {
+        const textNode = walker.currentNode;
+        if (!textNode.textContent.trim()) continue;
+        const range = document.createRange();
+        range.selectNodeContents(textNode);
+        for (const rect of range.getClientRects()) {
+          if (!rows.some(top => Math.abs(top - rect.top) < 1)) rows.push(rect.top);
+        }
+      }
+      return {
+        text: node.textContent.trim(),
+        lineCount: rows.length,
+        available: node.getBoundingClientRect().width,
+        intrinsic: (() => {
+          const probe = node.cloneNode(true);
+          probe.style.cssText = 'position:absolute;inline-size:max-content;max-inline-size:none;white-space:nowrap;visibility:hidden';
+          node.parentElement.appendChild(probe);
+          const width = probe.getBoundingClientRect().width;
+          probe.remove();
+          return width;
+        })(),
+      };
+    });
+    if (shortTitle.text === 'Slateframe' && shortTitle.available + 1 >= shortTitle.intrinsic) {
+      expect(shortTitle.lineCount, 'Short brand name should not wrap when it fits').toBe(1);
+    }
+  }
+
   const header = page.locator('[data-site-header]');
   const compact = await header.evaluate(node => node.classList.contains('is-compact'));
   if (width <= 1280) expect(compact).toBe(true);
