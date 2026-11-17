@@ -1,2 +1,2 @@
 .slateframe-project-grid{container:slateframe-portfolio/inline-size;font-size:1rem}
-@container slateframe-portfolio (max-width:35em){.wp-block-post-template:where(:not(.is-layout-grid)){grid-template-columns:minmax(0,1fr)}}
+@container slateframe-portfolio (max-width:35em){.slateframe-project-grid .wp-block-post-template:where(:not(.is-layout-grid)){grid-template-columns:minmax(0,1fr)}}
