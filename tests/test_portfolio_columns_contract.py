@@ -33,7 +33,7 @@ class PortfolioColumnsContract(unittest.TestCase):
     def test_named_container_reflow_is_bounded_and_scoped(self):
         reflow = (ROOT / 'assets/css/portfolio-reflow.css').read_text(encoding='utf-8')
         self.assertLessEqual(len(reflow.encode('utf-8')), 260)
-        self.assertIn('.slateframe-project-grid{container:slateframe-portfolio/inline-size}', reflow)
+        self.assertIn('.slateframe-project-grid{container:slateframe-portfolio/inline-size;font-size:1rem}', reflow)
         self.assertIn('@container slateframe-portfolio (max-width:35em)', reflow)
         self.assertIn('.wp-block-post-template:where(:not(.is-layout-grid))', reflow)
         self.assertIn('grid-template-columns:minmax(0,1fr)', reflow)
