@@ -51,7 +51,9 @@ class ResponsiveCoreContracts(unittest.TestCase):
     def test_core_file_focus_ring_uses_accessible_theme_token(self):
         css = (ROOT / "assets/css/reading.css").read_text()
         base = (ROOT / "style.css").read_text()
-        self.assertIn(":focus-visible,.wp-block-file>a:focus-visible:focus{", base)
+        self.assertIn(":focus-visible{outline:var(--slateframe-focus-width) solid var(--slateframe-focus)", base)
+        self.assertIn(":is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a{", base)
+        self.assertIn("min-block-size:var(--slateframe-control)", base)
         self.assertIn("outline:var(--slateframe-focus-width) solid var(--slateframe-focus)", base)
         self.assertIn("--slateframe-focus-width:3px", base)
         self.assertLessEqual(len(css.encode("utf-8")), 7000)
