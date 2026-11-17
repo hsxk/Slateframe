@@ -17,7 +17,8 @@ class NestedCssContract(unittest.TestCase):
 
     def test_editor_scrollable_code_focus_contract(self):
         css = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
-        selector = ':is(.wp-block-code,.wp-block-preformatted):focus-within'
+        # The table and scrollable code blocks share the same focus contract.
+        selector = ':is(.wp-block-table,.wp-block-code,.wp-block-preformatted):focus-within'
         self.assertIn('& ' + selector + '{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}', css)
         self.assertIn('@media(forced-colors:active){& ' + selector + '{outline-color:Highlight}}', css)
         self.assertIn('scrollbar-gutter:stable;overscroll-behavior-inline:contain', css)
