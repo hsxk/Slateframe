@@ -43,6 +43,20 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertNotIn('overflow:hidden', reflow)
         self.assertNotIn('!important', reflow)
 
+    def test_container_reflow_rule_is_inside_named_query(self):
+        reflow = (ROOT / 'assets/css/portfolio-reflow.css').read_text(encoding='utf-8')
+        import re
+        # A selector elsewhere in the stylesheet must not satisfy the contract.
+        # The actual override must be nested in the named container query.
+        pattern = (
+            r'@container\s+slateframe-portfolio\s*\(max-width:35em\)\s*\{'
+            r'\s*\.slateframe-project-grid\s+'
+            r'\.wp-block-post-template:where\(:not\(\.is-layout-grid\)\)'
+            r'\s*\{\s*grid-template-columns:minmax\(0,1fr\)\s*\}\s*\}'
+        )
+        self.assertRegex(reflow, pattern)
+        self.assertEqual(reflow.count('@container slateframe-portfolio'), 1)
+
     def test_conditional_frontend_and_editor_parity(self):
         php = (ROOT / 'functions.php').read_text(encoding='utf-8')
         self.assertIn("'assets/css/query-loop.css', 'assets/css/portfolio-reflow.css', 'assets/css/editor.css'", php)
