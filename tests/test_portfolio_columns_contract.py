@@ -36,6 +36,9 @@ class PortfolioColumnsContract(unittest.TestCase):
         self.assertIn('.slateframe-project-grid{container:slateframe-portfolio/inline-size;font-size:1rem}', reflow)
         self.assertIn('@container slateframe-portfolio (max-width:35em)', reflow)
         self.assertIn('.wp-block-post-template:where(:not(.is-layout-grid))', reflow)
+        # Match the shared Query Loop selector specificity: otherwise the
+        # responsive single-column rule loses even when its container matches.
+        self.assertIn('.slateframe-project-grid .wp-block-post-template:where(:not(.is-layout-grid))', reflow)
         self.assertIn('grid-template-columns:minmax(0,1fr)', reflow)
         self.assertNotIn('overflow:hidden', reflow)
         self.assertNotIn('!important', reflow)
