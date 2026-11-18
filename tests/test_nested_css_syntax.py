@@ -22,6 +22,11 @@ class NestedCssContract(unittest.TestCase):
         self.assertIn('& ' + selector + '{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}', css)
         self.assertIn('@media(forced-colors:active){& ' + selector + '{outline-color:Highlight}}', css)
         self.assertIn('scrollbar-gutter:stable;overscroll-behavior-inline:contain', css)
+        # Keep nested @media separate from the preceding focus rule; a
+        # selector followed by a comma and @media is invalid CSS nesting.
+        self.assertNotRegex(css, r':focus-within\s*,\s*@media')
+        self.assertNotRegex(css, r':focus-visible\s*,\s*@media')
+        self.assertIn('}@media(forced-colors:active){& ' + selector, css)
 
     def test_highest_combined_asset_budgets_remain_strict(self):
         size = lambda name: (ROOT / name).stat().st_size
