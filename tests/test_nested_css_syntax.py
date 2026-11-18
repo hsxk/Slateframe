@@ -17,10 +17,16 @@ class NestedCssContract(unittest.TestCase):
 
     def test_editor_scrollable_code_focus_contract(self):
         css = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
-        selector = ':is(.wp-block-code,.wp-block-preformatted):focus-within'
+        # The table and scrollable code blocks share the same focus contract.
+        selector = ':is(.wp-block-table,.wp-block-code,.wp-block-preformatted):focus-within'
         self.assertIn('& ' + selector + '{outline:var(--slateframe-focus-width) solid var(--slateframe-focus);outline-offset:var(--slateframe-focus-offset)}', css)
         self.assertIn('@media(forced-colors:active){& ' + selector + '{outline-color:Highlight}}', css)
         self.assertIn('scrollbar-gutter:stable;overscroll-behavior-inline:contain', css)
+        # Keep nested @media separate from the preceding focus rule; a
+        # selector followed by a comma and @media is invalid CSS nesting.
+        self.assertNotRegex(css, r':focus-within\s*,\s*@media')
+        self.assertNotRegex(css, r':focus-visible\s*,\s*@media')
+        self.assertIn('}@media(forced-colors:active){& ' + selector, css)
 
     def test_highest_combined_asset_budgets_remain_strict(self):
         size = lambda name: (ROOT / name).stat().st_size

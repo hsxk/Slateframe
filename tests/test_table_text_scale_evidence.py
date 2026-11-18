@@ -59,9 +59,9 @@ class TableTextScaleEvidence(unittest.TestCase):
         editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         browser = (ROOT / "tests/browser/core-table-parity.spec.js").read_text(encoding="utf-8")
         ci = (ROOT / ".github/workflows/quality.yml").read_text(encoding="utf-8")
-        for token in ("min-inline-size:0;", "scrollbar-gutter:stable;",
-                      "overscroll-behavior-inline:contain;", "contain:inline-size"):
-            self.assertIn(token, editor)
+        for token in ("min-inline-size:0", "scrollbar-gutter:stable",
+                      "overscroll-behavior-inline:contain", "contain:inline-size"):
+            self.assertRegex(editor, rf"{token}(?:;|[}}])")
         for token in ("openAuthenticatedEditor(page, postId)",
                       "window.wp.blocks.createBlock('core/table'",
                       "insertBlocks(block)", "removeBlock(id)",

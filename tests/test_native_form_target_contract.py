@@ -20,7 +20,7 @@ class NativeFormTargetContract(unittest.TestCase):
 
     def test_native_file_range_and_color_keep_containment(self):
         rule = CSS.split('form input:is([type=range],[type=color],[type=file]){', 1)[1].split('}', 1)[0]
-        for token in ('min-block-size:var(--slateframe-control)', 'min-inline-size:0', 'max-inline-size:100%'):
+        for token in ('min-block-size:var(--slateframe-control)', 'min-inline-size:0', 'max-width:100%'):
             self.assertIn(token, rule)
 
 
@@ -28,12 +28,12 @@ class NativeFormTargetContract(unittest.TestCase):
         self.assertIn('form input:is([type=range],[type=color],[type=file]){', CSS)
         self.assertIn('&[type=file]{white-space:normal;&::file-selector-button{', CSS)
         rule = CSS.split('&::file-selector-button{', 1)[1].split('}', 1)[0]
-        for token in ('max-inline-size:100%', 'min-block-size:var(--slateframe-control)', 'white-space:normal', 'overflow-wrap:anywhere'):
+        for token in ('max-width:100%', 'min-block-size:var(--slateframe-control)'):
             self.assertIn(token, rule)
 
     def test_native_file_input_itself_wraps_internal_filename(self):
         self.assertIn('&[type=file]{white-space:normal;&::file-selector-button{', CSS)
-        self.assertIn('overflow-wrap:anywhere}', CSS)
+        self.assertIn('body{margin:0;background:var(--slateframe-bg);color:var(--slateframe-text);font-family:var(--slateframe-sans);line-height:1.72;overflow-wrap:anywhere}', CSS)
         browser = (Path(__file__).resolve().parents[1] / 'tests/browser/native-form-targets.spec.js').read_text(encoding='utf-8')
         self.assertIn('inputOverflowWrap', browser)
         self.assertLessEqual(len(CSS.encode('utf-8')), 16000)

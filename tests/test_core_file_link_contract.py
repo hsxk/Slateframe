@@ -17,7 +17,6 @@ class CoreFileLinkContract(unittest.TestCase):
             'align-items:center',
             'min-block-size:var(--slateframe-control)',
             'max-inline-size:100%',
-            'overflow-wrap:anywhere',
         ):
             with self.subTest(property_value=property_value):
                 self.assertIn(property_value, rule)
@@ -25,7 +24,9 @@ class CoreFileLinkContract(unittest.TestCase):
     def test_inherited_filename_wrapping_is_checked_in_real_browser(self):
         css = (ROOT / 'style.css').read_text(encoding='utf-8')
         browser = (ROOT / 'tests/browser/core-file-verse.spec.js').read_text(encoding='utf-8')
-        self.assertIn('overflow-wrap:anywhere}', css)
+        self.assertIn('body{margin:0;background:var(--slateframe-bg);color:var(--slateframe-text);font-family:var(--slateframe-sans);line-height:1.72;overflow-wrap:anywhere}', css)
+        selector = ':is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a'
+        self.assertNotIn('overflow-wrap:normal', css.split(selector + '{', 1)[1].split('}', 1)[0])
         self.assertIn('filenameOverflowWrap', browser)
         self.assertIn("expect(m.filenameOverflowWrap).toBe('anywhere')", browser)
 
