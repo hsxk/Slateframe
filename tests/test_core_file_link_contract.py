@@ -25,7 +25,7 @@ class CoreFileLinkContract(unittest.TestCase):
         css = (ROOT / 'style.css').read_text(encoding='utf-8')
         browser = (ROOT / 'tests/browser/core-file-verse.spec.js').read_text(encoding='utf-8')
         self.assertIn('body{margin:0;background:var(--slateframe-bg);color:var(--slateframe-text);font-family:var(--slateframe-sans);line-height:1.72;overflow-wrap:anywhere}', css)
-        self.assertNotIn('overflow-wrap:normal', rule if False else css.split(selector + '{', 1)[1].split('}', 1)[0])
+        self.assertNotIn('overflow-wrap:normal', css.split(selector + '{', 1)[1].split('}', 1)[0])
         self.assertIn('filenameOverflowWrap', browser)
         self.assertIn("expect(m.filenameOverflowWrap).toBe('anywhere')", browser)
 
