@@ -50,9 +50,9 @@ test('native form targets follow bounded sizes in LTR and RTL without overflow',
 
 test('native labels, keyboard, zoom and forced-colors preserve accessibility', async ({ page }, testInfo) => {
   const width = testInfo.project.use.viewport?.width;
-  test.skip(![320, 390, 1440].includes(width), 'Representative keyboard and zoom coverage');
+  test.skip(![320, 375, 390, 412, 768, 1440, 1920].includes(width), 'Representative keyboard and zoom coverage');
   await mount(page);
-  await page.locator('#sf-nested-check').click();
+  // Exercise keyboard and zoom behavior at every supported responsive breakpoint.\n  await page.locator('#sf-nested-check').click();
   await expect(page.locator('#sf-check')).toBeChecked();
   await page.locator('#sf-check').focus();
   await page.keyboard.press('Space');
@@ -94,7 +94,7 @@ test('native labels, keyboard, zoom and forced-colors preserve accessibility', a
 
 test('native file selector wraps its button in narrow RTL forced-colors layout', async ({ page }, testInfo) => {
   const width = testInfo.project.use.viewport?.width;
-  test.skip(![320, 390, 1440].includes(width), 'Representative native file-button viewports');
+  test.skip(![320, 375, 390, 412, 768, 1440, 1920].includes(width), 'Representative native file-button viewports');
   await mount(page);
   await page.evaluate(() => {
     document.documentElement.dir = 'rtl';
