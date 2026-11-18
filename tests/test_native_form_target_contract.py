@@ -20,7 +20,7 @@ class NativeFormTargetContract(unittest.TestCase):
 
     def test_native_file_range_and_color_keep_containment(self):
         rule = CSS.split('form input:is([type=range],[type=color],[type=file]){', 1)[1].split('}', 1)[0]
-        for token in ('min-block-size:var(--slateframe-control)', 'min-inline-size:0', 'max-inline-size:100%'):
+        for token in ('min-block-size:var(--slateframe-control)', 'min-inline-size:0', 'max-width:100%'):
             self.assertIn(token, rule)
 
 
@@ -28,7 +28,7 @@ class NativeFormTargetContract(unittest.TestCase):
         self.assertIn('form input:is([type=range],[type=color],[type=file]){', CSS)
         self.assertIn('&[type=file]{white-space:normal;&::file-selector-button{', CSS)
         rule = CSS.split('&::file-selector-button{', 1)[1].split('}', 1)[0]
-        for token in ('max-inline-size:100%', 'min-block-size:var(--slateframe-control)'):
+        for token in ('max-width:100%', 'min-block-size:var(--slateframe-control)'):
             self.assertIn(token, rule)
 
     def test_native_file_input_itself_wraps_internal_filename(self):
