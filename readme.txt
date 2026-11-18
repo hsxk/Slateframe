@@ -49,6 +49,22 @@ Slateframe keeps presentation in the theme and leaves SEO ownership, analytics, 
 
 Slateframe does not require a page builder or companion plugin.
 
+== Design and accessibility verification ==
+
+Slateframe uses native WordPress blocks and settings. Before publishing a site, review the following with actual content rather than relying on theme screenshots alone.
+
+* In Appearance > Customize > Slateframe design, check compact, default, and spacious spacing at 320, 375, 390, 412, 768, 1440, and 1920 CSS pixels. Interactive controls should remain at least 44px high.
+* Test header navigation, search, forms, comments, and footer with a keyboard. Focus must remain visible and the compact menu must be operable without a pointer.
+* Check the site at 200% text enlargement and 400% browser zoom, including long navigation labels and long article titles.
+* Check RTL and CJK content with real translated text, including mixed-direction links, captions, metadata, and long unbroken strings.
+* Preview the same blocks in the editor and on the published page. Check wide/full alignment, tables, galleries, File blocks, Details blocks, and Query Loops.
+* Test native Core lightbox with mouse, keyboard, and touch. Check image containment and return of focus after closing.
+* Verify contrast and visible focus in light, dark, and operating-system color modes, including forced-colors and reduced-motion preferences.
+* Confirm photographs have meaningful alternative text when informative, or empty alternative text when decorative. The theme cannot supply this editorial information.
+* Verify that a newly installed theme ZIP contains only distributable theme files. Do not include development dependencies, credentials, or site-specific content.
+
+These checks describe a review process, not a claim of WordPress.org accessibility-ready certification. Theme and content accessibility both matter.
+
 == Frequently Asked Questions ==
 
 = Does Slateframe require a page builder? =
