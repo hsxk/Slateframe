@@ -8,8 +8,8 @@ ROOT = Path(__file__).resolve().parents[1]
 class CoreMediaTextParity(unittest.TestCase):
     def test_core_grid_shrink_is_shared_without_overriding_wordpress(self):
         css = (ROOT / "style.css").read_text(encoding="utf-8")
-        self.assertIn(".wp-block-media-text>*{min-inline-size:0}", css)
-        self.assertEqual(css.count(".wp-block-media-text>*{min-inline-size:0}"), 1)
+        self.assertIn(".wp-block-media-text>*,.wp-block-cover__inner-container{min-inline-size:0}", css)
+        self.assertEqual(css.count(".wp-block-media-text>*,.wp-block-cover__inner-container{min-inline-size:0}"), 1)
         self.assertIn("overflow-wrap:anywhere", css)
         self.assertIn("*{box-sizing:border-box}", css)
         self.assertIn("scroll-behavior:auto !important", css)
