@@ -10,11 +10,25 @@ READING = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
 
 class CoreFileWrapContract(unittest.TestCase):
     def test_filename_and_download_wrap_under_core_styles(self):
+        selector = ':is(.slateframe-prose,.editor-styles-wrapper) .wp-block-file>a'
+        self.assertEqual(STYLE.count(selector + '{'), 1)
+        rule = STYLE.split(selector + '{', 1)[1].split('}', 1)[0]
+        for declaration in (
+            'display:inline-flex',
+            'align-items:center',
+            'min-block-size:var(--slateframe-control)',
+            'max-inline-size:100%',
+        ):
+            with self.subTest(declaration=declaration):
+                self.assertIn(declaration, rule)
+        self.assertNotIn('overflow-wrap:normal', rule)
         self.assertIn(
-            ".wp-block-file>a{display:inline-flex;"
-            "align-items:center;min-block-size:var(--slateframe-control);"
-            "max-inline-size:100%;overflow-wrap:anywhere}", STYLE
+            'body{margin:0;background:var(--slateframe-bg);color:var(--slateframe-text);'
+            'font-family:var(--slateframe-sans);line-height:1.72;overflow-wrap:anywhere}',
+            STYLE,
         )
+        browser = (ROOT / 'tests/browser/core-file-verse.spec.js').read_text(encoding='utf-8')
+        self.assertIn("expect(m.filenameOverflowWrap).toBe('anywhere')", browser)
 
     def test_download_label_wraps_inside_bounded_control(self):
         rules = re.findall(r"\.slateframe-prose a\.wp-block-file__button\{([^}]*)\}", READING)
