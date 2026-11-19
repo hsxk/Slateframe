@@ -203,3 +203,43 @@ test('article headings and site chrome remain inside the viewport at 400% zoom',
   await fs.mkdir(directory, { recursive: true });
   await page.screenshot({ path: path.join(directory, 'article-title-rtl-400pct-' + width + '.png'), fullPage: true });
 });
+
+
+test('Core Details keeps native disclosure behavior and bounded hit target in RTL and LTR', async ({ page }, testInfo) => {
+  const width = testInfo.project.use.viewport?.width;
+  test.skip(![320, 375, 390, 412, 768, 1440, 1920].includes(width), 'Supported responsive breakpoints');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.locator('main').first().evaluate((main) => {
+    const shell = document.createElement('section');
+    shell.className = 'slateframe-shell';
+    shell.innerHTML = '<details class="wp-block-details"><summary>日本語中文한국어 — Long accessible disclosure title with wrapping</summary><p>Visible disclosure content</p></details>';
+    main.prepend(shell);
+  });
+  const details = page.locator('main .wp-block-details').first();
+  const summary = details.locator('summary');
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate((dir) => {
+      document.documentElement.dir = dir;
+      document.documentElement.style.fontSize = '64px';
+    }, direction);
+    await expect(details).not.toHaveAttribute('open');
+    await summary.focus();
+    expect(await summary.evaluate((node) => document.activeElement === node)).toBe(true);
+    await page.keyboard.press('Enter');
+    await expect(details).toHaveAttribute('open');
+    await expect(details.getByText('Visible disclosure content')).toBeVisible();
+    await page.keyboard.press('Enter');
+    await expect(details).not.toHaveAttribute('open');
+    await summary.press('Space');
+    await expect(details).toHaveAttribute('open');
+    const bounds = await summary.boundingBox();
+    expect(bounds?.height || 0).toBeGreaterThanOrEqual(44);
+    expect(bounds?.x ?? -100, direction + ' summary left').toBeGreaterThanOrEqual(-1);
+    expect((bounds?.x || 0) + (bounds?.width || 0), direction + ' summary right')
+      .toBeLessThanOrEqual(await page.evaluate(() => document.documentElement.clientWidth + 1));
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth))
+      .toBeLessThanOrEqual(1);
+    await summary.press('Space');
+    await expect(details).not.toHaveAttribute('open');
+  }
+});
