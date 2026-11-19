@@ -143,3 +143,39 @@ test('native file selector wraps its button in narrow RTL forced-colors layout',
     path: path.join(directory, 'native-file-selector-rtl-forced-colors-' + width + '.png'),
   });
 });
+
+
+test('article headings and site chrome remain inside the viewport at 400% zoom', async ({ page }, testInfo) => {
+  const width = testInfo.project.use.viewport?.width;
+  test.skip(![320, 375, 390, 412, 768, 1440, 1920].includes(width), 'Seven supported responsive breakpoints');
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = '64px';
+    const main = document.querySelector('main');
+    const title = document.createElement('h1');
+    title.className = 'slateframe-page-title';
+    title.textContent = 'Long article heading 日本語中文한국어 — accessibility and responsive typography';
+    main.prepend(title);
+  });
+  for (const direction of ['ltr', 'rtl']) {
+    await page.evaluate((dir) => { document.documentElement.dir = dir; }, direction);
+    const dimensions = await page.evaluate(() => {
+      const title = document.querySelector('main > .slateframe-page-title');
+      const box = title.getBoundingClientRect();
+      return {
+        viewport: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        titleLeft: box.left,
+        titleRight: box.right,
+        titleHeight: box.height,
+      };
+    });
+    expect(dimensions.scrollWidth - dimensions.viewport, direction + ' ' + width).toBeLessThanOrEqual(1);
+    expect(dimensions.titleLeft, direction + ' ' + width).toBeGreaterThanOrEqual(-1);
+    expect(dimensions.titleRight, direction + ' ' + width).toBeLessThanOrEqual(dimensions.viewport + 1);
+    expect(dimensions.titleHeight).toBeGreaterThan(0);
+  }
+  const directory = path.resolve('test-artifacts/screenshots');
+  await fs.mkdir(directory, { recursive: true });
+  await page.screenshot({ path: path.join(directory, 'article-title-rtl-400pct-' + width + '.png'), fullPage: true });
+});
