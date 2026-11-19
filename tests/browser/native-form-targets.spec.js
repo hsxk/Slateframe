@@ -172,12 +172,17 @@ test('article headings and site chrome remain inside the viewport at 400% zoom',
         titleLeft: box.left,
         titleRight: box.right,
         titleHeight: box.height,
+        titleFontSize: parseFloat(getComputedStyle(title).fontSize),
       };
     });
     expect(dimensions.scrollWidth - dimensions.viewport, direction + ' ' + width).toBeLessThanOrEqual(1);
     expect(dimensions.titleLeft, direction + ' ' + width).toBeGreaterThanOrEqual(-1);
     expect(dimensions.titleRight, direction + ' ' + width).toBeLessThanOrEqual(dimensions.viewport + 1);
     expect(dimensions.titleHeight).toBeGreaterThan(0);
+    if (width <= 480) {
+      // At 400% text zoom, keep the title readable without forcing 1.65rem minimum.
+      expect(dimensions.titleFontSize, direction + ' ' + width).toBeLessThanOrEqual(64.5);
+    }
   }
   const directory = path.resolve('test-artifacts/screenshots');
   await fs.mkdir(directory, { recursive: true });
