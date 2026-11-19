@@ -155,12 +155,16 @@ test('article headings and site chrome remain inside the viewport at 400% zoom',
     const title = document.createElement('h1');
     title.className = 'slateframe-page-title';
     title.textContent = 'Long article heading 日本語中文한국어 — accessibility and responsive typography';
-    main.prepend(title);
+    // Match the theme's content gutter: an unwrapped test heading touches the viewport edge.
+    const shell = document.createElement('div');
+    shell.className = 'slateframe-shell';
+    shell.append(title);
+    main.prepend(shell);
   });
   for (const direction of ['ltr', 'rtl']) {
     await page.evaluate((dir) => { document.documentElement.dir = dir; }, direction);
     const dimensions = await page.evaluate(() => {
-      const title = document.querySelector('main > .slateframe-page-title');
+      const title = document.querySelector('main > .slateframe-shell > .slateframe-page-title');
       const box = title.getBoundingClientRect();
       return {
         viewport: document.documentElement.clientWidth,
