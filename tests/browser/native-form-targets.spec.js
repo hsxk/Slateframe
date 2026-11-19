@@ -179,6 +179,21 @@ test('article headings and site chrome remain inside the viewport at 400% zoom',
     expect(dimensions.titleLeft, direction + ' ' + width).toBeGreaterThanOrEqual(-1);
     expect(dimensions.titleRight, direction + ' ' + width).toBeLessThanOrEqual(dimensions.viewport + 1);
     expect(dimensions.titleHeight).toBeGreaterThan(0);
+    // Guard the compact-header intrinsic-size regression: a long identity must not
+    // stretch the page beyond the viewport when text is enlarged to 400%.
+    const chrome = await page.evaluate(() => {
+      const brand = document.querySelector('.slateframe-brand');
+      const header = document.querySelector('.slateframe-site-header');
+      const viewport = document.documentElement.clientWidth;
+      const rect = brand?.getBoundingClientRect();
+      return { viewport, headerPresent: !!header, brandPresent: !!brand,
+        brandLeft: rect?.left, brandRight: rect?.right, brandWidth: rect?.width };
+    });
+    expect(chrome.headerPresent).toBe(true);
+    expect(chrome.brandPresent).toBe(true);
+    expect(chrome.brandLeft, direction + ' brand left ' + width).toBeGreaterThanOrEqual(-1);
+    expect(chrome.brandRight, direction + ' brand right ' + width).toBeLessThanOrEqual(chrome.viewport + 1);
+    expect(chrome.brandWidth, direction + ' brand width ' + width).toBeLessThanOrEqual(chrome.viewport + 1);
     if (width <= 480) {
       // At 400% text zoom, keep the title readable without forcing 1.65rem minimum.
       expect(dimensions.titleFontSize, direction + ' ' + width).toBeLessThanOrEqual(64.5);
