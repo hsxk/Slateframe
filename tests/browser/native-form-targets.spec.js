@@ -71,6 +71,10 @@ test('native labels, keyboard, zoom and forced-colors preserve accessibility', a
   await page.keyboard.press('ArrowRight');
   expect(Number(await slider.inputValue())).toBeGreaterThan(before);
   const file = page.getByLabel('Native file', { exact: true });
+  // Verify native file selection still works after the responsive control styling.
+  await file.setInputFiles({ name: 'sample-日本語.txt', mimeType: 'text/plain', buffer: Buffer.from('Slateframe fixture') });
+  expect(await file.evaluate((node) => ({ name: node.files[0]?.name, size: node.files[0]?.size })))
+    .toEqual({ name: 'sample-日本語.txt', size: Buffer.byteLength('Slateframe fixture') });
   await file.focus();
   expect(await file.evaluate((node) => document.activeElement === node)).toBe(true);
   await page.evaluate(() => {
