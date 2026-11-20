@@ -128,6 +128,17 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     });
     expect(customProof.secondMin, "custom width bypass").toBe("auto");
     expect(customProof.direction, "custom width mobile reflow axis").toBe("column");
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const desktopCustomDirection = await root.evaluate(node => {
+      const group = node.querySelector(".wp-block-buttons.is-nowrap");
+      const first = group.querySelector(".wp-block-button");
+      first.classList.add("has-custom-width");
+      const direction = getComputedStyle(group).flexDirection;
+      first.classList.remove("has-custom-width");
+      return direction;
+    });
+    expect(desktopCustomDirection, "custom width desktop preserves native horizontal layout").toBe("row");
+    await page.setViewportSize({ width: 320, height: 900 });
     for (const dir of ['ltr', 'rtl']) {
       await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = '200%'; }, dir);
       for (const zoom of ['200%', '400%']) {
