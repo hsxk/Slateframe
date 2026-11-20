@@ -127,7 +127,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       return { secondMin, direction };
     });
     expect(customProof.secondMin, "custom width bypass").toBe("auto");
-    expect(customProof.direction, "author width preserves native horizontal layout").toBe("row");
+    expect(customProof.direction, "custom width mobile reflow axis").toBe("column");
     for (const dir of ['ltr', 'rtl']) {
       await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = '200%'; }, dir);
       for (const zoom of ['200%', '400%']) {
