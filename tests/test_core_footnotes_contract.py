@@ -19,9 +19,10 @@ class CoreFootnotesContract(unittest.TestCase):
         self.assertIn('.slateframe-footer-widget', (ROOT / 'assets/css/footer.css').read_text(encoding='utf-8'))
 
     def test_target_anchors_account_for_sticky_header_and_forced_colors(self):
-        self.assertIn('[id^=fnref]', CSS)
-        self.assertIn(':is([id^=fnref],.wp-block-footnotes li[id^=fn]){', CSS)
-        self.assertIn('.wp-block-footnotes li[id^=fn]', CSS)
+        # The shared selector covers fnref, footnote list IDs and article anchors.
+        self.assertIn(':is([id^=fn],.slateframe-prose [id]){', CSS)
+        self.assertIn('.slateframe-prose [id]', CSS)
+        self.assertNotIn('[id^=fnref]', CSS)
         self.assertIn('scroll-margin-block-start:calc(var(--slateframe-header-height) + var(--slateframe-stack-gap))', CSS)
         self.assertNotIn('scroll-margin-block-start:var(--slateframe-header-height);&:target', CSS)
         self.assertIn('&:target{outline:2px solid var(--slateframe-accent)', CSS)

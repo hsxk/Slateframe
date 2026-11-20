@@ -46,8 +46,14 @@ test('Core footnote backreference is a bounded keyboard target in both direction
       expect(metrics.display).toBe('inline-grid');
       expect(metrics.width, `${width}px ${dir}`).toBeGreaterThanOrEqual(44);
       expect(metrics.height, `${width}px ${dir}`).toBeGreaterThanOrEqual(44);
-      expect(metrics.scrollMargin).toBeGreaterThan(0);
-      expect(await page.locator('#fnref-slateframe-core').evaluate(node => parseFloat(getComputedStyle(node).scrollMarginBlockStart))).toBeGreaterThan(0);
+      const referenceMargin = await page.locator('#fnref-slateframe-core').evaluate(node => parseFloat(getComputedStyle(node).scrollMarginBlockStart));
+      if (width >= 481) {
+        expect(metrics.scrollMargin, `${width}px ${dir} desktop footnote offset`).toBeGreaterThan(0);
+        expect(referenceMargin, `${width}px ${dir} desktop backreference offset`).toBeGreaterThan(0);
+      } else {
+        expect(metrics.scrollMargin, `${width}px ${dir} non-sticky mobile footnote`).toBe(0);
+        expect(referenceMargin, `${width}px ${dir} non-sticky mobile backreference`).toBe(0);
+      }
       expect(metrics.overflow, `${width}px ${dir}`).toBeLessThanOrEqual(1);
       expect(await inline.evaluate(node => getComputedStyle(node).display)).not.toBe('inline-flex');
     }
