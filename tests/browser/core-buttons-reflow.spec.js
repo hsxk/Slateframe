@@ -148,6 +148,10 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
             buttonWidth: buttonRect.width,
             groupWidth: groupRect.width,
             buttonRight: buttonRect.right,
+            buttonLeft: buttonRect.left,
+            groupLeft: groupRect.left,
+            secondRight: first.nextElementSibling.getBoundingClientRect().right,
+            secondLeft: first.nextElementSibling.getBoundingClientRect().left,
           };
         } finally {
           first.classList.remove('has-custom-width');
@@ -166,6 +170,10 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       expect(customGeometry.overflow, dir + ' custom-width 400% overflow').toBeLessThanOrEqual(1);
       expect(customGeometry.buttonWidth, dir + ' custom-width 400% readable width').toBeGreaterThanOrEqual(240);
       expect(customGeometry.buttonRight, dir + ' custom-width 400% viewport edge').toBeLessThanOrEqual(321);
+      expect(customGeometry.buttonLeft, dir + ' custom-width 400% leading edge').toBeGreaterThanOrEqual(-1);
+      expect(customGeometry.groupLeft, dir + ' custom-width 400% group leading edge').toBeGreaterThanOrEqual(-1);
+      expect(customGeometry.secondLeft, dir + ' custom-width 400% sibling leading edge').toBeGreaterThanOrEqual(-1);
+      expect(customGeometry.secondRight, dir + ' custom-width 400% sibling trailing edge').toBeLessThanOrEqual(321);
       expect(customGeometry.groupWidth, dir + ' custom-width 400% group width').toBeLessThanOrEqual(320);
     }
     await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
