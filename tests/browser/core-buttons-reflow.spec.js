@@ -153,6 +153,15 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           first.classList.remove('has-custom-width');
         }
       });
+      // Capture the actual custom-width state: the measurement above removes
+      // the temporary class, so a separate screenshot must restore it first.
+      await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => node.classList.add('has-custom-width'));
+      try {
+        await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+        await root.screenshot({ path: 'test-artifacts/screenshots/core-buttons-custom-320-' + dir + '-400-zoom.png' });
+      } finally {
+        await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => node.classList.remove('has-custom-width'));
+      }
       expect(customGeometry.direction, dir + ' custom-width 400% axis').toBe('column');
       expect(customGeometry.overflow, dir + ' custom-width 400% overflow').toBeLessThanOrEqual(1);
       expect(customGeometry.buttonWidth, dir + ' custom-width 400% readable width').toBeGreaterThanOrEqual(240);
