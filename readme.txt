@@ -65,6 +65,19 @@ Slateframe uses native WordPress blocks and settings. Before publishing a site, 
 
 These checks describe a review process, not a claim of WordPress.org accessibility-ready certification. Theme and content accessibility both matter.
 
+== Release evidence and package review ==
+
+For each candidate release, record the exact Git commit SHA and retain the corresponding successful Theme quality and Photography runtime Actions links. A successful earlier commit is not evidence for a later commit or for the squash-merged main commit.
+
+* Review the full set of required Jobs, including static tests, WordPress/PHP compatibility, WPCS, Theme Check, browser smoke, and the distributable build. Investigate a failed Job from its actual logs before modifying code.
+* Download the browser artifact for that same SHA and open real WordPress/Chromium screenshots, not just an artifact listing. Compare compact, default, and spacious Appearance settings at mobile and desktop widths.
+* Inspect Photography and native Core lightbox, Portfolio Query Loop, Knowledge and article reading views, plus header, navigation, search, forms, comments, and footer. Include RTL, CJK, 200% text, 400% zoom, keyboard focus, and forced-colors cases.
+* Inspect the distributable ZIP itself. Confirm its contents are limited to theme runtime assets and required licensing/documentation, with no symlinks, hidden credentials, test fixtures, CI workflows, dependency directories, or local site content.
+* Compare the packaged file manifest and checksums across equivalent PR and push builds where available; a successful build alone does not establish byte-for-byte reproducibility.
+* After merging a verified PR, separately check the merged main SHA and its required Actions before treating that main revision as release-ready. A merged PR is not itself a release certification.
+
+Do not describe an unexecuted check, an unreviewed screenshot, or a queued workflow as passed. Keep a record of known visual limitations and the exact viewports reviewed.
+
 == Frequently Asked Questions ==
 
 = Does Slateframe require a page builder? =
