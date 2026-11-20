@@ -128,6 +128,38 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     });
     expect(customProof.secondMin, "custom width bypass").toBe("auto");
     expect(customProof.direction, "custom width mobile reflow axis").toBe("column");
+    // Keep the custom-width class active while measuring real geometry at
+    // narrow width and enlarged text; a computed axis alone misses overflow.
+    for (const dir of ['ltr', 'rtl']) {
+      await page.locator('html').evaluate((node, value) => {
+        node.dir = value;
+        node.style.fontSize = '400%';
+      }, dir);
+      const customGeometry = await root.evaluate(node => {
+        const group = node.querySelector('.wp-block-buttons.is-nowrap');
+        const first = group.querySelector('.wp-block-button');
+        first.classList.add('has-custom-width');
+        try {
+          const groupRect = group.getBoundingClientRect();
+          const buttonRect = first.getBoundingClientRect();
+          return {
+            direction: getComputedStyle(group).flexDirection,
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            buttonWidth: buttonRect.width,
+            groupWidth: groupRect.width,
+            buttonRight: buttonRect.right,
+          };
+        } finally {
+          first.classList.remove('has-custom-width');
+        }
+      });
+      expect(customGeometry.direction, dir + ' custom-width 400% axis').toBe('column');
+      expect(customGeometry.overflow, dir + ' custom-width 400% overflow').toBeLessThanOrEqual(1);
+      expect(customGeometry.buttonWidth, dir + ' custom-width 400% readable width').toBeGreaterThanOrEqual(240);
+      expect(customGeometry.buttonRight, dir + ' custom-width 400% viewport edge').toBeLessThanOrEqual(321);
+      expect(customGeometry.groupWidth, dir + ' custom-width 400% group width').toBeLessThanOrEqual(320);
+    }
+    await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
     await page.setViewportSize({ width: 1440, height: 900 });
     const desktopCustomDirection = await root.evaluate(node => {
       const group = node.querySelector(".wp-block-buttons.is-nowrap");
