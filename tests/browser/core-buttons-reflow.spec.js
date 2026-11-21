@@ -53,7 +53,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     }
     await expect(root.locator('.wp-block-buttons')).toHaveCount(2);
     await expect(root.locator('.wp-block-button__link')).toHaveCount(3);
-    for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+    for (const width of [320, 375, 390, 412, 480, 481, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = ''; }, dir);
@@ -81,9 +81,11 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         expect(unrelated.direction, width + ' ' + dir + ' unrelated flex axis').toBe('row');
         expect(unrelated.minimums, width + ' ' + dir + ' unrelated children').toEqual(['auto', 'auto']);
         expect(geometry.nowrap.wrap).toBe('nowrap');
+        // The CSS uses width < 481px: both sides of the breakpoint must
+        // preserve the native nowrap contract without horizontal overflow.
         expect(geometry.vertical, width + ' ' + dir + ' native vertical axis').toBe('column');
         expect(geometry.nowrap.shrink).toEqual(['1', '1']);
-        if (width <= 412) {
+        if (width <= 480) {
           const [primary, secondary] = geometry.buttons;
           expect(geometry.nowrap.direction, width + ' ' + dir + ' native nowrap mobile axis').toBe('column');
           expect(primary.width, width + ' ' + dir + ' primary readable width').toBeGreaterThanOrEqual(width - 80);
@@ -93,7 +95,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           expect(Math.abs(primary.left - secondary.left), width + ' ' + dir + ' stacked alignment').toBeLessThanOrEqual(2);
           expect(secondary.top, width + ' ' + dir + ' stacked order').toBeGreaterThanOrEqual(primary.bottom);
         }
-        if (width >= 768) {
+        if (width >= 481) {
           expect(geometry.nowrap.direction, width + ' ' + dir + ' native desktop axis').toBe('row');
           const [primary, secondary] = geometry.buttons;
           expect(primary.width, width + " " + dir + " desktop readable width").toBeGreaterThanOrEqual(120);
@@ -127,7 +129,69 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       return { secondMin, direction };
     });
     expect(customProof.secondMin, "custom width bypass").toBe("auto");
-    expect(customProof.direction, "author width preserves native horizontal layout").toBe("row");
+    expect(customProof.direction, "custom width mobile reflow axis").toBe("column");
+    // Keep the custom-width class active while measuring real geometry at
+    // narrow width and enlarged text; a computed axis alone misses overflow.
+    for (const dir of ['ltr', 'rtl']) {
+      await page.locator('html').evaluate((node, value) => {
+        node.dir = value;
+        node.style.fontSize = '400%';
+      }, dir);
+      const customGeometry = await root.evaluate(node => {
+        const group = node.querySelector('.wp-block-buttons.is-nowrap');
+        const first = group.querySelector('.wp-block-button');
+        first.classList.add('has-custom-width');
+        first.style.width = '600px';
+        try {
+          const groupRect = group.getBoundingClientRect();
+          const buttonRect = first.getBoundingClientRect();
+          return {
+            direction: getComputedStyle(group).flexDirection,
+            overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+            buttonWidth: buttonRect.width,
+            groupWidth: groupRect.width,
+            buttonRight: buttonRect.right,
+            buttonLeft: buttonRect.left,
+            groupLeft: groupRect.left,
+            secondRight: first.nextElementSibling.getBoundingClientRect().right,
+            secondLeft: first.nextElementSibling.getBoundingClientRect().left,
+          };
+        } finally {
+          first.classList.remove('has-custom-width');
+          first.style.removeProperty('width');
+        }
+      });
+      // Capture the actual custom-width state: the measurement above removes
+      // the temporary class, so a separate screenshot must restore it first.
+      await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => { node.classList.add('has-custom-width'); node.style.width = '600px'; });
+      try {
+        await fs.mkdir('test-artifacts/screenshots', { recursive: true });
+        await root.screenshot({ path: 'test-artifacts/screenshots/core-buttons-custom-320-' + dir + '-400-zoom.png' });
+      } finally {
+        await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => { node.classList.remove('has-custom-width'); node.style.removeProperty('width'); });
+      }
+      expect(customGeometry.direction, dir + ' custom-width 400% axis').toBe('column');
+      expect(customGeometry.overflow, dir + ' custom-width 400% overflow').toBeLessThanOrEqual(1);
+      expect(customGeometry.buttonWidth, dir + ' custom-width 400% readable width').toBeGreaterThanOrEqual(240);
+      expect(customGeometry.buttonRight, dir + ' custom-width 400% viewport edge').toBeLessThanOrEqual(321);
+      expect(customGeometry.buttonLeft, dir + ' custom-width 400% leading edge').toBeGreaterThanOrEqual(-1);
+      expect(customGeometry.groupLeft, dir + ' custom-width 400% group leading edge').toBeGreaterThanOrEqual(-1);
+      expect(customGeometry.secondLeft, dir + ' custom-width 400% sibling leading edge').toBeGreaterThanOrEqual(-1);
+      expect(customGeometry.secondRight, dir + ' custom-width 400% sibling trailing edge').toBeLessThanOrEqual(321);
+      expect(customGeometry.groupWidth, dir + ' custom-width 400% group width').toBeLessThanOrEqual(320);
+    }
+    await page.locator('html').evaluate(node => { node.dir = 'ltr'; node.style.fontSize = ''; });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const desktopCustomDirection = await root.evaluate(node => {
+      const group = node.querySelector(".wp-block-buttons.is-nowrap");
+      const first = group.querySelector(".wp-block-button");
+      first.classList.add("has-custom-width");
+      const direction = getComputedStyle(group).flexDirection;
+      first.classList.remove("has-custom-width");
+      return direction;
+    });
+    expect(desktopCustomDirection, "custom width desktop preserves native horizontal layout").toBe("row");
+    await page.setViewportSize({ width: 320, height: 900 });
     for (const dir of ['ltr', 'rtl']) {
       await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = '200%'; }, dir);
       for (const zoom of ['200%', '400%']) {
