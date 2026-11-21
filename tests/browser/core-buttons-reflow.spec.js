@@ -53,7 +53,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     }
     await expect(root.locator('.wp-block-buttons')).toHaveCount(2);
     await expect(root.locator('.wp-block-button__link')).toHaveCount(3);
-    for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
+    for (const width of [320, 375, 390, 412, 480, 481, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
         await page.locator('html').evaluate((node, value) => { node.dir = value; node.style.fontSize = ''; }, dir);
@@ -81,9 +81,11 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         expect(unrelated.direction, width + ' ' + dir + ' unrelated flex axis').toBe('row');
         expect(unrelated.minimums, width + ' ' + dir + ' unrelated children').toEqual(['auto', 'auto']);
         expect(geometry.nowrap.wrap).toBe('nowrap');
+        // The CSS uses width < 481px: both sides of the breakpoint must
+        // preserve the native nowrap contract without horizontal overflow.
         expect(geometry.vertical, width + ' ' + dir + ' native vertical axis').toBe('column');
         expect(geometry.nowrap.shrink).toEqual(['1', '1']);
-        if (width <= 412) {
+        if (width <= 480) {
           const [primary, secondary] = geometry.buttons;
           expect(geometry.nowrap.direction, width + ' ' + dir + ' native nowrap mobile axis').toBe('column');
           expect(primary.width, width + ' ' + dir + ' primary readable width').toBeGreaterThanOrEqual(width - 80);
@@ -93,7 +95,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           expect(Math.abs(primary.left - secondary.left), width + ' ' + dir + ' stacked alignment').toBeLessThanOrEqual(2);
           expect(secondary.top, width + ' ' + dir + ' stacked order').toBeGreaterThanOrEqual(primary.bottom);
         }
-        if (width >= 768) {
+        if (width >= 481) {
           expect(geometry.nowrap.direction, width + ' ' + dir + ' native desktop axis').toBe('row');
           const [primary, secondary] = geometry.buttons;
           expect(primary.width, width + " " + dir + " desktop readable width").toBeGreaterThanOrEqual(120);
