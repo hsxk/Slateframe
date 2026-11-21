@@ -139,6 +139,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
         const group = node.querySelector('.wp-block-buttons.is-nowrap');
         const first = group.querySelector('.wp-block-button');
         first.classList.add('has-custom-width');
+        first.style.width = '600px';
         try {
           const groupRect = group.getBoundingClientRect();
           const buttonRect = first.getBoundingClientRect();
@@ -155,16 +156,17 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           };
         } finally {
           first.classList.remove('has-custom-width');
+          first.style.removeProperty('width');
         }
       });
       // Capture the actual custom-width state: the measurement above removes
       // the temporary class, so a separate screenshot must restore it first.
-      await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => node.classList.add('has-custom-width'));
+      await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => { node.classList.add('has-custom-width'); node.style.width = '600px'; });
       try {
         await fs.mkdir('test-artifacts/screenshots', { recursive: true });
         await root.screenshot({ path: 'test-artifacts/screenshots/core-buttons-custom-320-' + dir + '-400-zoom.png' });
       } finally {
-        await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => node.classList.remove('has-custom-width'));
+        await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => { node.classList.remove('has-custom-width'); node.style.removeProperty('width'); });
       }
       expect(customGeometry.direction, dir + ' custom-width 400% axis').toBe('column');
       expect(customGeometry.overflow, dir + ' custom-width 400% overflow').toBeLessThanOrEqual(1);
