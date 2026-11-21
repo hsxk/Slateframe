@@ -171,6 +171,22 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       } finally {
         await root.locator('.wp-block-buttons.is-nowrap > .wp-block-button').first().evaluate(node => { node.classList.remove('has-custom-width'); node.style.removeProperty('width'); });
       }
+      if (customGeometry.overflow > 1) {
+        const offenders = await page.evaluate(() => {
+          const viewport = document.documentElement.clientWidth;
+          return [...document.body.querySelectorAll('*')].map(node => {
+            const box = node.getBoundingClientRect();
+            return { tag: node.tagName.toLowerCase(),
+              className: typeof node.className === 'string' ? node.className.slice(0, 100) : '',
+              left: Math.round(box.left), right: Math.round(box.right),
+              width: Math.round(box.width),
+              scrollWidth: node.scrollWidth, clientWidth: node.clientWidth };
+          }).filter(box => box.left < -1 || box.right > viewport + 1).slice(0, 25);
+        });
+        console.error('Custom-width 400% overflow geometry', JSON.stringify({
+          dir, viewport: 320, customGeometry, offenders,
+        }));
+      }
       expect(customGeometry.direction, dir + ' custom-width 400% axis').toBe('column');
       expect(customGeometry.overflow, dir + ' custom-width 400% overflow').toBeLessThanOrEqual(1);
       expect(customGeometry.buttonWidth, dir + ' custom-width 400% readable width').toBeGreaterThanOrEqual(240);
