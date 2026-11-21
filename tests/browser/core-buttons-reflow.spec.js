@@ -41,7 +41,8 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
     if (await scopedStyle.evaluate(node => node.tagName === 'STYLE')) {
       // Playwright's visible-text matcher excludes <style>; inspect raw CSS.
       const cssText = await scopedStyle.evaluate(node => node.textContent || '');
-      expect(cssText).toContain('.wp-block-buttons.is-nowrap:not(:has(.has-custom-width)){');
+      expect(cssText).toContain('.wp-block-buttons.is-nowrap{');
+      expect(cssText).toContain('&:not(:has(.has-custom-width)):has(>:nth-child(2):last-child)>.wp-block-button{min-inline-size:min(8rem,35%)}');
       expect(cssText).toContain('flex-flow:column;align-items:stretch;& a{width:100%}');
       expect(cssText).toContain('@media(width<481px)');
       expect(cssText).toContain('min-inline-size:min(8rem,35%)');
