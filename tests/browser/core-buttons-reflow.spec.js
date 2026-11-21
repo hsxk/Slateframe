@@ -129,7 +129,7 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
       first.classList.remove("has-custom-width");
       return { secondMin, direction };
     });
-    expect(customProof.secondMin, "custom width bypass").toBe("auto");
+    expect(customProof.secondMin, "native nowrap sibling remains shrinkable").toBe("0px");
     expect(customProof.direction, "custom width mobile reflow axis").toBe("column");
     // Keep the custom-width class active while measuring real geometry at
     // narrow width and enlarged text; a computed axis alone misses overflow.
