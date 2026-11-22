@@ -47,7 +47,7 @@ class CoreButtonsReflowContract(unittest.TestCase):
         for needle in ("'ltr', 'rtl'", "'200%', '400%'", "forcedColors: 'active'",
                        "AxeBuilder", "openAuthenticatedEditor", "blocks.parse(serialized)",
                        "wp('post', 'delete'", "is-nowrap", "is-vertical", "43",
-                       "core-buttons-320-rtl-200-forced-colors.png", "stacked order", "stacked alignment", "primary readable width", "desktop readable width", "custom width bypass", "native nowrap mobile axis", "mobile reflow axis", "custom width desktop preserves native horizontal layout", "core-buttons.css", "slateframe-unrelated-nowrap", "unrelated flex axis", "unrelated children", "native vertical axis", "mobile link readable width", "stacked button readable width at text zoom", "primary mobile link readable width", "secondary mobile link readable width"):
+                       "core-buttons-320-rtl-200-forced-colors.png", "stacked order", "stacked alignment", "primary readable width", "desktop readable width", "custom-width 400% overflow", "native nowrap mobile axis", "mobile reflow axis", "custom width desktop preserves native horizontal layout", "core-buttons.css", "slateframe-unrelated-nowrap", "unrelated flex axis", "unrelated children", "native vertical axis", "mobile link readable width", "stacked button readable width at text zoom", "primary mobile link readable width", "secondary mobile link readable width"):
             self.assertIn(needle, js)
 
 
