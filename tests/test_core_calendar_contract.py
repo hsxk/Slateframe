@@ -11,13 +11,17 @@ class CoreCalendarContract(unittest.TestCase):
         editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
         self.assertIn(".slateframe-prose .wp-block-calendar{max-inline-size:100%;overflow-x:auto;", front)
         self.assertIn("& th{white-space:nowrap}}", front)
-        self.assertIn("& .wp-block-calendar{max-inline-size:100%;overflow-x:auto}", editor)
+        self.assertIn("& .wp-block-calendar{overflow-x:auto}", editor)
+        self.assertIn("& .block-editor-block-list__layout.is-root-container>.wp-block{min-inline-size:0;max-width:min(100%,var(--slateframe-content))}", editor)
         self.assertIn("& .wp-block-calendar th{white-space:nowrap}", editor)
 
     def test_no_table_semantics_replacement(self):
         front = (ROOT / "assets/css/reading.css").read_text(encoding="utf-8")
         self.assertNotIn(".wp-block-calendar table{display:block", front)
         self.assertNotIn(".wp-block-calendar table{display:grid", front)
+        editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
+        self.assertNotIn(".wp-block-calendar table{display:block", editor)
+        self.assertNotIn(".wp-block-calendar table{display:grid", editor)
 
 
 if __name__ == "__main__":
