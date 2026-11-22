@@ -16,7 +16,12 @@ class CoreButtonColorParity(unittest.TestCase):
     def test_editor_uses_same_core_button_theme_styles(self):
         source = (ROOT / "functions.php").read_text(encoding="utf-8")
         self.assertIn("add_editor_style( array( 'style.css'", source)
-        self.assertNotIn("wp-block-button", (ROOT / "assets/css/editor.css").read_text(encoding="utf-8"))
+        editor = (ROOT / "assets/css/editor.css").read_text(encoding="utf-8")
+        # Layout constraints are editor-only; palette and outline styling must
+        # still come from the shared front-end stylesheet.
+        self.assertIn(".wp-block-buttons.is-nowrap>.wp-block-button{min-inline-size:0;max-width:100%;flex-shrink:1}", editor)
+        self.assertNotIn(".wp-block-button__link{", editor)
+        self.assertNotIn(".wp-block-button:not(.is-style-outline)", editor)
 
     def test_real_wordpress_and_gutenberg_browser_evidence(self):
         source = (ROOT / "tests/browser/core-button-color-parity.spec.js").read_text(encoding="utf-8")
