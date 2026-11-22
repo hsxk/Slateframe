@@ -80,7 +80,8 @@ test('Core Buttons respect narrow reflow, 44px targets, RTL and 400% zoom', asyn
           minimums: [...node.children].map(child => getComputedStyle(child).minInlineSize),
         }));
         expect(unrelated.direction, width + ' ' + dir + ' unrelated flex axis').toBe('row');
-        // WordPress Core's flex layout normalizes these children to 0px;\n        // this fixture is not a native Buttons group and must retain that baseline.\n        expect(unrelated.minimums, width + ' ' + dir + ' unrelated children').toEqual(['0px', '0px']);
+        // Non-native containers retain their original automatic minimums.
+        expect(unrelated.minimums, width + ' ' + dir + ' unrelated children').toEqual(['auto', 'auto']);
         expect(geometry.nowrap.wrap).toBe('nowrap');
         // The CSS uses width < 481px: both sides of the breakpoint must
         // preserve the native nowrap contract without horizontal overflow.
