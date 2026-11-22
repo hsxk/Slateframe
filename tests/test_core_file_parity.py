@@ -32,7 +32,11 @@ class CoreFileParity(unittest.TestCase):
         self.assertIn("white-space:normal", button_rule)
         self.assertIn("min-inline-size:min(100%,var(--slateframe-control))", button_rule)
         link_rule = css.split(".wp-block-file>a{", 1)[1].split("}", 1)[0]
-        self.assertIn("overflow-wrap:anywhere", link_rule)
+        self.assertNotIn("overflow-wrap:", link_rule)
+        container_rule = css.split(".wp-block-file{", 1)[1].split("}", 1)[0]
+        self.assertIn("overflow-wrap:anywhere", container_rule)
+        self.assertNotIn("overflow-wrap:", button_rule)
+        # Both native filename and download action inherit emergency wrapping.
         self.assertLessEqual(len(css.encode("utf-8")), 400)
         self.assertIn("test $(wc -c < assets/css/core-file.css) -le 400", ci)
         self.assertIn("grep -qx 'slateframe/assets/css/core-file.css' /tmp/package.txt", ci)
