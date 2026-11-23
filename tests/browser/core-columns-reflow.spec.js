@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { execFileSync } = require('node:child_process');
 const { randomUUID } = require('node:crypto');
+const fs = require('node:fs/promises');
 const { setRootTextScale } = require('./support/root-text-scale');
 
 const wp = (...args) => execFileSync('wp', [...args, '--path=/tmp/wp-browser'], {
@@ -26,6 +27,7 @@ test('Core Columns preserve multilingual reading and keyboard access at narrow w
     await page.goto('/?p=' + postId, { waitUntil: 'networkidle' });
     const columns = page.locator('.wp-block-columns').first();
     await expect(columns.locator('.wp-block-column')).toHaveCount(2);
+    await fs.mkdir('test-artifacts/screenshots', { recursive: true });
     for (const width of [320, 375, 390, 412, 768, 1440, 1920]) {
       await page.setViewportSize({ width, height: 900 });
       for (const dir of ['ltr', 'rtl']) {
@@ -67,6 +69,14 @@ test('Core Columns preserve multilingual reading and keyboard access at narrow w
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(/#columns-end$/);
     await expect(page.locator('#columns-end')).toBeInViewport();
+    await setRootTextScale(page, 64, 'ltr');
+    await page.evaluate(() => { history.replaceState(null, '', location.pathname + location.search); scrollTo(0, 0); });
+    await link.focus();
+    await expect(link).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#columns-end$/);
+    await expect(page.locator('#columns-end')).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   } finally {
     if (postId) wp('post', 'delete', postId, '--force');
   }
