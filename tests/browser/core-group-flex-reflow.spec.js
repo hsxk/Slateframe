@@ -93,6 +93,7 @@ test('Core flex Group contains long multilingual children across responsive and 
     await expect(page).toHaveURL(/#group-end$/);
     await expect(page.locator('#group-end')).toBeInViewport();
     await setRootTextScale(page, 64, 'ltr');
+    await page.evaluate(() => { history.replaceState(null, '', location.pathname + location.search); scrollTo(0, 0); });
     await link.focus();
     await page.keyboard.press('Enter');
     await expect(page.locator('#group-end')).toBeInViewport();
