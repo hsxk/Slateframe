@@ -34,6 +34,18 @@ test('Core flex Group contains long multilingual children across responsive and 
             const rect = element => element.getBoundingClientRect().toJSON();
             return {
               pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+              overflowCandidates: Array.from(document.querySelectorAll('body *')).map(element => ({
+                element,
+                bounds: element.getBoundingClientRect()
+              })).filter(({ bounds }) => bounds.width && (bounds.left < -1 || bounds.right > innerWidth + 1))
+                .slice(0, 12).map(({ element, bounds }) => ({
+                  tag: element.tagName.toLowerCase(),
+                  className: typeof element.className === 'string' ? element.className.slice(0, 120) : '',
+                  left: Math.round(bounds.left),
+                  right: Math.round(bounds.right),
+                  scrollWidth: element.scrollWidth,
+                  clientWidth: element.clientWidth
+                })),
               group: rect(node),
               children: Array.from(node.children, rect),
               styles: Array.from(node.children, element => ({
@@ -44,7 +56,13 @@ test('Core flex Group contains long multilingual children across responsive and 
             };
           });
           const label = width + 'px ' + dir + ' ' + font + 'px';
-          expect(state.pageOverflow, label + ' document overflow').toBeLessThanOrEqual(1);
+          if (state.pageOverflow > 1) {
+            await page.screenshot({
+              path: 'test-artifacts/screenshots/core-group-flex-overflow-' + width + '-' + dir + '-' + font + '.png',
+              fullPage: true
+            });
+          }
+          expect(state.pageOverflow, label + ' document overflow; candidates=' + JSON.stringify(state.overflowCandidates)).toBeLessThanOrEqual(1);
           expect(state.group.left, label + ' group left').toBeGreaterThanOrEqual(-1);
           expect(state.group.right, label + ' group right').toBeLessThanOrEqual(width + 1);
           for (const [index, child] of state.children.entries()) {
