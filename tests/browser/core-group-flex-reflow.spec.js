@@ -86,8 +86,17 @@ test('Core flex Group contains long multilingual children across responsive and 
     }
     await page.setViewportSize({ width: 390, height: 900 });
     await setRootTextScale(page, 32, 'rtl');
-    await group.locator('a').focus();
-    await expect(group.locator('a')).toBeFocused();
+    const link = group.locator('a');
+    await link.focus();
+    await expect(link).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#group-end$/);
+    await expect(page.locator('#group-end')).toBeInViewport();
+    await setRootTextScale(page, 64, 'ltr');
+    await link.focus();
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#group-end')).toBeInViewport();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
   } finally {
     if (postId) wp('post', 'delete', postId, '--force');
   }
