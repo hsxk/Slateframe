@@ -44,7 +44,11 @@ test('Core flex Group contains long multilingual children across responsive and 
                   left: Math.round(bounds.left),
                   right: Math.round(bounds.right),
                   scrollWidth: element.scrollWidth,
-                  clientWidth: element.clientWidth
+                  clientWidth: element.clientWidth,
+                  text: element.textContent?.trim().slice(0, 100),
+                  html: element.outerHTML.slice(0, 350),
+                  parent: element.parentElement?.outerHTML.slice(0, 350),
+                  position: getComputedStyle(element).position
                 })),
               group: rect(node),
               children: Array.from(node.children, rect),
