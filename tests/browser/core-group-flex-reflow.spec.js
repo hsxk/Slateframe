@@ -51,6 +51,7 @@ test('Core flex Group contains long multilingual children across responsive and 
                   position: getComputedStyle(element).position
                 })),
               group: rect(node),
+              groupWrap: getComputedStyle(node).flexWrap,
               children: Array.from(node.children, rect),
               styles: Array.from(node.children, element => ({
                 minInline: getComputedStyle(element).minInlineSize,
@@ -67,6 +68,7 @@ test('Core flex Group contains long multilingual children across responsive and 
             });
           }
           expect(state.pageOverflow, label + ' document overflow; candidates=' + JSON.stringify(state.overflowCandidates)).toBeLessThanOrEqual(1);
+          if (width <= 480) expect(state.groupWrap, label + ' paragraph group reflow').toBe('wrap');
           expect(state.group.left, label + ' group left').toBeGreaterThanOrEqual(-1);
           expect(state.group.right, label + ' group right').toBeLessThanOrEqual(width + 1);
           for (const [index, child] of state.children.entries()) {
