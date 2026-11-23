@@ -61,22 +61,29 @@ test('Core Columns preserve multilingual reading and keyboard access at narrow w
         }
       }
     }
-    await page.setViewportSize({ width: 390, height: 900 });
-    await setRootTextScale(page, 64, 'rtl');
     const link = columns.locator('a');
-    await link.focus();
-    await expect(link).toBeFocused();
-    await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/#columns-end$/);
-    await expect(page.locator('#columns-end')).toBeInViewport();
-    await setRootTextScale(page, 64, 'ltr');
-    await page.evaluate(() => { history.replaceState(null, '', location.pathname + location.search); scrollTo(0, 0); });
-    await link.focus();
-    await expect(link).toBeFocused();
-    await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(/#columns-end$/);
-    await expect(page.locator('#columns-end')).toBeInViewport();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+    for (const width of [320, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const dir of ['rtl', 'ltr']) {
+        await setRootTextScale(page, 64, dir);
+        await page.evaluate(() => {
+          history.replaceState(null, '', location.pathname + location.search);
+          scrollTo(0, 0);
+        });
+        await link.focus();
+        await expect(link, width + 'px ' + dir + ' keyboard focus').toBeFocused();
+        await expect(link, width + 'px ' + dir + ' link visibility').toBeInViewport();
+        await page.keyboard.press('Enter');
+        await expect(page).toHaveURL(/#columns-end$/);
+        await expect(page.locator('#columns-end')).toBeInViewport();
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+          width + 'px ' + dir + ' post-navigation overflow').toBeLessThanOrEqual(1);
+        await page.screenshot({
+          path: 'test-artifacts/screenshots/core-columns-keyboard-' + width + '-' + dir + '-64.png',
+          fullPage: true
+        });
+      }
+    }
   } finally {
     if (postId) wp('post', 'delete', postId, '--force');
   }
