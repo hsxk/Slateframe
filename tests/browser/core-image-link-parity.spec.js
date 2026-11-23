@@ -58,6 +58,7 @@ test('native linked Core Image stays bounded with RTL, zoom and keyboard access'
     await page.locator('.slateframe-image-before').focus();
     await page.keyboard.press('Tab');
     await expect(link).toBeFocused();
+    expect(await link.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth))).toBeGreaterThanOrEqual(2);
     await page.keyboard.press('Tab');
     await expect(page.locator('.slateframe-image-after')).toBeFocused();
     const axe = await new AxeBuilder({ page }).include('#main-content')
@@ -66,6 +67,7 @@ test('native linked Core Image stays bounded with RTL, zoom and keyboard access'
     await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
     await link.focus();
     await expect(link).toBeFocused();
+    expect(await link.evaluate(node => parseFloat(getComputedStyle(node).outlineWidth))).toBeGreaterThanOrEqual(2);
     await page.screenshot({ path: 'test-artifacts/screenshots/core-image-link-390-rtl-forced-colors.png', fullPage: true });
   } finally {
     if (postId) wp('post', 'delete', postId, '--force');
