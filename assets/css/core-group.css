@@ -1,3 +1,2 @@
-.wp-block-group:not(.alignwide):not(.alignfull){min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
-.wp-block-group.is-layout-flex>*{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
+.wp-block-group:not(.alignwide):not(.alignfull),.wp-block-group.is-layout-flex>*{min-inline-size:0;max-inline-size:100%;overflow-wrap:anywhere}
 @media(max-width:480px){.wp-block-group.is-layout-flex.is-nowrap:has(>p){flex-wrap:wrap}}
