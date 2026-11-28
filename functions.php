@@ -71,6 +71,25 @@ function slateframe_setup() {
 add_action( 'after_setup_theme', 'slateframe_setup' );
 
 /**
+ * Register a conditional Core block stylesheet with matching URL and disk path.
+ *
+ * @param string $block_name Core block name.
+ * @param string $handle     Stylesheet handle.
+ * @param string $relative_path Theme-relative stylesheet path.
+ */
+function slateframe_enqueue_core_block_style( $block_name, $handle, $relative_path ) {
+	wp_enqueue_block_style(
+		$block_name,
+		array(
+			'handle' => $handle,
+			'src'    => get_template_directory_uri() . $relative_path,
+			'path'   => get_template_directory() . $relative_path,
+			'ver'    => wp_get_theme()->get( 'Version' ),
+		)
+	);
+}
+
+/**
  * Load Core Button enhancements only for rendered native Button blocks.
  *
  * Keep the universal runtime below its existing strict CSS budgets while
@@ -79,15 +98,7 @@ add_action( 'after_setup_theme', 'slateframe_setup' );
  * through add_editor_style() for consistent appearance.
  */
 function slateframe_register_core_button_styles() {
-	wp_enqueue_block_style(
-		'core/button',
-		array(
-			'handle' => 'slateframe-core-buttons',
-			'src'    => get_template_directory_uri() . '/assets/css/core-buttons.css',
-			'path'   => get_template_directory() . '/assets/css/core-buttons.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/button', 'slateframe-core-buttons', '/assets/css/core-buttons.css' );
 }
 add_action( 'init', 'slateframe_register_core_button_styles', 20 );
 
@@ -99,15 +110,7 @@ add_action( 'init', 'slateframe_register_core_button_styles', 20 );
  * Gutenberg parity through add_editor_style().
  */
 function slateframe_register_core_query_pagination_styles() {
-	wp_enqueue_block_style(
-		'core/query-pagination',
-		array(
-			'handle' => 'slateframe-core-query-pagination',
-			'src'    => get_template_directory_uri() . '/assets/css/core-query-pagination.css',
-			'path'   => get_template_directory() . '/assets/css/core-query-pagination.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/query-pagination', 'slateframe-core-query-pagination', '/assets/css/core-query-pagination.css' );
 }
 add_action( 'init', 'slateframe_register_core_query_pagination_styles', 20 );
 
@@ -118,15 +121,7 @@ add_action( 'init', 'slateframe_register_core_query_pagination_styles', 20 );
  * authored block layout. The conditional stylesheet is shared with Gutenberg.
  */
 function slateframe_register_core_comments_pagination_styles() {
-	wp_enqueue_block_style(
-		'core/comments-pagination',
-		array(
-			'handle' => 'slateframe-core-comments-pagination',
-			'src'    => get_template_directory_uri() . '/assets/css/core-comments-pagination.css',
-			'path'   => get_template_directory() . '/assets/css/core-comments-pagination.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/comments-pagination', 'slateframe-core-comments-pagination', '/assets/css/core-comments-pagination.css' );
 }
 add_action( 'init', 'slateframe_register_core_comments_pagination_styles', 20 );
 
@@ -137,15 +132,7 @@ add_action( 'init', 'slateframe_register_core_comments_pagination_styles', 20 );
  * loading the stylesheet on pages without a native Navigation block.
  */
 function slateframe_register_core_navigation_styles() {
-	wp_enqueue_block_style(
-		'core/navigation',
-		array(
-			'handle' => 'slateframe-core-navigation',
-			'src'    => get_template_directory_uri() . '/assets/css/core-navigation.css',
-			'path'   => get_template_directory() . '/assets/css/core-navigation.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/navigation', 'slateframe-core-navigation', '/assets/css/core-navigation.css' );
 }
 add_action( 'init', 'slateframe_register_core_navigation_styles', 20 );
 
@@ -154,15 +141,7 @@ add_action( 'init', 'slateframe_register_core_navigation_styles', 20 );
  * The conditional presentation stylesheet is also shared with Gutenberg.
  */
 function slateframe_register_core_footnotes_styles() {
-	wp_enqueue_block_style(
-		'core/footnotes',
-		array(
-			'handle' => 'slateframe-core-footnotes',
-			'src'    => get_template_directory_uri() . '/assets/css/core-footnotes.css',
-			'path'   => get_template_directory() . '/assets/css/core-footnotes.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/footnotes', 'slateframe-core-footnotes', '/assets/css/core-footnotes.css' );
 }
 add_action( 'init', 'slateframe_register_core_footnotes_styles', 20 );
 
@@ -174,15 +153,7 @@ add_action( 'init', 'slateframe_register_core_footnotes_styles', 20 );
  */
 function slateframe_register_core_archive_heading_styles() {
 	foreach ( array( 'query-title', 'term-description' ) as $block ) {
-		wp_enqueue_block_style(
-			'core/' . $block,
-			array(
-				'handle' => 'slateframe-core-' . $block,
-				'src'    => get_template_directory_uri() . '/assets/css/core-' . $block . '.css',
-				'path'   => get_template_directory() . '/assets/css/core-' . $block . '.css',
-				'ver'    => wp_get_theme()->get( 'Version' ),
-			)
-		);
+		slateframe_enqueue_core_block_style( 'core/' . $block, 'slateframe-core-' . $block, '/assets/css/core-' . $block . '.css' );
 	}
 }
 add_action( 'init', 'slateframe_register_core_archive_heading_styles', 20 );
@@ -198,15 +169,7 @@ function slateframe_register_core_tabs_styles() {
 		return;
 	}
 
-	wp_enqueue_block_style(
-		'core/tabs',
-		array(
-			'handle' => 'slateframe-core-tabs',
-			'src'    => get_template_directory_uri() . '/assets/css/core-tabs.css',
-			'path'   => get_template_directory() . '/assets/css/core-tabs.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/tabs', 'slateframe-core-tabs', '/assets/css/core-tabs.css' );
 }
 add_action( 'init', 'slateframe_register_core_tabs_styles', 20 );
 
@@ -220,15 +183,7 @@ function slateframe_register_core_accordion_styles() {
 		return;
 	}
 
-	wp_enqueue_block_style(
-		'core/accordion',
-		array(
-			'handle' => 'slateframe-core-accordion',
-			'src'    => get_template_directory_uri() . '/assets/css/core-accordion.css',
-			'path'   => get_template_directory() . '/assets/css/core-accordion.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/accordion', 'slateframe-core-accordion', '/assets/css/core-accordion.css' );
 }
 add_action( 'init', 'slateframe_register_core_accordion_styles', 20 );
 
@@ -239,15 +194,7 @@ add_action( 'init', 'slateframe_register_core_accordion_styles', 20 );
  * Register only a presentation stylesheet, loaded with the rendered block.
  */
 function slateframe_register_core_post_navigation_styles() {
-	wp_enqueue_block_style(
-		'core/post-navigation-link',
-		array(
-			'handle' => 'slateframe-core-post-navigation',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-navigation.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-navigation.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-navigation-link', 'slateframe-core-post-navigation', '/assets/css/core-post-navigation.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_navigation_styles', 20 );
 
@@ -259,15 +206,7 @@ add_action( 'init', 'slateframe_register_core_post_navigation_styles', 20 );
  */
 function slateframe_register_core_av_styles() {
 	foreach ( array( 'video', 'audio' ) as $block ) {
-		wp_enqueue_block_style(
-			'core/' . $block,
-			array(
-				'handle' => 'slateframe-core-' . $block,
-				'src'    => get_template_directory_uri() . '/assets/css/core-' . $block . '.css',
-				'path'   => get_template_directory() . '/assets/css/core-' . $block . '.css',
-				'ver'    => wp_get_theme()->get( 'Version' ),
-			)
-		);
+		slateframe_enqueue_core_block_style( 'core/' . $block, 'slateframe-core-' . $block, '/assets/css/core-' . $block . '.css' );
 	}
 }
 add_action( 'init', 'slateframe_register_core_av_styles', 20 );
@@ -282,15 +221,7 @@ add_action( 'init', 'slateframe_register_core_av_styles', 20 );
  * WordPress Core owns provider resolution, iframe markup and playback.
  */
 function slateframe_register_core_embed_styles() {
-	wp_enqueue_block_style(
-		'core/embed',
-		array(
-			'handle' => 'slateframe-core-embed',
-			'src'    => get_template_directory_uri() . '/assets/css/core-embed.css',
-			'path'   => get_template_directory() . '/assets/css/core-embed.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/embed', 'slateframe-core-embed', '/assets/css/core-embed.css' );
 }
 add_action( 'init', 'slateframe_register_core_embed_styles', 20 );
 
@@ -301,15 +232,7 @@ add_action( 'init', 'slateframe_register_core_embed_styles', 20 );
  * The tiny style is requested only when the RSS block is rendered.
  */
 function slateframe_register_core_rss_styles() {
-	wp_enqueue_block_style(
-		'core/rss',
-		array(
-			'handle' => 'slateframe-core-rss',
-			'src'    => get_template_directory_uri() . '/assets/css/core-rss.css',
-			'path'   => get_template_directory() . '/assets/css/core-rss.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/rss', 'slateframe-core-rss', '/assets/css/core-rss.css' );
 }
 add_action( 'init', 'slateframe_register_core_rss_styles', 20 );
 
@@ -319,15 +242,7 @@ add_action( 'init', 'slateframe_register_core_rss_styles', 20 );
  * Core owns the post query, categories, dates, excerpts and layout selection.
  */
 function slateframe_register_core_latest_posts_styles() {
-	wp_enqueue_block_style(
-		'core/latest-posts',
-		array(
-			'handle' => 'slateframe-core-latest-posts',
-			'src'    => get_template_directory_uri() . '/assets/css/core-latest-posts.css',
-			'path'   => get_template_directory() . '/assets/css/core-latest-posts.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/latest-posts', 'slateframe-core-latest-posts', '/assets/css/core-latest-posts.css' );
 }
 add_action( 'init', 'slateframe_register_core_latest_posts_styles', 20 );
 
@@ -337,15 +252,7 @@ add_action( 'init', 'slateframe_register_core_latest_posts_styles', 20 );
  * WordPress remains responsible for comment queries, approval, and markup.
  */
 function slateframe_register_core_latest_comments_styles() {
-	wp_enqueue_block_style(
-		'core/latest-comments',
-		array(
-			'handle' => 'slateframe-core-latest-comments',
-			'src'    => get_template_directory_uri() . '/assets/css/core-latest-comments.css',
-			'path'   => get_template_directory() . '/assets/css/core-latest-comments.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/latest-comments', 'slateframe-core-latest-comments', '/assets/css/core-latest-comments.css' );
 }
 add_action( 'init', 'slateframe_register_core_latest_comments_styles', 20 );
 
@@ -355,15 +262,7 @@ add_action( 'init', 'slateframe_register_core_latest_comments_styles', 20 );
  * Core owns taxonomy queries, counts, archive URLs and select navigation.
  */
 function slateframe_register_core_categories_styles() {
-	wp_enqueue_block_style(
-		'core/categories',
-		array(
-			'handle' => 'slateframe-core-categories',
-			'src'    => get_template_directory_uri() . '/assets/css/core-categories.css',
-			'path'   => get_template_directory() . '/assets/css/core-categories.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/categories', 'slateframe-core-categories', '/assets/css/core-categories.css' );
 }
 add_action( 'init', 'slateframe_register_core_categories_styles', 20 );
 
@@ -372,15 +271,7 @@ add_action( 'init', 'slateframe_register_core_categories_styles', 20 );
  * Core owns dates, queries, counts, URLs and native select navigation.
  */
 function slateframe_register_core_archives_styles() {
-	wp_enqueue_block_style(
-		'core/archives',
-		array(
-			'handle' => 'slateframe-core-archives',
-			'src'    => get_template_directory_uri() . '/assets/css/core-archives.css',
-			'path'   => get_template_directory() . '/assets/css/core-archives.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/archives', 'slateframe-core-archives', '/assets/css/core-archives.css' );
 }
 add_action( 'init', 'slateframe_register_core_archives_styles', 20 );
 
@@ -389,15 +280,7 @@ add_action( 'init', 'slateframe_register_core_archives_styles', 20 );
  * WordPress owns term queries, weights, counts, URLs and markup.
  */
 function slateframe_register_core_tag_cloud_styles() {
-	wp_enqueue_block_style(
-		'core/tag-cloud',
-		array(
-			'handle' => 'slateframe-core-tag-cloud',
-			'src'    => get_template_directory_uri() . '/assets/css/core-tag-cloud.css',
-			'path'   => get_template_directory() . '/assets/css/core-tag-cloud.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/tag-cloud', 'slateframe-core-tag-cloud', '/assets/css/core-tag-cloud.css' );
 }
 add_action( 'init', 'slateframe_register_core_tag_cloud_styles', 20 );
 
@@ -408,15 +291,7 @@ add_action( 'init', 'slateframe_register_core_tag_cloud_styles', 20 );
  * WordPress owns published-page queries, parent/child links and navigation.
  */
 function slateframe_register_core_page_list_styles() {
-	wp_enqueue_block_style(
-		'core/page-list',
-		array(
-			'handle' => 'slateframe-core-page-list',
-			'src'    => get_template_directory_uri() . '/assets/css/core-page-list.css',
-			'path'   => get_template_directory() . '/assets/css/core-page-list.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/page-list', 'slateframe-core-page-list', '/assets/css/core-page-list.css' );
 }
 add_action( 'init', 'slateframe_register_core_page_list_styles', 20 );
 
@@ -426,15 +301,7 @@ add_action( 'init', 'slateframe_register_core_page_list_styles', 20 );
  * WordPress owns term selection, URLs, separators and block markup.
  */
 function slateframe_register_core_post_terms_styles() {
-	wp_enqueue_block_style(
-		'core/post-terms',
-		array(
-			'handle' => 'slateframe-core-post-terms',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-terms.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-terms.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-terms', 'slateframe-core-post-terms', '/assets/css/core-post-terms.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_terms_styles', 20 );
 
@@ -445,15 +312,7 @@ add_action( 'init', 'slateframe_register_core_post_terms_styles', 20 );
  * This conditional presentation-only asset is shared with Gutenberg.
  */
 function slateframe_register_core_post_comments_link_styles() {
-	wp_enqueue_block_style(
-		'core/post-comments-link',
-		array(
-			'handle' => 'slateframe-core-post-comments-link',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-comments-link.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-comments-link.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-comments-link', 'slateframe-core-post-comments-link', '/assets/css/core-post-comments-link.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_comments_link_styles', 20 );
 
@@ -464,15 +323,7 @@ add_action( 'init', 'slateframe_register_core_post_comments_link_styles', 20 );
  * This presentation-only asset is shared with Gutenberg.
  */
 function slateframe_register_core_comments_title_styles() {
-	wp_enqueue_block_style(
-		'core/comments-title',
-		array(
-			'handle' => 'slateframe-core-comments-title',
-			'src'    => get_template_directory_uri() . '/assets/css/core-comments-title.css',
-			'path'   => get_template_directory() . '/assets/css/core-comments-title.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/comments-title', 'slateframe-core-comments-title', '/assets/css/core-comments-title.css' );
 }
 add_action( 'init', 'slateframe_register_core_comments_title_styles', 20 );
 
@@ -483,15 +334,7 @@ add_action( 'init', 'slateframe_register_core_comments_title_styles', 20 );
  * Load only for rendered Core Comments; the editor uses the same stylesheet.
  */
 function slateframe_register_core_comments_thread_styles() {
-	wp_enqueue_block_style(
-		'core/comments',
-		array(
-			'handle' => 'slateframe-core-comments-thread',
-			'src'    => get_template_directory_uri() . '/assets/css/core-comments-thread.css',
-			'path'   => get_template_directory() . '/assets/css/core-comments-thread.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/comments', 'slateframe-core-comments-thread', '/assets/css/core-comments-thread.css' );
 }
 add_action( 'init', 'slateframe_register_core_comments_thread_styles', 20 );
 
@@ -503,15 +346,7 @@ add_action( 'init', 'slateframe_register_core_comments_thread_styles', 20 );
  * The stylesheet is conditional and shared with the block editor.
  */
 function slateframe_register_core_post_comments_form_styles() {
-	wp_enqueue_block_style(
-		'core/post-comments-form',
-		array(
-			'handle' => 'slateframe-core-post-comments-form',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-comments-form.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-comments-form.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-comments-form', 'slateframe-core-post-comments-form', '/assets/css/core-post-comments-form.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_comments_form_styles', 20 );
 
@@ -521,15 +356,7 @@ add_action( 'init', 'slateframe_register_core_post_comments_form_styles', 20 );
  * Core retains file URLs, names, preview controls and download semantics.
  */
 function slateframe_register_core_file_styles() {
-	wp_enqueue_block_style(
-		'core/file',
-		array(
-			'handle' => 'slateframe-core-file',
-			'src'    => get_template_directory_uri() . '/assets/css/core-file.css',
-			'path'   => get_template_directory() . '/assets/css/core-file.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/file', 'slateframe-core-file', '/assets/css/core-file.css' );
 }
 add_action( 'init', 'slateframe_register_core_file_styles', 20 );
 
@@ -539,15 +366,7 @@ add_action( 'init', 'slateframe_register_core_file_styles', 20 );
  * WordPress owns login/logout URLs, nonces, redirects and authentication.
  */
 function slateframe_register_core_loginout_styles() {
-	wp_enqueue_block_style(
-		'core/loginout',
-		array(
-			'handle' => 'slateframe-core-loginout',
-			'src'    => get_template_directory_uri() . '/assets/css/core-loginout.css',
-			'path'   => get_template_directory() . '/assets/css/core-loginout.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/loginout', 'slateframe-core-loginout', '/assets/css/core-loginout.css' );
 }
 add_action( 'init', 'slateframe_register_core_loginout_styles', 20 );
 
@@ -557,15 +376,7 @@ add_action( 'init', 'slateframe_register_core_loginout_styles', 20 );
  * Core retains ownership of date selection, permalink and time markup.
  */
 function slateframe_register_core_post_date_styles() {
-	wp_enqueue_block_style(
-		'core/post-date',
-		array(
-			'handle' => 'slateframe-core-post-date',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-date.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-date.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-date', 'slateframe-core-post-date', '/assets/css/core-post-date.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_date_styles', 20 );
 
@@ -575,15 +386,7 @@ add_action( 'init', 'slateframe_register_core_post_date_styles', 20 );
  * WordPress retains ownership of author identity, URLs and link behavior.
  */
 function slateframe_register_core_post_author_name_styles() {
-	wp_enqueue_block_style(
-		'core/post-author-name',
-		array(
-			'handle' => 'slateframe-core-post-author-name',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-author-name.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-author-name.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-author-name', 'slateframe-core-post-author-name', '/assets/css/core-post-author-name.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_author_name_styles', 20 );
 
@@ -593,15 +396,7 @@ add_action( 'init', 'slateframe_register_core_post_author_name_styles', 20 );
  * Core retains author/comment context, avatar providers and link semantics.
  */
 function slateframe_register_core_avatar_styles() {
-	wp_enqueue_block_style(
-		'core/avatar',
-		array(
-			'handle' => 'slateframe-core-avatar',
-			'src'    => get_template_directory_uri() . '/assets/css/core-avatar.css',
-			'path'   => get_template_directory() . '/assets/css/core-avatar.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/avatar', 'slateframe-core-avatar', '/assets/css/core-avatar.css' );
 }
 add_action( 'init', 'slateframe_register_core_avatar_styles', 20 );
 
@@ -609,15 +404,7 @@ add_action( 'init', 'slateframe_register_core_avatar_styles', 20 );
  * Bound native Core Site Logo media and home links without altering Core.
  */
 function slateframe_register_core_site_logo_styles() {
-	wp_enqueue_block_style(
-		'core/site-logo',
-		array(
-			'handle' => 'slateframe-core-site-logo',
-			'src'    => get_template_directory_uri() . '/assets/css/core-site-logo.css',
-			'path'   => get_template_directory() . '/assets/css/core-site-logo.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/site-logo', 'slateframe-core-site-logo', '/assets/css/core-site-logo.css' );
 }
 add_action( 'init', 'slateframe_register_core_site_logo_styles', 20 );
 
@@ -627,15 +414,7 @@ add_action( 'init', 'slateframe_register_core_site_logo_styles', 20 );
  * WordPress owns the site name, heading level, home URL and link behavior.
  */
 function slateframe_register_core_site_title_styles() {
-	wp_enqueue_block_style(
-		'core/site-title',
-		array(
-			'handle' => 'slateframe-core-site-title',
-			'src'    => get_template_directory_uri() . '/assets/css/core-site-title.css',
-			'path'   => get_template_directory() . '/assets/css/core-site-title.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/site-title', 'slateframe-core-site-title', '/assets/css/core-site-title.css' );
 }
 add_action( 'init', 'slateframe_register_core_site_title_styles', 20 );
 
@@ -645,15 +424,7 @@ add_action( 'init', 'slateframe_register_core_site_title_styles', 20 );
  * WordPress retains ownership of the site description and block markup.
  */
 function slateframe_register_core_site_tagline_styles() {
-	wp_enqueue_block_style(
-		'core/site-tagline',
-		array(
-			'handle' => 'slateframe-core-site-tagline',
-			'src'    => get_template_directory_uri() . '/assets/css/core-site-tagline.css',
-			'path'   => get_template_directory() . '/assets/css/core-site-tagline.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/site-tagline', 'slateframe-core-site-tagline', '/assets/css/core-site-tagline.css' );
 }
 add_action( 'init', 'slateframe_register_core_site_tagline_styles', 20 );
 
@@ -663,15 +434,7 @@ add_action( 'init', 'slateframe_register_core_site_tagline_styles', 20 );
  * Core owns the author lookup, biography content and empty-profile behavior.
  */
 function slateframe_register_core_post_author_biography_styles() {
-	wp_enqueue_block_style(
-		'core/post-author-biography',
-		array(
-			'handle' => 'slateframe-core-post-author-biography',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-author-biography.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-author-biography.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-author-biography', 'slateframe-core-post-author-biography', '/assets/css/core-post-author-biography.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_author_biography_styles', 20 );
 
@@ -683,15 +446,7 @@ add_action( 'init', 'slateframe_register_core_post_author_biography_styles', 20 
  * editor-shared presentation is registered here.
  */
 function slateframe_register_core_post_comments_count_styles() {
-	wp_enqueue_block_style(
-		'core/post-comments-count',
-		array(
-			'handle' => 'slateframe-core-post-comments-count',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-comments-count.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-comments-count.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-comments-count', 'slateframe-core-post-comments-count', '/assets/css/core-post-comments-count.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_comments_count_styles', 20 );
 
@@ -702,15 +457,7 @@ add_action( 'init', 'slateframe_register_core_post_comments_count_styles', 20 );
  * The editor shares this conditional, presentation-only stylesheet.
  */
 function slateframe_register_core_post_excerpt_styles() {
-	wp_enqueue_block_style(
-		'core/post-excerpt',
-		array(
-			'handle' => 'slateframe-core-post-excerpt',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-excerpt.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-excerpt.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-excerpt', 'slateframe-core-post-excerpt', '/assets/css/core-post-excerpt.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_excerpt_styles', 20 );
 
@@ -719,15 +466,7 @@ add_action( 'init', 'slateframe_register_core_post_excerpt_styles', 20 );
  * Core retains the permalink, accessible title and link target.
  */
 function slateframe_register_core_read_more_styles() {
-	wp_enqueue_block_style(
-		'core/read-more',
-		array(
-			'handle' => 'slateframe-core-read-more',
-			'src'    => get_template_directory_uri() . '/assets/css/core-read-more.css',
-			'path'   => get_template_directory() . '/assets/css/core-read-more.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/read-more', 'slateframe-core-read-more', '/assets/css/core-read-more.css' );
 }
 add_action( 'init', 'slateframe_register_core_read_more_styles', 20 );
 
@@ -738,15 +477,7 @@ add_action( 'init', 'slateframe_register_core_read_more_styles', 20 );
  * The editor shares this conditional, presentation-only stylesheet.
  */
 function slateframe_register_core_post_title_styles() {
-	wp_enqueue_block_style(
-		'core/post-title',
-		array(
-			'handle' => 'slateframe-core-post-title',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-title.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-title.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-title', 'slateframe-core-post-title', '/assets/css/core-post-title.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_title_styles', 20 );
 
@@ -757,15 +488,7 @@ add_action( 'init', 'slateframe_register_core_post_title_styles', 20 );
  * Only conditional presentation is added, with Gutenberg editor parity.
  */
 function slateframe_register_core_post_featured_image_styles() {
-	wp_enqueue_block_style(
-		'core/post-featured-image',
-		array(
-			'handle' => 'slateframe-core-post-featured-image',
-			'src'    => get_template_directory_uri() . '/assets/css/core-post-featured-image.css',
-			'path'   => get_template_directory() . '/assets/css/core-post-featured-image.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/post-featured-image', 'slateframe-core-post-featured-image', '/assets/css/core-post-featured-image.css' );
 }
 add_action( 'init', 'slateframe_register_core_post_featured_image_styles', 20 );
 
@@ -1920,15 +1643,7 @@ add_action( 'init', 'slateframe_pattern_category' );
  * Only intrinsic width containment and multilingual reflow are theme-owned.
  */
 function slateframe_register_core_columns_styles() {
-	wp_enqueue_block_style(
-		'core/columns',
-		array(
-			'handle' => 'slateframe-core-columns',
-			'src'    => get_template_directory_uri() . '/assets/css/core-columns.css',
-			'path'   => get_template_directory() . '/assets/css/core-columns.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/columns', 'slateframe-core-columns', '/assets/css/core-columns.css' );
 }
 add_action( 'init', 'slateframe_register_core_columns_styles', 20 );
 
@@ -1939,15 +1654,7 @@ add_action( 'init', 'slateframe_register_core_columns_styles', 20 );
  * The same small conditional stylesheet is registered for Gutenberg.
  */
 function slateframe_register_core_group_styles() {
-	wp_enqueue_block_style(
-		'core/group',
-		array(
-			'handle' => 'slateframe-core-group',
-			'src'    => get_template_directory_uri() . '/assets/css/core-group.css',
-			'path'   => get_template_directory() . '/assets/css/core-group.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/group', 'slateframe-core-group', '/assets/css/core-group.css' );
 }
 add_action( 'init', 'slateframe_register_core_group_styles', 20 );
 
@@ -1958,15 +1665,7 @@ add_action( 'init', 'slateframe_register_core_group_styles', 20 );
  * Only presentation is registered; no custom disclosure JavaScript is used.
  */
 function slateframe_register_core_details_styles() {
-	wp_enqueue_block_style(
-		'core/details',
-		array(
-			'handle' => 'slateframe-core-details',
-			'src'    => get_template_directory_uri() . '/assets/css/core-details.css',
-			'path'   => get_template_directory() . '/assets/css/core-details.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/details', 'slateframe-core-details', '/assets/css/core-details.css' );
 }
 add_action( 'init', 'slateframe_register_core_details_styles', 20 );
 
@@ -1977,15 +1676,7 @@ add_action( 'init', 'slateframe_register_core_details_styles', 20 );
  * The stylesheet is conditional on rendered Core blocks and editor-shared.
  */
 function slateframe_register_core_separator_styles() {
-	wp_enqueue_block_style(
-		'core/separator',
-		array(
-			'handle' => 'slateframe-core-separator',
-			'src'    => get_template_directory_uri() . '/assets/css/core-separator.css',
-			'path'   => get_template_directory() . '/assets/css/core-separator.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/separator', 'slateframe-core-separator', '/assets/css/core-separator.css' );
 }
 add_action( 'init', 'slateframe_register_core_separator_styles', 20 );
 
@@ -1995,15 +1686,7 @@ add_action( 'init', 'slateframe_register_core_separator_styles', 20 );
  * WordPress retains semantic markup, citations, styles, and serialization.
  */
 function slateframe_register_core_quote_styles() {
-	wp_enqueue_block_style(
-		'core/quote',
-		array(
-			'handle' => 'slateframe-core-quote',
-			'src'    => get_template_directory_uri() . '/assets/css/core-quote.css',
-			'path'   => get_template_directory() . '/assets/css/core-quote.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/quote', 'slateframe-core-quote', '/assets/css/core-quote.css' );
 }
 add_action( 'init', 'slateframe_register_core_quote_styles', 20 );
 
@@ -2014,15 +1697,7 @@ add_action( 'init', 'slateframe_register_core_quote_styles', 20 );
  * WordPress retains the semantic figure/blockquote, citation, colors, and serialization.
  */
 function slateframe_register_core_pullquote_styles() {
-	wp_enqueue_block_style(
-		'core/pullquote',
-		array(
-			'handle' => 'slateframe-core-pullquote',
-			'src'    => get_template_directory_uri() . '/assets/css/core-pullquote.css',
-			'path'   => get_template_directory() . '/assets/css/core-pullquote.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/pullquote', 'slateframe-core-pullquote', '/assets/css/core-pullquote.css' );
 }
 add_action( 'init', 'slateframe_register_core_pullquote_styles', 20 );
 
@@ -2032,15 +1707,7 @@ add_action( 'init', 'slateframe_register_core_pullquote_styles', 20 );
  * Core owns result detection, wrapper markup, nested blocks and navigation.
  */
 function slateframe_register_core_query_no_results_styles() {
-	wp_enqueue_block_style(
-		'core/query-no-results',
-		array(
-			'handle' => 'slateframe-core-query-no-results',
-			'src'    => get_template_directory_uri() . '/assets/css/core-query-no-results.css',
-			'path'   => get_template_directory() . '/assets/css/core-query-no-results.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/query-no-results', 'slateframe-core-query-no-results', '/assets/css/core-query-no-results.css' );
 }
 add_action( 'init', 'slateframe_register_core_query_no_results_styles', 20 );
 
@@ -2050,15 +1717,7 @@ add_action( 'init', 'slateframe_register_core_query_no_results_styles', 20 );
  * WordPress owns the cells, table headings, authored styles and data.
  */
 function slateframe_register_core_table_styles() {
-	wp_enqueue_block_style(
-		'core/table',
-		array(
-			'handle' => 'slateframe-core-table',
-			'src'    => get_template_directory_uri() . '/assets/css/core-table.css',
-			'path'   => get_template_directory() . '/assets/css/core-table.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/table', 'slateframe-core-table', '/assets/css/core-table.css' );
 }
 add_action( 'init', 'slateframe_register_core_table_styles', 20 );
 
@@ -2069,15 +1728,7 @@ add_action( 'init', 'slateframe_register_core_table_styles', 20 );
  * The tiny stylesheet is enqueued only when WordPress renders the block.
  */
 function slateframe_register_core_paragraph_styles() {
-	wp_enqueue_block_style(
-		'core/paragraph',
-		array(
-			'handle' => 'slateframe-core-paragraph',
-			'src'    => get_template_directory_uri() . '/assets/css/core-paragraph.css',
-			'path'   => get_template_directory() . '/assets/css/core-paragraph.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/paragraph', 'slateframe-core-paragraph', '/assets/css/core-paragraph.css' );
 }
 add_action( 'init', 'slateframe_register_core_paragraph_styles', 20 );
 
@@ -2088,15 +1739,7 @@ add_action( 'init', 'slateframe_register_core_paragraph_styles', 20 );
  * This presentation-only asset is loaded only when a Heading block renders.
  */
 function slateframe_register_core_heading_styles() {
-	wp_enqueue_block_style(
-		'core/heading',
-		array(
-			'handle' => 'slateframe-core-heading',
-			'src'    => get_template_directory_uri() . '/assets/css/core-heading.css',
-			'path'   => get_template_directory() . '/assets/css/core-heading.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/heading', 'slateframe-core-heading', '/assets/css/core-heading.css' );
 }
 add_action( 'init', 'slateframe_register_core_heading_styles', 20 );
 
@@ -2107,14 +1750,6 @@ add_action( 'init', 'slateframe_register_core_heading_styles', 20 );
  * Core owns links, alt text, attachment sources, sizes and gallery markup.
  */
 function slateframe_register_core_image_styles() {
-	wp_enqueue_block_style(
-		'core/image',
-		array(
-			'handle' => 'slateframe-core-image',
-			'src'    => get_template_directory_uri() . '/assets/css/core-image.css',
-			'path'   => get_template_directory() . '/assets/css/core-image.css',
-			'ver'    => wp_get_theme()->get( 'Version' ),
-		)
-	);
+	slateframe_enqueue_core_block_style( 'core/image', 'slateframe-core-image', '/assets/css/core-image.css' );
 }
 add_action( 'init', 'slateframe_register_core_image_styles', 20 );
